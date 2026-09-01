@@ -22,12 +22,14 @@ RUN dotnet test tests/Inventory.Domain.UnitTests/Inventory.Domain.UnitTests.cspr
 # Publicar API
 RUN dotnet publish src/Inventory.API/Inventory.API.csproj -c Release -o /app/publish
 
-# Runtime stage
+# Runtime stage (con soporte completo de globalización para SqlClient en Alpine)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 WORKDIR /app
 
+RUN apk add --no-cache icu-libs icu-data-full tzdata
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV ASPNETCORE_HTTP_PORTS=8080
-ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_ENVIRONMENT=Development
 
 RUN mkdir -p /app/uploads && chown -R $APP_UID:$APP_UID /app
 

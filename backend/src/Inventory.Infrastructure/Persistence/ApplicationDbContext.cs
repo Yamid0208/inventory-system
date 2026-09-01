@@ -1,14 +1,20 @@
 using Microsoft.EntityFrameworkCore;
+using Inventory.Application.Common.Interfaces;
 using Inventory.Domain.Common;
+using Inventory.Domain.Entities;
 
 namespace Inventory.Infrastructure.Persistence;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
+
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<Product> Products => Set<Product>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,8 +36,7 @@ public class ApplicationDbContext : DbContext
                     break;
                 case EntityState.Deleted:
                     entry.State = EntityState.Modified;
-                    entry.Entity.IsDeleted = true;
-                    entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
+                    entry.Entity.SoftDelete();
                     break;
             }
         }

@@ -1,6 +1,8 @@
 using Inventory.API.Middlewares;
 using Inventory.Application;
 using Inventory.Infrastructure;
+using Inventory.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +20,7 @@ builder.Services.AddSwaggerGen();
 // 3. Health Checks
 builder.Services.AddHealthChecks();
 
-// 4. Configuración CORS con soporte para credenciales (HttpOnly cookies)
+// 4. Configuración CORS con soporte para credenciales
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:4200" };
 builder.Services.AddCors(options =>
 {
@@ -43,6 +45,24 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Inventory Management API v1");
     });
+
+    // Aplicar migraciones automáticamente en entorno de desarrollo / Docker
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        var db = services.GetRequiredService<ApplicationDbContext>();
+        try
+        {
+            logger.LogInformation("Verificando y aplicando migraciones de base de datos...");
+            await db.Database.MigrateAsync();
+            logger.LogInformation("Base de datos actualizada con éxito mediante migraciones.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error al aplicar migraciones automáticas en SQL Server.");
+        }
+    }
 }
 
 app.UseCors("CorsPolicy");

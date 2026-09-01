@@ -25,6 +25,7 @@ public static class DependencyInjection
             }
         });
 
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
