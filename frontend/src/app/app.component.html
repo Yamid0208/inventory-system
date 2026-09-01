@@ -1,0 +1,67 @@
+<main class="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between p-6 sm:p-12">
+  <div class="max-w-4xl mx-auto w-full space-y-8">
+    <header class="border-b border-slate-800 pb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight text-white">{{ title() }}</h1>
+        <p class="text-slate-400 text-sm mt-1">Infraestructura Base & Scaffolding de Arquitectura (Tarea T-001)</p>
+      </div>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        v1.0.0 — Scaffolding Activo
+      </span>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 shadow-lg backdrop-blur">
+        <div class="flex items-center space-x-3 mb-3">
+          <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+          <h2 class="font-semibold text-lg text-white">Front-End</h2>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">Angular 18 Standalone + esbuild builder + Tailwind CSS</p>
+        <div class="text-xs text-emerald-400 font-mono flex items-center">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+          Operacional & Renderizando
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 shadow-lg backdrop-blur">
+        <div class="flex items-center space-x-3 mb-3">
+          <div class="w-3 h-3 rounded-full bg-indigo-500"></div>
+          <h2 class="font-semibold text-lg text-white">Back-End API</h2>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">ASP.NET Core 8 Web API + Clean Architecture</p>
+        @if (backendStatus() === 'connected') {
+          <div class="text-xs text-emerald-400 font-mono flex items-center">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+            Conectado: {{ apiData()?.service }}
+          </div>
+        } @else if (backendStatus() === 'checking') {
+          <div class="text-xs text-amber-400 font-mono flex items-center">
+            <span class="inline-block w-2 h-2 rounded-full bg-amber-400 mr-2 animate-spin"></span>
+            Verificando conectividad...
+          </div>
+        } @else {
+          <div class="text-xs text-rose-400 font-mono flex items-center">
+            <span class="inline-block w-2 h-2 rounded-full bg-rose-400 mr-2"></span>
+            Esperando API (/api/v1/health)
+          </div>
+        }
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 shadow-lg backdrop-blur">
+        <div class="flex items-center space-x-3 mb-3">
+          <div class="w-3 h-3 rounded-full bg-cyan-500"></div>
+          <h2 class="font-semibold text-lg text-white">Base de Datos</h2>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">SQL Server 2022 + EF Core 8 Code First</p>
+        <div class="text-xs text-cyan-400 font-mono flex items-center">
+          <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 mr-2"></span>
+          Docker Compose Orquestado
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center text-xs text-slate-500 border-t border-slate-800/80 pt-6 mt-8">
+    Sistema de Gestión de Inventario — Clean Architecture Enterprise Blueprint
+  </footer>
+</main>

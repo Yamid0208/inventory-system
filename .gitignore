@@ -1,0 +1,46 @@
+# .NET
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+_ReSharper*/
+*.suo
+*.userprefs
+*.launchSettings.json
+*.db
+*.db-shm
+*.db-wal
+
+# Node & Frontend
+node_modules/
+dist/
+.angular/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+coverage/
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker & Uploads
+uploads/*
+!uploads/.gitkeep
+sqlserver_data/
+
+# Environment files
+.env
+.env.local
+.env.*.local
