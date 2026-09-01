@@ -1,0 +1,95 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🚀 [Docker] Iniciar Entorno Completo (Compose Up)",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🛑 [Docker] Detener Entorno (Compose Down)",
+      "type": "shell",
+      "command": "docker compose down",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "📜 [Docker] Ver Logs del Backend en Vivo",
+      "type": "shell",
+      "command": "docker compose logs -f backend",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "📜 [Docker] Ver Logs del Frontend en Vivo",
+      "type": "shell",
+      "command": "docker compose logs -f frontend",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🧪 [Full Stack] Ejecutar Todas las Pruebas (Backend + Frontend)",
+      "type": "shell",
+      "command": "docker compose run --rm backend dotnet test tests/Inventory.Domain.UnitTests/Inventory.Domain.UnitTests.csproj && cd frontend && npm run test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🧪 [Backend] Tests Unitarios xUnit",
+      "type": "shell",
+      "command": "docker compose run --rm backend dotnet test tests/Inventory.Domain.UnitTests/Inventory.Domain.UnitTests.csproj",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🧪 [Frontend] Tests Unitarios Vitest",
+      "type": "shell",
+      "command": "cd frontend && npm run test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🔨 [Frontend] Compilar Angular (Build)",
+      "type": "shell",
+      "command": "cd frontend && npm run build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🗄️ [Database] Aplicar Migraciones EF Core en SQL Server",
+      "type": "shell",
+      "command": "docker compose restart backend",
+      "problemMatcher": []
+    }
+  ]
+}
