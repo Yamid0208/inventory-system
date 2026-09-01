@@ -1,0 +1,181 @@
+<div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-primary-500 selection:text-white">
+  <!-- Header de Navegación con Información de Sesión -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-primary-500/20">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+          Sistema de Gestión de Inventario
+          <span class="text-xs px-2 py-0.5 rounded bg-primary-500/20 text-primary-400 font-mono border border-primary-500/30">v1.0 (T-004)</span>
+        </h1>
+        <p class="text-xs text-slate-400">Dashboard & Sesión Autenticada con Roles</p>
+      </div>
+    </div>
+
+    <!-- Usuario en Sesión y Acciones -->
+    <div class="flex items-center space-x-4">
+      @if (authService.currentUser(); as user) {
+        <div class="hidden sm:flex items-center space-x-2 bg-slate-800/80 border border-slate-700/80 rounded-full px-3 py-1">
+          <span class="text-xs text-slate-300 font-medium">{{ user.fullName }}</span>
+          <app-badge
+            [variant]="user.role === 'Admin' ? 'danger' : user.role === 'Warehouse' ? 'warning' : 'info'"
+            [label]="user.role">
+          </app-badge>
+        </div>
+      }
+
+      <!-- Indicador de API -->
+      <div class="hidden md:flex items-center space-x-2 bg-slate-800/60 border border-slate-700/60 rounded-full px-3 py-1 text-xs text-slate-400">
+        <span class="w-2 h-2 rounded-full" [class]="isHealthy() ? 'bg-emerald-400' : 'bg-rose-500'"></span>
+        <span>API: <strong [class]="isHealthy() ? 'text-emerald-400' : 'text-rose-400'">{{ apiStatus() }}</strong></span>
+      </div>
+
+      <app-button variant="outline" size="sm" (clicked)="logout()">
+        Cerrar Sesión
+      </app-button>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Banner Informativo de Sesión -->
+    @if (authService.currentUser(); as user) {
+      <div class="bg-gradient-to-r from-primary-950/40 via-slate-900/60 to-slate-900 border border-primary-800/40 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-primary-600/20 border border-primary-500/30 flex items-center justify-center text-primary-400 font-bold text-sm">
+            {{ user.fullName.charAt(0) }}
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-white">Sesión activa como: {{ user.fullName }}</h2>
+            <p class="text-xs text-slate-400">Email: {{ user.email }} | Rol: <span class="font-mono text-primary-300">{{ user.role }}</span> | Refresh Token: <span class="text-emerald-400">HttpOnly Cookie Segura</span></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <app-badge variant="success" label="Sesión Verificada con JWT"></app-badge>
+        </div>
+      </div>
+    }
+
+    <!-- SECCIÓN 1: Showcase de Botones y Badges -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <app-card title="Componente: AppButton" subtitle="Variantes de acción, tamaños, loading states y accesibilidad">
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <app-button variant="primary" (clicked)="toggleButtonLoading()" [loading]="buttonLoading()">
+              Primary (Click para Loading)
+            </app-button>
+            <app-button variant="secondary">Secondary</app-button>
+            <app-button variant="outline">Outline</app-button>
+            <app-button variant="danger">Danger</app-button>
+            <app-button variant="success">Success</app-button>
+          </div>
+
+          <div class="pt-3 border-t border-slate-700/60 flex items-center gap-3">
+            <span class="text-xs text-slate-400">Tamaños:</span>
+            <app-button variant="secondary" size="sm">Small (sm)</app-button>
+            <app-button variant="secondary" size="md">Medium (md)</app-button>
+            <app-button variant="secondary" size="lg">Large (lg)</app-button>
+            <app-button variant="outline" size="sm" [disabled]="true">Deshabilitado</app-button>
+          </div>
+        </div>
+      </app-card>
+
+      <app-card title="Componente: AppBadge" subtitle="Etiquetas semánticas de estado con alto contraste visual">
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <app-badge variant="success" label="En Stock / Activo"></app-badge>
+            <app-badge variant="warning" label="Stock Bajo"></app-badge>
+            <app-badge variant="danger" label="Agotado / Inactivo"></app-badge>
+            <app-badge variant="info" label="Pendiente de Recepción"></app-badge>
+            <app-badge variant="neutral" label="Borrador"></app-badge>
+          </div>
+
+          <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between">
+            <span class="text-xs text-slate-400">Modal de confirmación accesible:</span>
+            <app-button variant="danger" size="sm" (clicked)="openConfirmDialog()">
+              Abrir AppConfirmDialog
+            </app-button>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- SECCIÓN 2: AppDataTable + AppSearch + AppPagination -->
+    <app-card title="Componentes: AppDataTable + AppSearch + AppPagination" subtitle="Tabla genérica tipada con búsqueda reactiva debounced y paginación">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+        <div class="w-full sm:w-80">
+          <app-search
+            placeholder="Buscar por producto, SKU o categoría..."
+            (search)="onSearch($event)">
+          </app-search>
+        </div>
+
+        <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <app-button variant="secondary" size="sm" (clicked)="toggleTableLoading()">
+            Simular Skeleton Loading
+          </app-button>
+        </div>
+      </div>
+
+      <app-data-table
+        [columns]="columns"
+        [data]="displayedProducts()"
+        [loading]="tableLoading()"
+        emptyTitle="Sin productos coincidentes"
+        emptyDescription="No se encontraron productos para el filtro ingresado.">
+
+        <ng-template #priceTemplate let-item>
+          <span class="font-mono text-slate-200">{{ item.price | currencyFormat }}</span>
+        </ng-template>
+
+        <ng-template #stockTemplate let-item>
+          <span class="font-bold" [class]="item.stock === 0 ? 'text-rose-400' : item.stock <= 5 ? 'text-amber-400' : 'text-slate-200'">
+            {{ item.stock }}
+          </span>
+        </ng-template>
+
+        <ng-template #statusTemplate let-item>
+          @if (item.status === 'InStock') {
+            <app-badge variant="success" label="En Stock"></app-badge>
+          } @else if (item.status === 'LowStock') {
+            <app-badge variant="warning" label="Stock Bajo"></app-badge>
+          } @else {
+            <app-badge variant="danger" label="Agotado"></app-badge>
+          }
+        </ng-template>
+
+      </app-data-table>
+
+      <app-pagination
+        [pageNumber]="currentPage()"
+        [pageSize]="pageSize()"
+        [totalCount]="displayedProducts().length"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
+    </app-card>
+
+  </main>
+
+  <!-- Diálogo de Confirmación Reutilizable -->
+  <app-confirm-dialog
+    [isOpen]="dialogOpen()"
+    title="¿Anular venta #VTA-0012?"
+    message="Esta acción revertirá los movimientos de stock asociados y marcará la factura como cancelada. Esta acción no se puede deshacer."
+    [isDanger]="true"
+    confirmText="Anular Venta"
+    cancelText="Volver"
+    (confirmed)="handleConfirm()"
+    (cancelled)="closeConfirmDialog()">
+  </app-confirm-dialog>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-900/60 px-6 py-4 text-center text-xs text-slate-500">
+    Sistema de Gestión de Inventario &copy; 2026 — Clean Architecture (.NET 8 + EF Core 8) & Angular 18 Standalone + Tailwind CSS.
+  </footer>
+</div>

@@ -1,4 +1,6 @@
 using Inventory.Application.Common.Interfaces;
+using Inventory.Application.Features.Auth.Services;
+using Inventory.Infrastructure.Identity;
 using Inventory.Infrastructure.Persistence;
 using Inventory.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,11 @@ public static class DependencyInjection
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
+        // Servicios de Identidad y Seguridad
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }

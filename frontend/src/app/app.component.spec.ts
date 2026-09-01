@@ -1,15 +1,21 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import '@angular/compiler';
+import { describe, it, expect, vi } from 'vitest';
+import { createEnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { AppComponent } from './app.component';
+import { AuthService } from './core/auth/services/auth.service';
+import { of } from 'rxjs';
 
-describe('AppComponent (Unit Tests)', () => {
-  it('should initialize title with the system brand name', () => {
-    // Verificación de la inicialización de Signals
-    const expectedTitle = 'Sistema de Gestión de Inventario (SGI)';
-    expect(expectedTitle).toBe('Sistema de Gestión de Inventario (SGI)');
-  });
+describe('AppComponent', () => {
+  const authServiceMock = {
+    refresh: vi.fn().mockReturnValue(of({}))
+  };
 
-  it('should verify initial status is checking', () => {
-    const status = 'checking';
-    expect(status).toBe('checking');
+  const injector = createEnvironmentInjector([
+    { provide: AuthService, useValue: authServiceMock }
+  ], null as any);
+
+  it('should create the app shell component within injection context', () => {
+    const app = runInInjectionContext(injector, () => new AppComponent());
+    expect(app).toBeTruthy();
   });
 });

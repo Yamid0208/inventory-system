@@ -3,6 +3,7 @@ namespace Inventory.Application.Common.Models;
 public class Result
 {
     public bool Succeeded { get; init; }
+    public bool IsSuccess => Succeeded;
     public string? Error { get; init; }
     public IReadOnlyCollection<string> Errors { get; init; }
 
