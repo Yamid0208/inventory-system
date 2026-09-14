@@ -35,25 +35,34 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
         padding: 0 !important;
         margin: 0 !important;
         max-width: 100% !important;
+        max-height: none !important;
         width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
         background: transparent !important;
+      }
+      .invoice-scroll-area {
+        overflow: visible !important;
+        max-height: none !important;
+        height: auto !important;
+        padding: 0 !important;
       }
     }
   `],
   template: `
-    <div class="invoice-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block print:w-full">
-      <div class="invoice-modal-card bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl border border-slate-100 flex flex-col space-y-6 my-8 print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-none print:w-full print:text-black">
+    <div class="invoice-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto print:static print:inset-auto print:z-auto print:p-0 print:m-0 print:bg-transparent print:backdrop-blur-none print:overflow-visible print:block print:w-full">
+      <div class="invoice-modal-card bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] my-auto flex flex-col shadow-2xl border border-slate-100 overflow-hidden print:shadow-none print:border-none print:m-0 print:p-0 print:max-w-none print:w-full print:max-h-none print:text-black print:overflow-visible">
         
-        <!-- Controles que no se imprimen en el papel -->
-        <div class="flex items-center justify-between border-b border-slate-100 pb-4 print:hidden">
-          <div class="flex items-center gap-2">
+        <!-- Controles que no se imprimen en el papel (Fijados arriba) -->
+        <div class="flex-shrink-0 flex items-center justify-between border-b border-slate-100 p-4 sm:px-6 sm:py-4 bg-white z-10 print:hidden">
+          <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
             </div>
             <div>
-              <h2 class="text-base font-bold text-slate-900">
+              <h2 class="text-sm sm:text-base font-bold text-slate-900 leading-tight">
                 {{ sale?.invoiceType === 'Electronic' ? 'Factura Electrónica de Venta' : 'Factura de Venta Tradicional' }}
               </h2>
               <p class="text-xs text-slate-500 font-mono">{{ sale?.saleNumber }}</p>
@@ -79,8 +88,8 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
           </div>
         </div>
 
-        <!-- Documento Factura (Área Imprimible) -->
-        <div class="print:block" id="invoice-content">
+        <!-- Documento Factura (Área Imprimible con Scroll Interno en Pantalla) -->
+        <div class="invoice-scroll-area overflow-y-auto flex-1 p-5 sm:p-8 space-y-6 print:overflow-visible print:p-0 print:space-y-6" id="invoice-content">
           @if (sale) {
             <!-- Encabezado de la Factura -->
             <div class="flex justify-between items-start mb-6 pb-5 border-b border-slate-200">

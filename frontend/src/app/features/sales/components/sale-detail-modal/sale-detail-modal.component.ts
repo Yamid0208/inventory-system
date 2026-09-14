@@ -9,8 +9,8 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
   standalone: true,
   imports: [CommonModule, AppButtonComponent, CurrencyFormatPipe],
   template: `
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-100 flex flex-col space-y-5 my-8 print-container">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto print-container">
+      <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] my-auto flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
         
         <!-- MEMBRETE EMPRESARIAL IMPRESO (Visible al imprimir) -->
         <div class="print-only border-b-2 border-slate-800 pb-4 mb-4">
@@ -31,8 +31,8 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
           </div>
         </div>
 
-        <!-- Header Modal en Pantalla -->
-        <div class="flex items-center justify-between border-b border-slate-100 pb-4 no-print">
+        <!-- Header Modal en Pantalla (Fijado) -->
+        <div class="flex-shrink-0 flex items-center justify-between border-b border-slate-100 p-4 sm:px-6 no-print bg-white">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,91 +78,94 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
           </div>
         </div>
 
-        <!-- Info Grid (Cliente y Operación) -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200/60 text-xs">
-          <div>
-            <span class="text-slate-400 block text-[11px]">Adquirente / Cliente</span>
-            <strong class="text-slate-800 text-sm font-bold block">{{ sale.customerName }}</strong>
-            <span class="text-slate-500 text-[10px]">{{ sale.customerTaxId || 'Consumidor Final (222222222222)' }}</span>
+        <!-- Cuerpo con Scroll Interno -->
+        <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-5">
+          <!-- Info Grid (Cliente y Operación) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200/60 text-xs">
+            <div>
+              <span class="text-slate-400 block text-[11px]">Adquirente / Cliente</span>
+              <strong class="text-slate-800 text-sm font-bold block">{{ sale.customerName }}</strong>
+              <span class="text-slate-500 text-[10px]">{{ sale.customerTaxId || 'Consumidor Final (222222222222)' }}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[11px]">Medio de Pago</span>
+              <span class="font-semibold text-slate-700 block mt-0.5">{{ getPaymentMethodLabel(sale.paymentMethod) }}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[11px]">Emisión y Operador</span>
+              <span class="text-slate-600 block mt-0.5">{{ sale.saleDate | date:'medium' }}</span>
+              <span class="text-slate-500 text-[10px]">Cajero: {{ sale.userName }}</span>
+            </div>
           </div>
-          <div>
-            <span class="text-slate-400 block text-[11px]">Medio de Pago</span>
-            <span class="font-semibold text-slate-700 block mt-0.5">{{ getPaymentMethodLabel(sale.paymentMethod) }}</span>
-          </div>
-          <div>
-            <span class="text-slate-400 block text-[11px]">Emisión y Operador</span>
-            <span class="text-slate-600 block mt-0.5">{{ sale.saleDate | date:'medium' }}</span>
-            <span class="text-slate-500 text-[10px]">Cajero: {{ sale.userName }}</span>
-          </div>
-        </div>
 
-        @if (sale.notes) {
-          <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-200/40 text-xs text-amber-800">
-            <span class="font-bold">Observaciones:</span> {{ sale.notes }}
-          </div>
-        }
+          @if (sale.notes) {
+            <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-200/40 text-xs text-amber-800">
+              <span class="font-bold">Observaciones:</span> {{ sale.notes }}
+            </div>
+          }
 
-        <!-- Tabla de Productos -->
-        <div class="border border-slate-100 rounded-xl overflow-hidden">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
-                <th class="py-2.5 px-3">SKU</th>
-                <th class="py-2.5 px-3">Descripción</th>
-                <th class="py-2.5 px-3 text-center">Cant.</th>
-                <th class="py-2.5 px-3 text-right">Precio Unit.</th>
-                <th class="py-2.5 px-3 text-right">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-slate-700">
-              @for (item of sale.items; track item.id) {
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                  <td class="py-2.5 px-3 font-mono text-[11px] text-slate-500">{{ item.productSku }}</td>
-                  <td class="py-2.5 px-3 font-medium text-slate-900">{{ item.productName }}</td>
-                  <td class="py-2.5 px-3 text-center font-bold">{{ item.quantity }}</td>
-                  <td class="py-2.5 px-3 text-right font-mono">{{ item.unitPrice | currencyFormat }}</td>
-                  <td class="py-2.5 px-3 text-right font-mono font-bold">{{ item.subtotal | currencyFormat }}</td>
+          <!-- Tabla de Productos -->
+          <div class="border border-slate-100 rounded-xl overflow-hidden">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                  <th class="py-2.5 px-3">SKU</th>
+                  <th class="py-2.5 px-3">Descripción</th>
+                  <th class="py-2.5 px-3 text-center">Cant.</th>
+                  <th class="py-2.5 px-3 text-right">Precio Unit.</th>
+                  <th class="py-2.5 px-3 text-right">Subtotal</th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                @for (item of sale.items; track item.id) {
+                  <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-2.5 px-3 font-mono text-[11px] text-slate-500">{{ item.productSku }}</td>
+                    <td class="py-2.5 px-3 font-medium text-slate-900">{{ item.productName }}</td>
+                    <td class="py-2.5 px-3 text-center font-bold">{{ item.quantity }}</td>
+                    <td class="py-2.5 px-3 text-right font-mono">{{ item.unitPrice | currencyFormat }}</td>
+                    <td class="py-2.5 px-3 text-right font-mono font-bold">{{ item.subtotal | currencyFormat }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
 
-        <!-- Totales -->
-        <div class="flex justify-end">
-          <div class="w-full sm:w-64 space-y-1.5 text-xs font-mono">
-            <div class="flex justify-between text-slate-500">
-              <span>Subtotal Gravable:</span>
-              <span>{{ sale.subtotal | currencyFormat }}</span>
+          <!-- Totales -->
+          <div class="flex justify-end">
+            <div class="w-full sm:w-64 space-y-1.5 text-xs font-mono">
+              <div class="flex justify-between text-slate-500">
+                <span>Subtotal Gravable:</span>
+                <span>{{ sale.subtotal | currencyFormat }}</span>
+              </div>
+              <div class="flex justify-between text-slate-500">
+                <span>IVA Discriminado:</span>
+                <span>{{ sale.tax | currencyFormat }}</span>
+              </div>
+              <div class="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-200 pt-1.5">
+                <span>Total a Pagar:</span>
+                <span class="text-emerald-600 font-extrabold">{{ sale.total | currencyFormat }}</span>
+              </div>
             </div>
-            <div class="flex justify-between text-slate-500">
-              <span>IVA Discriminado:</span>
-              <span>{{ sale.tax | currencyFormat }}</span>
-            </div>
-            <div class="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-200 pt-1.5">
-              <span>Total a Pagar:</span>
-              <span class="text-emerald-600 font-extrabold">{{ sale.total | currencyFormat }}</span>
+          </div>
+
+          <!-- Pie de Página Legal (Impreso) -->
+          <div class="print-only pt-6 mt-6 border-t border-slate-300 text-[10px] text-slate-500 leading-normal space-y-4">
+            <p>
+              Esta factura de venta se asimila en todos sus efectos a una letra de cambio según los artículos 772, 773 y 774 del Código de Comercio Colombiano. La firma del comprador en este documento constituye constancia de recibo a satisfacción de los bienes adquiridos.
+            </p>
+            <div class="grid grid-cols-2 gap-12 pt-8">
+              <div class="border-t border-slate-400 pt-1 text-center">
+                <span>Firma y Sello del Emisor / SGI PRO S.A.S.</span>
+              </div>
+              <div class="border-t border-slate-400 pt-1 text-center">
+                <span>Firma y Cédula del Receptor / Adquirente</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Pie de Página Legal (Impreso) -->
-        <div class="print-only pt-6 mt-6 border-t border-slate-300 text-[10px] text-slate-500 leading-normal space-y-4">
-          <p>
-            Esta factura de venta se asimila en todos sus efectos a una letra de cambio según los artículos 772, 773 y 774 del Código de Comercio Colombiano. La firma del comprador en este documento constituye constancia de recibo a satisfacción de los bienes adquiridos.
-          </p>
-          <div class="grid grid-cols-2 gap-12 pt-8">
-            <div class="border-t border-slate-400 pt-1 text-center">
-              <span>Firma y Sello del Emisor / SGI PRO S.A.S.</span>
-            </div>
-            <div class="border-t border-slate-400 pt-1 text-center">
-              <span>Firma y Cédula del Receptor / Adquirente</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Acciones Inferiores en Pantalla -->
-        <div class="flex items-center justify-between pt-3 border-t border-slate-100 no-print">
+        <!-- Acciones Inferiores en Pantalla (Fijado abajo) -->
+        <div class="flex-shrink-0 flex items-center justify-between p-4 sm:px-6 border-t border-slate-100 no-print bg-white">
           <div>
             @if (sale.status === 'Completed') {
               <app-button variant="danger" size="sm" (clicked)="onCancelSale()">
