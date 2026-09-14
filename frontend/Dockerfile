@@ -1,6 +1,8 @@
 # Stage 1: Build Angular Frontend
 FROM node:20-alpine AS node-build
 WORKDIR /src
+ENV CI=true
+ENV NG_CLI_ANALYTICS=ci
 COPY package*.json ./
 RUN npm ci
 COPY . .
