@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Inventory.Application.Features.Products.Services;
 
+using Npgsql;
+
 namespace Inventory.Infrastructure;
 
 public static class DependencyInjection
@@ -18,6 +20,26 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+        if (!string.IsNullOrWhiteSpace(connectionString))
+        {
+            if (connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+                connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+            {
+                var databaseUri = new Uri(connectionString);
+                var userInfo = databaseUri.UserInfo.Split(':');
+                var builder = new NpgsqlConnectionStringBuilder
+                {
+                    Host = databaseUri.Host,
+                    Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
+                    Username = userInfo[0],
+                    Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "",
+                    Database = databaseUri.LocalPath.TrimStart('/'),
+                    SslMode = SslMode.Require
+                };
+                connectionString = builder.ToString();
+            }
+        }
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
