@@ -35,9 +35,14 @@ public static class DependencyInjection
                     Username = userInfo[0],
                     Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "",
                     Database = databaseUri.LocalPath.TrimStart('/'),
-                    SslMode = SslMode.Require
+                    SslMode = SslMode.Prefer
                 };
-                connectionString = builder.ToString();
+                connectionString = builder.ToString() + ";Trust Server Certificate=true;";
+            }
+            else if (!connectionString.Contains("Trust Server Certificate", StringComparison.OrdinalIgnoreCase) &&
+                     !connectionString.Contains("TrustServerCertificate", StringComparison.OrdinalIgnoreCase))
+            {
+                connectionString += ";Trust Server Certificate=true;";
             }
         }
 

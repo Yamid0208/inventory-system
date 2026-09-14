@@ -82,7 +82,7 @@ public class GlobalExceptionMiddleware
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 problemDetails.Status = (int)HttpStatusCode.InternalServerError;
                 problemDetails.Title = "Error interno del servidor";
-                problemDetails.Detail = "Ha ocurrido un error inesperado al procesar la solicitud.";
+                problemDetails.Detail = $"{exception.Message}{(exception.InnerException != null ? " | " + exception.InnerException.Message : "")}";
                 break;
         }
 
