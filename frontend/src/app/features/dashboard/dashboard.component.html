@@ -60,116 +60,130 @@
 
   @if (summary()) {
   <!-- 4 HERO KPI CARDS STOCKFLOW STYLE -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
     <!-- 1. Valuación de Inventario (Blue Accent) -->
     <div
-      class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Valuación Almacén</span>
-        <div
-          class="w-10 h-10 rounded-2xl bg-accent-blue/10 text-accent-blue flex items-center justify-center font-bold">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-          </svg>
+      class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Valuación Almacén</span>
+          <div
+            class="w-10 h-10 rounded-2xl bg-accent-blue/10 text-accent-blue flex items-center justify-center font-bold flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div
+            class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0"
+            [title]="summary()!.kpis.totalInventoryValuation | currencyFormat">
+            {{ summary()!.kpis.totalInventoryValuation | currencyFormat }}
+          </div>
+          <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+            <span class="font-bold text-slate-700">{{ summary()!.kpis.totalStockUnits }}</span> unidades en existencia
+          </p>
         </div>
       </div>
-      <div class="mt-4">
-        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          {{ summary()!.kpis.totalInventoryValuation | currencyFormat }}
-        </div>
-        <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-          <span class="font-bold text-slate-700">{{ summary()!.kpis.totalStockUnits }}</span> unidades en existencia
-        </p>
-      </div>
-      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-        <span class="text-slate-400 font-medium">{{ summary()!.kpis.totalProductsCount }} refs activas</span>
-        <span class="text-primary-500 font-bold cursor-pointer hover:underline" (click)="navigateTo('/products')">Ver
+      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] gap-2">
+        <span class="text-slate-400 font-medium truncate">{{ summary()!.kpis.totalProductsCount }} refs activas</span>
+        <span class="text-primary-500 font-bold cursor-pointer hover:underline flex-shrink-0" (click)="navigateTo('/products')">Ver
           catálogo ›</span>
       </div>
     </div>
 
     <!-- 2. Ventas Totales (Coral Accent) -->
     <div
-      class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ventas Facturadas</span>
-        <div class="w-10 h-10 rounded-2xl bg-primary-50 text-primary-500 flex items-center justify-center font-bold">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-            </path>
-          </svg>
+      class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Ventas Facturadas</span>
+          <div class="w-10 h-10 rounded-2xl bg-primary-50 text-primary-500 flex items-center justify-center font-bold flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+              </path>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div
+            class="text-xl sm:text-2xl 2xl:text-3xl font-black text-primary-500 tracking-tight truncate min-w-0"
+            [title]="summary()!.kpis.totalSalesAmount | currencyFormat">
+            {{ summary()!.kpis.totalSalesAmount | currencyFormat }}
+          </div>
+          <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+            <span class="font-bold text-slate-700">{{ summary()!.kpis.completedSalesCount }}</span> ventas completadas
+          </p>
         </div>
       </div>
-      <div class="mt-4">
-        <div class="text-2xl sm:text-3xl font-extrabold text-primary-500 tracking-tight">
-          {{ summary()!.kpis.totalSalesAmount | currencyFormat }}
-        </div>
-        <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-          <span class="font-bold text-slate-700">{{ summary()!.kpis.completedSalesCount }}</span> ventas completadas
-        </p>
-      </div>
-      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-        <span class="text-emerald-600 font-bold">100% cobradas</span>
-        <span class="text-primary-500 font-bold cursor-pointer hover:underline" (click)="navigateTo('/sales')">Ir a
+      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] gap-2">
+        <span class="text-emerald-600 font-bold truncate">100% cobradas</span>
+        <span class="text-primary-500 font-bold cursor-pointer hover:underline flex-shrink-0" (click)="navigateTo('/sales')">Ir a
           ventas ›</span>
       </div>
     </div>
 
     <!-- 3. Abastecimiento y Compras (Cyan / Purple Accent) -->
     <div
-      class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Compras & Ordenes</span>
-        <div
-          class="w-10 h-10 rounded-2xl bg-accent-cyan/10 text-accent-cyan flex items-center justify-center font-bold">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-          </svg>
+      class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Compras & Ordenes</span>
+          <div
+            class="w-10 h-10 rounded-2xl bg-accent-cyan/10 text-accent-cyan flex items-center justify-center font-bold flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div
+            class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0"
+            [title]="summary()!.kpis.totalPurchasesAmount | currencyFormat">
+            {{ summary()!.kpis.totalPurchasesAmount | currencyFormat }}
+          </div>
+          <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+            <span class="font-bold text-amber-600">{{ summary()!.kpis.pendingPurchasesCount }}</span> pendientes
+          </p>
         </div>
       </div>
-      <div class="mt-4">
-        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          {{ summary()!.kpis.totalPurchasesAmount | currencyFormat }}
-        </div>
-        <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-          <span class="font-bold text-amber-600">{{ summary()!.kpis.pendingPurchasesCount }}</span> pendientes
-        </p>
-      </div>
-      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-        <span class="text-slate-400 font-medium">Ingreso a bodega</span>
-        <span class="text-primary-500 font-bold cursor-pointer hover:underline"
+      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] gap-2">
+        <span class="text-slate-400 font-medium truncate">Ingreso a bodega</span>
+        <span class="text-primary-500 font-bold cursor-pointer hover:underline flex-shrink-0"
           (click)="navigateTo('/purchases')">Gestionar ›</span>
       </div>
     </div>
 
     <!-- 4. Alertas de Stock Crítico -->
     <div
-      class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alertas de Stock</span>
-        <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center font-bold">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-            </path>
-          </svg>
+      class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Alertas de Stock</span>
+          <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center font-bold flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+              </path>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-rose-500 tracking-tight truncate min-w-0">
+            {{ summary()!.kpis.lowStockProductsCount + summary()!.kpis.outOfStockProductsCount }}
+          </div>
+          <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5 flex-wrap">
+            <span class="font-bold text-rose-600">{{ summary()!.kpis.outOfStockProductsCount }}</span> agotados |
+            <span class="font-bold text-amber-600">{{ summary()!.kpis.lowStockProductsCount }}</span> bajo stock
+          </p>
         </div>
       </div>
-      <div class="mt-4">
-        <div class="text-2xl sm:text-3xl font-extrabold text-rose-500 tracking-tight">
-          {{ summary()!.kpis.lowStockProductsCount + summary()!.kpis.outOfStockProductsCount }}
-        </div>
-        <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-          <span class="font-bold text-rose-600">{{ summary()!.kpis.outOfStockProductsCount }}</span> agotados |
-          <span class="font-bold text-amber-600">{{ summary()!.kpis.lowStockProductsCount }}</span> bajo stock
-        </p>
-      </div>
-      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-        <span class="text-rose-500 font-bold">Requiere atención</span>
-        <span class="text-slate-600 font-bold cursor-pointer hover:underline" (click)="navigateTo('/alerts')">Ver
+      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] gap-2">
+        <span class="text-rose-500 font-bold truncate">Requiere atención</span>
+        <span class="text-slate-600 font-bold cursor-pointer hover:underline flex-shrink-0" (click)="navigateTo('/alerts')">Ver
           alertas ›</span>
       </div>
     </div>
