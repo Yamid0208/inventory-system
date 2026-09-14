@@ -38,20 +38,20 @@ export class AppButtonComponent {
   clicked = output<MouseEvent>();
 
   buttonClasses = computed(() => {
-    const base = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none';
+    const base = 'inline-flex items-center justify-center font-bold rounded-2xl transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none cursor-pointer';
     
     const sizeClasses = {
-      sm: 'text-xs px-3 py-1.5 gap-1.5',
-      md: 'text-sm px-4 py-2 gap-2',
-      lg: 'text-base px-5 py-2.5 gap-2.5'
+      sm: 'text-xs px-3.5 py-2 gap-1.5',
+      md: 'text-xs px-4.5 py-2.5 gap-2',
+      lg: 'text-sm px-6 py-3.5 gap-2.5'
     }[this.size()];
 
     const variantClasses = {
-      primary: 'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 focus-visible:ring-primary-500 shadow-sm',
-      secondary: 'bg-slate-700 text-slate-100 hover:bg-slate-600 active:bg-slate-800 focus-visible:ring-slate-500 border border-slate-600',
-      outline: 'bg-transparent text-slate-300 border border-slate-600 hover:bg-slate-800 hover:text-white focus-visible:ring-slate-400',
-      danger: 'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 focus-visible:ring-rose-500 shadow-sm',
-      success: 'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 focus-visible:ring-emerald-500 shadow-sm'
+      primary: 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 focus-visible:ring-primary-400 shadow-coral-glow hover:shadow-lg',
+      secondary: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-slate-300 border border-slate-200 dark:border-slate-700',
+      outline: 'bg-transparent text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 focus-visible:ring-slate-400',
+      danger: 'bg-rose-500 text-white hover:bg-rose-600 active:bg-rose-700 focus-visible:ring-rose-400 shadow-sm',
+      success: 'bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 focus-visible:ring-emerald-400 shadow-sm'
     }[this.variant()];
 
     const widthClass = this.fullWidth() ? 'w-full' : '';

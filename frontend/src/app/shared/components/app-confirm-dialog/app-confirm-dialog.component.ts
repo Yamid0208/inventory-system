@@ -1,69 +1,104 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AppButtonComponent } from '../app-button/app-button.component';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule, AppButtonComponent],
+  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (isOpen()) {
+    @if (confirmationService.state().isOpen) {
       <div
-        class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
-        role="dialog"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+        role="alertdialog"
         aria-modal="true"
-        [attr.aria-labelledby]="'dialog-title'">
-        <div class="relative bg-slate-900 border border-slate-700 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
-          <div class="flex items-start space-x-3">
-            <div [class]="iconBgClasses">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-              </svg>
-            </div>
-            <div class="flex-1">
-              <h3 id="dialog-title" class="text-base font-semibold text-white">{{ title() }}</h3>
-              <p class="text-xs text-slate-400 mt-1">{{ message() }}</p>
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-desc"
+      >
+        <div
+          class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col space-y-4 my-8 transition-transform transform scale-100"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="flex items-start gap-4">
+            <!-- Icono de severidad / variante -->
+            @switch (confirmationService.state().options.variant) {
+              @case ('danger') {
+                <div class="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                </div>
+              }
+              @case ('warning') {
+                <div class="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                  </svg>
+                </div>
+              }
+              @default {
+                <div class="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+              }
+            }
+
+            <div class="space-y-1">
+              <h3 id="confirm-dialog-title" class="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                {{ confirmationService.state().options.title }}
+              </h3>
+              <p id="confirm-dialog-desc" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                {{ confirmationService.state().options.message }}
+              </p>
             </div>
           </div>
 
-          <footer class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-800">
-            <app-button
-              variant="outline"
-              size="sm"
-              [disabled]="loading()"
-              (clicked)="cancelled.emit()">
-              {{ cancelText() }}
-            </app-button>
-            <app-button
-              [variant]="isDanger() ? 'danger' : 'primary'"
-              size="sm"
-              [loading]="loading()"
-              (clicked)="confirmed.emit()">
-              {{ confirmText() }}
-            </app-button>
-          </footer>
+          <!-- Acciones Inferiores -->
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <button
+              type="button"
+              (click)="confirmationService.handleCancel()"
+              class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold transition-all cursor-pointer"
+            >
+              {{ confirmationService.state().options.cancelText }}
+            </button>
+
+            <button
+              type="button"
+              (click)="confirmationService.handleConfirm()"
+              [class]="getConfirmButtonClasses()"
+            >
+              {{ confirmationService.state().options.confirmText }}
+            </button>
+          </div>
         </div>
       </div>
     }
   `
 })
 export class AppConfirmDialogComponent {
-  isOpen = input<boolean>(false);
-  title = input<string>('¿Está seguro de continuar?');
-  message = input<string>('Esta acción modificará los datos del sistema.');
-  confirmText = input<string>('Confirmar');
-  cancelText = input<string>('Cancelar');
-  isDanger = input<boolean>(false);
-  loading = input<boolean>(false);
+  confirmationService = inject(ConfirmationService);
 
-  confirmed = output<void>();
-  cancelled = output<void>();
-
-  get iconBgClasses(): string {
-    if (this.isDanger()) {
-      return 'w-10 h-10 rounded-full bg-rose-950/60 border border-rose-800/80 flex items-center justify-center text-rose-400 shrink-0';
+  @HostListener('window:keydown.escape')
+  onEscape(): void {
+    if (this.confirmationService.state().isOpen) {
+      this.confirmationService.handleCancel();
     }
-    return 'w-10 h-10 rounded-full bg-amber-950/60 border border-amber-800/80 flex items-center justify-center text-amber-400 shrink-0';
+  }
+
+  getConfirmButtonClasses(): string {
+    const variant = this.confirmationService.state().options.variant;
+    const base = 'px-4 py-2 rounded-xl text-white text-xs font-bold transition-all cursor-pointer shadow-sm';
+    switch (variant) {
+      case 'danger':
+        return `${base} bg-rose-600 hover:bg-rose-700 active:bg-rose-800 shadow-rose-500/20`;
+      case 'warning':
+        return `${base} bg-amber-600 hover:bg-amber-700 active:bg-amber-800 shadow-amber-500/20`;
+      default:
+        return `${base} bg-primary-600 hover:bg-primary-700 active:bg-primary-800 shadow-primary-500/20`;
+    }
   }
 }

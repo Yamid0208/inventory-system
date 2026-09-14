@@ -4,6 +4,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient("BackendApi", client =>
 {
     client.BaseAddress = new Uri("http://backend:8080");
+}).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    UseCookies = false
 });
 
 var app = builder.Build();
@@ -39,7 +42,17 @@ app.Map("/api/{**catch-all}", async (HttpContext context, IHttpClientFactory cli
 
     foreach (var header in response.Headers)
     {
-        context.Response.Headers[header.Key] = header.Value.ToArray();
+        if (header.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (var val in header.Value)
+            {
+                context.Response.Headers.Append("Set-Cookie", val);
+            }
+        }
+        else
+        {
+            context.Response.Headers[header.Key] = header.Value.ToArray();
+        }
     }
     foreach (var header in response.Content.Headers)
     {

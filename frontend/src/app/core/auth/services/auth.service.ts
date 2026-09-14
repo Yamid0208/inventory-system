@@ -44,7 +44,10 @@ export class AuthService {
         this.setSession(res);
       }),
       catchError((err) => {
-        this.clearSession();
+        // No destruir la sesión activa si todavía disponemos de un token en memoria/storage
+        if (!this.accessTokenSignal()) {
+          this.clearSession();
+        }
         return throwError(() => err);
       })
     );
@@ -70,6 +73,35 @@ export class AuthService {
     return allowedRoles.includes(role);
   }
 
+  hasPermission(permission: string): boolean {
+    const role = this.userRole();
+    if (!role) return false;
+    if (role === 'Admin') return true;
+
+    const warehousePermissions = [
+      'Products:Read', 'Products:Write',
+      'Inventory:Read', 'Inventory:Adjust',
+      'Purchases:Read', 'Purchases:Create', 'Purchases:Receive', 'Purchases:Cancel',
+      'Dashboard:Read', 'Reports:Export'
+    ];
+
+    const sellerPermissions = [
+      'Products:Read',
+      'Sales:Read', 'Sales:Create', 'Sales:Cancel',
+      'Dashboard:Read', 'Reports:Export'
+    ];
+
+    if (role === 'Warehouse') {
+      return warehousePermissions.includes(permission);
+    }
+
+    if (role === 'Seller') {
+      return sellerPermissions.includes(permission);
+    }
+
+    return false;
+  }
+
   setAccessToken(token: string | null): void {
     this.accessTokenSignal.set(token);
   }
@@ -79,6 +111,7 @@ export class AuthService {
     this.currentUserSignal.set(authResponse.user);
     try {
       localStorage.setItem('sgi_user', JSON.stringify(authResponse.user));
+      localStorage.setItem('sgi_token', authResponse.accessToken);
     } catch {
       // Ignorar fallo de almacenamiento en modo incógnito/privado
     }
@@ -89,6 +122,7 @@ export class AuthService {
     this.currentUserSignal.set(null);
     try {
       localStorage.removeItem('sgi_user');
+      localStorage.removeItem('sgi_token');
     } catch {
       // Ignorar
     }
@@ -97,8 +131,12 @@ export class AuthService {
   private restoreUserFromStorage(): void {
     try {
       const savedUser = localStorage.getItem('sgi_user');
+      const savedToken = localStorage.getItem('sgi_token');
       if (savedUser) {
         this.currentUserSignal.set(JSON.parse(savedUser));
+      }
+      if (savedToken) {
+        this.accessTokenSignal.set(savedToken);
       }
     } catch {
       this.clearSession();

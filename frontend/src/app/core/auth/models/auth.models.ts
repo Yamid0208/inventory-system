@@ -1,4 +1,4 @@
-export type UserRole = 'Admin' | 'Warehouse' | 'Seller';
+export type UserRole = 'SuperAdmin' | 'Admin' | 'Warehouse' | 'Seller';
 
 export interface User {
   id: number;
@@ -6,6 +6,8 @@ export interface User {
   email: string;
   role: UserRole;
   isActive: boolean;
+  warehouseId?: number | null;
+  warehouseName?: string | null;
 }
 
 export interface LoginCredentials {

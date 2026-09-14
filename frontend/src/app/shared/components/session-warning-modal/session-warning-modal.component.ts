@@ -1,0 +1,65 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SessionTimeoutService } from '../../../core/services/session-timeout.service';
+
+@Component({
+  selector: 'app-session-warning-modal',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    @if (sessionTimeoutService.showWarning()) {
+      <div
+        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="session-warning-title"
+        aria-describedby="session-warning-desc"
+      >
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-center space-y-4">
+          <!-- ICONO TEMPORIZADOR -->
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center text-2xl font-bold animate-pulse">
+            ⏳
+          </div>
+
+          <div>
+            <h3 id="session-warning-title" class="text-base font-extrabold text-slate-900">
+              ¿Sigues ahí? Tu sesión está por expirar
+            </h3>
+            <p id="session-warning-desc" class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+              Hemos detectado inactividad prolongada. Por razones de seguridad, tu sesión se cerrará automáticamente en:
+            </p>
+          </div>
+
+          <!-- CONTADOR REGRESIVO -->
+          <div class="py-3 px-4 bg-amber-50/70 border border-amber-200/90 rounded-xl">
+            <span class="text-3xl font-mono font-extrabold text-amber-600 tracking-wider">
+              {{ sessionTimeoutService.remainingSeconds() }}s
+            </span>
+          </div>
+
+          <!-- BOTONES DE ACCIÓN -->
+          <div class="flex items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              (click)="sessionTimeoutService.autoLogout()"
+              class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-800 hover:bg-slate-50 text-xs font-semibold cursor-pointer transition-all"
+            >
+              Cerrar Sesión Ahora
+            </button>
+
+            <button
+              type="button"
+              (click)="sessionTimeoutService.extendSession()"
+              class="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-bold shadow-md shadow-primary-500/20 cursor-pointer transition-all"
+            >
+              Mantener Sesión Activa
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  `
+})
+export class SessionWarningModalComponent {
+  sessionTimeoutService = inject(SessionTimeoutService);
+}

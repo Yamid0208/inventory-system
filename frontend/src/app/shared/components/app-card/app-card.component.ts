@@ -7,15 +7,15 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-md backdrop-blur overflow-hidden transition-shadow duration-200">
+    <section class="bg-white dark:bg-slate-900 border border-slate-100/90 dark:border-slate-800 rounded-3xl shadow-card hover:shadow-card-hover overflow-hidden transition-all duration-200">
       @if (title() || hasHeaderContent) {
-        <header class="px-6 py-4 border-b border-slate-700/60 flex items-center justify-between">
+        <header class="px-6 py-4.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
             @if (title()) {
-              <h3 class="text-base font-semibold text-white tracking-tight">{{ title() }}</h3>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white tracking-tight">{{ title() }}</h3>
             }
             @if (subtitle()) {
-              <p class="text-xs text-slate-400 mt-0.5">{{ subtitle() }}</p>
+              <p class="text-xs text-slate-400 font-medium mt-0.5">{{ subtitle() }}</p>
             }
           </div>
           <div class="flex items-center space-x-2">

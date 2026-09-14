@@ -10,9 +10,8 @@ describe('AppButtonComponent (Unit Tests)', () => {
     const component = runInInjectionContext(injector, () => new AppButtonComponent());
     const classes = component.buttonClasses();
 
-    expect(classes).toContain('bg-primary-600');
+    expect(classes).toContain('bg-primary-500');
     expect(classes).toContain('text-white');
-    expect(classes).toContain('text-sm');
   });
 
   it('should emit clicked event when not disabled or loading', () => {

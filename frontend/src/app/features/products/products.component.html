@@ -1,0 +1,385 @@
+<div class="p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-xs font-medium text-slate-400">
+    <span>Catálogo</span>
+    <span class="text-slate-300">›</span>
+    <span class="text-slate-700 font-semibold">Productos</span>
+  </div>
+
+  <!-- Header & Add Button -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Catálogo de Productos</h1>
+      <p class="text-xs text-slate-500 mt-1">
+        Administra el catálogo de inventario, precios, niveles de reabastecimiento y trazabilidad.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      (click)="openCreateModal()"
+      class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-sm font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer select-none"
+    >
+      <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+      </svg>
+      <span>+ Nuevo Producto</span>
+    </button>
+  </div>
+
+  <!-- Toolbar Card: Filtros por Stock, Buscador y Categorías -->
+  <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+    <!-- Píldoras de Estado de Stock (Stitch Style) -->
+    <div class="flex items-center gap-1.5 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0">
+      <button
+        type="button"
+        (click)="setStockFilter('all')"
+        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
+        [class]="stockStatus() === 'all'
+          ? 'bg-slate-900 text-white shadow-sm'
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
+      >
+        Todos
+      </button>
+
+      <button
+        type="button"
+        (click)="setStockFilter('in_stock')"
+        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
+        [class]="stockStatus() === 'in_stock'
+          ? 'bg-emerald-600 text-white shadow-sm'
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
+      >
+        En Stock
+      </button>
+
+      <button
+        type="button"
+        (click)="setStockFilter('low_stock')"
+        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
+        [class]="stockStatus() === 'low_stock'
+          ? 'bg-amber-500 text-white shadow-sm'
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
+      >
+        Stock Bajo
+      </button>
+
+      <button
+        type="button"
+        (click)="setStockFilter('out_of_stock')"
+        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
+        [class]="stockStatus() === 'out_of_stock'
+          ? 'bg-rose-600 text-white shadow-sm'
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
+      >
+        Agotados
+      </button>
+    </div>
+
+    <!-- Buscador y Selector de Categorías -->
+    <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+      <!-- Search Input -->
+      <div class="relative w-full sm:w-64">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input
+          type="text"
+          [value]="searchQuery()"
+          (input)="onSearch($event)"
+          placeholder="Buscar por nombre o SKU..."
+          class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+        />
+      </div>
+
+      <!-- Category Dropdown Filter -->
+      <div class="relative w-full sm:w-48">
+        <select
+          (change)="onCategoryChange($event)"
+          class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
+        >
+          <option value="all">Todas las Categorías</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="py-20 flex flex-col items-center justify-center space-y-3">
+      <div class="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+      <p class="text-xs text-slate-400 font-medium">Cargando catálogo de productos...</p>
+    </div>
+  }
+
+  <!-- Data Table Card -->
+  @if (!loading()) {
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      @if (products().length === 0) {
+        <div class="p-16 text-center">
+          <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800">No se encontraron productos</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            No hay registros que coincidan con la búsqueda o filtros de stock seleccionados.
+          </p>
+          <button
+            type="button"
+            (click)="openCreateModal()"
+            class="mt-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
+          >
+            + Crear Producto
+          </button>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
+                <th class="py-3.5 pl-6 pr-4">Producto</th>
+                <th class="py-3.5 px-4">SKU</th>
+                <th class="py-3.5 px-4">Categoría</th>
+                <th class="py-3.5 px-4 text-right">Precio Compra</th>
+                <th class="py-3.5 px-4 text-right">Precio Venta</th>
+                <th class="py-3.5 px-6 min-w-[200px]">Nivel de Stock</th>
+                <th class="py-3.5 pr-6 pl-4 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              @for (product of products(); track product.id) {
+                <tr class="hover:bg-slate-50/80 transition-colors group">
+                  <!-- Producto (Thumbnail + Nombre) -->
+                  <td class="py-4 pl-6 pr-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center flex-shrink-0 text-slate-400 group-hover:border-primary-200 group-hover:bg-primary-50/30 transition-all">
+                        @if (product.imageUrl) {
+                          <img [src]="product.imageUrl" [alt]="product.name" class="w-full h-full object-cover rounded-xl" />
+                        } @else {
+                          <svg class="w-5 h-5 text-slate-400 group-hover:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                          </svg>
+                        }
+                      </div>
+                      <div class="min-w-0">
+                        <span class="font-bold text-slate-900 group-hover:text-primary-700 transition-colors block truncate max-w-xs">
+                          {{ product.name }}
+                        </span>
+                        @if (product.description) {
+                          <span class="text-[11px] text-slate-400 truncate block max-w-xs">
+                            {{ product.description }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- SKU Badge -->
+                  <td class="py-4 px-4 whitespace-nowrap">
+                    <span class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200/80 font-mono text-[11px] font-semibold text-slate-700">
+                      {{ product.sku }}
+                    </span>
+                  </td>
+
+                  <!-- Categoría Pastel Badge -->
+                  <td class="py-4 px-4 whitespace-nowrap">
+                    <span
+                      class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border"
+                      [ngClass]="getCategoryBadgeClass(product.categoryName)"
+                    >
+                      {{ product.categoryName }}
+                    </span>
+                  </td>
+
+                  <!-- Precio Compra -->
+                  <td class="py-4 px-4 text-right font-mono text-slate-500 whitespace-nowrap">
+                    {{ product.purchasePrice | currencyFormat }}
+                  </td>
+
+                  <!-- Precio Venta -->
+                  <td class="py-4 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                    {{ product.salePrice | currencyFormat }}
+                  </td>
+
+                  <!-- Nivel de Stock (Estado + Barra de Progreso + Conteo) -->
+                  <td class="py-4 px-6">
+                    <div class="space-y-1.5">
+                      <div class="flex items-center justify-between text-[11px]">
+                        <span
+                          class="font-bold"
+                          [class]="product.stockStatus === 'InStock'
+                            ? 'text-emerald-600'
+                            : (product.stockStatus === 'LowStock' ? 'text-amber-500' : 'text-rose-500')"
+                        >
+                          {{ product.stockStatus === 'InStock' ? 'En Stock' : (product.stockStatus === 'LowStock' ? 'Stock Bajo' : 'Agotado') }}
+                        </span>
+                        <span class="font-mono text-slate-400">
+                          {{ product.currentStock }}/{{ product.minimumStock * 3 }}
+                        </span>
+                      </div>
+
+                      <!-- Progress Bar -->
+                      <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          class="h-1.5 rounded-full transition-all duration-300"
+                          [class]="product.stockStatus === 'InStock'
+                            ? 'bg-emerald-500'
+                            : (product.stockStatus === 'LowStock' ? 'bg-amber-400' : 'bg-rose-400')"
+                          [style.width.%]="getStockBarWidth(product.currentStock, product.minimumStock)"
+                        ></div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Acciones -->
+                  <td class="py-4 pr-6 pl-4 text-center whitespace-nowrap">
+                    <div class="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        (click)="openBatchModal(product)"
+                        class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                        title="Gestionar Lotes y Vencimientos (FEFO)"
+                      >
+                        <span class="text-sm">🏷️</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="openDetailModal(product)"
+                        class="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                        title="Ver detalle"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="openEditModal(product)"
+                        class="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                        title="Editar producto"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="promptDelete(product)"
+                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                        title="Eliminar producto"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación Inferior -->
+        <div class="px-6 py-2 border-t border-slate-100 bg-white">
+          <app-pagination
+            [pageNumber]="pageNumber()"
+            [pageSize]="pageSize()"
+            [totalCount]="totalCount()"
+            (pageChange)="onPaginationChange($event)"
+          ></app-pagination>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Modales -->
+  @if (isModalOpen()) {
+    <app-product-modal
+      [product]="selectedProduct()"
+      [categories]="categories()"
+      [suppliers]="suppliers()"
+      [loading]="modalLoading"
+      [errorMessage]="modalError"
+      (save)="onSaveProduct($event)"
+      (cancel)="isModalOpen.set(false)"
+    ></app-product-modal>
+  }
+
+  @if (isDetailModalOpen() && detailProduct()) {
+    <app-product-detail-modal
+      [product]="detailProduct()!"
+      (close)="isDetailModalOpen.set(false)"
+    ></app-product-detail-modal>
+  }
+
+  <!-- Diálogo de Confirmación de Borrado con validación RN-007 -->
+  @if (confirmDialogOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4">
+        <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </div>
+
+        <div class="text-center">
+          <h3 class="text-base font-bold text-slate-900">¿Confirmas la baja del producto?</h3>
+          <p class="text-xs text-slate-500 mt-1">
+            Se dará de baja lógica a
+            <strong class="text-slate-800">"{{ productToDelete()?.name }}"</strong> (SKU: {{ productToDelete()?.sku }}).
+          </p>
+        </div>
+
+        <!-- Alerta de Restricción de Negocio RN-007 si la API rechazó -->
+        @if (deleteWarning()) {
+          <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2.5">
+            <svg class="w-4 h-4 flex-shrink-0 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="flex-1">
+              <strong class="font-semibold block text-amber-900">Restricción de Integridad (RN-007):</strong>
+              <span>{{ deleteWarning() }}</span>
+            </div>
+          </div>
+        }
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <app-button variant="outline" size="sm" (clicked)="closeDeleteDialog()">
+            {{ deleteWarning() ? 'Entendido / Cerrar' : 'Cancelar' }}
+          </app-button>
+
+          @if (!deleteWarning()) {
+            <app-button variant="danger" size="sm" (clicked)="executeDelete()">
+              Confirmar Eliminación
+            </app-button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal de Lotes y Vencimientos -->
+  @if (isBatchModalOpen() && batchProduct()) {
+    <app-batch-modal
+      [product]="batchProduct()!"
+      (closed)="isBatchModalOpen.set(false)"
+    ></app-batch-modal>
+  }
+</div>

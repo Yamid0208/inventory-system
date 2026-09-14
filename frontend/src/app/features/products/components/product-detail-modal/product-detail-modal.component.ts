@@ -1,0 +1,126 @@
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Product } from '../../../../core/models/product.model';
+import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
+import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+
+@Component({
+  selector: 'app-product-detail-modal',
+  standalone: true,
+  imports: [CommonModule, AppButtonComponent, CurrencyFormatPipe],
+  template: `
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 flex flex-col space-y-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900">{{ product.name }}</h3>
+              <span class="inline-block font-mono text-xs text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100 mt-0.5">
+                SKU: {{ product.sku }}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            (click)="close.emit()"
+            class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Description -->
+        <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+          {{ product.description || 'Sin descripción técnica adicional registrada.' }}
+        </p>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Categoría</span>
+            <p class="text-xs font-semibold text-slate-800 mt-1">{{ product.categoryName }}</p>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Proveedor</span>
+            <p class="text-xs font-semibold text-slate-800 mt-1 truncate" [title]="product.supplierName">
+              {{ product.supplierName }}
+            </p>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Precio Compra</span>
+            <p class="text-sm font-mono font-semibold text-slate-800 mt-1">
+              {{ product.purchasePrice | currencyFormat }}
+            </p>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Precio Venta</span>
+            <p class="text-sm font-mono font-bold text-emerald-600 mt-1">
+              {{ product.salePrice | currencyFormat }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Stock Status Card -->
+        <div class="p-4 rounded-xl border border-slate-200/80 bg-white shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-700">Estado de Inventario:</span>
+            <span
+              class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+              [class]="product.stockStatus === 'InStock'
+                ? 'bg-emerald-100 text-emerald-800'
+                : (product.stockStatus === 'LowStock' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')"
+            >
+              {{ product.stockStatus === 'InStock' ? 'En Stock' : (product.stockStatus === 'LowStock' ? 'Stock Bajo' : 'Agotado') }}
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>Stock Físico Actual:</span>
+            <strong class="text-slate-900 font-mono text-sm">{{ product.currentStock }} unidades</strong>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>Stock Mínimo (Alerta):</span>
+            <strong class="text-slate-700 font-mono">{{ product.minimumStock }} unidades</strong>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div
+              class="h-2 rounded-full transition-all duration-300"
+              [class]="product.stockStatus === 'InStock' ? 'bg-emerald-500' : (product.stockStatus === 'LowStock' ? 'bg-amber-500' : 'bg-rose-500')"
+              [style.width.%]="product.minimumStock > 0 ? (product.currentStock / (product.minimumStock * 3)) * 100 : 100"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <span class="text-[11px] text-slate-400">
+            Registrado: {{ product.createdAt | date:'mediumDate' }}
+          </span>
+          <app-button variant="outline" size="sm" (clicked)="close.emit()">
+            Cerrar
+          </app-button>
+        </div>
+      </div>
+    </div>
+  `
+})
+export class ProductDetailModalComponent {
+  @Input({ required: true }) product!: Product;
+  @Output() close = new EventEmitter<void>();
+}

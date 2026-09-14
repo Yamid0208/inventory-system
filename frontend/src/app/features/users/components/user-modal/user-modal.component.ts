@@ -1,0 +1,169 @@
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { UserDetail } from '../../../../core/models/user-admin.model';
+import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
+import { AuthService } from '../../../../core/auth/services/auth.service';
+
+@Component({
+  selector: 'app-user-modal',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, AppButtonComponent],
+  template: `
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 flex flex-col space-y-5 my-8">
+        <!-- Encabezado -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-slate-900">
+                {{ user ? (isClientAdmin ? 'Editar Empleado' : 'Editar Usuario') : (isClientAdmin ? 'Nuevo Empleado de Sede' : 'Nuevo Usuario del Sistema') }}
+              </h2>
+              <p class="text-xs text-slate-500">
+                {{ user ? 'Modifica los datos del usuario.' : (isClientAdmin ? 'Registra un colaborador operativo vinculado a tu sede.' : 'Crea una cuenta y asigna su rol.') }}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="onCancel()"
+            class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Alerta de Error -->
+        @if (getErrorMessage()) {
+          <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
+            <svg class="w-4 h-4 flex-shrink-0 text-rose-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="font-medium">{{ getErrorMessage() }}</span>
+          </div>
+        }
+
+        <!-- Formulario -->
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-xs">
+          <!-- Nombre Completo -->
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Nombre Completo *</label>
+            <input
+              type="text"
+              formControlName="fullName"
+              placeholder="Ej. Juan Manuel Pérez"
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+            />
+          </div>
+
+          <!-- Correo Electrónico -->
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Correo Electrónico (Login) *</label>
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="correo@empresa.com"
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+            />
+          </div>
+
+          <!-- Rol en el Sistema -->
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Rol Operativo *</label>
+            <select
+              formControlName="role"
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
+            >
+              @if (!isClientAdmin) {
+                <option value="SuperAdmin">Super Administrador (Control total multi-almacén)</option>
+                <option value="Admin">Administrador Titular de Almacén</option>
+              }
+              <option value="Warehouse">Bodega / Almacén (Gestión de stock, compras y Kardex)</option>
+              <option value="Seller">Vendedor / Comercial (Facturación y clientes)</option>
+            </select>
+          </div>
+
+          <!-- Contraseña (Solo en creación) -->
+          @if (!user) {
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Contraseña Inicial *</label>
+              <input
+                type="password"
+                formControlName="password"
+                placeholder="Mínimo 6 caracteres..."
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+              />
+            </div>
+          }
+
+          <!-- Botones de Acción -->
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+            <app-button variant="outline" size="sm" type="button" (clicked)="onCancel()">
+              Cancelar
+            </app-button>
+            <app-button
+              variant="primary"
+              size="sm"
+              type="submit"
+              [disabled]="form.invalid || isLoading()"
+            >
+              {{ isLoading() ? 'Guardando...' : (user ? 'Actualizar' : 'Crear Colaborador') }}
+            </app-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `
+})
+export class UserModalComponent implements OnInit {
+  private authService = inject(AuthService);
+  private fb = inject(FormBuilder);
+
+  @Input() user: UserDetail | null = null;
+  @Input() loading: any = false;
+  @Input() errorMessage: any = null;
+
+  @Output() save = new EventEmitter<any>();
+  @Output() cancel = new EventEmitter<void>();
+
+  form!: FormGroup;
+
+  get isClientAdmin(): boolean {
+    return this.authService.currentUser()?.role === 'Admin';
+  }
+
+  ngOnInit(): void {
+    const defaultRole = this.user?.role || (this.isClientAdmin ? 'Warehouse' : 'Seller');
+    this.form = this.fb.group({
+      fullName: [this.user?.fullName || '', [Validators.required, Validators.maxLength(150)]],
+      email: [this.user?.email || '', [Validators.required, Validators.email, Validators.maxLength(150)]],
+      role: [defaultRole, [Validators.required]],
+      password: ['', this.user ? [] : [Validators.required, Validators.minLength(6)]]
+    });
+  }
+
+  isLoading(): boolean {
+    return typeof this.loading === 'function' ? this.loading() : !!this.loading;
+  }
+
+  getErrorMessage(): string | null {
+    return typeof this.errorMessage === 'function' ? this.errorMessage() : (this.errorMessage || null);
+  }
+
+  onSubmit(): void {
+    if (this.form.valid) {
+      this.save.emit(this.form.value);
+    }
+  }
+
+  onCancel(): void {
+    this.cancel.emit();
+  }
+}

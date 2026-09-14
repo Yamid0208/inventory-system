@@ -5,7 +5,183 @@
 html, body {
   height: 100%;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #F8F9FD;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Soporte Global Integral de Modo Oscuro (Dark Mode)
+   ========================================================================== */
+html.dark, html.dark body {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+  color-scheme: dark;
+}
+
+html.dark header,
+html.dark aside,
+html.dark .bg-white {
+  background-color: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .bg-slate-50 {
+  background-color: #0b0f19 !important;
+}
+
+html.dark .bg-slate-100,
+html.dark .bg-slate-100\/80 {
+  background-color: #1f2937 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .bg-slate-50\/50,
+html.dark .bg-slate-50\/30 {
+  background-color: #1e293b !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/60,
+html.dark .border-slate-100 {
+  border-color: #1f2937 !important;
+}
+
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1f2937 !important;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #1f2937 !important;
+  color: #f8fafc !important;
+  border-color: #374151 !important;
+}
+
+html.dark input::placeholder {
+  color: #64748b !important;
+}
+
+html.dark tr:hover,
+html.dark tr.hover\:bg-slate-50\/50:hover,
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-100:hover {
+  background-color: #1a2234 !important;
+}
+
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-2xl {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* ==========================================================================
+   Reglas universales para impresión de facturas y comprobantes
+   ========================================================================== */
+@media print {
+  @page {
+    margin: 10mm;
+    size: portrait;
+  }
+
+  html, body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Reset layout containers de Tailwind para evitar cortes en impresión */
+  .h-screen,
+  .min-h-screen,
+  .overflow-hidden,
+  .overflow-y-auto {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Ocultar elementos no relevantes en la impresión */
+  .no-print,
+  .print\:hidden,
+  app-navbar,
+  app-sidebar,
+  app-toaster,
+  app-sale-modal,
+  app-sale-detail-modal,
+  button,
+  header,
+  nav {
+    display: none !important;
+  }
+
+  /* Si hay visor de factura presente, ocultar todo lo demás de app-sales */
+  body:has(app-invoice-viewer) app-sales > div:not(app-invoice-viewer) {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* Ajuste de contenedor modal a página completa */
+  .print-container {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: #000000 !important;
+    overflow: visible !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border-bottom: 1px solid #cbd5e1 !important;
+    padding: 8px 6px !important;
+    color: #0f172a !important;
+  }
+
+  th {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
 }

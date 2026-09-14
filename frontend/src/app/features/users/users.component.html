@@ -1,0 +1,447 @@
+<div class="p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
+  <!-- ENCABEZADO Y BREADCRUMB -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+          Configuración
+        </span>
+        <span class="text-xs text-slate-400">/</span>
+        <span class="text-xs font-semibold text-primary-600">
+          {{ authService.currentUser()?.role === 'Admin' ? 'Empleados del Almacén' : 'Usuarios y Seguridad' }}
+        </span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+        {{ authService.currentUser()?.role === 'Admin' ? 'Gestión de Empleados de Sede' : 'Control de Accesos y Permisos' }}
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">
+        {{ authService.currentUser()?.role === 'Admin'
+          ? 'Administra el personal operativo (bodegueros y vendedores) vinculados exclusivamente a tu almacén.'
+          : 'Gestiona las cuentas de usuario, asignación de roles y políticas de seguridad basadas en claims.' }}
+      </p>
+    </div>
+
+    <!-- Botón Crear Usuario (solo en pestaña de usuarios) -->
+    @if (activeTab() === 'users') {
+      <div>
+        <button
+          type="button"
+          (click)="openCreateModal()"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer"
+        >
+          <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>{{ authService.currentUser()?.role === 'Admin' ? '+ Nuevo Empleado' : '+ Nuevo Usuario' }}</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- SELECTOR DE PESTAÑAS (TABS) -->
+  <div class="flex items-center border-b border-slate-200 gap-8 text-sm font-semibold">
+    <button
+      type="button"
+      (click)="switchTab('users')"
+      class="pb-3 border-b-2 flex items-center gap-2 cursor-pointer transition-colors"
+      [class]="activeTab() === 'users' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-800'"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+      </svg>
+      <span>Directorio de Usuarios</span>
+      <span class="px-2 py-0.5 rounded-full text-[11px] bg-slate-100 text-slate-600 font-bold">
+        {{ totalCount() }}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      (click)="switchTab('matrix')"
+      class="pb-3 border-b-2 flex items-center gap-2 cursor-pointer transition-colors"
+      [class]="activeTab() === 'matrix' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-800'"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+      </svg>
+      <span>Matriz de Roles y Permisos Granulares</span>
+      <span class="px-2 py-0.5 rounded-full text-[11px] bg-purple-50 text-purple-700 font-bold border border-purple-100">
+        3 Roles
+      </span>
+    </button>
+  </div>
+
+  <!-- PESTAÑA 1: DIRECTORIO DE USUARIOS -->
+  @if (activeTab() === 'users') {
+    <!-- FILTROS Y BÚSQUEDA -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <!-- Pills de Rol -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+        <button
+          type="button"
+          (click)="setRoleFilter('all')"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          [class]="roleFilter() === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+        >
+          Todos los Roles
+        </button>
+        <button
+          type="button"
+          (click)="setRoleFilter('Admin')"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          [class]="roleFilter() === 'Admin' ? 'bg-purple-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+        >
+          Administradores
+        </button>
+        <button
+          type="button"
+          (click)="setRoleFilter('Warehouse')"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          [class]="roleFilter() === 'Warehouse' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+        >
+          Bodega
+        </button>
+        <button
+          type="button"
+          (click)="setRoleFilter('Seller')"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          [class]="roleFilter() === 'Seller' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+        >
+          Ventas
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Selector de Estado -->
+        <select
+          [value]="statusFilter()"
+          (change)="setStatusFilter($any($event.target).value)"
+          class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none cursor-pointer"
+        >
+          <option value="all">Todos los Estados</option>
+          <option value="active">Solo Activos</option>
+          <option value="inactive">Solo Inactivos</option>
+        </select>
+
+        <!-- Input de Búsqueda -->
+        <div class="relative w-full md:w-64">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </span>
+          <input
+            type="text"
+            placeholder="Buscar por nombre o email..."
+            (input)="onSearch($event)"
+            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 transition-all"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DE USUARIOS -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      @if (loading()) {
+        <div class="py-20 flex flex-col items-center justify-center space-y-3">
+          <div class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+          <p class="text-xs text-slate-400">Cargando directorio de usuarios...</p>
+        </div>
+      } @else if (users().length === 0) {
+        <div class="py-16 text-center space-y-2">
+          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-sm font-bold text-slate-700">No se encontraron usuarios</h3>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">
+            No hay usuarios registrados que coincidan con los filtros aplicados.
+          </p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <th class="py-3.5 pl-6">Usuario</th>
+                <th class="py-3.5 px-4">Correo Electrónico</th>
+                <th class="py-3.5 px-4">Rol Operativo</th>
+                <th class="py-3.5 px-4">Estado</th>
+                <th class="py-3.5 px-4">Fecha Creación</th>
+                <th class="py-3.5 pr-6 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @for (u of users(); track u.id) {
+                <tr class="hover:bg-slate-50/70 transition-colors">
+                  <!-- Nombre y Avatar -->
+                  <td class="py-3.5 pl-6">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                        {{ getInitials(u.fullName) }}
+                      </div>
+                      <div>
+                        <strong class="text-slate-900 block font-semibold">{{ u.fullName }}</strong>
+                        <span class="text-[10px] text-slate-400">ID #{{ u.id }}</span>
+                        @if (u.warehouseName) {
+                          <span class="text-[10px] text-primary-600 block font-medium">🏢 {{ u.warehouseName }}</span>
+                        }
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Email -->
+                  <td class="py-3.5 px-4 font-mono text-slate-600">
+                    {{ u.email }}
+                  </td>
+
+                  <!-- Rol -->
+                  <td class="py-3.5 px-4">
+                    <span
+                      class="px-2.5 py-1 rounded-full text-[10px] font-bold border"
+                      [ngClass]="getRoleBadge(u.role).class"
+                    >
+                      {{ getRoleBadge(u.role).label }}
+                    </span>
+                  </td>
+
+                  <!-- Estado -->
+                  <td class="py-3.5 px-4">
+                    <span
+                      class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                      [class]="u.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
+                    >
+                      <span class="w-1.5 h-1.5 rounded-full" [class]="u.isActive ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                      {{ u.isActive ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+
+                  <!-- Fecha -->
+                  <td class="py-3.5 px-4 text-slate-400">
+                    {{ u.createdAt | date:'mediumDate' }}
+                  </td>
+
+                  <!-- Acciones -->
+                  <td class="py-3.5 pr-6 text-right space-x-1">
+                    <!-- Editar -->
+                    <button
+                      type="button"
+                      (click)="openEditModal(u)"
+                      class="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                      title="Editar datos y rol"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </button>
+
+                    <!-- Restablecer Contraseña -->
+                    <button
+                      type="button"
+                      (click)="openResetPasswordModal(u)"
+                      class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                      title="Restablecer contraseña"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                      </svg>
+                    </button>
+
+                    <!-- Activar / Desactivar -->
+                    <button
+                      type="button"
+                      (click)="toggleStatus(u)"
+                      class="p-1.5 rounded-lg transition-colors"
+                      [class]="u.isActive ? 'text-slate-400 hover:text-rose-600 hover:bg-rose-50' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'"
+                      [title]="u.isActive ? 'Desactivar usuario' : 'Activar usuario'"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        @if (u.isActive) {
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        } @else {
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        }
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="p-4 border-t border-slate-100">
+          <app-pagination
+            [totalCount]="totalCount()"
+            [pageNumber]="pageNumber()"
+            [pageSize]="pageSize()"
+            (pageChange)="onPaginationChange($event)"
+          ></app-pagination>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- PESTAÑA 2: MATRIZ DE ROLES Y PERMISOS GRANULARES -->
+  @if (activeTab() === 'matrix') {
+    <!-- 3 CARDS RESUMEN DE ROLES -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Admin -->
+      <div class="p-5 rounded-2xl bg-white border border-purple-200/80 shadow-sm relative overflow-hidden">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold text-xs">
+            ADM
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Administrador</h3>
+            <span class="text-[10px] text-purple-700 font-semibold bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+              Acceso Irrestricto (16 permisos)
+            </span>
+          </div>
+        </div>
+        <p class="text-xs text-slate-500 mt-2">
+          Supervisa el catálogo, ajusta existencias, gestiona compras/ventas, altas de usuarios y auditoría.
+        </p>
+      </div>
+
+      <!-- Warehouse -->
+      <div class="p-5 rounded-2xl bg-white border border-blue-200/80 shadow-sm relative overflow-hidden">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">
+            BOD
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Bodega / Almacén</h3>
+            <span class="text-[10px] text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+              Operación Logística (10 permisos)
+            </span>
+          </div>
+        </div>
+        <p class="text-xs text-slate-500 mt-2">
+          Edición de referencias, recepción física de mercadería, calibraciones de Kardex y compras.
+        </p>
+      </div>
+
+      <!-- Seller -->
+      <div class="p-5 rounded-2xl bg-white border border-emerald-200/80 shadow-sm relative overflow-hidden">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs">
+            VEN
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Vendedor / Comercial</h3>
+            <span class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              Facturación & Clientes (6 permisos)
+            </span>
+          </div>
+        </div>
+        <p class="text-xs text-slate-500 mt-2">
+          Consulta de existencias disponibles, facturación rápida en mostrador y cancelaciones autorizadas.
+        </p>
+      </div>
+    </div>
+
+    <!-- TABLA DE LA MATRIZ DE PERMISOS -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+              <th class="py-3.5 pl-6 w-1/2">Módulo y Privilegio Granular</th>
+              <th class="py-3.5 px-4 text-center">Administrador</th>
+              <th class="py-3.5 px-4 text-center">Bodega / Almacén</th>
+              <th class="py-3.5 pr-6 text-center">Ventas / Comercial</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (mod of permissionModules; track mod.name) {
+              <!-- Separador de Módulo -->
+              <tr class="bg-slate-50/50">
+                <td colspan="4" class="py-2.5 pl-6 font-bold text-slate-800 text-xs border-y border-slate-100">
+                  {{ mod.name }}
+                </td>
+              </tr>
+
+              <!-- Filas de Permiso -->
+              @for (p of mod.permissions; track p.code) {
+                <tr class="hover:bg-slate-50/60 transition-colors">
+                  <td class="py-3 pl-8">
+                    <strong class="text-slate-900 block">{{ p.label }}</strong>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span class="font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                        {{ p.code }}
+                      </span>
+                      <span class="text-[11px] text-slate-400">{{ p.desc }}</span>
+                    </div>
+                  </td>
+
+                  <!-- Columna Admin -->
+                  <td class="py-3 px-4 text-center">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-700">
+                      <svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    </span>
+                  </td>
+
+                  <!-- Columna Bodega -->
+                  <td class="py-3 px-4 text-center">
+                    @if (hasRolePermission('Warehouse', p.code)) {
+                      <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700">
+                        <svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center justify-center w-6 h-6 text-slate-300 font-bold text-sm">
+                        —
+                      </span>
+                    }
+                  </td>
+
+                  <!-- Columna Ventas -->
+                  <td class="py-3 pr-6 text-center">
+                    @if (hasRolePermission('Seller', p.code)) {
+                      <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700">
+                        <svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center justify-center w-6 h-6 text-slate-300 font-bold text-sm">
+                        —
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL DE USUARIO -->
+  @if (isUserModalOpen()) {
+    <app-user-modal
+      [user]="selectedUserForEdit()"
+      [loading]="modalLoading()"
+      [errorMessage]="modalError()"
+      (save)="onSaveUser($event)"
+      (cancel)="isUserModalOpen.set(false)"
+    ></app-user-modal>
+  }
+
+  <!-- MODAL RESTABLECER CONTRASEÑA -->
+  @if (selectedUserForPassword()) {
+    <app-reset-password-modal
+      [user]="selectedUserForPassword()!"
+      [loading]="modalLoading()"
+      (save)="onSavePassword($event)"
+      (cancel)="selectedUserForPassword.set(null)"
+    ></app-reset-password-modal>
+  }
+</div>
