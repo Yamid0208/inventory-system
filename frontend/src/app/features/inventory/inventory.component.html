@@ -9,112 +9,86 @@
   <!-- Header & Botones de Acción -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kardex & Auditoría de Stock</h1>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kardex Audit & Traceability</h1>
       <p class="text-xs text-slate-500 mt-1">
-        Monitorea los movimientos de inventario y trazabilidad en tiempo real.
+        Monitor real-time stock movements and audit trails.
       </p>
     </div>
 
     <div class="flex items-center gap-3">
       <!-- Botón Export CSV -->
-      <button
-        type="button"
-        (click)="exportCsv()"
-        [disabled]="exporting()"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer select-none disabled:opacity-50"
-      >
+      <button type="button" (click)="exportCsv()" [disabled]="exporting()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer select-none disabled:opacity-50">
         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
         </svg>
-        <span>{{ exporting() ? 'Exportando...' : 'Exportar CSV' }}</span>
+        <span>{{ exporting() ? 'Exportando...' : 'Export CSV' }}</span>
       </button>
 
       <!-- Botón + Devolución -->
-      <button
-        type="button"
-        (click)="isReturnModalOpen.set(true)"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold shadow-md shadow-amber-500/20 transition-all cursor-pointer select-none"
-      >
+      <button type="button" (click)="isReturnModalOpen.set(true)"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold shadow-md shadow-amber-500/20 transition-all cursor-pointer select-none">
         <span class="text-sm">🔄</span>
-        <span>+ Devolución</span>
+        <span>Devolución</span>
       </button>
 
       <!-- Botón + Manual Entry -->
-      <button
-        type="button"
-        (click)="openAdjustmentModal()"
-        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer select-none"
-      >
+      <button type="button" (click)="openAdjustmentModal()"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer select-none">
         <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
         </svg>
-        <span>+ Ajuste Manual</span>
+        <span>Manual Entry</span>
       </button>
     </div>
   </div>
 
   <!-- Barra de Filtros: Rango de Fechas & Tipo de Movimiento (Stitch Style) -->
-  <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+  <div
+    class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
     <!-- Píldoras de Período -->
     <div class="flex items-center gap-1.5 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0">
-      <button
-        type="button"
-        (click)="setDateRange('today')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
-        [class]="dateRange() === 'today'
+      <button type="button" (click)="setDateRange('today')"
+        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === 'today'
           ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
-      >
-        Hoy
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+        Today
       </button>
 
-      <button
-        type="button"
-        (click)="setDateRange('7d')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
-        [class]="dateRange() === '7d'
+      <button type="button" (click)="setDateRange('7d')"
+        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '7d'
           ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
-      >
-        7 Días
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+        7D
       </button>
 
-      <button
-        type="button"
-        (click)="setDateRange('1m')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
-        [class]="dateRange() === '1m'
+      <button type="button" (click)="setDateRange('1m')"
+        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1m'
           ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
-      >
-        1 Mes
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+        1M
       </button>
 
-      <button
-        type="button"
-        (click)="setDateRange('1y')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap"
-        [class]="dateRange() === '1y'
+      <button type="button" (click)="setDateRange('1y')"
+        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1y'
           ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
-      >
-        1 Año
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+        1Y
       </button>
 
       <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
-      <button
-        type="button"
-        (click)="setDateRange('custom')"
+      <button type="button" (click)="setDateRange('custom')"
         class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
         [class]="dateRange() === 'custom'
           ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
-      >
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        <span>Personalizado</span>
+        <span>Custom</span>
       </button>
     </div>
 
@@ -124,25 +98,19 @@
       <div class="relative w-full sm:w-64">
         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
         </div>
-        <input
-          type="text"
-          [value]="searchQuery()"
-          (input)="onSearch($event)"
-          placeholder="Buscar en Kardex..."
-          class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-        />
+        <input type="text" [value]="searchQuery()" (input)="onSearch($event)" placeholder="Search Kardex..."
+          class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all" />
       </div>
 
       <!-- Type Select Dropdown -->
       <div class="relative w-full sm:w-44">
-        <select
-          (change)="onTypeChange($event)"
-          class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
-        >
-          <option value="all">Todos los Tipos</option>
+        <select (change)="onTypeChange($event)"
+          class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer">
+          <option value="all">All Types</option>
           <option value="Purchase">Entradas (Compras)</option>
           <option value="Sale">Salidas (Ventas)</option>
           <option value="AdjustmentIn">Ajustes (+)</option>
@@ -159,150 +127,143 @@
 
   <!-- Loading State -->
   @if (loading()) {
-    <div class="py-20 flex flex-col items-center justify-center space-y-3">
-      <div class="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-      <p class="text-xs text-slate-400 font-medium">Cargando trazabilidad de Kardex...</p>
-    </div>
+  <div class="py-20 flex flex-col items-center justify-center space-y-3">
+    <div class="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+    <p class="text-xs text-slate-400 font-medium">Cargando trazabilidad de Kardex...</p>
+  </div>
   }
 
   <!-- Data Table Card -->
   @if (!loading()) {
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-      @if (movements().length === 0) {
-        <div class="p-16 text-center">
-          <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-            </svg>
-          </div>
-          <h3 class="text-sm font-bold text-slate-800">No hay movimientos registrados</h3>
-          <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            No se encontraron transacciones en el período o con los filtros seleccionados.
-          </p>
-          <button
-            type="button"
-            (click)="openAdjustmentModal()"
-            class="mt-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
-          >
-            + Registrar Ajuste Manual
-          </button>
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-                <th class="py-3.5 pl-6 pr-4">ID Movimiento</th>
-                <th class="py-3.5 px-4">Fecha y Hora</th>
-                <th class="py-3.5 px-4">SKU / Producto</th>
-                <th class="py-3.5 px-4">Tipo</th>
-                <th class="py-3.5 px-4 text-right">Cambio Stock</th>
-                <th class="py-3.5 pr-6 pl-4">Responsable</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
-              @for (m of movements(); track m.id) {
-                <tr class="hover:bg-slate-50/80 transition-colors group">
-                  <!-- Movement ID (Purple Mono Link) -->
-                  <td class="py-4 pl-6 pr-4 whitespace-nowrap">
-                    <span class="font-mono font-bold text-primary-600 hover:text-primary-800 transition-colors cursor-pointer">
-                      {{ m.movementNumber }}
-                    </span>
-                  </td>
-
-                  <!-- Date & Time -->
-                  <td class="py-4 px-4 whitespace-nowrap">
-                    <div class="font-medium text-slate-900">
-                      {{ m.createdAt | date:'mediumDate' }}
-                    </div>
-                    <div class="text-[11px] text-slate-400">
-                      {{ m.createdAt | date:'shortTime' }}
-                    </div>
-                  </td>
-
-                  <!-- SKU / Product -->
-                  <td class="py-4 px-4">
-                    <div class="font-bold text-slate-900 tracking-tight">
-                      {{ m.productSku }}
-                    </div>
-                    <div class="text-[11px] text-slate-400 truncate max-w-xs">
-                      {{ m.productName }}
-                    </div>
-                  </td>
-
-                  <!-- Type Badge (Entrada / Salida / Ajuste) -->
-                  <td class="py-4 px-4 whitespace-nowrap">
-                    @if (m.movementType === 'Purchase' || m.movementType === 'AdjustmentIn') {
-                      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[11px]">
-                        <span>↓</span>
-                        <span>{{ m.movementType === 'Purchase' ? 'Entrada (Compra)' : 'Entrada' }}</span>
-                      </span>
-                    } @else if (m.movementType === 'Sale' || m.movementType === 'AdjustmentOut') {
-                      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-semibold text-[11px]">
-                        <span>↑</span>
-                        <span>{{ m.movementType === 'Sale' ? 'Salida (Venta)' : 'Salida' }}</span>
-                      </span>
-                    } @else {
-                      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-semibold text-[11px]">
-                        <span>⚖</span>
-                        <span>Ajuste</span>
-                      </span>
-                    }
-                  </td>
-
-                  <!-- Stock Delta (+ / -) -->
-                  <td class="py-4 px-4 text-right font-mono font-bold whitespace-nowrap">
-                    <span [class]="m.quantityDelta > 0 ? 'text-emerald-600' : 'text-rose-600'">
-                      {{ m.quantityDelta > 0 ? '+' + m.quantityDelta : m.quantityDelta }}
-                    </span>
-                  </td>
-
-                  <!-- Responsible (Initials Avatar + Name) -->
-                  <td class="py-4 pr-6 pl-4 whitespace-nowrap">
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-7 h-7 rounded-full bg-primary-100 text-primary-700 font-bold text-[10px] flex items-center justify-center flex-shrink-0">
-                        {{ getInitials(m.userName) }}
-                      </div>
-                      <span class="text-slate-700 font-medium">
-                        {{ m.userName }}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Paginación Inferior -->
-        <div class="px-6 py-2 border-t border-slate-100 bg-white">
-          <app-pagination
-            [pageNumber]="pageNumber()"
-            [pageSize]="pageSize()"
-            [totalCount]="totalCount()"
-            (pageChange)="onPaginationChange($event)"
-          ></app-pagination>
-        </div>
-      }
+  <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+    @if (movements().length === 0) {
+    <div class="p-16 text-center">
+      <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+          </path>
+        </svg>
+      </div>
+      <h3 class="text-sm font-bold text-slate-800">No hay movimientos registrados</h3>
+      <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+        No se encontraron transacciones en el período o con los filtros seleccionados.
+      </p>
+      <button type="button" (click)="openAdjustmentModal()"
+        class="mt-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all">
+        + Registrar Ajuste Manual
+      </button>
     </div>
+    } @else {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr
+            class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
+            <th class="py-3.5 pl-6 pr-4">Movement ID</th>
+            <th class="py-3.5 px-4">Date & Time</th>
+            <th class="py-3.5 px-4">SKU / Product</th>
+            <th class="py-3.5 px-4">Type</th>
+            <th class="py-3.5 px-4 text-right">Stock Delta</th>
+            <th class="py-3.5 pr-6 pl-4">Responsible</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-xs">
+          @for (m of movements(); track m.id) {
+          <tr class="hover:bg-slate-50/80 transition-colors group">
+            <!-- Movement ID (Purple Mono Link) -->
+            <td class="py-4 pl-6 pr-4 whitespace-nowrap">
+              <span
+                class="font-mono font-bold text-primary-600 hover:text-primary-800 transition-colors cursor-pointer">
+                {{ m.movementNumber }}
+              </span>
+            </td>
+
+            <!-- Date & Time -->
+            <td class="py-4 px-4 whitespace-nowrap">
+              <div class="font-medium text-slate-900">
+                {{ m.createdAt | date:'mediumDate' }}
+              </div>
+              <div class="text-[11px] text-slate-400">
+                {{ m.createdAt | date:'shortTime' }}
+              </div>
+            </td>
+
+            <!-- SKU / Product -->
+            <td class="py-4 px-4">
+              <div class="font-bold text-slate-900 tracking-tight">
+                {{ m.productSku }}
+              </div>
+              <div class="text-[11px] text-slate-400 truncate max-w-xs">
+                {{ m.productName }}
+              </div>
+            </td>
+
+            <!-- Type Badge (Entrada / Salida / Ajuste) -->
+            <td class="py-4 px-4 whitespace-nowrap">
+              @if (m.movementType === 'Purchase' || m.movementType === 'AdjustmentIn') {
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[11px]">
+                <span>↓</span>
+                <span>{{ m.movementType === 'Purchase' ? 'Entrada (Compra)' : 'Entrada' }}</span>
+              </span>
+              } @else if (m.movementType === 'Sale' || m.movementType === 'AdjustmentOut') {
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-semibold text-[11px]">
+                <span>↑</span>
+                <span>{{ m.movementType === 'Sale' ? 'Salida (Venta)' : 'Salida' }}</span>
+              </span>
+              } @else {
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-semibold text-[11px]">
+                <span>⚖</span>
+                <span>Ajuste</span>
+              </span>
+              }
+            </td>
+
+            <!-- Stock Delta (+ / -) -->
+            <td class="py-4 px-4 text-right font-mono font-bold whitespace-nowrap">
+              <span [class]="m.quantityDelta > 0 ? 'text-emerald-600' : 'text-rose-600'">
+                {{ m.quantityDelta > 0 ? '+' + m.quantityDelta : m.quantityDelta }}
+              </span>
+            </td>
+
+            <!-- Responsible (Initials Avatar + Name) -->
+            <td class="py-4 pr-6 pl-4 whitespace-nowrap">
+              <div class="flex items-center gap-2.5">
+                <div
+                  class="w-7 h-7 rounded-full bg-primary-100 text-primary-700 font-bold text-[10px] flex items-center justify-center flex-shrink-0">
+                  {{ getInitials(m.userName) }}
+                </div>
+                <span class="text-slate-700 font-medium">
+                  {{ m.userName }}
+                </span>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación Inferior -->
+    <div class="px-6 py-2 border-t border-slate-100 bg-white">
+      <app-pagination [pageNumber]="pageNumber()" [pageSize]="pageSize()" [totalCount]="totalCount()"
+        (pageChange)="onPaginationChange($event)"></app-pagination>
+    </div>
+    }
+  </div>
   }
 
   <!-- Modal de Ajuste Manual -->
   @if (isAdjustmentModalOpen()) {
-    <app-stock-adjustment-modal
-      [products]="products()"
-      [loading]="modalLoading"
-      [errorMessage]="modalError"
-      (save)="onSaveAdjustment($event)"
-      (cancel)="isAdjustmentModalOpen.set(false)"
-    ></app-stock-adjustment-modal>
+  <app-stock-adjustment-modal [products]="products()" [loading]="modalLoading" [errorMessage]="modalError"
+    (save)="onSaveAdjustment($event)" (cancel)="isAdjustmentModalOpen.set(false)"></app-stock-adjustment-modal>
   }
 
   <!-- Modal de Devolución -->
   @if (isReturnModalOpen()) {
-    <app-return-modal
-      (closed)="isReturnModalOpen.set(false)"
-      (saved)="loadKardex()"
-    ></app-return-modal>
+  <app-return-modal (closed)="isReturnModalOpen.set(false)" (saved)="loadKardex()"></app-return-modal>
   }
 </div>

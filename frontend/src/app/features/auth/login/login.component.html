@@ -1,13 +1,16 @@
 <div class="min-h-screen bg-[#F8F9FD] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
   <!-- Fondo decorativo sutil con acentos coral y azul -->
   <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none">
+  </div>
 
   <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center mb-6">
     <!-- Icono / Logo Isotipo Coral StockFlow-style -->
-    <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary-500 to-primary-400 items-center justify-center shadow-lg shadow-primary-500/30 mb-4 transform hover:scale-105 transition-transform">
+    <div
+      class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary-500 to-primary-400 items-center justify-center shadow-lg shadow-primary-500/30 mb-4 transform hover:scale-105 transition-transform">
       <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
       </svg>
     </div>
     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
@@ -19,15 +22,18 @@
   </div>
 
   <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-    <div class="bg-white border border-slate-100/80 rounded-3xl p-8 sm:p-10 shadow-card hover:shadow-card-hover transition-shadow space-y-6">
-      
+    <div
+      class="bg-white border border-slate-100/80 rounded-3xl p-8 sm:p-10 shadow-card hover:shadow-card-hover transition-shadow space-y-6">
+
       @if (errorMessage()) {
-        <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-start space-x-2.5 text-rose-700 text-xs animate-shake">
-          <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <span class="font-medium">{{ errorMessage() }}</span>
-        </div>
+      <div
+        class="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-start space-x-2.5 text-rose-700 text-xs animate-shake">
+        <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="font-medium">{{ errorMessage() }}</span>
+      </div>
       }
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
@@ -36,15 +42,11 @@
           <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
             Correo Electrónico
           </label>
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            placeholder="usuario@empresa.com"
+          <input id="email" type="email" formControlName="email" placeholder="usuario@empresa.com"
             class="w-full px-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/15 focus:border-primary-500 transition-all"
             [class.border-rose-400]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
           @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-            <p class="text-xs text-rose-500 font-medium mt-1">Ingrese un correo electrónico válido.</p>
+          <p class="text-xs text-rose-500 font-medium mt-1">Ingrese un correo electrónico válido.</p>
           }
         </div>
 
@@ -53,43 +55,38 @@
           <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
             Contraseña
           </label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            placeholder="••••••••"
+          <input id="password" type="password" formControlName="password" placeholder="••••••••"
             class="w-full px-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/15 focus:border-primary-500 transition-all"
             [class.border-rose-400]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
           @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-            <p class="text-xs text-rose-500 font-medium mt-1">La contraseña es obligatoria (mínimo 6 caracteres).</p>
+          <p class="text-xs text-rose-500 font-medium mt-1">La contraseña es obligatoria (mínimo 6 caracteres).</p>
           }
         </div>
 
         <!-- Remember preference & Forgot password -->
         <div class="flex items-center justify-between pt-1">
           <label class="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              class="w-4 h-4 rounded-md text-primary-500 border-slate-300 focus:ring-primary-500 accent-primary-500 cursor-pointer"
-            />
+            <input type="checkbox"
+              class="w-4 h-4 rounded-md text-primary-500 border-slate-300 focus:ring-primary-500 accent-primary-500 cursor-pointer" />
             <span class="text-xs font-medium text-slate-600">Recordar mi preferencia</span>
           </label>
-          <a href="javascript:void(0)" class="text-xs font-bold text-primary-500 hover:text-primary-600 hover:underline transition-colors">
+          <a href="javascript:void(0)"
+            class="text-xs font-bold text-primary-500 hover:text-primary-600 hover:underline transition-colors">
             ¿Olvidaste tu contraseña?
           </a>
         </div>
 
         <!-- Botón Iniciar Sesión -->
         <div class="pt-2">
-          <button
-            type="submit"
-            [disabled]="loading()"
+          <button type="submit" [disabled]="loading()"
             class="w-full py-3.5 px-6 rounded-2xl bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-bold text-sm shadow-coral-glow hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
             @if (loading()) {
-              <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+            <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
             }
             <span>Iniciar Sesión</span>
           </button>
@@ -99,30 +96,26 @@
       <!-- Bottom link -->
       <div class="text-center pt-2">
         <p class="text-xs font-medium text-slate-500">
-          ¿No tienes una cuenta? 
-          <span class="font-bold text-primary-500 hover:text-primary-600 cursor-pointer hover:underline">Regístrate</span>
+          ¿No tienes una cuenta?
+          <span
+            class="font-bold text-primary-500 hover:text-primary-600 cursor-pointer hover:underline">Regístrate</span>
         </p>
       </div>
 
       <!-- Selector Rápido de Cuentas Demo -->
       <div class="pt-5 border-t border-slate-100">
-        <p class="text-[11px] font-semibold text-slate-400 text-center mb-3 uppercase tracking-wider">Acceso rápido de prueba:</p>
+        <p class="text-[11px] font-semibold text-slate-400 text-center mb-3 uppercase tracking-wider">Acceso rápido de
+          prueba:</p>
         <div class="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            (click)="fillDemo('admin')"
+          <button type="button" (click)="fillDemo('admin')"
             class="px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-primary-50 hover:border-primary-200 hover:text-primary-600 text-slate-700 text-xs font-semibold transition-all text-center cursor-pointer">
             👑 Admin
           </button>
-          <button
-            type="button"
-            (click)="fillDemo('warehouse')"
+          <button type="button" (click)="fillDemo('warehouse')"
             class="px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-primary-50 hover:border-primary-200 hover:text-primary-600 text-slate-700 text-xs font-semibold transition-all text-center cursor-pointer">
             📦 Almacén
           </button>
-          <button
-            type="button"
-            (click)="fillDemo('seller')"
+          <button type="button" (click)="fillDemo('seller')"
             class="px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-primary-50 hover:border-primary-200 hover:text-primary-600 text-slate-700 text-xs font-semibold transition-all text-center cursor-pointer">
             🛒 Vendedor
           </button>

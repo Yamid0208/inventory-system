@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://inventory-system-backend.onrender.com/api/:path*"
+      "destination": "https://inventory-backend-ouw0.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",

@@ -121,26 +121,26 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Inventory Management API v1");
     });
+}
 
-    // Migraciones y sembrado inicial de datos
-    using (var scope = app.Services.CreateScope())
+// Migraciones y sembrado inicial de datos (ahora en todos los entornos)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var db = services.GetRequiredService<ApplicationDbContext>();
+    var passwordHasher = services.GetRequiredService<IPasswordHasher>();
+    try
     {
-        var services = scope.ServiceProvider;
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        var db = services.GetRequiredService<ApplicationDbContext>();
-        var passwordHasher = services.GetRequiredService<IPasswordHasher>();
-        try
-        {
-            logger.LogInformation("Verificando y aplicando migraciones de base de datos...");
-            await db.Database.MigrateAsync();
-            logger.LogInformation("Base de datos actualizada con éxito mediante migraciones.");
+        logger.LogInformation("Verificando y aplicando migraciones de base de datos...");
+        await db.Database.MigrateAsync();
+        logger.LogInformation("Base de datos actualizada con éxito mediante migraciones.");
 
-            await DatabaseSeeder.SeedInitialDataAsync(db, passwordHasher, logger);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error al aplicar migraciones o sembrar datos en SQL Server.");
-        }
+        await DatabaseSeeder.SeedInitialDataAsync(db, passwordHasher, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error al aplicar migraciones o sembrar datos en PostgreSQL.");
     }
 }
 
