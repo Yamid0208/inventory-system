@@ -132,15 +132,25 @@ using (var scope = app.Services.CreateScope())
     var passwordHasher = services.GetRequiredService<IPasswordHasher>();
     try
     {
-        logger.LogInformation("Verificando y aplicando migraciones de base de datos...");
-        await db.Database.MigrateAsync();
-        logger.LogInformation("Base de datos actualizada con éxito mediante migraciones.");
+        logger.LogInformation("Verificando y aplicando migraciones de base de datos en PostgreSQL...");
+        try
+        {
+            await db.Database.MigrateAsync();
+            logger.LogInformation("Base de datos actualizada con éxito mediante MigrateAsync.");
+        }
+        catch (Exception migEx)
+        {
+            logger.LogWarning(migEx, "MigrateAsync falló. Asegurando creación de tablas con EnsureCreatedAsync...");
+            await db.Database.EnsureCreatedAsync();
+            logger.LogInformation("Tablas de la base de datos aseguradas mediante EnsureCreatedAsync.");
+        }
 
         await DatabaseSeeder.SeedInitialDataAsync(db, passwordHasher, logger);
+        logger.LogInformation("Sembrado de datos iniciales completado con éxito.");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Error al aplicar migraciones o sembrar datos en PostgreSQL.");
+        logger.LogError(ex, "Error crítico al inicializar la base de datos PostgreSQL: {Message}", ex.Message);
     }
 }
 
