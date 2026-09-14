@@ -6,6 +6,7 @@ using Inventory.Infrastructure;
 using Inventory.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -132,17 +133,19 @@ using (var scope = app.Services.CreateScope())
     var passwordHasher = services.GetRequiredService<IPasswordHasher>();
     try
     {
-        logger.LogInformation("Verificando y aplicando migraciones de base de datos en PostgreSQL...");
-        try
+        logger.LogInformation("Verificando la existencia de tablas en la base de datos PostgreSQL...");
+        var dbCreator = db.Database.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
+        bool hasTables = await dbCreator.HasTablesAsync();
+
+        if (!hasTables)
         {
-            await db.Database.MigrateAsync();
-            logger.LogInformation("Base de datos actualizada con éxito mediante MigrateAsync.");
+            logger.LogInformation("No se encontraron tablas. Creando esquema de tablas en PostgreSQL...");
+            await dbCreator.CreateTablesAsync();
+            logger.LogInformation("Esquema de tablas creado exitosamente.");
         }
-        catch (Exception migEx)
+        else
         {
-            logger.LogWarning(migEx, "MigrateAsync falló. Asegurando creación de tablas con EnsureCreatedAsync...");
-            await db.Database.EnsureCreatedAsync();
-            logger.LogInformation("Tablas de la base de datos aseguradas mediante EnsureCreatedAsync.");
+            logger.LogInformation("Las tablas ya existen en PostgreSQL.");
         }
 
         await DatabaseSeeder.SeedInitialDataAsync(db, passwordHasher, logger);
