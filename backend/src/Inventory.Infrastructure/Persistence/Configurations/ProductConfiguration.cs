@@ -63,11 +63,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.RowVersion)
             .IsRowVersion();
 
-        // Índice único en SKU ignorando eliminados lógicamente
-        builder.HasIndex(p => p.Sku)
+        // Índice único en SKU por almacén ignorando eliminados lógicamente
+        builder.HasIndex(p => new { p.WarehouseId, p.Sku })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0")
-            .HasDatabaseName("UX_Products_Sku");
+            .HasDatabaseName("UX_Products_Warehouse_Sku");
 
         // Relaciones con comportamiento Restrict (RN-005, RN-006)
         builder.HasOne(p => p.Category)

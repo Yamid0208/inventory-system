@@ -127,10 +127,10 @@ public class AuthController : ControllerBase
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
             Expires = expiresAt.UtcDateTime,
-            Path = "/api/v1/auth"
+            Path = "/"
         };
 
         Response.Cookies.Append(RefreshTokenCookieName, token, cookieOptions);
@@ -141,9 +141,9 @@ public class AuthController : ControllerBase
         Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Path = "/api/v1/auth"
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            Path = "/"
         });
     }
 

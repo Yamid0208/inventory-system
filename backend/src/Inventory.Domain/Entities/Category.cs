@@ -7,6 +7,7 @@ public class Category : BaseEntity
     public string Name { get; private set; } = null!;
     public string? Description { get; private set; }
     public bool IsActive { get; private set; } = true;
+    public int? WarehouseId { get; private set; }
 
     // Propiedad de navegación
     private readonly List<Product> _products = new();
@@ -14,9 +15,16 @@ public class Category : BaseEntity
 
     protected Category() { } // Requerido por EF Core
 
-    public Category(string name, string? description = null)
+    public Category(string name, string? description = null, int? warehouseId = null)
     {
         Update(name, description);
+        WarehouseId = warehouseId;
+    }
+
+    public void AssignWarehouse(int? warehouseId)
+    {
+        WarehouseId = warehouseId;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public void Update(string name, string? description)

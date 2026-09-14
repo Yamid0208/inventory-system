@@ -5,5 +5,7 @@ public record UserDto(
     string FullName,
     string Email,
     string Role,
-    bool IsActive
+    bool IsActive,
+    int? WarehouseId = null,
+    string? WarehouseName = null
 );

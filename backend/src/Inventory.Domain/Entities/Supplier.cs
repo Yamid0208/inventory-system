@@ -11,6 +11,7 @@ public class Supplier : BaseEntity
     public string? Phone { get; private set; }
     public string? Address { get; private set; }
     public bool IsActive { get; private set; } = true;
+    public int? WarehouseId { get; private set; }
 
     // Propiedad de navegación
     private readonly List<Product> _products = new();
@@ -18,9 +19,16 @@ public class Supplier : BaseEntity
 
     protected Supplier() { } // Requerido por EF Core
 
-    public Supplier(string name, string taxId, string? contactName = null, string? email = null, string? phone = null, string? address = null)
+    public Supplier(string name, string taxId, string? contactName = null, string? email = null, string? phone = null, string? address = null, int? warehouseId = null)
     {
         Update(name, taxId, contactName, email, phone, address);
+        WarehouseId = warehouseId;
+    }
+
+    public void AssignWarehouse(int? warehouseId)
+    {
+        WarehouseId = warehouseId;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public void Update(string name, string taxId, string? contactName, string? email, string? phone, string? address)

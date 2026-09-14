@@ -20,6 +20,7 @@ public class Product : BaseEntity
     public int MinimumStock { get; private set; }
     public string? ImageUrl { get; private set; }
     public bool IsActive { get; private set; } = true;
+    public int? WarehouseId { get; private set; }
 
     // Token de concurrencia optimista
     public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
@@ -35,7 +36,8 @@ public class Product : BaseEntity
         decimal salePrice,
         int minimumStock = 5,
         string? description = null,
-        string? imageUrl = null)
+        string? imageUrl = null,
+        int? warehouseId = null)
     {
         if (string.IsNullOrWhiteSpace(sku))
         {
@@ -72,7 +74,14 @@ public class Product : BaseEntity
         CurrentStock = 0; // Inicializado en 0 hasta compras o ajustes formales
         Description = description?.Trim();
         ImageUrl = imageUrl?.Trim();
+        WarehouseId = warehouseId;
         CreatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void AssignWarehouse(int? warehouseId)
+    {
+        WarehouseId = warehouseId;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public void Update(

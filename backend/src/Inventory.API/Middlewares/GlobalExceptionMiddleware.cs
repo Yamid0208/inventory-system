@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Inventory.Application.Common.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Inventory.API.Middlewares;
@@ -23,7 +24,7 @@ public class GlobalExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Excepción no controlada capturada en GlobalExceptionMiddleware: {Message}", ex.Message);
+            _logger.LogError(ex, "Excepción capturada en GlobalExceptionMiddleware: {Message}", ex.Message);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -40,12 +41,43 @@ public class GlobalExceptionMiddleware
 
         switch (exception)
         {
+            case ValidationException valEx:
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                problemDetails.Status = (int)HttpStatusCode.BadRequest;
+                problemDetails.Title = "Error de validación";
+                problemDetails.Detail = valEx.Message;
+                problemDetails.Extensions["errors"] = valEx.Errors;
+                break;
+
+            case NotFoundException notFoundEx:
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                problemDetails.Status = (int)HttpStatusCode.NotFound;
+                problemDetails.Title = "Recurso no encontrado";
+                problemDetails.Detail = notFoundEx.Message;
+                break;
+
+            case ConflictException conflictEx:
+                context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+                problemDetails.Status = (int)HttpStatusCode.Conflict;
+                problemDetails.Title = "Conflicto de recursos";
+                problemDetails.Detail = conflictEx.Message;
+                break;
+
+            case BusinessRuleViolationException ruleEx:
+                context.Response.StatusCode = (int)HttpStatusCode.UnprocessableEntity;
+                problemDetails.Status = (int)HttpStatusCode.UnprocessableEntity;
+                problemDetails.Title = $"Regla de negocio no satisfecha ({ruleEx.RuleCode})";
+                problemDetails.Detail = ruleEx.Message;
+                problemDetails.Extensions["ruleCode"] = ruleEx.RuleCode;
+                break;
+
             case ArgumentException or InvalidOperationException:
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 problemDetails.Status = (int)HttpStatusCode.BadRequest;
                 problemDetails.Title = "Solicitud inválida";
                 problemDetails.Detail = exception.Message;
                 break;
+
             default:
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 problemDetails.Status = (int)HttpStatusCode.InternalServerError;
@@ -58,3 +90,4 @@ public class GlobalExceptionMiddleware
         await context.Response.WriteAsync(json);
     }
 }
+

@@ -86,8 +86,15 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 5. Health Checks
+// 5. Health Checks y Optimización de Rendimiento
 builder.Services.AddHealthChecks();
+builder.Services.AddMemoryCache();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+});
 
 // 6. Configuración CORS con soporte para cookies y credenciales
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:4200" };
@@ -137,6 +144,7 @@ if (app.Environment.IsDevelopment())
     }
 }
 
+app.UseResponseCompression();
 app.UseCors("CorsPolicy");
 
 // Servir estáticos de uploads de forma segura

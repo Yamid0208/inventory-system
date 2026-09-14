@@ -37,6 +37,16 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
+        if (user.WarehouseId.HasValue)
+        {
+            claims.Add(new Claim("warehouseId", user.WarehouseId.Value.ToString()));
+        }
+
+        foreach (var permission in Inventory.Domain.Constants.RolePermissions.GetPermissionsForRole(user.Role))
+        {
+            claims.Add(new Claim("permission", permission));
+        }
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),

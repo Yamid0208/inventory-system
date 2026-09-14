@@ -32,6 +32,7 @@ public class AuthService : IAuthService
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
         var user = await _context.Users
             .Include(u => u.RefreshTokens)
+            .Include(u => u.Warehouse)
             .FirstOrDefaultAsync(u => u.Email == normalizedEmail && !u.IsDeleted, cancellationToken);
 
         if (user == null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
@@ -50,9 +51,26 @@ public class AuthService : IAuthService
         var expiresAt = DateTimeOffset.UtcNow.AddDays(refreshDays);
 
         user.AddRefreshToken(rawRefreshToken, expiresAt, ipAddress);
+        _context.AuditLogs.Add(new AuditLog(
+            "Auth",
+            "Login",
+            $"Inicio de sesión exitoso para la cuenta {user.Email}.",
+            user.FullName,
+            user.Id,
+            user.Id.ToString(),
+            ipAddress
+        ));
         await _context.SaveChangesAsync(cancellationToken);
 
-        var userDto = new UserDto(user.Id, user.FullName, user.Email, user.Role.ToString(), user.IsActive);
+        var userDto = new UserDto(
+            user.Id,
+            user.FullName,
+            user.Email,
+            user.Role.ToString(),
+            user.IsActive,
+            user.WarehouseId,
+            user.Warehouse?.Name
+        );
         return Result<AuthResponse>.Success(new AuthResponse(accessToken, userDto, expiresAt, rawRefreshToken));
     }
 
@@ -65,6 +83,7 @@ public class AuthService : IAuthService
 
         var tokenEntity = await _context.RefreshTokens
             .Include(t => t.User)
+                .ThenInclude(u => u.Warehouse)
             .FirstOrDefaultAsync(t => t.Token == refreshToken, cancellationToken);
 
         if (tokenEntity == null)
@@ -101,7 +120,15 @@ public class AuthService : IAuthService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        var userDto = new UserDto(tokenEntity.User.Id, tokenEntity.User.FullName, tokenEntity.User.Email, tokenEntity.User.Role.ToString(), tokenEntity.User.IsActive);
+        var userDto = new UserDto(
+            tokenEntity.User.Id,
+            tokenEntity.User.FullName,
+            tokenEntity.User.Email,
+            tokenEntity.User.Role.ToString(),
+            tokenEntity.User.IsActive,
+            tokenEntity.User.WarehouseId,
+            tokenEntity.User.Warehouse?.Name
+        );
         return Result<AuthResponse>.Success(new AuthResponse(newAccessToken, userDto, expiresAt, newRawRefreshToken));
     }
 

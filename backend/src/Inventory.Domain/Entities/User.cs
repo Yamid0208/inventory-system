@@ -10,20 +10,22 @@ public class User : BaseEntity
     public string PasswordHash { get; private set; } = null!;
     public UserRole Role { get; private set; }
     public bool IsActive { get; private set; } = true;
+    public int? WarehouseId { get; private set; }
+    public Warehouse? Warehouse { get; private set; }
 
     private readonly List<RefreshToken> _refreshTokens = new();
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
 
     protected User() { } // Requerido por EF Core
 
-    public User(string fullName, string email, string passwordHash, UserRole role)
+    public User(string fullName, string email, string passwordHash, UserRole role, int? warehouseId = null)
     {
-        Update(fullName, email, role);
+        Update(fullName, email, role, warehouseId);
         SetPasswordHash(passwordHash);
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
-    public void Update(string fullName, string email, UserRole role)
+    public void Update(string fullName, string email, UserRole role, int? warehouseId = null)
     {
         if (string.IsNullOrWhiteSpace(fullName))
         {
@@ -38,6 +40,13 @@ public class User : BaseEntity
         FullName = fullName.Trim();
         Email = email.Trim().ToLowerInvariant();
         Role = role;
+        WarehouseId = warehouseId;
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void AssignWarehouse(int? warehouseId)
+    {
+        WarehouseId = warehouseId;
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 

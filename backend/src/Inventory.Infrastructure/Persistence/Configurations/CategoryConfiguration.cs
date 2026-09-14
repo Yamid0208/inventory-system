@@ -30,10 +30,10 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(c => c.CreatedAt)
             .IsRequired();
 
-        builder.HasIndex(c => c.Name)
+        builder.HasIndex(c => new { c.WarehouseId, c.Name })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0")
-            .HasDatabaseName("UX_Categories_Name");
+            .HasDatabaseName("UX_Categories_Warehouse_Name");
 
         builder.HasQueryFilter(c => !c.IsDeleted);
     }
