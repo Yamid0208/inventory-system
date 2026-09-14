@@ -1,0 +1,107 @@
+name: CI/CD Pipeline - SGI Inventory System
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -------------------------------------------------------------
+  # Job 1: Verificación y Compilación del Back-End (.NET 8)
+  # -------------------------------------------------------------
+  backend-ci:
+    name: Backend Build & Validation (.NET 8)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('backend/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore Backend Dependencies
+        run: dotnet restore backend/Inventory.sln
+
+      - name: Build Backend Solution (Release)
+        run: dotnet build backend/Inventory.sln -c Release --no-restore
+
+  # -------------------------------------------------------------
+  # Job 2: Pruebas Unitarias y Compilación del Front-End (Angular 18)
+  # -------------------------------------------------------------
+  frontend-ci:
+    name: Frontend Tests & Production Build (Angular 18)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Run Frontend Vitest Unit Tests
+        run: npm run test
+
+      - name: Build Frontend Production Bundle
+        run: npm run build
+
+  # -------------------------------------------------------------
+  # Job 3: Validación de Infraestructura Docker y Configuración
+  # -------------------------------------------------------------
+  docker-validation:
+    name: Dockerfile & Compose Verification
+    runs-on: ubuntu-latest
+    needs: [ backend-ci, frontend-ci ]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose config
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: backend
+          file: backend/Dockerfile
+          push: false
+          tags: inventory-system-backend:ci-test
+
+      - name: Build Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          file: frontend/Dockerfile
+          push: false
+          tags: inventory-system-frontend:ci-test
