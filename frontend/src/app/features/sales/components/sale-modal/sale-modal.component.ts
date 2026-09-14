@@ -8,6 +8,7 @@ import { CreateSaleRequest, PaymentMethod, InvoiceType } from '../../../../core/
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
 import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
 import { CustomerService } from '../../../../core/services/customer.service';
+import { SettingsService } from '../../../../core/services/settings.service';
 
 @Component({
   selector: 'app-sale-modal',
@@ -312,7 +313,7 @@ import { CustomerService } from '../../../../core/services/customer.service';
                 <span>{{ calculatedSubtotal() | currencyFormat }}</span>
               </div>
               <div>
-                <span class="block text-[10px] text-slate-400">IVA (19%)</span>
+                <span class="block text-[10px] text-slate-400">IVA ({{ taxRatePercent() }}%)</span>
                 <span>{{ calculatedTax() | currencyFormat }}</span>
               </div>
               <div>
@@ -358,10 +359,14 @@ export class SaleModalComponent implements OnInit {
   autoRegisterCustomer = signal<boolean>(true);
   isRegisteringCustomer = signal<boolean>(false);
 
+  taxRatePercent = signal<number>(19);
+  taxRateDecimal = signal<number>(0.19);
+
   constructor(
     private fb: FormBuilder,
-    private customerService: CustomerService
-  ) { }
+    private customerService: CustomerService,
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -373,6 +378,18 @@ export class SaleModalComponent implements OnInit {
       saleDate: [new Date().toISOString().slice(0, 10), [Validators.required]],
       notes: [''],
       items: this.fb.array([])
+    });
+
+    this.settingsService.getSettings().subscribe({
+      next: (s) => {
+        const rate = s.defaultTaxRate ?? 19;
+        this.taxRatePercent.set(rate);
+        this.taxRateDecimal.set(rate > 1 ? rate / 100 : rate);
+        this.itemsArray.controls.forEach(control => {
+          control.patchValue({ taxRate: this.taxRateDecimal() });
+        });
+      },
+      error: () => {}
     });
 
     this.addItem();
@@ -431,7 +448,6 @@ export class SaleModalComponent implements OnInit {
       return;
     }
 
-    // 1. Consulta en la lista cargada localmente
     const localMatch = this.registeredCustomers().find(c =>
       c.taxId && c.taxId.trim().toLowerCase() === taxId.toLowerCase()
     );
@@ -446,7 +462,6 @@ export class SaleModalComponent implements OnInit {
       return;
     }
 
-    // 2. Consulta al backend vía API
     this.isSearchingCustomer.set(true);
     this.customerService.getCustomers({ search: taxId }).subscribe({
       next: (res) => {
@@ -509,7 +524,7 @@ export class SaleModalComponent implements OnInit {
       productId: [null, [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
       unitPrice: [0, [Validators.required, Validators.min(0)]],
-      taxRate: [0.19]
+      taxRate: [this.taxRateDecimal()]
     });
     this.itemsArray.push(itemGroup);
   }
@@ -551,7 +566,7 @@ export class SaleModalComponent implements OnInit {
     const qty = Number(group.get('quantity')?.value) || 0;
     const price = Number(group.get('unitPrice')?.value) || 0;
     const subtotal = qty * price;
-    return subtotal * 1.19;
+    return subtotal * (1 + this.taxRateDecimal());
   }
 
   calculatedSubtotal(): number {
@@ -563,7 +578,7 @@ export class SaleModalComponent implements OnInit {
   }
 
   calculatedTax(): number {
-    return this.calculatedSubtotal() * 0.19;
+    return this.calculatedSubtotal() * this.taxRateDecimal();
   }
 
   calculatedTotal(): number {
@@ -586,7 +601,6 @@ export class SaleModalComponent implements OnInit {
     const taxId = val.customerTaxId?.trim();
     const email = val.customerEmail?.trim();
 
-    // Auto-registro en directorio de clientes si no está registrado y la casilla está habilitada
     if (this.customerSearchStatus() === 'not_found' && this.autoRegisterCustomer() && name && taxId) {
       try {
         this.isRegisteringCustomer.set(true);
@@ -616,7 +630,7 @@ export class SaleModalComponent implements OnInit {
         productId: Number(i.productId),
         quantity: Number(i.quantity),
         unitPrice: Number(i.unitPrice),
-        taxRate: 0.19
+        taxRate: this.taxRateDecimal()
       }))
     };
 
@@ -627,3 +641,4 @@ export class SaleModalComponent implements OnInit {
     this.cancel.emit();
   }
 }
+

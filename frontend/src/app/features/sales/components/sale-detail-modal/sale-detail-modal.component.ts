@@ -136,7 +136,7 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
               <span>{{ sale.subtotal | currencyFormat }}</span>
             </div>
             <div class="flex justify-between text-slate-500">
-              <span>IVA Discriminado (19%):</span>
+              <span>IVA Discriminado:</span>
               <span>{{ sale.tax | currencyFormat }}</span>
             </div>
             <div class="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-200 pt-1.5">

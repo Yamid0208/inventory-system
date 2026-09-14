@@ -1,11 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Supplier } from '../../../../core/models/supplier.model';
 import { Product } from '../../../../core/models/product.model';
-import { CreatePurchaseRequest, CreatePurchaseItemRequest } from '../../../../core/models/purchase.model';
+import { CreatePurchaseRequest } from '../../../../core/models/purchase.model';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
 import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+import { SettingsService } from '../../../../core/services/settings.service';
 
 @Component({
   selector: 'app-purchase-modal',
@@ -175,7 +176,7 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
                 <span>{{ calculatedSubtotal() | currencyFormat }}</span>
               </div>
               <div>
-                <span class="block text-[10px] text-slate-400">IVA (19%)</span>
+                <span class="block text-[10px] text-slate-400">IVA ({{ taxRatePercent() }}%)</span>
                 <span>{{ calculatedTax() | currencyFormat }}</span>
               </div>
               <div>
@@ -225,8 +226,13 @@ export class PurchaseModalComponent implements OnInit {
   @Output() cancel = new EventEmitter<void>();
 
   form!: FormGroup;
+  taxRatePercent = signal<number>(19);
+  taxRateDecimal = signal<number>(0.19);
 
-  constructor(private fb: FormBuilder) { }
+  constructor(
+    private fb: FormBuilder,
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -235,6 +241,20 @@ export class PurchaseModalComponent implements OnInit {
       notes: [''],
       autoReceive: [true],
       items: this.fb.array([])
+    });
+
+    this.settingsService.getSettings().subscribe({
+      next: (s) => {
+        const rate = s.defaultTaxRate ?? 19;
+        this.taxRatePercent.set(rate);
+        this.taxRateDecimal.set(rate > 1 ? rate / 100 : rate);
+
+        // Actualizar el valor del taxRate en los controles de items si ya existen
+        this.itemsArray.controls.forEach(control => {
+          control.patchValue({ taxRate: this.taxRateDecimal() });
+        });
+      },
+      error: () => {}
     });
 
     // Agregar primera línea por defecto
@@ -250,7 +270,7 @@ export class PurchaseModalComponent implements OnInit {
       productId: [null, [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
       unitPrice: [0, [Validators.required, Validators.min(0)]],
-      taxRate: [0.19]
+      taxRate: [this.taxRateDecimal()]
     });
     this.itemsArray.push(itemGroup);
   }
@@ -275,7 +295,7 @@ export class PurchaseModalComponent implements OnInit {
     const qty = Number(group.get('quantity')?.value) || 0;
     const price = Number(group.get('unitPrice')?.value) || 0;
     const subtotal = qty * price;
-    return subtotal * 1.19; // con IVA 19%
+    return subtotal * (1 + this.taxRateDecimal());
   }
 
   calculatedSubtotal(): number {
@@ -287,7 +307,7 @@ export class PurchaseModalComponent implements OnInit {
   }
 
   calculatedTax(): number {
-    return this.calculatedSubtotal() * 0.19;
+    return this.calculatedSubtotal() * this.taxRateDecimal();
   }
 
   calculatedTotal(): number {
@@ -315,7 +335,7 @@ export class PurchaseModalComponent implements OnInit {
         productId: Number(i.productId),
         quantity: Number(i.quantity),
         unitPrice: Number(i.unitPrice),
-        taxRate: 0.19
+        taxRate: this.taxRateDecimal()
       }))
     };
 

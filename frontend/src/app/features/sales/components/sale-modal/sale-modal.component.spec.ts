@@ -9,6 +9,8 @@ describe('SaleModalComponent (Customer Lookup & Registration Tests)', () => {
   let component: SaleModalComponent;
   let customerServiceMock: any;
 
+  let settingsServiceMock: any;
+
   const mockCustomers: Customer[] = [
     {
       id: 1,
@@ -26,7 +28,11 @@ describe('SaleModalComponent (Customer Lookup & Registration Tests)', () => {
       createCustomer: vi.fn().mockImplementation((req) => of({ id: 2, ...req, isActive: true, createdAt: '2026-09-09T00:00:00Z' }))
     };
 
-    component = new SaleModalComponent(new FormBuilder(), customerServiceMock);
+    settingsServiceMock = {
+      getSettings: vi.fn().mockReturnValue(of({ defaultTaxRate: 19 }))
+    };
+
+    component = new SaleModalComponent(new FormBuilder(), customerServiceMock, settingsServiceMock);
     component.ngOnInit();
   });
 
