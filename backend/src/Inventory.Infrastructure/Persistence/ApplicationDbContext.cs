@@ -55,6 +55,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        foreach (var entry in ChangeTracker.Entries<Product>())
+        {
+            if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdateRowVersion();
+            }
+        }
+
         foreach (var entry in ChangeTracker.Entries<BaseEntity<int>>())
         {
             switch (entry.State)
