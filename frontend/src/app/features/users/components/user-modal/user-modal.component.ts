@@ -1,7 +1,9 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserDetail } from '../../../../core/models/user-admin.model';
+import { Warehouse } from '../../../../core/models/warehouse.model';
+import { WarehouseService } from '../../../../core/services/warehouse.service';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 
@@ -25,7 +27,7 @@ import { AuthService } from '../../../../core/auth/services/auth.service';
                 {{ user ? (isClientAdmin ? 'Editar Empleado' : 'Editar Usuario') : (isClientAdmin ? 'Nuevo Empleado de Sede' : 'Nuevo Usuario del Sistema') }}
               </h2>
               <p class="text-xs text-slate-500">
-                {{ user ? 'Modifica los datos del usuario.' : (isClientAdmin ? 'Registra un colaborador operativo vinculado a tu sede.' : 'Crea una cuenta y asigna su rol.') }}
+                {{ user ? 'Modifica los datos del usuario.' : (isClientAdmin ? 'Registra un colaborador operativo vinculado a tu sede.' : 'Crea una cuenta y asigna su rol y almacén.') }}
               </p>
             </div>
           </div>
@@ -90,6 +92,29 @@ import { AuthService } from '../../../../core/auth/services/auth.service';
             </select>
           </div>
 
+          <!-- Almacén / Sede Asignada -->
+          @if (isClientAdmin) {
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+              <span class="text-slate-600 font-medium">Sede Asignada:</span>
+              <span class="font-bold text-slate-800">
+                {{ user?.warehouseName || authService.currentUser()?.warehouseName || 'Tu Almacén' }}
+              </span>
+            </div>
+          } @else {
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Almacén / Sede Asignada</label>
+              <select
+                formControlName="warehouseId"
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
+              >
+                <option [ngValue]="null">-- Sin Almacén Específico (Global) --</option>
+                @for (w of warehouses(); track w.id) {
+                  <option [ngValue]="w.id">{{ w.name }} ({{ w.code }})</option>
+                }
+              </select>
+            </div>
+          }
+
           <!-- Contraseña (Solo en creación) -->
           @if (!user) {
             <div>
@@ -123,7 +148,8 @@ import { AuthService } from '../../../../core/auth/services/auth.service';
   `
 })
 export class UserModalComponent implements OnInit {
-  private authService = inject(AuthService);
+  authService = inject(AuthService);
+  private warehouseService = inject(WarehouseService);
   private fb = inject(FormBuilder);
 
   @Input() user: UserDetail | null = null;
@@ -134,17 +160,28 @@ export class UserModalComponent implements OnInit {
   @Output() cancel = new EventEmitter<void>();
 
   form!: FormGroup;
+  warehouses = signal<Warehouse[]>([]);
 
   get isClientAdmin(): boolean {
     return this.authService.currentUser()?.role === 'Admin';
   }
 
   ngOnInit(): void {
+    if (!this.isClientAdmin) {
+      this.warehouseService.getWarehouses().subscribe({
+        next: (data) => this.warehouses.set(data),
+        error: () => {}
+      });
+    }
+
     const defaultRole = this.user?.role || (this.isClientAdmin ? 'Warehouse' : 'Seller');
+    const defaultWarehouseId = this.user?.warehouseId ?? (this.isClientAdmin ? (this.authService.currentUser()?.warehouseId ?? null) : null);
+
     this.form = this.fb.group({
       fullName: [this.user?.fullName || '', [Validators.required, Validators.maxLength(150)]],
       email: [this.user?.email || '', [Validators.required, Validators.email, Validators.maxLength(150)]],
       role: [defaultRole, [Validators.required]],
+      warehouseId: [defaultWarehouseId],
       password: ['', this.user ? [] : [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -159,7 +196,15 @@ export class UserModalComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.valid) {
-      this.save.emit(this.form.value);
+      const formValue = { ...this.form.value };
+      if (this.isClientAdmin) {
+        formValue.warehouseId = this.authService.currentUser()?.warehouseId ?? null;
+      }
+      if (this.user) {
+        this.save.emit({ id: this.user.id, request: formValue });
+      } else {
+        this.save.emit(formValue);
+      }
     }
   }
 
@@ -167,3 +212,4 @@ export class UserModalComponent implements OnInit {
     this.cancel.emit();
   }
 }
+

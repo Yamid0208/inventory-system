@@ -2,8 +2,10 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserAdminService } from '../../core/services/user-admin.service';
 import { RoleService } from '../../core/services/role.service';
+import { WarehouseService } from '../../core/services/warehouse.service';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { RolePermissionMatrixItem } from '../../core/models/role.model';
+import { Warehouse } from '../../core/models/warehouse.model';
 import { AuthService } from '../../core/auth/services/auth.service';
 import {
   UserDetail,
@@ -33,6 +35,7 @@ import { PageChangeEvent } from '../../shared/models/pagination.model';
 export class UsersComponent implements OnInit {
   private userAdminService = inject(UserAdminService);
   private roleService = inject(RoleService);
+  private warehouseService = inject(WarehouseService);
   private confirmationService = inject(ConfirmationService);
   authService = inject(AuthService);
 
@@ -52,7 +55,9 @@ export class UsersComponent implements OnInit {
   // Filtros
   roleFilter = signal<string>('all');
   statusFilter = signal<string>('all');
+  warehouseFilter = signal<string>('all');
   searchQuery = signal<string>('');
+  warehouses = signal<Warehouse[]>([]);
 
   // Modales
   isUserModalOpen = signal<boolean>(false);
@@ -118,6 +123,12 @@ export class UsersComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    if (this.authService.currentUser()?.role === 'SuperAdmin') {
+      this.warehouseService.getWarehouses().subscribe({
+        next: (data) => this.warehouses.set(data),
+        error: () => {}
+      });
+    }
     this.loadUsers();
     this.loadMatrix();
   }
@@ -157,7 +168,8 @@ export class UsersComponent implements OnInit {
       isActive,
       search: this.searchQuery(),
       pageNumber: this.pageNumber(),
-      pageSize: this.pageSize()
+      pageSize: this.pageSize(),
+      warehouseId: this.warehouseFilter() === 'all' ? undefined : Number(this.warehouseFilter())
     };
 
     this.userAdminService.getUsers(params).subscribe({
@@ -180,6 +192,12 @@ export class UsersComponent implements OnInit {
 
   setStatusFilter(status: string): void {
     this.statusFilter.set(status);
+    this.pageNumber.set(1);
+    this.loadUsers();
+  }
+
+  setWarehouseFilter(warehouseId: string): void {
+    this.warehouseFilter.set(warehouseId);
     this.pageNumber.set(1);
     this.loadUsers();
   }

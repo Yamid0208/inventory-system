@@ -112,6 +112,20 @@
       </div>
 
       <div class="flex items-center gap-3">
+        <!-- Selector de Sede/Almacén (Solo SuperAdmin) -->
+        @if (authService.currentUser()?.role === 'SuperAdmin') {
+          <select
+            [value]="warehouseFilter()"
+            (change)="setWarehouseFilter($any($event.target).value)"
+            class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none cursor-pointer"
+          >
+            <option value="all">Todas las Sedes</option>
+            @for (w of warehouses(); track w.id) {
+              <option [value]="w.id">{{ w.name }}</option>
+            }
+          </select>
+        }
+
         <!-- Selector de Estado -->
         <select
           [value]="statusFilter()"
