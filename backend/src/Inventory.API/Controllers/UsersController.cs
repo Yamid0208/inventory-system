@@ -54,7 +54,9 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDetailDto>> GetUserById(int id, CancellationToken cancellationToken)
     {
-        var user = await _userService.GetUserByIdAsync(id, cancellationToken);
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var warehouseId = role == "Admin" ? await GetCurrentAdminWarehouseIdAsync(cancellationToken) : null;
+        var user = await _userService.GetUserByIdAsync(id, warehouseId, role, cancellationToken);
         return Ok(user);
     }
 
@@ -105,17 +107,18 @@ public class UsersController : ControllerBase
         CancellationToken cancellationToken)
     {
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var warehouseId = role == "Admin" ? await GetCurrentAdminWarehouseIdAsync(cancellationToken) : null;
+
         if (role == "Admin")
         {
             if (request.Role == "Admin" || request.Role == "SuperAdmin")
             {
                 return BadRequest(new { message = "No tiene permisos para asignar roles de nivel administrativo." });
             }
-            var warehouseId = await GetCurrentAdminWarehouseIdAsync(cancellationToken);
             request = request with { WarehouseId = warehouseId };
         }
 
-        var updated = await _userService.UpdateUserAsync(id, request, cancellationToken);
+        var updated = await _userService.UpdateUserAsync(id, request, warehouseId, role, cancellationToken);
         return Ok(updated);
     }
 
@@ -130,7 +133,11 @@ public class UsersController : ControllerBase
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         int.TryParse(idClaim, out var currentUserId);
-        var updated = await _userService.ToggleUserStatusAsync(id, currentUserId, cancellationToken);
+
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var warehouseId = role == "Admin" ? await GetCurrentAdminWarehouseIdAsync(cancellationToken) : null;
+
+        var updated = await _userService.ToggleUserStatusAsync(id, currentUserId, warehouseId, role, cancellationToken);
         return Ok(updated);
     }
 
@@ -146,7 +153,10 @@ public class UsersController : ControllerBase
         [FromBody] ResetUserPasswordRequest request,
         CancellationToken cancellationToken)
     {
-        await _userService.ResetPasswordAsync(id, request, cancellationToken);
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var warehouseId = role == "Admin" ? await GetCurrentAdminWarehouseIdAsync(cancellationToken) : null;
+
+        await _userService.ResetPasswordAsync(id, request, warehouseId, role, cancellationToken);
         return NoContent();
     }
 

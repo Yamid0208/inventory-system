@@ -67,7 +67,11 @@ public class UserManagementService : IUserManagementService
         return new PagedResult<UserDetailDto>(dtos, totalCount, pageNumber, pageSize);
     }
 
-    public async Task<UserDetailDto> GetUserByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<UserDetailDto> GetUserByIdAsync(
+        int id,
+        int? callerWarehouseId = null,
+        string? callerRole = null,
+        CancellationToken cancellationToken = default)
     {
         var user = await _context.Users
             .AsNoTracking()
@@ -77,6 +81,8 @@ public class UserManagementService : IUserManagementService
         {
             throw new NotFoundException($"El usuario con ID {id} no existe.");
         }
+
+        ValidateCallerPermissions(user, callerWarehouseId, callerRole);
 
         return MapToDto(user);
     }
@@ -122,6 +128,8 @@ public class UserManagementService : IUserManagementService
     public async Task<UserDetailDto> UpdateUserAsync(
         int id,
         UpdateUserAdminRequest request,
+        int? callerWarehouseId = null,
+        string? callerRole = null,
         CancellationToken cancellationToken = default)
     {
         var user = await _context.Users
@@ -131,6 +139,8 @@ public class UserManagementService : IUserManagementService
         {
             throw new NotFoundException($"El usuario con ID {id} no existe.");
         }
+
+        ValidateCallerPermissions(user, callerWarehouseId, callerRole);
 
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
@@ -150,6 +160,11 @@ public class UserManagementService : IUserManagementService
             role = user.Role;
         }
 
+        if (callerRole == "Admin" && (role == UserRole.SuperAdmin || role == UserRole.Admin))
+        {
+            role = user.Role;
+        }
+
         user.Update(request.FullName, normalizedEmail, role, request.WarehouseId ?? user.WarehouseId);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -159,6 +174,8 @@ public class UserManagementService : IUserManagementService
     public async Task<UserDetailDto> ToggleUserStatusAsync(
         int id,
         int currentUserId,
+        int? callerWarehouseId = null,
+        string? callerRole = null,
         CancellationToken cancellationToken = default)
     {
         if (id == currentUserId)
@@ -176,6 +193,8 @@ public class UserManagementService : IUserManagementService
         {
             throw new NotFoundException($"El usuario con ID {id} no existe.");
         }
+
+        ValidateCallerPermissions(user, callerWarehouseId, callerRole);
 
         if (user.IsActive)
         {
@@ -210,6 +229,8 @@ public class UserManagementService : IUserManagementService
     public async Task ResetPasswordAsync(
         int id,
         ResetUserPasswordRequest request,
+        int? callerWarehouseId = null,
+        string? callerRole = null,
         CancellationToken cancellationToken = default)
     {
         var user = await _context.Users
@@ -220,6 +241,8 @@ public class UserManagementService : IUserManagementService
         {
             throw new NotFoundException($"El usuario con ID {id} no existe.");
         }
+
+        ValidateCallerPermissions(user, callerWarehouseId, callerRole);
 
         var newHash = _passwordHasher.Hash(request.NewPassword);
         user.SetPasswordHash(newHash);
@@ -234,6 +257,21 @@ public class UserManagementService : IUserManagementService
         ));
 
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void ValidateCallerPermissions(User targetUser, int? callerWarehouseId, string? callerRole)
+    {
+        if (callerRole == "Admin")
+        {
+            if (targetUser.Role == UserRole.SuperAdmin)
+            {
+                throw new NotFoundException("El usuario solicitado no fue encontrado.");
+            }
+            if (callerWarehouseId.HasValue && targetUser.WarehouseId != callerWarehouseId.Value)
+            {
+                throw new NotFoundException("El usuario solicitado no pertenece a su sede asignada.");
+            }
+        }
     }
 
     private static UserDetailDto MapToDto(User u)
