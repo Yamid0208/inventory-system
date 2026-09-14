@@ -85,7 +85,7 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
                 (click)="addItem()"
                 class="px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold text-xs transition-colors flex items-center gap-1"
               >
-                <span>+ Agregar Línea</span>
+                <span>Agregar Línea</span>
               </button>
             </div>
 
@@ -226,7 +226,7 @@ export class PurchaseModalComponent implements OnInit {
 
   form!: FormGroup;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({

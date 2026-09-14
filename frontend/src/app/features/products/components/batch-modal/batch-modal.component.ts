@@ -32,7 +32,7 @@ import { Product, ProductBatch, CreateProductBatchRequest } from '../../../../co
           <!-- FORMULARIO NUEVO LOTE -->
           <form (ngSubmit)="submitBatch()" class="bg-slate-50/80 rounded-xl p-4 border border-slate-200/80 space-y-3">
             <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <span>+</span> Registrar Nuevo Lote
+              Registrar Nuevo Lote
             </h4>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>

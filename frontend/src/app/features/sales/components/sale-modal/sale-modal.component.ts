@@ -220,7 +220,7 @@ import { CustomerService } from '../../../../core/services/customer.service';
                 (click)="addItem()"
                 class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer"
               >
-                <span>+ Agregar Producto</span>
+                <span>Agregar Producto</span>
               </button>
             </div>
 
@@ -361,7 +361,7 @@ export class SaleModalComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private customerService: CustomerService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -381,7 +381,7 @@ export class SaleModalComponent implements OnInit {
     this.form.get('invoiceType')?.valueChanges.subscribe(type => {
       const emailCtrl = this.form.get('customerEmail');
       const taxCtrl = this.form.get('customerTaxId');
-      
+
       if (type === 'Electronic') {
         emailCtrl?.setValidators([Validators.required, Validators.email]);
         taxCtrl?.setValidators([Validators.required]);
