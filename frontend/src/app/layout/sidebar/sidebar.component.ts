@@ -27,7 +27,7 @@ export class SidebarComponent {
   get navItems(): NavItem[] {
     const role: UserRole = this.authService.currentUser()?.role || 'Seller';
     const items: NavItem[] = [
-      { label: 'Dashboard', route: '/dashboard', icon: 'grid', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse', 'Seller'] },
+      { label: 'Panel Principal', route: '/dashboard', icon: 'grid', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse', 'Seller'] },
       { label: 'Clientes & Almacenes', route: '/warehouses', icon: 'building', allowedRoles: ['SuperAdmin'] },
       { label: 'Productos', route: '/products', icon: 'tag', allowedRoles: ['Admin', 'Warehouse', 'Seller'] },
       { label: 'Inventario / Kardex', route: '/inventory', icon: 'box', allowedRoles: ['Admin', 'Warehouse'] },

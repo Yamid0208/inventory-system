@@ -9,9 +9,9 @@
   <!-- Header & Botones de Acción -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kardex Audit & Traceability</h1>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kardex & Auditoría de Stock</h1>
       <p class="text-xs text-slate-500 mt-1">
-        Monitor real-time stock movements and audit trails.
+        Monitorea los movimientos de inventario y trazabilidad en tiempo real.
       </p>
     </div>
 
@@ -26,7 +26,7 @@
         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
         </svg>
-        <span>{{ exporting() ? 'Exportando...' : 'Export CSV' }}</span>
+        <span>{{ exporting() ? 'Exportando...' : 'Exportar CSV' }}</span>
       </button>
 
       <!-- Botón + Devolución -->
@@ -48,7 +48,7 @@
         <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
         </svg>
-        <span>+ Manual Entry</span>
+        <span>+ Ajuste Manual</span>
       </button>
     </div>
   </div>
@@ -65,7 +65,7 @@
           ? 'bg-primary-600 text-white shadow-sm'
           : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
       >
-        Today
+        Hoy
       </button>
 
       <button
@@ -76,7 +76,7 @@
           ? 'bg-primary-600 text-white shadow-sm'
           : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
       >
-        7D
+        7 Días
       </button>
 
       <button
@@ -87,7 +87,7 @@
           ? 'bg-primary-600 text-white shadow-sm'
           : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
       >
-        1M
+        1 Mes
       </button>
 
       <button
@@ -98,7 +98,7 @@
           ? 'bg-primary-600 text-white shadow-sm'
           : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'"
       >
-        1Y
+        1 Año
       </button>
 
       <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
@@ -114,7 +114,7 @@
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        <span>Custom</span>
+        <span>Personalizado</span>
       </button>
     </div>
 
@@ -131,7 +131,7 @@
           type="text"
           [value]="searchQuery()"
           (input)="onSearch($event)"
-          placeholder="Search Kardex..."
+          placeholder="Buscar en Kardex..."
           class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
         />
       </div>
@@ -142,7 +142,7 @@
           (change)="onTypeChange($event)"
           class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
         >
-          <option value="all">All Types</option>
+          <option value="all">Todos los Tipos</option>
           <option value="Purchase">Entradas (Compras)</option>
           <option value="Sale">Salidas (Ventas)</option>
           <option value="AdjustmentIn">Ajustes (+)</option>
@@ -192,12 +192,12 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-                <th class="py-3.5 pl-6 pr-4">Movement ID</th>
-                <th class="py-3.5 px-4">Date & Time</th>
-                <th class="py-3.5 px-4">SKU / Product</th>
-                <th class="py-3.5 px-4">Type</th>
-                <th class="py-3.5 px-4 text-right">Stock Delta</th>
-                <th class="py-3.5 pr-6 pl-4">Responsible</th>
+                <th class="py-3.5 pl-6 pr-4">ID Movimiento</th>
+                <th class="py-3.5 px-4">Fecha y Hora</th>
+                <th class="py-3.5 px-4">SKU / Producto</th>
+                <th class="py-3.5 px-4">Tipo</th>
+                <th class="py-3.5 px-4 text-right">Cambio Stock</th>
+                <th class="py-3.5 pr-6 pl-4">Responsable</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-xs">
