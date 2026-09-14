@@ -23,12 +23,30 @@ public class UserManagementService : IUserManagementService
 
     public async Task<PagedResult<UserDetailDto>> GetUsersAsync(
         UserAdminFilterRequest request,
+        int? callerWarehouseId = null,
+        string? callerRole = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Users.AsNoTracking().Include(u => u.Warehouse).AsQueryable();
 
-        if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
+        if (callerRole == "Admin")
         {
+            // Un Administrador de Sede solo gestiona colaboradores operativos (Bodega y Ventas) de su propia sede.
+            query = query.Where(u => u.Role != UserRole.SuperAdmin && u.Role != UserRole.Admin);
+
+            if (callerWarehouseId.HasValue && callerWarehouseId.Value > 0)
+            {
+                query = query.Where(u => u.WarehouseId == callerWarehouseId.Value);
+            }
+            else
+            {
+                // Si el Admin no tiene almacén vinculado, no puede ver colaboradores de otros almacenes
+                query = query.Where(u => u.Id == 0);
+            }
+        }
+        else if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
+        {
+            // SuperAdmin filtrando opcionalmente por un almacén específico
             query = query.Where(u => u.WarehouseId == request.WarehouseId.Value);
         }
 

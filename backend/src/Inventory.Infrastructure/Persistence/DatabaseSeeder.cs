@@ -54,6 +54,37 @@ public static class DatabaseSeeder
             logger.LogInformation("Usuarios sembrados exitosamente: admin@sgi.local, almacen@sgi.local, vendedor@sgi.local, demo.limpio@sgi.local");
         }
 
+        if (!await context.Warehouses.AnyAsync())
+        {
+            logger.LogInformation("Sembrando almacén inicial para la sede del administrador...");
+            var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "admin@sgi.local");
+            if (adminUser != null)
+            {
+                var mainWarehouse = new Warehouse(
+                    name: "Sede Principal - Bogotá",
+                    code: "BOG-01",
+                    adminUserId: adminUser.Id,
+                    address: "Calle 26 #69D-91",
+                    city: "Bogotá D.C.",
+                    phone: "+57 601 555 8900"
+                );
+
+                await context.Warehouses.AddAsync(mainWarehouse);
+                await context.SaveChangesAsync();
+
+                adminUser.AssignWarehouse(mainWarehouse.Id);
+
+                var almacenUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "almacen@sgi.local");
+                almacenUser?.AssignWarehouse(mainWarehouse.Id);
+
+                var vendedorUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "vendedor@sgi.local");
+                vendedorUser?.AssignWarehouse(mainWarehouse.Id);
+
+                await context.SaveChangesAsync();
+                logger.LogInformation("Almacén inicial 'Sede Principal - Bogotá' creado y vinculado a admin@sgi.local, almacen@sgi.local y vendedor@sgi.local.");
+            }
+        }
+
         if (!await context.CompanySettings.AnyAsync())
         {
             logger.LogInformation("Sembrando configuración global inicial de empresa...");

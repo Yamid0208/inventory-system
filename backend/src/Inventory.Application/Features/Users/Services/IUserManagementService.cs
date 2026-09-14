@@ -5,7 +5,7 @@ namespace Inventory.Application.Features.Users.Services;
 
 public interface IUserManagementService
 {
-    Task<PagedResult<UserDetailDto>> GetUsersAsync(UserAdminFilterRequest request, CancellationToken cancellationToken = default);
+    Task<PagedResult<UserDetailDto>> GetUsersAsync(UserAdminFilterRequest request, int? callerWarehouseId = null, string? callerRole = null, CancellationToken cancellationToken = default);
     Task<UserDetailDto> GetUserByIdAsync(int id, int? callerWarehouseId = null, string? callerRole = null, CancellationToken cancellationToken = default);
     Task<UserDetailDto> CreateUserAsync(CreateUserAdminRequest request, CancellationToken cancellationToken = default);
     Task<UserDetailDto> UpdateUserAsync(int id, UpdateUserAdminRequest request, int? callerWarehouseId = null, string? callerRole = null, CancellationToken cancellationToken = default);

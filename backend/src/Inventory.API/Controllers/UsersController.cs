@@ -33,16 +33,14 @@ public class UsersController : ControllerBase
         CancellationToken cancellationToken)
     {
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        int? warehouseId = null;
+
         if (role == "Admin")
         {
-            var warehouseId = await GetCurrentAdminWarehouseIdAsync(cancellationToken);
-            if (warehouseId.HasValue)
-            {
-                request = request with { WarehouseId = warehouseId.Value };
-            }
+            warehouseId = await GetCurrentAdminWarehouseIdAsync(cancellationToken);
         }
 
-        var result = await _userService.GetUsersAsync(request, cancellationToken);
+        var result = await _userService.GetUsersAsync(request, warehouseId, role, cancellationToken);
         return Ok(result);
     }
 
