@@ -139,10 +139,10 @@ namespace Inventory.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
-                    table.CheckConstraint("CK_Products_CurrentStock_NonNegative", "[CurrentStock] >= 0");
-                    table.CheckConstraint("CK_Products_MinimumStock_NonNegative", "[MinimumStock] >= 0");
-                    table.CheckConstraint("CK_Products_PurchasePrice_NonNegative", "[PurchasePrice] >= 0");
-                    table.CheckConstraint("CK_Products_SalePrice_NonNegative", "[SalePrice] >= 0");
+                    table.CheckConstraint("CK_Products_CurrentStock_NonNegative", "\"CurrentStock\" >= 0");
+                    table.CheckConstraint("CK_Products_MinimumStock_NonNegative", "\"MinimumStock\" >= 0");
+                    table.CheckConstraint("CK_Products_PurchasePrice_NonNegative", "\"PurchasePrice\" >= 0");
+                    table.CheckConstraint("CK_Products_SalePrice_NonNegative", "\"SalePrice\" >= 0");
                     table.ForeignKey(
                         name: "FK_Products_Categories",
                         column: x => x.CategoryId,
@@ -461,7 +461,7 @@ namespace Inventory.Infrastructure.Migrations
                 table: "Categories",
                 columns: new[] { "WarehouseId", "Name" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "\"IsDeleted\" = false");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Customers_Email",
@@ -525,7 +525,7 @@ namespace Inventory.Infrastructure.Migrations
                 table: "Products",
                 columns: new[] { "WarehouseId", "Sku" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "\"IsDeleted\" = false");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseItems_ProductId",
@@ -605,7 +605,7 @@ namespace Inventory.Infrastructure.Migrations
                 table: "Suppliers",
                 columns: new[] { "WarehouseId", "TaxId" },
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "\"IsDeleted\" = false");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_WarehouseId",
@@ -617,7 +617,7 @@ namespace Inventory.Infrastructure.Migrations
                 table: "Users",
                 column: "Email",
                 unique: true,
-                filter: "[IsDeleted] = 0");
+                filter: "\"IsDeleted\" = false");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Warehouses_AdminUserId",

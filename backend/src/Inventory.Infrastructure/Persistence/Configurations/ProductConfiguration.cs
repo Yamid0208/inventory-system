@@ -10,10 +10,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
         builder.ToTable("Products", table =>
         {
-            table.HasCheckConstraint("CK_Products_CurrentStock_NonNegative", "[CurrentStock] >= 0");
-            table.HasCheckConstraint("CK_Products_PurchasePrice_NonNegative", "[PurchasePrice] >= 0");
-            table.HasCheckConstraint("CK_Products_SalePrice_NonNegative", "[SalePrice] >= 0");
-            table.HasCheckConstraint("CK_Products_MinimumStock_NonNegative", "[MinimumStock] >= 0");
+            table.HasCheckConstraint("CK_Products_CurrentStock_NonNegative", "\"CurrentStock\" >= 0");
+            table.HasCheckConstraint("CK_Products_PurchasePrice_NonNegative", "\"PurchasePrice\" >= 0");
+            table.HasCheckConstraint("CK_Products_SalePrice_NonNegative", "\"SalePrice\" >= 0");
+            table.HasCheckConstraint("CK_Products_MinimumStock_NonNegative", "\"MinimumStock\" >= 0");
         });
 
         builder.HasKey(p => p.Id);
@@ -66,7 +66,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         // Índice único en SKU por almacén ignorando eliminados lógicamente
         builder.HasIndex(p => new { p.WarehouseId, p.Sku })
             .IsUnique()
-            .HasFilter("[IsDeleted] = 0")
+            .HasFilter("\"IsDeleted\" = false")
             .HasDatabaseName("UX_Products_Warehouse_Sku");
 
         // Relaciones con comportamiento Restrict (RN-005, RN-006)

@@ -42,7 +42,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(u => u.Email)
             .IsUnique()
-            .HasFilter("[IsDeleted] = 0")
+            .HasFilter("\"IsDeleted\" = false")
             .HasDatabaseName("UX_Users_Email");
 
         builder.HasMany(u => u.RefreshTokens)

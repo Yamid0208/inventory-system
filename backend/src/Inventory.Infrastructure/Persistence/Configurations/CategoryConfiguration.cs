@@ -32,7 +32,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.HasIndex(c => new { c.WarehouseId, c.Name })
             .IsUnique()
-            .HasFilter("[IsDeleted] = 0")
+            .HasFilter("\"IsDeleted\" = false")
             .HasDatabaseName("UX_Categories_Warehouse_Name");
 
         builder.HasQueryFilter(c => !c.IsDeleted);

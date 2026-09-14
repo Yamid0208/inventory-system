@@ -45,7 +45,7 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
 
         builder.HasIndex(s => new { s.WarehouseId, s.TaxId })
             .IsUnique()
-            .HasFilter("[IsDeleted] = 0")
+            .HasFilter("\"IsDeleted\" = false")
             .HasDatabaseName("UX_Suppliers_Warehouse_TaxId");
 
         builder.HasQueryFilter(s => !s.IsDeleted);

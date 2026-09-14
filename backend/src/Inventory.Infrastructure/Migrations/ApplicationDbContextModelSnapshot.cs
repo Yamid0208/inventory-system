@@ -130,7 +130,7 @@ namespace Inventory.Infrastructure.Migrations
                     b.HasIndex("WarehouseId", "Name")
                         .IsUnique()
                         .HasDatabaseName("UX_Categories_Warehouse_Name")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -469,17 +469,17 @@ namespace Inventory.Infrastructure.Migrations
                     b.HasIndex("WarehouseId", "Sku")
                         .IsUnique()
                         .HasDatabaseName("UX_Products_Warehouse_Sku")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.ToTable("Products", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Products_CurrentStock_NonNegative", "[CurrentStock] >= 0");
+                            t.HasCheckConstraint("CK_Products_CurrentStock_NonNegative", "\"CurrentStock\" >= 0");
 
-                            t.HasCheckConstraint("CK_Products_MinimumStock_NonNegative", "[MinimumStock] >= 0");
+                            t.HasCheckConstraint("CK_Products_MinimumStock_NonNegative", "\"MinimumStock\" >= 0");
 
-                            t.HasCheckConstraint("CK_Products_PurchasePrice_NonNegative", "[PurchasePrice] >= 0");
+                            t.HasCheckConstraint("CK_Products_PurchasePrice_NonNegative", "\"PurchasePrice\" >= 0");
 
-                            t.HasCheckConstraint("CK_Products_SalePrice_NonNegative", "[SalePrice] >= 0");
+                            t.HasCheckConstraint("CK_Products_SalePrice_NonNegative", "\"SalePrice\" >= 0");
                         });
                 });
 
@@ -925,7 +925,7 @@ namespace Inventory.Infrastructure.Migrations
                     b.HasIndex("WarehouseId", "TaxId")
                         .IsUnique()
                         .HasDatabaseName("UX_Suppliers_Warehouse_TaxId")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.ToTable("Suppliers", (string)null);
                 });
@@ -985,7 +985,7 @@ namespace Inventory.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("UX_Users_Email")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.HasIndex("WarehouseId");
 
