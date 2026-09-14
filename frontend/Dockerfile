@@ -1,17 +1,26 @@
-# Build stage for SPA Host (using cached .NET Alpine SDK)
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+# Stage 1: Build Angular Frontend
+FROM node:20-alpine AS node-build
+WORKDIR /src
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: Build .NET Host
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS dotnet-build
 WORKDIR /src
 COPY Host/ .
 RUN dotnet publish FrontendHost.csproj -c Release -o /app/publish
 
-# Runtime stage (using cached .NET Alpine runtime)
+# Stage 3: Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 WORKDIR /app
-COPY --from=build /app/publish .
-COPY dist/inventory-frontend/browser ./wwwroot
+COPY --from=dotnet-build /app/publish .
+COPY --from=node-build /src/dist/inventory-frontend/browser ./wwwroot
 
 ENV ASPNETCORE_HTTP_PORTS=80
 ENV ASPNETCORE_ENVIRONMENT=Production
 EXPOSE 80
 
 ENTRYPOINT ["dotnet", "FrontendHost.dll"]
+
