@@ -44,3 +44,7 @@ sqlserver_data/
 .env
 .env.local
 .env.*.local
+
+# Scratch / Temporary workspace files
+scratch/
+
