@@ -1,12 +1,9 @@
 <header class="h-20 bg-white border-b border-slate-100 px-4 sm:px-8 flex items-center justify-between flex-shrink-0">
   <div class="flex items-center gap-3 sm:gap-4">
     <!-- Hamburger Button (Visible solo en dispositivos móviles < lg) -->
-    <button
-      type="button"
-      (click)="sidebarService.toggle()"
+    <button type="button" (click)="sidebarService.toggle()"
       class="lg:hidden w-10 h-10 flex items-center justify-center rounded-2xl text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
-      aria-label="Alternar menú lateral"
-    >
+      aria-label="Alternar menú lateral">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
@@ -17,69 +14,50 @@
       <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Dashboard</h2>
     </div>
 
-    <!-- Search Input Pill (Búsqueda Global Acara Style) -->
+    <!-- Search Input Pill (Búsqueda Global StockFlow Style) -->
     <div class="relative w-44 sm:w-64 md:w-80 ml-2">
       <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
       </div>
-      <input
-        type="text"
-        [(ngModel)]="searchQuery"
-        (keydown.enter)="onGlobalSearch()"
-        placeholder="Search here..."
+      <input type="text" [(ngModel)]="searchQuery" (keydown.enter)="onGlobalSearch()" placeholder="Search here..."
         class="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-slate-100/70 hover:bg-slate-100 focus:bg-white border border-transparent focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-500/10 rounded-full text-xs font-medium text-slate-800 placeholder-slate-400 transition-all"
-        aria-label="Búsqueda global de inventario"
-      />
+        aria-label="Búsqueda global de inventario" />
     </div>
   </div>
 
-  <!-- Right Actions Acara Style (Circular Buttons with Red Dots) -->
+  <!-- Right Actions StockFlow Style (Circular Buttons with Red Dots) -->
   <div class="flex items-center gap-2.5 sm:gap-3.5">
     <!-- Notification Bell (Circular pill with coral badge) -->
-    <button
-      type="button"
-      (click)="goToAlerts()"
+    <button type="button" (click)="goToAlerts()"
       class="relative w-10 h-10 flex items-center justify-center text-slate-600 bg-slate-50 hover:bg-primary-50 hover:text-primary-600 rounded-2xl transition-all cursor-pointer"
-      title="Ver Alertas y Notificaciones"
-      aria-label="Notificaciones y Alertas"
-    >
+      title="Ver Alertas y Notificaciones" aria-label="Notificaciones y Alertas">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-      </svg>
-      <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-primary-500 rounded-full ring-2 ring-white"></span>
-    </button>
-
-    <!-- Chat / Message Icon Style -->
-    <button
-      type="button"
-      class="relative w-10 h-10 flex items-center justify-center text-slate-600 bg-slate-50 hover:bg-primary-50 hover:text-primary-600 rounded-2xl transition-all cursor-pointer"
-      title="Mensajes y Auditoría"
-      aria-label="Mensajes"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+        </path>
       </svg>
       <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-primary-500 rounded-full ring-2 ring-white"></span>
     </button>
 
     <!-- Dark Mode / Theme Toggle -->
-    <button
-      type="button"
-      (click)="toggleTheme()"
+    <button type="button" (click)="toggleTheme()"
       class="w-10 h-10 flex items-center justify-center text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-2xl transition-colors cursor-pointer"
       [title]="themeService.isDark() ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'"
-      aria-label="Alternar tema visual claro y oscuro"
-    >
+      aria-label="Alternar tema visual claro y oscuro">
       @if (themeService.isDark()) {
-        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-        </svg>
+      <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+        </path>
+      </svg>
       } @else {
-        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-        </svg>
+      <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+      </svg>
       }
     </button>
 
@@ -87,26 +65,24 @@
 
     <!-- User Profile & Avatar -->
     @if (authService.currentUser(); as user) {
-      <div class="flex items-center gap-2.5">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-primary-500 to-primary-400 text-white flex items-center justify-center font-bold text-sm shadow-coral-glow">
-          {{ user.fullName.charAt(0) }}
-        </div>
-        <div class="hidden md:flex flex-col text-left">
-          <span class="text-xs font-bold text-slate-900 leading-tight">{{ user.fullName }}</span>
-          <span class="text-[10px] text-slate-400 font-semibold">{{ user.role }}</span>
-        </div>
-        <button
-          type="button"
-          (click)="logout()"
-          class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer ml-1"
-          title="Cerrar Sesión"
-          aria-label="Cerrar Sesión"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-          </svg>
-        </button>
+    <div class="flex items-center gap-2.5">
+      <div
+        class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-primary-500 to-primary-400 text-white flex items-center justify-center font-bold text-sm shadow-coral-glow">
+        {{ user.fullName.charAt(0) }}
       </div>
+      <div class="hidden md:flex flex-col text-left">
+        <span class="text-xs font-bold text-slate-900 leading-tight">{{ user.fullName }}</span>
+        <span class="text-[10px] text-slate-400 font-semibold">{{ user.role }}</span>
+      </div>
+      <button type="button" (click)="logout()"
+        class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer ml-1"
+        title="Cerrar Sesión" aria-label="Cerrar Sesión">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+      </button>
+    </div>
     }
   </div>
 </header>

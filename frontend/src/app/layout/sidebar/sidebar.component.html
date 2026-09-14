@@ -7,24 +7,24 @@
   ></div>
 }
 
-<!-- Menú Lateral / Drawer Responsive Acara Style -->
+<!-- Menú Lateral / Drawer Responsive StockFlow Style -->
 <aside
   class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 flex flex-col flex-shrink-0 h-full select-none transition-transform duration-300 ease-in-out lg:static lg:translate-x-0"
   [class.translate-x-0]="sidebarService.isOpen()"
   [class.-translate-x-full]="!sidebarService.isOpen()"
   aria-label="Menú principal de navegación"
 >
-  <!-- Brand Header con Logo Estilo Acara -->
+  <!-- Brand Header con Logo Estilo StockFlow -->
   <div class="h-20 px-6 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <!-- Isotipo Acara Style (Caja redondeada Coral con símbolo blanco) -->
+      <!-- Isotipo StockFlow Style (Caja redondeada Coral con símbolo blanco) -->
       <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-primary-500 to-primary-400 flex items-center justify-center text-white shadow-coral-glow">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
         </svg>
       </div>
       <div class="flex flex-col">
-        <span class="font-extrabold text-slate-900 text-lg tracking-tight lowercase">acara<span class="text-primary-500 font-black">.</span></span>
+        <span class="font-extrabold text-slate-900 text-lg tracking-tight lowercase">stockflow<span class="text-primary-500 font-black">.</span></span>
         <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase -mt-1">Inventory</span>
       </div>
     </div>
@@ -42,7 +42,7 @@
     </button>
   </div>
 
-  <!-- Botón Destacado '+ Nueva Operación' estilo Acara '+ New Event' -->
+  <!-- Botón Destacado '+ Nueva Operación' estilo StockFlow '+ New Event' -->
   <div class="px-4 mb-3">
     <a
       routerLink="/sales"

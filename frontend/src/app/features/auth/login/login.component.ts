@@ -59,7 +59,7 @@ export class LoginComponent {
 
   fillDemo(role: 'admin' | 'warehouse' | 'seller'): void {
     const creds = {
-      admin: { email: 'admin@sgi.local', password: 'Admin123*' },
+      admin: { email: 'aks12@prueba.com', password: '12345678' },
       warehouse: { email: 'almacen@sgi.local', password: 'Almacen123*' },
       seller: { email: 'vendedor@sgi.local', password: 'Vendedor123*' }
     }[role];

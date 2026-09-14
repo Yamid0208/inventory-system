@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: inventory-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_HTTP_PORTS
+        value: 8080
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Cors__AllowedOrigins
+        value: http://localhost:4200,https://*.vercel.app
+      - key: Jwt__Key
+        generateValue: true
+      - key: Jwt__Issuer
+        value: InventoryManagementAPI
+      - key: Jwt__Audience
+        value: InventoryManagementApp

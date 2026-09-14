@@ -1,9 +1,10 @@
 <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
-  <!-- Top Greeting & Header Acara Style -->
+  <!-- Top Greeting & Header StockFlow Style -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <div class="flex items-center gap-2 mb-1.5">
-        <span class="text-[11px] font-extrabold px-3 py-1 rounded-full bg-primary-50 text-primary-500 border border-primary-100">
+        <span
+          class="text-[11px] font-extrabold px-3 py-1 rounded-full bg-primary-50 text-primary-500 border border-primary-100">
           Panel de Control Operativo
         </span>
         <span class="text-xs text-slate-400 font-semibold flex items-center gap-1">
@@ -19,373 +20,382 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <button
-        type="button"
-        (click)="loadDashboardData()"
-        [disabled]="loading()"
-        class="inline-flex items-center gap-2 px-4.5 py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50"
-      >
-        <svg class="w-4 h-4 text-slate-500" [class.animate-spin]="loading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      <button type="button" (click)="loadDashboardData()" [disabled]="loading()"
+        class="inline-flex items-center gap-2 px-4.5 py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50">
+        <svg class="w-4 h-4 text-slate-500" [class.animate-spin]="loading()" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+          </path>
         </svg>
         <span>Actualizar Datos</span>
       </button>
 
-      <button
-        type="button"
-        (click)="navigateTo('/sales', { new: 'true' })"
-        class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold shadow-coral-glow transition-all cursor-pointer"
-      >
+      <button type="button" (click)="navigateTo('/sales', { new: 'true' })"
+        class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold shadow-coral-glow transition-all cursor-pointer">
         <svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
         </svg>
-        <span>+ Nueva Venta</span>
+        <span>Nueva Venta</span>
       </button>
     </div>
   </div>
 
   <!-- Loading State -->
   @if (loading() && !summary()) {
-    <div class="py-24 flex flex-col items-center justify-center space-y-3">
-      <div class="w-10 h-10 border-4 border-primary-200 border-t-primary-500 rounded-full animate-spin"></div>
-      <p class="text-xs text-slate-400 font-medium">Consolidando métricas ejecutivas...</p>
-    </div>
+  <div class="py-24 flex flex-col items-center justify-center space-y-3">
+    <div class="w-10 h-10 border-4 border-primary-200 border-t-primary-500 rounded-full animate-spin"></div>
+    <p class="text-xs text-slate-400 font-medium">Consolidando métricas ejecutivas...</p>
+  </div>
   }
 
   <!-- Error State -->
   @if (error()) {
-    <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between">
-      <span>{{ error() }}</span>
-      <button (click)="loadDashboardData()" class="underline font-bold">Reintentar</button>
-    </div>
+  <div
+    class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between">
+    <span>{{ error() }}</span>
+    <button (click)="loadDashboardData()" class="underline font-bold">Reintentar</button>
+  </div>
   }
 
   @if (summary()) {
-    <!-- 4 HERO KPI CARDS ACARA STYLE -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <!-- 1. Valuación de Inventario (Blue Accent) -->
-      <div class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Valuación Almacén</span>
-          <div class="w-10 h-10 rounded-2xl bg-accent-blue/10 text-accent-blue flex items-center justify-center font-bold">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4">
-          <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            {{ summary()!.kpis.totalInventoryValuation | currencyFormat }}
-          </div>
-          <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-            <span class="font-bold text-slate-700">{{ summary()!.kpis.totalStockUnits }}</span> unidades en existencia
-          </p>
-        </div>
-        <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-          <span class="text-slate-400 font-medium">{{ summary()!.kpis.totalProductsCount }} refs activas</span>
-          <span class="text-primary-500 font-bold cursor-pointer hover:underline" (click)="navigateTo('/products')">Ver catálogo ›</span>
+  <!-- 4 HERO KPI CARDS STOCKFLOW STYLE -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <!-- 1. Valuación de Inventario (Blue Accent) -->
+    <div
+      class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Valuación Almacén</span>
+        <div
+          class="w-10 h-10 rounded-2xl bg-accent-blue/10 text-accent-blue flex items-center justify-center font-bold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
         </div>
       </div>
-
-      <!-- 2. Ventas Totales (Coral Accent) -->
-      <div class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ventas Facturadas</span>
-          <div class="w-10 h-10 rounded-2xl bg-primary-50 text-primary-500 flex items-center justify-center font-bold">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
+      <div class="mt-4">
+        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          {{ summary()!.kpis.totalInventoryValuation | currencyFormat }}
         </div>
-        <div class="mt-4">
-          <div class="text-2xl sm:text-3xl font-extrabold text-primary-500 tracking-tight">
-            {{ summary()!.kpis.totalSalesAmount | currencyFormat }}
-          </div>
-          <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-            <span class="font-bold text-slate-700">{{ summary()!.kpis.completedSalesCount }}</span> ventas completadas
-          </p>
-        </div>
-        <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-          <span class="text-emerald-600 font-bold">100% cobradas</span>
-          <span class="text-primary-500 font-bold cursor-pointer hover:underline" (click)="navigateTo('/sales')">Ir a ventas ›</span>
-        </div>
+        <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+          <span class="font-bold text-slate-700">{{ summary()!.kpis.totalStockUnits }}</span> unidades en existencia
+        </p>
       </div>
-
-      <!-- 3. Abastecimiento y Compras (Cyan / Purple Accent) -->
-      <div class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Compras & Ordenes</span>
-          <div class="w-10 h-10 rounded-2xl bg-accent-cyan/10 text-accent-cyan flex items-center justify-center font-bold">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4">
-          <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            {{ summary()!.kpis.totalPurchasesAmount | currencyFormat }}
-          </div>
-          <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-            <span class="font-bold text-amber-600">{{ summary()!.kpis.pendingPurchasesCount }}</span> pendientes
-          </p>
-        </div>
-        <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-          <span class="text-slate-400 font-medium">Ingreso a bodega</span>
-          <span class="text-primary-500 font-bold cursor-pointer hover:underline" (click)="navigateTo('/purchases')">Gestionar ›</span>
-        </div>
-      </div>
-
-      <!-- 4. Alertas de Stock Crítico -->
-      <div class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alertas de Stock</span>
-          <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center font-bold">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4">
-          <div class="text-2xl sm:text-3xl font-extrabold text-rose-500 tracking-tight">
-            {{ summary()!.kpis.lowStockProductsCount + summary()!.kpis.outOfStockProductsCount }}
-          </div>
-          <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-            <span class="font-bold text-rose-600">{{ summary()!.kpis.outOfStockProductsCount }}</span> agotados |
-            <span class="font-bold text-amber-600">{{ summary()!.kpis.lowStockProductsCount }}</span> bajo stock
-          </p>
-        </div>
-        <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-          <span class="text-rose-500 font-bold">Requiere atención</span>
-          <span class="text-slate-600 font-bold cursor-pointer hover:underline" (click)="navigateTo('/alerts')">Ver alertas ›</span>
-        </div>
+      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <span class="text-slate-400 font-medium">{{ summary()!.kpis.totalProductsCount }} refs activas</span>
+        <span class="text-primary-500 font-bold cursor-pointer hover:underline" (click)="navigateTo('/products')">Ver
+          catálogo ›</span>
       </div>
     </div>
 
-    <!-- DOS COLUMNAS PRINCIPALES -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <!-- COLUMNA IZQUIERDA (7/12) -->
-      <div class="lg:col-span-7 space-y-8">
-        <!-- Distribución de Inventario por Categoría -->
-        <div class="bg-white rounded-3xl border border-slate-100/90 p-6 sm:p-7 shadow-card space-y-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-base font-extrabold text-slate-900">Distribución de Inventario por Categoría</h2>
-              <p class="text-xs text-slate-400 font-medium mt-0.5">Participación patrimonial y volumen de existencias por rubro.</p>
-            </div>
-            <span class="text-xs font-bold text-primary-500 cursor-pointer hover:underline" (click)="navigateTo('/directory')">
-              Ver categorías ›
-            </span>
-          </div>
+    <!-- 2. Ventas Totales (Coral Accent) -->
+    <div
+      class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ventas Facturadas</span>
+        <div class="w-10 h-10 rounded-2xl bg-primary-50 text-primary-500 flex items-center justify-center font-bold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+            </path>
+          </svg>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="text-2xl sm:text-3xl font-extrabold text-primary-500 tracking-tight">
+          {{ summary()!.kpis.totalSalesAmount | currencyFormat }}
+        </div>
+        <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+          <span class="font-bold text-slate-700">{{ summary()!.kpis.completedSalesCount }}</span> ventas completadas
+        </p>
+      </div>
+      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <span class="text-emerald-600 font-bold">100% cobradas</span>
+        <span class="text-primary-500 font-bold cursor-pointer hover:underline" (click)="navigateTo('/sales')">Ir a
+          ventas ›</span>
+      </div>
+    </div>
 
-          <div class="space-y-4">
-            @for (cat of summary()!.categories; track cat.categoryId) {
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between text-xs font-medium">
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold text-slate-800">{{ cat.categoryName }}</span>
-                    <span class="text-slate-400 text-[11px]">({{ cat.productCount }} prods / {{ cat.totalStock }} uds)</span>
-                  </div>
-                  <div class="font-bold text-slate-900">
-                    {{ cat.totalValuation | currencyFormat }}
-                    <span class="text-slate-400 text-[10px] font-medium">({{ cat.percentage }}%)</span>
-                  </div>
-                </div>
-                <!-- Barra de Progreso Coral Acara Style -->
-                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                  <div
-                    class="bg-gradient-to-r from-primary-500 to-primary-400 h-full rounded-full transition-all duration-500"
-                    [style.width.%]="cat.percentage"
-                  ></div>
-                </div>
-              </div>
-            }
+    <!-- 3. Abastecimiento y Compras (Cyan / Purple Accent) -->
+    <div
+      class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Compras & Ordenes</span>
+        <div
+          class="w-10 h-10 rounded-2xl bg-accent-cyan/10 text-accent-cyan flex items-center justify-center font-bold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          {{ summary()!.kpis.totalPurchasesAmount | currencyFormat }}
+        </div>
+        <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+          <span class="font-bold text-amber-600">{{ summary()!.kpis.pendingPurchasesCount }}</span> pendientes
+        </p>
+      </div>
+      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <span class="text-slate-400 font-medium">Ingreso a bodega</span>
+        <span class="text-primary-500 font-bold cursor-pointer hover:underline"
+          (click)="navigateTo('/purchases')">Gestionar ›</span>
+      </div>
+    </div>
+
+    <!-- 4. Alertas de Stock Crítico -->
+    <div
+      class="bg-white rounded-3xl p-6 border border-slate-100/90 shadow-card hover:shadow-card-hover relative overflow-hidden group transition-all">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alertas de Stock</span>
+        <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center font-bold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+            </path>
+          </svg>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="text-2xl sm:text-3xl font-extrabold text-rose-500 tracking-tight">
+          {{ summary()!.kpis.lowStockProductsCount + summary()!.kpis.outOfStockProductsCount }}
+        </div>
+        <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+          <span class="font-bold text-rose-600">{{ summary()!.kpis.outOfStockProductsCount }}</span> agotados |
+          <span class="font-bold text-amber-600">{{ summary()!.kpis.lowStockProductsCount }}</span> bajo stock
+        </p>
+      </div>
+      <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <span class="text-rose-500 font-bold">Requiere atención</span>
+        <span class="text-slate-600 font-bold cursor-pointer hover:underline" (click)="navigateTo('/alerts')">Ver
+          alertas ›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOS COLUMNAS PRINCIPALES -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- COLUMNA IZQUIERDA (7/12) -->
+    <div class="lg:col-span-7 space-y-8">
+      <!-- Distribución de Inventario por Categoría -->
+      <div class="bg-white rounded-3xl border border-slate-100/90 p-6 sm:p-7 shadow-card space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">Distribución de Inventario por Categoría</h2>
+            <p class="text-xs text-slate-400 font-medium mt-0.5">Participación patrimonial y volumen de existencias por
+              rubro.</p>
           </div>
+          <span class="text-xs font-bold text-primary-500 cursor-pointer hover:underline"
+            (click)="navigateTo('/directory')">
+            Ver categorías ›
+          </span>
         </div>
 
-        <!-- Alertas de Reabastecimiento Inmediato -->
-        <div class="bg-white rounded-3xl border border-slate-100/90 p-6 sm:p-7 shadow-card space-y-5">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
+        <div class="space-y-4">
+          @for (cat of summary()!.categories; track cat.categoryId) {
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs font-medium">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-800">{{ cat.categoryName }}</span>
+                <span class="text-slate-400 text-[11px]">({{ cat.productCount }} prods / {{ cat.totalStock }}
+                  uds)</span>
               </div>
-              <div>
-                <h2 class="text-base font-extrabold text-slate-900">Productos con Stock Crítico</h2>
-                <p class="text-xs text-slate-400 font-medium">Existencias por debajo del umbral mínimo de seguridad.</p>
+              <div class="font-bold text-slate-900">
+                {{ cat.totalValuation | currencyFormat }}
+                <span class="text-slate-400 text-[10px] font-medium">({{ cat.percentage }}%)</span>
               </div>
             </div>
-            <span class="text-xs font-bold text-primary-500 cursor-pointer hover:underline" (click)="navigateTo('/products')">
-              Gestionar ›
-            </span>
+            <!-- Barra de Progreso Coral StockFlow Style -->
+            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+              <div
+                class="bg-gradient-to-r from-primary-500 to-primary-400 h-full rounded-full transition-all duration-500"
+                [style.width.%]="cat.percentage"></div>
+            </div>
           </div>
-
-          @if (summary()!.criticalProducts.length === 0) {
-            <div class="py-8 text-center text-xs text-slate-400 font-medium">
-              ✓ Todo el inventario se encuentra en niveles saludables de existencia.
-            </div>
-          } @else {
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th class="py-3 pl-2">Producto</th>
-                    <th class="py-3 px-2 text-center">Stock Actual</th>
-                    <th class="py-3 px-2 text-center">Mínimo</th>
-                    <th class="py-3 px-2 text-center">Estado</th>
-                    <th class="py-3 pr-2 text-right">Acción</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  @for (cp of summary()!.criticalProducts; track cp.productId) {
-                    <tr class="hover:bg-slate-50/70 transition-colors">
-                      <td class="py-3 pl-2">
-                        <strong class="text-slate-900 font-bold block">{{ cp.name }}</strong>
-                        <span class="font-mono text-[10px] text-slate-400 font-medium">{{ cp.sku }}</span>
-                      </td>
-                      <td class="py-3 px-2 text-center font-bold" [class]="cp.currentStock === 0 ? 'text-rose-500' : 'text-amber-500'">
-                        {{ cp.currentStock }}
-                      </td>
-                      <td class="py-3 px-2 text-center text-slate-500 font-medium">
-                        {{ cp.minStock }}
-                      </td>
-                      <td class="py-3 px-2 text-center">
-                        <span
-                          class="px-2.5 py-1 rounded-full text-[10px] font-bold"
-                          [class]="cp.currentStock === 0 ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'"
-                        >
-                          {{ cp.status }}
-                        </span>
-                      </td>
-                      <td class="py-3 pr-2 text-right">
-                        <button
-                          type="button"
-                          (click)="navigateTo('/purchases')"
-                          class="px-3 py-1.5 rounded-xl bg-primary-50 text-primary-600 hover:bg-primary-500 hover:text-white text-[11px] font-bold transition-all cursor-pointer"
-                        >
-                          Abastecer
-                        </button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
           }
         </div>
       </div>
 
-      <!-- COLUMNA DERECHA (5/12) -->
-      <div class="lg:col-span-5 space-y-8">
-        <!-- Accesos Rápidos Operativos Acara Style -->
-        <div class="bg-white rounded-3xl border border-slate-100/90 p-6 sm:p-7 shadow-card space-y-5">
-          <h2 class="text-base font-extrabold text-slate-900">Accesos Rápidos</h2>
-          <div class="grid grid-cols-2 gap-3.5">
-            <button
-              type="button"
-              (click)="navigateTo('/sales', { new: 'true' })"
-              class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-primary-50 hover:border-primary-200 transition-all text-left group cursor-pointer"
-            >
-              <div class="w-9 h-9 rounded-xl bg-primary-50 text-primary-500 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-                </svg>
-              </div>
-              <strong class="block text-xs font-bold text-slate-900">Nueva Venta</strong>
-              <span class="text-[11px] text-slate-400 font-medium">Facturar a cliente</span>
-            </button>
-
-            <button
-              type="button"
-              (click)="navigateTo('/purchases', { new: 'true' })"
-              class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-accent-cyan/10 hover:border-accent-cyan/30 transition-all text-left group cursor-pointer"
-            >
-              <div class="w-9 h-9 rounded-xl bg-accent-cyan/10 text-accent-cyan flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                </svg>
-              </div>
-              <strong class="block text-xs font-bold text-slate-900">Orden Compra</strong>
-              <span class="text-[11px] text-slate-400 font-medium">Pedir a proveedor</span>
-            </button>
-
-            <button
-              type="button"
-              (click)="navigateTo('/inventory')"
-              class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-accent-blue/10 hover:border-accent-blue/30 transition-all text-left group cursor-pointer"
-            >
-              <div class="w-9 h-9 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-              </div>
-              <strong class="block text-xs font-bold text-slate-900">Ajuste Kardex</strong>
-              <span class="text-[11px] text-slate-400 font-medium">Conteo o merma</span>
-            </button>
-
-            <button
-              type="button"
-              (click)="navigateTo('/products')"
-              class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-purple-50 hover:border-purple-200 transition-all text-left group cursor-pointer"
-            >
-              <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
-                <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                </svg>
-              </div>
-              <strong class="block text-xs font-bold text-slate-900">Catálogo</strong>
-              <span class="text-[11px] text-slate-400 font-medium">Nuevos productos</span>
-            </button>
+      <!-- Alertas de Reabastecimiento Inmediato -->
+      <div class="bg-white rounded-3xl border border-slate-100/90 p-6 sm:p-7 shadow-card space-y-5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                </path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-slate-900">Productos con Stock Crítico</h2>
+              <p class="text-xs text-slate-400 font-medium">Existencias por debajo del umbral mínimo de seguridad.</p>
+            </div>
           </div>
+          <span class="text-xs font-bold text-primary-500 cursor-pointer hover:underline"
+            (click)="navigateTo('/products')">
+            Gestionar ›
+          </span>
         </div>
 
-        <!-- Trazabilidad en Vivo (Kardex Feed) Acara Style -->
-        <div class="bg-white rounded-3xl border border-slate-100/90 p-6 sm:p-7 shadow-card space-y-5">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base font-extrabold text-slate-900">Trazabilidad en Vivo (Kardex)</h2>
-            <span class="text-xs font-bold text-primary-500 cursor-pointer hover:underline" (click)="navigateTo('/inventory')">
-              Ver Kardex ›
-            </span>
-          </div>
-
-          <div class="space-y-3">
-            @for (m of summary()!.recentMovements; track m.movementNumber) {
-              <div class="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100 flex items-center justify-between text-xs">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-2xl bg-primary-50 text-primary-600 font-bold text-[11px] flex items-center justify-center flex-shrink-0">
-                    {{ getInitials(m.userName) }}
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <strong class="text-slate-900 font-bold">{{ m.productSku }}</strong>
-                      <span
-                        class="px-2 py-0.5 rounded-full text-[9px] font-bold"
-                        [class]="m.quantityDelta > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'"
-                      >
-                        {{ m.movementType }}
-                      </span>
-                    </div>
-                    <span class="text-[11px] text-slate-400 font-medium truncate max-w-[180px] block mt-0.5">
-                      {{ m.productName }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="text-right">
-                  <span
-                    class="font-bold block"
-                    [class]="m.quantityDelta > 0 ? 'text-emerald-600' : 'text-rose-500'"
-                  >
-                    {{ m.quantityDelta > 0 ? '+' + m.quantityDelta : m.quantityDelta }}
+        @if (summary()!.criticalProducts.length === 0) {
+        <div class="py-8 text-center text-xs text-slate-400 font-medium">
+          ✓ Todo el inventario se encuentra en niveles saludables de existencia.
+        </div>
+        } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <th class="py-3 pl-2">Producto</th>
+                <th class="py-3 px-2 text-center">Stock Actual</th>
+                <th class="py-3 px-2 text-center">Mínimo</th>
+                <th class="py-3 px-2 text-center">Estado</th>
+                <th class="py-3 pr-2 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @for (cp of summary()!.criticalProducts; track cp.productId) {
+              <tr class="hover:bg-slate-50/70 transition-colors">
+                <td class="py-3 pl-2">
+                  <strong class="text-slate-900 font-bold block">{{ cp.name }}</strong>
+                  <span class="font-mono text-[10px] text-slate-400 font-medium">{{ cp.sku }}</span>
+                </td>
+                <td class="py-3 px-2 text-center font-bold"
+                  [class]="cp.currentStock === 0 ? 'text-rose-500' : 'text-amber-500'">
+                  {{ cp.currentStock }}
+                </td>
+                <td class="py-3 px-2 text-center text-slate-500 font-medium">
+                  {{ cp.minStock }}
+                </td>
+                <td class="py-3 px-2 text-center">
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold"
+                    [class]="cp.currentStock === 0 ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'">
+                    {{ cp.status }}
                   </span>
-                  <span class="text-[10px] text-slate-400 font-medium">{{ m.createdAt | date:'shortTime' }}</span>
-                </div>
+                </td>
+                <td class="py-3 pr-2 text-right">
+                  <button type="button" (click)="navigateTo('/purchases')"
+                    class="px-3 py-1.5 rounded-xl bg-primary-50 text-primary-600 hover:bg-primary-500 hover:text-white text-[11px] font-bold transition-all cursor-pointer">
+                    Abastecer
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA (5/12) -->
+    <div class="lg:col-span-5 space-y-8">
+      <!-- Accesos Rápidos Operativos StockFlow Style -->
+      <div class="bg-white rounded-3xl border border-slate-100/90 p-6 sm:p-7 shadow-card space-y-5">
+        <h2 class="text-base font-extrabold text-slate-900">Accesos Rápidos</h2>
+        <div class="grid grid-cols-2 gap-3.5">
+          <button type="button" (click)="navigateTo('/sales', { new: 'true' })"
+            class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-primary-50 hover:border-primary-200 transition-all text-left group cursor-pointer">
+            <div
+              class="w-9 h-9 rounded-xl bg-primary-50 text-primary-500 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </div>
+            <strong class="block text-xs font-bold text-slate-900">Nueva Venta</strong>
+            <span class="text-[11px] text-slate-400 font-medium">Facturar a cliente</span>
+          </button>
+
+          <button type="button" (click)="navigateTo('/purchases', { new: 'true' })"
+            class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-accent-cyan/10 hover:border-accent-cyan/30 transition-all text-left group cursor-pointer">
+            <div
+              class="w-9 h-9 rounded-xl bg-accent-cyan/10 text-accent-cyan flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z">
+                </path>
+              </svg>
+            </div>
+            <strong class="block text-xs font-bold text-slate-900">Orden Compra</strong>
+            <span class="text-[11px] text-slate-400 font-medium">Pedir a proveedor</span>
+          </button>
+
+          <button type="button" (click)="navigateTo('/inventory')"
+            class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-accent-blue/10 hover:border-accent-blue/30 transition-all text-left group cursor-pointer">
+            <div
+              class="w-9 h-9 rounded-xl bg-accent-blue/10 text-accent-blue flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                </path>
+              </svg>
+            </div>
+            <strong class="block text-xs font-bold text-slate-900">Ajuste Kardex</strong>
+            <span class="text-[11px] text-slate-400 font-medium">Conteo o merma</span>
+          </button>
+
+          <button type="button" (click)="navigateTo('/products')"
+            class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-purple-50 hover:border-purple-200 transition-all text-left group cursor-pointer">
+            <div
+              class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+                </path>
+              </svg>
+            </div>
+            <strong class="block text-xs font-bold text-slate-900">Catálogo</strong>
+            <span class="text-[11px] text-slate-400 font-medium">Nuevos productos</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Trazabilidad en Vivo (Kardex Feed) StockFlow Style -->
+      <div class="bg-white rounded-3xl border border-slate-100/90 p-6 sm:p-7 shadow-card space-y-5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-extrabold text-slate-900">Trazabilidad en Vivo (Kardex)</h2>
+          <span class="text-xs font-bold text-primary-500 cursor-pointer hover:underline"
+            (click)="navigateTo('/inventory')">
+            Ver Kardex ›
+          </span>
+        </div>
+
+        <div class="space-y-3">
+          @for (m of summary()!.recentMovements; track m.movementNumber) {
+          <div
+            class="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-8 h-8 rounded-2xl bg-primary-50 text-primary-600 font-bold text-[11px] flex items-center justify-center flex-shrink-0">
+                {{ getInitials(m.userName) }}
               </div>
-            }
+              <div>
+                <div class="flex items-center gap-2">
+                  <strong class="text-slate-900 font-bold">{{ m.productSku }}</strong>
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-bold"
+                    [class]="m.quantityDelta > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'">
+                    {{ m.movementType }}
+                  </span>
+                </div>
+                <span class="text-[11px] text-slate-400 font-medium truncate max-w-[180px] block mt-0.5">
+                  {{ m.productName }}
+                </span>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <span class="font-bold block" [class]="m.quantityDelta > 0 ? 'text-emerald-600' : 'text-rose-500'">
+                {{ m.quantityDelta > 0 ? '+' + m.quantityDelta : m.quantityDelta }}
+              </span>
+              <span class="text-[10px] text-slate-400 font-medium">{{ m.createdAt | date:'shortTime' }}</span>
+            </div>
           </div>
+          }
         </div>
       </div>
     </div>
+  </div>
   }
 </div>

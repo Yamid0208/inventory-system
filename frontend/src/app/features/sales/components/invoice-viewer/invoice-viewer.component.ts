@@ -89,7 +89,7 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
                   <div class="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-black text-sm">
                     A
                   </div>
-                  <h1 class="text-2xl font-black text-slate-900 tracking-tight">ACARA INVENTORY</h1>
+                  <h1 class="text-2xl font-black text-slate-900 tracking-tight">STOCKFLOW INVENTORY</h1>
                 </div>
                 <p class="text-xs text-slate-600 font-semibold">NIT: 900.123.456-7 · Régimen Responsable de IVA</p>
                 <p class="text-xs text-slate-500">Av. Principal #123-45, Centro Comercial Plaza</p>
