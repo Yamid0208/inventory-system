@@ -15,8 +15,8 @@ import { SettingsService } from '../../../../core/services/settings.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, AppButtonComponent, CurrencyFormatPipe],
   template: `
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-100 flex flex-col space-y-5 my-8">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div class="bg-white rounded-2xl sm:rounded-3xl max-w-3xl w-full p-4 sm:p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4 sm:space-y-5 my-auto max-h-[92vh] overflow-y-auto transition-all">
         <!-- Encabezado -->
         <div class="flex items-center justify-between border-b border-slate-100 pb-4">
           <div class="flex items-center gap-3">
@@ -324,7 +324,7 @@ import { SettingsService } from '../../../../core/services/settings.service';
           </div>
 
           <!-- Botones de Acción -->
-          <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+          <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100">
             <app-button variant="outline" size="sm" type="button" (clicked)="onCancel()">
               Cancelar
             </app-button>

@@ -10,10 +10,10 @@ import { Product, ProductBatch, CreateProductBatchRequest } from '../../../../co
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="batch-modal-title">
+    <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-in">
+      <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto my-auto" role="dialog" aria-modal="true" aria-labelledby="batch-modal-title">
         <!-- HEADER -->
-        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div class="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg">
               🏷️

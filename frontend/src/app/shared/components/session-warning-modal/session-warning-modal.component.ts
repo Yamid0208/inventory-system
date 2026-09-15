@@ -9,13 +9,13 @@ import { SessionTimeoutService } from '../../../core/services/session-timeout.se
   template: `
     @if (sessionTimeoutService.showWarning()) {
       <div
-        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-in"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="session-warning-title"
         aria-describedby="session-warning-desc"
       >
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-center space-y-4">
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-4 sm:p-6 text-center space-y-4 my-auto max-h-[92vh] overflow-y-auto">
           <!-- ICONO TEMPORIZADOR -->
           <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center text-2xl font-bold animate-pulse">
             ⏳
@@ -38,11 +38,11 @@ import { SessionTimeoutService } from '../../../core/services/session-timeout.se
           </div>
 
           <!-- BOTONES DE ACCIÓN -->
-          <div class="flex items-center justify-center gap-3 pt-2">
+          <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 pt-2">
             <button
               type="button"
               (click)="sessionTimeoutService.autoLogout()"
-              class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-800 hover:bg-slate-50 text-xs font-semibold cursor-pointer transition-all"
+              class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-800 hover:bg-slate-50 text-xs font-semibold cursor-pointer transition-all text-center"
             >
               Cerrar Sesión Ahora
             </button>
@@ -50,7 +50,7 @@ import { SessionTimeoutService } from '../../../core/services/session-timeout.se
             <button
               type="button"
               (click)="sessionTimeoutService.extendSession()"
-              class="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-bold shadow-md shadow-primary-500/20 cursor-pointer transition-all"
+              class="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-bold shadow-md shadow-primary-500/20 cursor-pointer transition-all text-center"
             >
               Mantener Sesión Activa
             </button>

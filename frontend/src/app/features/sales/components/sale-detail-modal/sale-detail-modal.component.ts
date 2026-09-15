@@ -165,7 +165,7 @@ import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pip
         </div>
 
         <!-- Acciones Inferiores en Pantalla (Fijado abajo) -->
-        <div class="flex-shrink-0 flex items-center justify-between p-4 sm:px-6 border-t border-slate-100 no-print bg-white">
+        <div class="flex-shrink-0 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 p-4 sm:px-6 border-t border-slate-100 no-print bg-white">
           <div>
             @if (sale.status === 'Completed') {
               <app-button variant="danger" size="sm" (clicked)="onCancelSale()">

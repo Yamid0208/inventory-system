@@ -44,7 +44,10 @@ export class AlertsComponent implements OnInit {
     });
 
     this.alertService.getSummary().subscribe({
-      next: (sum) => this.summary.set(sum)
+      next: (sum) => {
+        this.summary.set(sum);
+        this.alertService.markAsSeen(sum.totalAlerts);
+      }
     });
   }
 
@@ -68,7 +71,6 @@ export class AlertsComponent implements OnInit {
       queryParams: {
         new: 'true',
         productId: alert.productId,
-        quantity: alert.suggestedQuantity,
         supplierId: alert.supplierId
       }
     });
