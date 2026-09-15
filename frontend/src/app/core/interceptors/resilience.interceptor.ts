@@ -22,11 +22,21 @@ export const resilienceInterceptor: HttpInterceptorFn = (req, next) => {
       }
     }),
     catchError((error: HttpErrorResponse) => {
+      const isAuthEndpoint = req.url.includes('/api/v1/auth/login') ||
+                             req.url.includes('/api/v1/auth/refresh') ||
+                             req.url.includes('/api/v1/auth/logout');
+      const isLoginRoute = router.url.includes('/login');
+      const wasAuthenticated = authService.isAuthenticated();
+
       // Manejo centralizado de expiración de sesión
-      if (error.status === 401 && !req.url.includes('/api/v1/auth/login')) {
-        notificationService.warning('Tu sesión ha expirado. Por favor inicia sesión nuevamente.', 'Sesión Expirada');
-        authService.logout();
-        router.navigate(['/login']);
+      if (error.status === 401) {
+        if (!isAuthEndpoint && !isLoginRoute && wasAuthenticated) {
+          notificationService.warning('Tu sesión ha expirado. Por favor inicia sesión nuevamente.', 'Sesión Expirada');
+        }
+        authService.setAccessToken(null);
+        if (!isLoginRoute) {
+          router.navigate(['/login']);
+        }
       } else if (error.status === 0) {
         notificationService.error('No se pudo establecer comunicación con el servidor.', 'Error de Red');
       }
