@@ -1,11 +1,14 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-  <div class="bg-white rounded-2xl sm:rounded-3xl max-w-3xl w-full p-4 sm:p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4 sm:space-y-5 my-auto max-h-[92vh] overflow-y-auto transition-all">
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+  <div
+    class="bg-white rounded-2xl sm:rounded-3xl max-w-3xl w-full p-4 sm:p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4 sm:space-y-5 my-auto max-h-[92vh] overflow-y-auto transition-all">
     <!-- Encabezado -->
     <div class="flex items-center justify-between border-b border-slate-100 pb-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
           </svg>
         </div>
         <div>
@@ -13,11 +16,8 @@
           <p class="text-xs text-slate-500">Registra compras a proveedores con incremento atómico de stock.</p>
         </div>
       </div>
-      <button
-        type="button"
-        (click)="onCancel()"
-        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-      >
+      <button type="button" (click)="onCancel()"
+        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -26,12 +26,13 @@
 
     <!-- Alerta de Error -->
     @if (getErrorMessage()) {
-      <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
-        <svg class="w-4 h-4 flex-shrink-0 text-rose-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <span class="font-medium">{{ getErrorMessage() }}</span>
-      </div>
+    <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
+      <svg class="w-4 h-4 flex-shrink-0 text-rose-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span class="font-medium">{{ getErrorMessage() }}</span>
+    </div>
     }
 
     <!-- Formulario -->
@@ -40,142 +41,117 @@
         <!-- Proveedor con Autocomplete -->
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Proveedor *</label>
-          <app-autocomplete
-            formControlName="supplierId"
-            [options]="supplierOptions()"
+          <app-autocomplete formControlName="supplierId" [options]="supplierOptions()"
             placeholder="Escriba para buscar proveedor..."
-            (selectionChange)="onSupplierChange($event)"
-          ></app-autocomplete>
+            (selectionChange)="onSupplierChange($event)"></app-autocomplete>
         </div>
 
         <!-- Fecha de Compra -->
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Fecha de la Orden *</label>
-          <input
-            type="date"
-            formControlName="purchaseDate"
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-          />
+          <input type="date" formControlName="purchaseDate"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all" />
         </div>
       </div>
 
       <!-- Sección de Productos a Abastecer: Oculta hasta seleccionar un proveedor -->
       @if (!selectedSupplierId()) {
-        <div class="p-6 rounded-2xl bg-slate-50/70 border border-dashed border-slate-200 text-center space-y-2 animate-fade-in">
-          <div class="w-9 h-9 rounded-xl bg-slate-200/60 text-slate-400 flex items-center justify-center mx-auto">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-            </svg>
-          </div>
-          <h4 class="text-xs font-bold text-slate-700">Selecciona un Proveedor</h4>
-          <p class="text-[11px] text-slate-400 max-w-sm mx-auto">
-            La lista de productos disponibles se habilitará automáticamente para mostrar solo los productos asociados al proveedor elegido.
+      <div
+        class="p-6 rounded-2xl bg-slate-50/70 border border-dashed border-slate-200 text-center space-y-2 animate-fade-in">
+        <div class="w-9 h-9 rounded-xl bg-slate-200/60 text-slate-400 flex items-center justify-center mx-auto">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+            </path>
+          </svg>
+        </div>
+        <h4 class="text-xs font-bold text-slate-700">Selecciona un Proveedor</h4>
+        <p class="text-[11px] text-slate-400 max-w-sm mx-auto">
+          La lista de productos disponibles se habilitará automáticamente para mostrar solo los productos asociados al
+          proveedor elegido.
+        </p>
+      </div>
+      } @else {
+      <!-- Líneas de Detalle -->
+      <div class="space-y-3 pt-2 animate-fade-in">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-slate-800">
+            Productos a Abastecer (Líneas de Compra)
+            <span class="text-[11px] font-normal text-slate-400 ml-1">
+              ({{ filteredProducts().length }} producto(s) del proveedor disponible(s))
+            </span>
+          </h3>
+          <button type="button" (click)="addItem()" [disabled]="filteredProducts().length === 0"
+            class="px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+            <span>+ Agregar Línea</span>
+          </button>
+        </div>
+
+        @if (filteredProducts().length === 0) {
+        <div class="p-6 bg-amber-50/70 border border-amber-200/80 rounded-xl text-center space-y-1">
+          <p class="text-xs font-bold text-amber-800">Este proveedor no tiene productos asignados en el catálogo.</p>
+          <p class="text-[11px] text-amber-700">
+            Para poder crear una orden de compra, asigne primero productos a este proveedor desde el catálogo de
+            productos.
           </p>
         </div>
-      } @else {
-        <!-- Líneas de Detalle -->
-        <div class="space-y-3 pt-2 animate-fade-in">
-          <div class="flex items-center justify-between">
-            <h3 class="font-bold text-slate-800">
-              Productos a Abastecer (Líneas de Compra)
-              <span class="text-[11px] font-normal text-slate-400 ml-1">
-                ({{ filteredProducts().length }} producto(s) del proveedor disponible(s))
-              </span>
-            </h3>
-            <button
-              type="button"
-              (click)="addItem()"
-              [disabled]="filteredProducts().length === 0"
-              class="px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <span>+ Agregar Línea</span>
+        } @else {
+        <div formArrayName="items" class="space-y-2 max-h-60  pr-1">
+          @for (item of itemsArray.controls; track $index; let i = $index) {
+          <div [formGroupName]="i"
+            class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">
+            <!-- Producto con Autocomplete -->
+            <div class="flex-1 w-full sm:w-auto">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Producto (solo del proveedor)</label>
+              <app-autocomplete formControlName="productId" [options]="productOptions()"
+                placeholder="Buscar por SKU o nombre..."
+                (selectionChange)="onProductSelect(i, $event)"></app-autocomplete>
+            </div>
+
+            <!-- Cantidad con puntuación de miles -->
+            <div class="w-full sm:w-24">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Cantidad</label>
+              <input type="text" inputmode="numeric" appThousandsSeparator [maxDecimals]="0" formControlName="quantity"
+                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-center focus:outline-none focus:border-primary-500" />
+            </div>
+
+            <!-- Precio Unitario con puntuación de miles -->
+            <div class="w-full sm:w-28">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Precio Unit.</label>
+              <input type="text" inputmode="decimal" appThousandsSeparator [maxDecimals]="2" formControlName="unitPrice"
+                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-right focus:outline-none focus:border-primary-500" />
+            </div>
+
+            <!-- Subtotal de Línea -->
+            <div class="w-full sm:w-28 text-right">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Total Línea</label>
+              <div class="py-1.5 font-mono font-bold text-slate-800">
+                {{ getLineTotal(i) | currencyFormat }}
+              </div>
+            </div>
+
+            <!-- Eliminar Línea -->
+            <button type="button" (click)="removeItem(i)" [disabled]="itemsArray.length === 1"
+              class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+              title="Eliminar fila">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                </path>
+              </svg>
             </button>
           </div>
-
-          @if (filteredProducts().length === 0) {
-            <div class="p-6 bg-amber-50/70 border border-amber-200/80 rounded-xl text-center space-y-1">
-              <p class="text-xs font-bold text-amber-800">Este proveedor no tiene productos asignados en el catálogo.</p>
-              <p class="text-[11px] text-amber-700">
-                Para poder crear una orden de compra, asigne primero productos a este proveedor desde el catálogo de productos.
-              </p>
-            </div>
-          } @else {
-            <div formArrayName="items" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-              @for (item of itemsArray.controls; track $index; let i = $index) {
-                <div [formGroupName]="i" class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">
-                  <!-- Producto con Autocomplete -->
-                  <div class="flex-1 w-full sm:w-auto">
-                    <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Producto (solo del proveedor)</label>
-                    <app-autocomplete
-                      formControlName="productId"
-                      [options]="productOptions()"
-                      placeholder="Buscar por SKU o nombre..."
-                      (selectionChange)="onProductSelect(i, $event)"
-                    ></app-autocomplete>
-                  </div>
-
-                  <!-- Cantidad con puntuación de miles -->
-                  <div class="w-full sm:w-24">
-                    <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Cantidad</label>
-                    <input
-                      type="text"
-                      inputmode="numeric"
-                      appThousandsSeparator
-                      [maxDecimals]="0"
-                      formControlName="quantity"
-                      class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-center focus:outline-none focus:border-primary-500"
-                    />
-                  </div>
-
-                  <!-- Precio Unitario con puntuación de miles -->
-                  <div class="w-full sm:w-28">
-                    <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Precio Unit.</label>
-                    <input
-                      type="text"
-                      inputmode="decimal"
-                      appThousandsSeparator
-                      [maxDecimals]="2"
-                      formControlName="unitPrice"
-                      class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-right focus:outline-none focus:border-primary-500"
-                    />
-                  </div>
-
-                  <!-- Subtotal de Línea -->
-                  <div class="w-full sm:w-28 text-right">
-                    <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Total Línea</label>
-                    <div class="py-1.5 font-mono font-bold text-slate-800">
-                      {{ getLineTotal(i) | currencyFormat }}
-                    </div>
-                  </div>
-
-                  <!-- Eliminar Línea -->
-                  <button
-                    type="button"
-                    (click)="removeItem(i)"
-                    [disabled]="itemsArray.length === 1"
-                    class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
-                    title="Eliminar fila"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                  </button>
-                </div>
-              }
-            </div>
           }
         </div>
+        }
+      </div>
       }
 
       <!-- Resumen de Totales y Auto-Receive -->
       <div class="p-4 bg-slate-900 text-white rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="autoReceiveCheck"
-            formControlName="autoReceive"
-            class="w-4 h-4 text-primary-600 rounded border-slate-700 bg-slate-800 focus:ring-primary-500 cursor-pointer"
-          />
+          <input type="checkbox" id="autoReceiveCheck" formControlName="autoReceive"
+            class="w-4 h-4 text-primary-600 rounded border-slate-700 bg-slate-800 focus:ring-primary-500 cursor-pointer" />
           <label for="autoReceiveCheck" class="text-xs text-slate-300 cursor-pointer">
             <strong>Ingreso Inmediato:</strong> Incrementar existencias en almacén y Kardex ahora mismo.
           </label>
@@ -200,25 +176,19 @@
       <!-- Notas -->
       <div>
         <label class="block font-semibold text-slate-700 mb-1">Notas u Observaciones (Opcional)</label>
-        <textarea
-          formControlName="notes"
-          rows="2"
+        <textarea formControlName="notes" rows="2"
           placeholder="Número de factura del proveedor, condiciones de entrega..."
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all resize-none"
-        ></textarea>
+          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all resize-none"></textarea>
       </div>
 
       <!-- Botones de Acción -->
-      <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100">
+      <div
+        class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100">
         <app-button variant="outline" size="sm" type="button" (clicked)="onCancel()">
           Cancelar
         </app-button>
-        <app-button
-          variant="primary"
-          size="sm"
-          type="submit"
-          [disabled]="form.invalid || itemsArray.length === 0 || isLoading()"
-        >
+        <app-button variant="primary" size="sm" type="submit"
+          [disabled]="form.invalid || itemsArray.length === 0 || isLoading()">
           {{ isLoading() ? 'Procesando...' : 'Generar Orden de Compra' }}
         </app-button>
       </div>
