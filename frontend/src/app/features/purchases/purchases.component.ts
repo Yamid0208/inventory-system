@@ -5,6 +5,7 @@ import { PurchaseService } from '../../core/services/purchase.service';
 import { SupplierService } from '../../core/services/supplier.service';
 import { ProductService } from '../../core/services/product.service';
 import { ConfirmationService } from '../../core/services/confirmation.service';
+import { AlertService } from '../../core/services/alert.service';
 import { Purchase, PurchaseFilterParams, CreatePurchaseRequest } from '../../core/models/purchase.model';
 import { Supplier } from '../../core/models/supplier.model';
 import { Product } from '../../core/models/product.model';
@@ -33,6 +34,7 @@ export class PurchasesComponent implements OnInit {
   private supplierService = inject(SupplierService);
   private productService = inject(ProductService);
   private confirmationService = inject(ConfirmationService);
+  private alertService = inject(AlertService, { optional: true });
   private route = inject(ActivatedRoute);
 
   purchases = signal<Purchase[]>([]);
@@ -144,6 +146,7 @@ export class PurchasesComponent implements OnInit {
         this.modalLoading.set(false);
         this.isCreateModalOpen.set(false);
         this.loadPurchases();
+        this.alertService?.checkUnreadStatus();
       },
       error: (err) => {
         this.modalLoading.set(false);
@@ -162,6 +165,7 @@ export class PurchasesComponent implements OnInit {
       next: (updated) => {
         this.selectedPurchaseForDetail.set(null);
         this.loadPurchases();
+        this.alertService?.checkUnreadStatus();
       }
     });
   }

@@ -264,6 +264,6 @@
 
   <!-- Modal de Devolución -->
   @if (isReturnModalOpen()) {
-  <app-return-modal (closed)="isReturnModalOpen.set(false)" (saved)="loadKardex()"></app-return-modal>
+  <app-return-modal (closed)="isReturnModalOpen.set(false)" (saved)="onReturnSaved()"></app-return-modal>
   }
 </div>

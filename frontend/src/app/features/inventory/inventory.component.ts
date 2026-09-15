@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../../core/services/inventory.service';
 import { ProductService } from '../../core/services/product.service';
+import { AlertService } from '../../core/services/alert.service';
 import { InventoryMovement, KardexFilterParams, CreateStockAdjustmentRequest } from '../../core/models/inventory.model';
 import { Product } from '../../core/models/product.model';
 import { StockAdjustmentModalComponent } from './components/stock-adjustment-modal/stock-adjustment-modal.component';
@@ -27,6 +28,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 export class InventoryComponent implements OnInit {
   private inventoryService = inject(InventoryService);
   private productService = inject(ProductService);
+  private alertService = inject(AlertService, { optional: true });
 
   readonly Math = Math;
 
@@ -130,6 +132,7 @@ export class InventoryComponent implements OnInit {
         this.isAdjustmentModalOpen.set(false);
         this.loadProductsCatalog(); // Refrescar catálogo con stock actualizado
         this.loadKardex(); // Refrescar movimientos en tabla
+        this.alertService?.checkUnreadStatus();
       },
       error: (err) => {
         this.modalLoading.set(false);
@@ -137,6 +140,13 @@ export class InventoryComponent implements OnInit {
         this.modalError.set(detail);
       }
     });
+  }
+
+  onReturnSaved(): void {
+    this.isReturnModalOpen.set(false);
+    this.loadProductsCatalog();
+    this.loadKardex();
+    this.alertService?.checkUnreadStatus();
   }
 
   exportCsv(): void {

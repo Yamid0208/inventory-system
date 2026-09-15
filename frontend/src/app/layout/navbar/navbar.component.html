@@ -40,7 +40,9 @@
         </path>
       </svg>
       @if (alertService.hasUnreadAlerts()) {
-        <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary-500 rounded-full ring-2 ring-white animate-pulse"></span>
+        <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary-500 text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-sm animate-pulse">
+          {{ alertService.unreadCount() > 9 ? '9+' : (alertService.unreadCount() > 0 ? alertService.unreadCount() : '!') }}
+        </span>
       }
     </button>
 

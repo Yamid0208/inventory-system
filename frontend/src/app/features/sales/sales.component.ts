@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SaleService } from '../../core/services/sale.service';
 import { ProductService } from '../../core/services/product.service';
 import { ConfirmationService } from '../../core/services/confirmation.service';
+import { AlertService } from '../../core/services/alert.service';
 import { Sale, SaleFilterParams, CreateSaleRequest } from '../../core/models/sale.model';
 import { Product } from '../../core/models/product.model';
 import { SaleModalComponent } from './components/sale-modal/sale-modal.component';
@@ -32,6 +33,7 @@ export class SalesComponent implements OnInit {
   private saleService = inject(SaleService);
   private productService = inject(ProductService);
   private confirmationService = inject(ConfirmationService);
+  private alertService = inject(AlertService, { optional: true });
   private route = inject(ActivatedRoute);
 
   sales = signal<Sale[]>([]);
@@ -129,6 +131,7 @@ export class SalesComponent implements OnInit {
         this.isCreateModalOpen.set(false);
         this.loadProducts();
         this.loadSales();
+        this.alertService?.checkUnreadStatus();
 
         // En el caso de factura tradicional, se abre el visor y se imprime automáticamente
         if (createdSale.invoiceType === 'Traditional' || !createdSale.invoiceType) {

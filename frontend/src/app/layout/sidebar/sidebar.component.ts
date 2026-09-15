@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { SidebarService } from '../../core/services/sidebar.service';
+import { AlertService } from '../../core/services/alert.service';
 import { UserRole } from '../../core/auth/models/auth.models';
 
 interface NavItem {
@@ -23,6 +24,7 @@ export class SidebarComponent {
   private router = inject(Router);
   authService = inject(AuthService);
   sidebarService = inject(SidebarService);
+  alertService = inject(AlertService, { optional: true });
 
   get navItems(): NavItem[] {
     const role: UserRole = this.authService.currentUser()?.role || 'Seller';
@@ -36,7 +38,15 @@ export class SidebarComponent {
       { label: 'Clientes', route: '/customers', icon: 'user', allowedRoles: ['SuperAdmin', 'Admin', 'Seller'] },
       { label: 'Categorías & Prov.', route: '/directory', icon: 'folder', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse'] },
       { label: 'Reportes', route: '/reports', icon: 'chart', allowedRoles: ['SuperAdmin', 'Admin'] },
-      { label: 'Alertas', route: '/alerts', icon: 'bell', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse'] },
+      {
+        label: 'Alertas',
+        route: '/alerts',
+        icon: 'bell',
+        badge: this.alertService?.hasUnreadAlerts()
+          ? (this.alertService.unreadCount() > 0 ? (this.alertService.unreadCount() > 9 ? '9+' : `${this.alertService.unreadCount()}`) : '!')
+          : undefined,
+        allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse']
+      },
       { label: 'Auditoría', route: '/audit', icon: 'shield', allowedRoles: ['SuperAdmin'] },
       {
         label: role === 'Admin' ? 'Empleados de Sede' : 'Usuarios del Sistema',

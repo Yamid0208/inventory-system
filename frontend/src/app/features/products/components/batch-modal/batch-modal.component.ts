@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BatchService } from '../../../../core/services/batch.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AlertService } from '../../../../core/services/alert.service';
 import { Product, ProductBatch, CreateProductBatchRequest } from '../../../../core/models/product.model';
 
 @Component({
@@ -17,6 +18,7 @@ export class BatchModalComponent implements OnInit {
 
   private batchService = inject(BatchService);
   private notificationService = inject(NotificationService);
+  private alertService = inject(AlertService, { optional: true });
 
   readonly Math = Math;
 
@@ -65,6 +67,7 @@ export class BatchModalComponent implements OnInit {
         this.newExpirationDate = '';
         this.newQuantity = 10;
         this.loadBatches();
+        this.alertService?.checkUnreadStatus();
       },
       error: (err) => {
         this.creating.set(false);

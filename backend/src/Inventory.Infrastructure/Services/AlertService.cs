@@ -56,7 +56,7 @@ public class AlertService : IAlertService
             // Reabastecimiento sugerido: llevar al doble del stock mínimo para amortiguar la demanda
             var suggestedQty = Math.Max(p.MinimumStock, (p.MinimumStock * 2) - p.CurrentStock);
             var estimatedCost = decimal.Round(suggestedQty * p.PurchasePrice, 2, MidpointRounding.AwayFromZero);
-            var severity = p.CurrentStock == 0 ? "Critical" : "Warning";
+            var severity = p.CurrentStock <= 0 ? "Critical" : "Warning";
 
             return new StockAlertDto(
                 p.Id,
@@ -119,7 +119,7 @@ public class AlertService : IAlertService
             .ToListAsync(cancellationToken);
 
         var totalAlerts = criticalProducts.Count;
-        var criticalCount = criticalProducts.Count(p => p.CurrentStock == 0);
+        var criticalCount = criticalProducts.Count(p => p.CurrentStock <= 0);
         var warningCount = criticalProducts.Count(p => p.CurrentStock > 0);
 
         var totalCost = criticalProducts.Sum(p =>

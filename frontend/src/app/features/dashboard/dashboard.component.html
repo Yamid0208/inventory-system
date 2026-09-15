@@ -7,9 +7,6 @@
           class="text-[11px] font-extrabold px-3 py-1 rounded-full bg-primary-50 text-primary-500 border border-primary-100">
           Panel de Control Operativo
         </span>
-        <span class="text-xs text-slate-400 font-semibold flex items-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> En vivo
-        </span>
       </div>
       <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
         {{ greeting() }}, {{ authService.currentUser()?.fullName || 'Administrador' }}
@@ -76,8 +73,7 @@
           </div>
         </div>
         <div class="mt-3">
-          <div
-            class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0"
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0"
             [title]="summary()!.kpis.totalInventoryValuation | currencyFormat">
             {{ summary()!.kpis.totalInventoryValuation | currencyFormat }}
           </div>
@@ -88,7 +84,8 @@
       </div>
       <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] gap-2">
         <span class="text-slate-400 font-medium truncate">{{ summary()!.kpis.totalProductsCount }} refs activas</span>
-        <span class="text-primary-500 font-bold cursor-pointer hover:underline flex-shrink-0" (click)="navigateTo('/products')">Ver
+        <span class="text-primary-500 font-bold cursor-pointer hover:underline flex-shrink-0"
+          (click)="navigateTo('/products')">Ver
           catálogo ›</span>
       </div>
     </div>
@@ -99,7 +96,8 @@
       <div>
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Ventas Facturadas</span>
-          <div class="w-10 h-10 rounded-2xl bg-primary-50 text-primary-500 flex items-center justify-center font-bold flex-shrink-0">
+          <div
+            class="w-10 h-10 rounded-2xl bg-primary-50 text-primary-500 flex items-center justify-center font-bold flex-shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
@@ -108,8 +106,7 @@
           </div>
         </div>
         <div class="mt-3">
-          <div
-            class="text-xl sm:text-2xl 2xl:text-3xl font-black text-primary-500 tracking-tight truncate min-w-0"
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-primary-500 tracking-tight truncate min-w-0"
             [title]="summary()!.kpis.totalSalesAmount | currencyFormat">
             {{ summary()!.kpis.totalSalesAmount | currencyFormat }}
           </div>
@@ -120,7 +117,8 @@
       </div>
       <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] gap-2">
         <span class="text-emerald-600 font-bold truncate">100% cobradas</span>
-        <span class="text-primary-500 font-bold cursor-pointer hover:underline flex-shrink-0" (click)="navigateTo('/sales')">Ir a
+        <span class="text-primary-500 font-bold cursor-pointer hover:underline flex-shrink-0"
+          (click)="navigateTo('/sales')">Ir a
           ventas ›</span>
       </div>
     </div>
@@ -140,8 +138,7 @@
           </div>
         </div>
         <div class="mt-3">
-          <div
-            class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0"
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0"
             [title]="summary()!.kpis.totalPurchasesAmount | currencyFormat">
             {{ summary()!.kpis.totalPurchasesAmount | currencyFormat }}
           </div>
@@ -163,7 +160,8 @@
       <div>
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-bold text-slate-400 uppercase tracking-wider truncate">Alertas de Stock</span>
-          <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center font-bold flex-shrink-0">
+          <div
+            class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center font-bold flex-shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
@@ -183,7 +181,8 @@
       </div>
       <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] gap-2">
         <span class="text-rose-500 font-bold truncate">Requiere atención</span>
-        <span class="text-slate-600 font-bold cursor-pointer hover:underline flex-shrink-0" (click)="navigateTo('/alerts')">Ver
+        <span class="text-slate-600 font-bold cursor-pointer hover:underline flex-shrink-0"
+          (click)="navigateTo('/alerts')">Ver
           alertas ›</span>
       </div>
     </div>

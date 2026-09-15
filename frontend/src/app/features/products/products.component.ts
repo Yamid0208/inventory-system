@@ -6,7 +6,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductService } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
 import { SupplierService } from '../../core/services/supplier.service';
-import { Product, CreateProductRequest, UpdateProductRequest, ProductFilterParams } from '../../core/models/product.model';
+import { AlertService } from '../../core/services/alert.service';
+import { Product, ProductFilterParams, CreateProductRequest, UpdateProductRequest } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Supplier } from '../../core/models/supplier.model';
 import { ProductModalComponent } from './components/product-modal/product-modal.component';
@@ -35,6 +36,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private supplierService = inject(SupplierService);
+  private alertService = inject(AlertService, { optional: true });
   private route = inject(ActivatedRoute);
 
   private searchSubject = new Subject<string>();
@@ -201,6 +203,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.modalLoading.set(false);
         this.isModalOpen.set(false);
         this.loadProducts();
+        this.alertService?.checkUnreadStatus();
       },
       error: (err) => {
         this.modalLoading.set(false);
