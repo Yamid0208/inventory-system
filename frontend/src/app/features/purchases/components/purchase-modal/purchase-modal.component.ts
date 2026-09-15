@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Supplier } from '../../../../core/models/supplier.model';
@@ -216,9 +216,10 @@ import { SettingsService } from '../../../../core/services/settings.service';
     </div>
   `
 })
-export class PurchaseModalComponent implements OnInit {
+export class PurchaseModalComponent implements OnInit, OnChanges {
   @Input() suppliers: Supplier[] = [];
   @Input() products: Product[] = [];
+  @Input() preloadedItem: { productId?: number; quantity?: number; supplierId?: number } | null = null;
   @Input() loading: any = false;
   @Input() errorMessage: any = null;
 
@@ -235,8 +236,10 @@ export class PurchaseModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const initialSupplier = this.preloadedItem?.supplierId ?? null;
+
     this.form = this.fb.group({
-      supplierId: [null, [Validators.required]],
+      supplierId: [initialSupplier, [Validators.required]],
       purchaseDate: [new Date().toISOString().slice(0, 10), [Validators.required]],
       notes: [''],
       autoReceive: [true],
@@ -249,7 +252,6 @@ export class PurchaseModalComponent implements OnInit {
         this.taxRatePercent.set(rate);
         this.taxRateDecimal.set(rate > 1 ? rate / 100 : rate);
 
-        // Actualizar el valor del taxRate en los controles de items si ya existen
         this.itemsArray.controls.forEach(control => {
           control.patchValue({ taxRate: this.taxRateDecimal() });
         });
@@ -257,8 +259,53 @@ export class PurchaseModalComponent implements OnInit {
       error: () => {}
     });
 
-    // Agregar primera línea por defecto
-    this.addItem();
+    if (this.preloadedItem?.productId) {
+      const prodId = Number(this.preloadedItem.productId);
+      const qty = Number(this.preloadedItem.quantity) || 1;
+      const prod = this.products.find(p => p.id === prodId);
+      const price = prod ? prod.purchasePrice : 0;
+
+      const itemGroup = this.fb.group({
+        productId: [prodId, [Validators.required]],
+        quantity: [qty, [Validators.required, Validators.min(1)]],
+        unitPrice: [price, [Validators.required, Validators.min(0)]],
+        taxRate: [this.taxRateDecimal()]
+      });
+      this.itemsArray.push(itemGroup);
+    } else {
+      this.addItem();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['products'] && this.products.length > 0 && this.itemsArray?.length > 0) {
+      this.itemsArray.controls.forEach(control => {
+        const prodId = Number(control.get('productId')?.value);
+        if (prodId && (!control.get('unitPrice')?.value || control.get('unitPrice')?.value === 0)) {
+          const prod = this.products.find(p => p.id === prodId);
+          if (prod) {
+            control.patchValue({ unitPrice: prod.purchasePrice });
+          }
+        }
+      });
+    }
+
+    if (changes['preloadedItem'] && this.preloadedItem && this.form) {
+      if (this.preloadedItem.supplierId) {
+        this.form.patchValue({ supplierId: this.preloadedItem.supplierId });
+      }
+      if (this.preloadedItem.productId && this.itemsArray.length > 0) {
+        const firstLine = this.itemsArray.at(0);
+        const prodId = Number(this.preloadedItem.productId);
+        const qty = Number(this.preloadedItem.quantity) || 1;
+        const prod = this.products.find(p => p.id === prodId);
+        firstLine.patchValue({
+          productId: prodId,
+          quantity: qty,
+          unitPrice: prod ? prod.purchasePrice : 0
+        });
+      }
+    }
   }
 
   get itemsArray(): FormArray {

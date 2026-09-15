@@ -54,6 +54,7 @@ export class PurchasesComponent implements OnInit {
   selectedPurchaseForDetail = signal<Purchase | null>(null);
   modalLoading = signal<boolean>(false);
   modalError = signal<string | null>(null);
+  initialPreloadedItem = signal<{ productId?: number; quantity?: number; supplierId?: number } | null>(null);
 
   ngOnInit(): void {
     this.loadSuppliers();
@@ -62,6 +63,15 @@ export class PurchasesComponent implements OnInit {
 
     this.route.queryParams.subscribe(params => {
       if (params['new'] === 'true') {
+        const productId = params['productId'] ? Number(params['productId']) : undefined;
+        const quantity = params['quantity'] ? Number(params['quantity']) : undefined;
+        const supplierId = params['supplierId'] ? Number(params['supplierId']) : undefined;
+
+        if (productId || quantity || supplierId) {
+          this.initialPreloadedItem.set({ productId, quantity, supplierId });
+        } else {
+          this.initialPreloadedItem.set(null);
+        }
         this.openCreateModal();
       }
     });

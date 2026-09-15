@@ -60,7 +60,18 @@ export class AlertsComponent implements OnInit {
   }
 
   goToOrders(): void {
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/purchases']);
+  }
+
+  createOrderForAlert(alert: StockAlert): void {
+    this.router.navigate(['/purchases'], {
+      queryParams: {
+        new: 'true',
+        productId: alert.productId,
+        quantity: alert.suggestedQuantity,
+        supplierId: alert.supplierId
+      }
+    });
   }
 
   goToProducts(): void {
