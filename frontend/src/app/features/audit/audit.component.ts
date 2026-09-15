@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { AuditService } from '../../core/services/audit.service';
 import { AuditLog, AuditSummary, AuditLogFilterParams } from '../../core/models/audit.model';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
+import { AppAutocompleteComponent } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 
 @Component({
   selector: 'app-audit',
   standalone: true,
-  imports: [CommonModule, AppPaginationComponent],
+  imports: [CommonModule, AppPaginationComponent, AppAutocompleteComponent],
   templateUrl: './audit.component.html'
 })
 export class AuditComponent implements OnInit {

@@ -107,6 +107,30 @@ public class PurchasesController : ControllerBase
     }
 
     /// <summary>
+    /// Registra la devolución de productos de una compra recibida a su proveedor, descontando inventario.
+    /// </summary>
+    [HttpPost("{id:int}/return")]
+    [Authorize(Roles = "SuperAdmin,Admin,Warehouse")]
+    [ProducesResponseType(typeof(PurchaseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PurchaseDto>> ReturnPurchase(
+        int id,
+        [FromBody] ReturnPurchaseRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        int.TryParse(userIdClaim, out var userId);
+        if (userId <= 0)
+        {
+            userId = 1;
+        }
+
+        var purchase = await _purchaseService.ReturnPurchaseAsync(id, request, userId, cancellationToken);
+        return Ok(purchase);
+    }
+
+    /// <summary>
     /// Cancela una orden de compra en estado pendiente.
     /// </summary>
     [HttpPatch("{id:int}/cancel")]

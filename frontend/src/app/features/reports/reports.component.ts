@@ -52,7 +52,7 @@ export class ReportsComponent implements OnInit {
   loadAnalytics(): void {
     this.dashboardService.getSummary().subscribe({
       next: (data) => this.dashboardData.set(data),
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -100,7 +100,4 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  printReport(report: ReportMetadata): void {
-    window.print();
-  }
 }

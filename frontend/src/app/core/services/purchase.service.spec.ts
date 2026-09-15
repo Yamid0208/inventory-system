@@ -44,4 +44,13 @@ describe('PurchaseService (Unit Tests)', () => {
     service.cancelPurchase(42).subscribe();
     expect(httpClientMock.patch).toHaveBeenCalledWith('/api/v1/purchases/42/cancel', {});
   });
+
+  it('should call post when returning a purchase to supplier', () => {
+    const returnPayload = {
+      reason: 'Mercancía defectuosa',
+      items: [{ productId: 1, quantity: 2 }]
+    };
+    service.returnPurchase(42, returnPayload).subscribe();
+    expect(httpClientMock.post).toHaveBeenCalledWith('/api/v1/purchases/42/return', returnPayload);
+  });
 });

@@ -28,3 +28,15 @@ public record CreatePurchaseRequest(
     bool AutoReceive = true,
     int? WarehouseId = null
 );
+
+public record ReturnPurchaseItemRequest(
+    int ProductId,
+    int Quantity
+);
+
+public record ReturnPurchaseRequest(
+    string Reason,
+    List<ReturnPurchaseItemRequest> Items,
+    string? Notes = null
+);
+

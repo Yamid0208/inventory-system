@@ -113,6 +113,11 @@
             ✓ Confirmar Recepción en Almacén
           </app-button>
         }
+        @if (purchase.status === 'Received') {
+          <app-button variant="outline" size="sm" (clicked)="onReturn()">
+            ↩ Devolver a Proveedor
+          </app-button>
+        }
       </div>
       <app-button variant="outline" size="sm" (clicked)="onClose()">
         Cerrar

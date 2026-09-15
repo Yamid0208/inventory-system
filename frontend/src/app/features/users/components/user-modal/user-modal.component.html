@@ -59,23 +59,28 @@
           formControlName="email"
           placeholder="correo@empresa.com"
           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+          [class.border-rose-400]="form.get('email')?.invalid && form.get('email')?.touched"
         />
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <span class="text-[11px] text-rose-500 mt-1 block">
+            @if (form.get('email')?.hasError('required')) {
+              El correo electrónico es obligatorio.
+            } @else {
+              Ingrese un correo electrónico válido (ej. usuario&#64;empresa.com).
+            }
+          </span>
+        }
       </div>
 
       <!-- Rol en el Sistema -->
       <div>
-        <label class="block font-semibold text-slate-700 mb-1">Rol Operativo *</label>
-        <select
+        <app-autocomplete
           formControlName="role"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
-        >
-          @if (!isClientAdmin) {
-            <option value="SuperAdmin">Super Administrador (Control total multi-almacén)</option>
-            <option value="Admin">Administrador Titular de Almacén</option>
-          }
-          <option value="Warehouse">Bodega / Almacén (Gestión de stock, compras y Kardex)</option>
-          <option value="Seller">Vendedor / Comercial (Facturación y clientes)</option>
-        </select>
+          label="Rol Operativo"
+          [required]="true"
+          [options]="roleOptions"
+          placeholder="Selecciona o busca un rol..."
+        ></app-autocomplete>
       </div>
 
       <!-- Almacén / Sede Asignada -->
@@ -88,16 +93,12 @@
         </div>
       } @else {
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Almacén / Sede Asignada</label>
-          <select
+          <app-autocomplete
             formControlName="warehouseId"
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
-          >
-            <option [ngValue]="null">-- Sin Almacén Específico (Global) --</option>
-            @for (w of warehouses(); track w.id) {
-              <option [ngValue]="w.id">{{ w.name }} ({{ w.code }})</option>
-            }
-          </select>
+            label="Almacén / Sede Asignada"
+            [options]="warehouseOptions"
+            placeholder="Selecciona o busca un almacén..."
+          ></app-autocomplete>
         </div>
       }
 

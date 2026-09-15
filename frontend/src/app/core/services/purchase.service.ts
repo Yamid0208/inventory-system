@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PagedResult } from '../models/product.model';
-import { Purchase, PurchaseFilterParams, CreatePurchaseRequest } from '../models/purchase.model';
+import { Purchase, PurchaseFilterParams, CreatePurchaseRequest, ReturnPurchaseRequest } from '../models/purchase.model';
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +49,10 @@ export class PurchaseService {
 
   receivePurchase(id: number): Observable<Purchase> {
     return this.http.patch<Purchase>(`${this.baseUrl}/${id}/receive`, {});
+  }
+
+  returnPurchase(id: number, request: ReturnPurchaseRequest): Observable<Purchase> {
+    return this.http.post<Purchase>(`${this.baseUrl}/${id}/return`, request);
   }
 
   cancelPurchase(id: number): Observable<void> {

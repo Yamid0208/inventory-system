@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
@@ -14,6 +14,7 @@ import { ProductModalComponent } from './components/product-modal/product-modal.
 import { ProductDetailModalComponent } from './components/product-detail-modal/product-detail-modal.component';
 import { BatchModalComponent } from './components/batch-modal/batch-modal.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
+import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -27,6 +28,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
     ProductDetailModalComponent,
     BatchModalComponent,
     AppButtonComponent,
+    AppAutocompleteComponent,
     AppPaginationComponent,
     CurrencyFormatPipe
   ],
@@ -60,6 +62,13 @@ export class ProductsComponent implements OnInit, OnDestroy {
   searchQuery = signal<string>('');
   selectedCategoryId = signal<number | null>(null);
   stockStatus = signal<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
+
+  categoryOptions = computed<AutocompleteOption[]>(() => {
+    return [
+      { value: null, label: 'Todas las Categorías' },
+      ...this.categories().map(c => ({ value: c.id, label: c.name }))
+    ];
+  });
 
   // Modales
   isModalOpen = signal<boolean>(false);
@@ -157,10 +166,17 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
+  onCategorySelect(categoryId: any): void {
+    const val = categoryId ? Number(categoryId) : null;
+    this.selectedCategoryId.set(val);
+    this.pageNumber.set(1);
+    this.loadProducts();
+  }
+
   onCategoryChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const val = select.value;
-    this.selectedCategoryId.set(val === 'all' ? null : Number(val));
+    const target = event.target as HTMLSelectElement;
+    const val = target.value && target.value !== 'all' ? Number(target.value) : null;
+    this.selectedCategoryId.set(val);
     this.pageNumber.set(1);
     this.loadProducts();
   }

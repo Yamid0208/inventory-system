@@ -73,17 +73,29 @@
           </div>
         </div>
         <div class="mt-3">
-          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0"
-            [title]="summary()!.kpis.totalInventoryValuation | currencyFormat">
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0 tabular-nums"
+            [title]="summary()!.kpis.totalInventoryValuation | currencyFormat"
+            [appCountUp]="summary()!.kpis.totalInventoryValuation"
+            prefix="$"
+            [duration]="1100"
+            [retrigger]="refreshKey()">
             {{ summary()!.kpis.totalInventoryValuation | currencyFormat }}
           </div>
           <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-            <span class="font-bold text-slate-700">{{ summary()!.kpis.totalStockUnits }}</span> unidades en existencia
+            <span class="font-bold text-slate-700 tabular-nums"
+              [appCountUp]="summary()!.kpis.totalStockUnits"
+              [duration]="1000"
+              [retrigger]="refreshKey()">{{ summary()!.kpis.totalStockUnits }}</span> unidades en existencia
           </p>
         </div>
       </div>
       <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] gap-2">
-        <span class="text-slate-400 font-medium truncate">{{ summary()!.kpis.totalProductsCount }} refs activas</span>
+        <span class="text-slate-400 font-medium truncate">
+          <span class="font-semibold tabular-nums"
+            [appCountUp]="summary()!.kpis.totalProductsCount"
+            [duration]="900"
+            [retrigger]="refreshKey()">{{ summary()!.kpis.totalProductsCount }}</span> refs activas
+        </span>
         <span class="text-primary-500 font-bold cursor-pointer hover:underline flex-shrink-0"
           (click)="navigateTo('/products')">Ver
           catálogo ›</span>
@@ -106,12 +118,19 @@
           </div>
         </div>
         <div class="mt-3">
-          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-primary-500 tracking-tight truncate min-w-0"
-            [title]="summary()!.kpis.totalSalesAmount | currencyFormat">
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-primary-500 tracking-tight truncate min-w-0 tabular-nums"
+            [title]="summary()!.kpis.totalSalesAmount | currencyFormat"
+            [appCountUp]="summary()!.kpis.totalSalesAmount"
+            prefix="$"
+            [duration]="1100"
+            [retrigger]="refreshKey()">
             {{ summary()!.kpis.totalSalesAmount | currencyFormat }}
           </div>
           <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-            <span class="font-bold text-slate-700">{{ summary()!.kpis.completedSalesCount }}</span> ventas completadas
+            <span class="font-bold text-slate-700 tabular-nums"
+              [appCountUp]="summary()!.kpis.completedSalesCount"
+              [duration]="1000"
+              [retrigger]="refreshKey()">{{ summary()!.kpis.completedSalesCount }}</span> ventas completadas
           </p>
         </div>
       </div>
@@ -138,12 +157,19 @@
           </div>
         </div>
         <div class="mt-3">
-          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0"
-            [title]="summary()!.kpis.totalPurchasesAmount | currencyFormat">
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-slate-900 tracking-tight truncate min-w-0 tabular-nums"
+            [title]="summary()!.kpis.totalPurchasesAmount | currencyFormat"
+            [appCountUp]="summary()!.kpis.totalPurchasesAmount"
+            prefix="$"
+            [duration]="1100"
+            [retrigger]="refreshKey()">
             {{ summary()!.kpis.totalPurchasesAmount | currencyFormat }}
           </div>
           <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-            <span class="font-bold text-amber-600">{{ summary()!.kpis.pendingPurchasesCount }}</span> pendientes
+            <span class="font-bold text-amber-600 tabular-nums"
+              [appCountUp]="summary()!.kpis.pendingPurchasesCount"
+              [duration]="900"
+              [retrigger]="refreshKey()">{{ summary()!.kpis.pendingPurchasesCount }}</span> pendientes
           </p>
         </div>
       </div>
@@ -170,12 +196,21 @@
           </div>
         </div>
         <div class="mt-3">
-          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-rose-500 tracking-tight truncate min-w-0">
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-black text-rose-500 tracking-tight truncate min-w-0 tabular-nums"
+            [appCountUp]="summary()!.kpis.lowStockProductsCount + summary()!.kpis.outOfStockProductsCount"
+            [duration]="900"
+            [retrigger]="refreshKey()">
             {{ summary()!.kpis.lowStockProductsCount + summary()!.kpis.outOfStockProductsCount }}
           </div>
           <p class="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5 flex-wrap">
-            <span class="font-bold text-rose-600">{{ summary()!.kpis.outOfStockProductsCount }}</span> agotados |
-            <span class="font-bold text-amber-600">{{ summary()!.kpis.lowStockProductsCount }}</span> bajo stock
+            <span class="font-bold text-rose-600 tabular-nums"
+              [appCountUp]="summary()!.kpis.outOfStockProductsCount"
+              [duration]="900"
+              [retrigger]="refreshKey()">{{ summary()!.kpis.outOfStockProductsCount }}</span> agotados |
+            <span class="font-bold text-amber-600 tabular-nums"
+              [appCountUp]="summary()!.kpis.lowStockProductsCount"
+              [duration]="900"
+              [retrigger]="refreshKey()">{{ summary()!.kpis.lowStockProductsCount }}</span> bajo stock
           </p>
         </div>
       </div>

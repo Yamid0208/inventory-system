@@ -9,6 +9,7 @@ import { StockAdjustmentModalComponent } from './components/stock-adjustment-mod
 import { ReturnModalComponent } from './components/return-modal/return-modal.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
+import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 
@@ -21,6 +22,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
     ReturnModalComponent,
     AppButtonComponent,
     AppPaginationComponent,
+    AppAutocompleteComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './inventory.component.html'
@@ -97,11 +99,24 @@ export class InventoryComponent implements OnInit {
     this.loadKardex();
   }
 
-  onTypeChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.selectedType.set(select.value);
+  movementTypeOptions: AutocompleteOption[] = [
+    { value: 'all', label: 'Todos los Tipos' },
+    { value: 'Purchase', label: 'Entradas (Compras)' },
+    { value: 'Sale', label: 'Salidas (Ventas)' },
+    { value: 'AdjustmentIn', label: 'Ajustes (+)' },
+    { value: 'AdjustmentOut', label: 'Ajustes (-)' },
+    { value: 'Return', label: 'Devoluciones' }
+  ];
+
+  onTypeSelected(type: any): void {
+    this.selectedType.set(type || 'all');
     this.pageNumber.set(1);
     this.loadKardex();
+  }
+
+  onTypeChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.onTypeSelected(select.value);
   }
 
   onSearch(event: Event): void {

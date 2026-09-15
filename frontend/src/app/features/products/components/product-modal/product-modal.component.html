@@ -69,34 +69,24 @@
 
         <!-- Categoría -->
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1.5">
-            Categoría <span class="text-rose-500">*</span>
-          </label>
-          <select
+          <app-autocomplete
             formControlName="categoryId"
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-          >
-            <option [ngValue]="null" disabled>Selecciona una categoría...</option>
-            @for (cat of categories; track cat.id) {
-              <option [ngValue]="cat.id">{{ cat.name }}</option>
-            }
-          </select>
+            label="Categoría"
+            [required]="true"
+            [options]="categoryOptions"
+            placeholder="Selecciona o busca una categoría..."
+          ></app-autocomplete>
         </div>
 
         <!-- Proveedor -->
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1.5">
-            Proveedor Principal <span class="text-rose-500">*</span>
-          </label>
-          <select
+          <app-autocomplete
             formControlName="supplierId"
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-          >
-            <option [ngValue]="null" disabled>Selecciona un proveedor...</option>
-            @for (sup of suppliers; track sup.id) {
-              <option [ngValue]="sup.id">{{ sup.name }} ({{ sup.taxId }})</option>
-            }
-          </select>
+            label="Proveedor Principal"
+            [required]="true"
+            [options]="supplierOptions"
+            placeholder="Selecciona o busca un proveedor..."
+          ></app-autocomplete>
         </div>
 
         <!-- Precio Compra -->
@@ -105,11 +95,12 @@
             Precio de Compra ($) <span class="text-rose-500">*</span>
           </label>
           <input
-            type="number"
-            step="0.01"
-            min="0"
+            type="text"
+            inputmode="decimal"
             formControlName="purchasePrice"
-            placeholder="0.00"
+            appThousandsSeparator
+            [allowDecimals]="true"
+            placeholder="0"
             class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
           />
         </div>
@@ -120,11 +111,12 @@
             Precio de Venta ($) <span class="text-rose-500">*</span>
           </label>
           <input
-            type="number"
-            step="0.01"
-            min="0"
+            type="text"
+            inputmode="decimal"
             formControlName="salePrice"
-            placeholder="0.00"
+            appThousandsSeparator
+            [allowDecimals]="true"
+            placeholder="0"
             class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
           />
         </div>
@@ -135,9 +127,11 @@
             Stock Mínimo (Umbral de Alerta) <span class="text-rose-500">*</span>
           </label>
           <input
-            type="number"
-            min="0"
+            type="text"
+            inputmode="numeric"
             formControlName="minimumStock"
+            appThousandsSeparator
+            [allowDecimals]="false"
             placeholder="5"
             class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
           />

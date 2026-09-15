@@ -1,11 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { formatThousands } from '../utils/number-format.util';
 
 @Pipe({
   name: 'currencyFormat',
   standalone: true
 })
 export class CurrencyFormatPipe implements PipeTransform {
-  transform(value: number | string | null | undefined, currencyCode: string = 'USD'): string {
+  transform(value: number | string | null | undefined, _currencyCode: string = 'USD'): string {
     if (value === null || value === undefined || value === '') {
       return '$0';
     }
@@ -16,13 +17,7 @@ export class CurrencyFormatPipe implements PipeTransform {
       return '$0';
     }
 
-    const formatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currencyCode,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(numericValue);
-
-    return formatted;
+    return `$${formatThousands(numericValue)}`;
   }
 }
+

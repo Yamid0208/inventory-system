@@ -52,3 +52,15 @@ export interface PurchaseFilterParams {
   pageNumber?: number;
   pageSize?: number;
 }
+
+export interface ReturnPurchaseItemRequest {
+  productId: number;
+  quantity: number;
+}
+
+export interface ReturnPurchaseRequest {
+  reason: string;
+  items: ReturnPurchaseItemRequest[];
+  notes?: string;
+}
+

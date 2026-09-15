@@ -1,15 +1,23 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Product, CreateProductRequest, UpdateProductRequest } from '../../../../core/models/product.model';
 import { Category } from '../../../../core/models/category.model';
 import { Supplier } from '../../../../core/models/supplier.model';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
+import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
+import { ThousandsSeparatorDirective } from '../../../../shared/directives/thousands-separator.directive';
 
 @Component({
   selector: 'app-product-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AppButtonComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AppButtonComponent,
+    AppAutocompleteComponent,
+    ThousandsSeparatorDirective
+  ],
   templateUrl: './product-modal.component.html'
 })
 export class ProductModalComponent implements OnInit {
@@ -40,6 +48,22 @@ export class ProductModalComponent implements OnInit {
       salePrice: [this.product?.salePrice ?? 0, [Validators.required, Validators.min(0)]],
       minimumStock: [this.product?.minimumStock ?? 5, [Validators.required, Validators.min(0)]]
     });
+  }
+
+  get categoryOptions(): AutocompleteOption[] {
+    return this.categories.map(cat => ({
+      value: cat.id,
+      label: cat.name,
+      sublabel: cat.description || undefined
+    }));
+  }
+
+  get supplierOptions(): AutocompleteOption[] {
+    return this.suppliers.map(sup => ({
+      value: sup.id,
+      label: `${sup.name} (${sup.taxId})`,
+      sublabel: sup.contactName || undefined
+    }));
   }
 
   get calculatedMargin(): number {

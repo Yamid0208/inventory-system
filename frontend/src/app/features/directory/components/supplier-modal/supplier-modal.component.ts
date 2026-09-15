@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Supplier, CreateSupplierRequest } from '../../../../core/models/supplier.model';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
+import { emailFormatValidator } from '../../../../shared/validators';
 
 @Component({
   selector: 'app-supplier-modal',
@@ -27,7 +28,7 @@ export class SupplierModalComponent implements OnInit {
       name: [this.supplier?.name || '', [Validators.required, Validators.maxLength(150)]],
       taxId: [this.supplier?.taxId || '', [Validators.required, Validators.maxLength(30)]],
       contactName: [this.supplier?.contactName || '', [Validators.maxLength(100)]],
-      email: [this.supplier?.email || '', [Validators.email, Validators.maxLength(150)]],
+      email: [this.supplier?.email || '', [emailFormatValidator(), Validators.maxLength(150)]],
       phone: [this.supplier?.phone || '', [Validators.maxLength(30)]],
       address: [this.supplier?.address || '', [Validators.maxLength(300)]]
     });

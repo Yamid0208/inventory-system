@@ -72,20 +72,13 @@
           class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all" />
       </div>
 
-      <!-- Category Dropdown Filter -->
-      <div class="relative w-full sm:w-48">
-        <select (change)="onCategoryChange($event)"
-          class="w-full appearance-none pl-3 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer">
-          <option value="all">Todas las Categorías</option>
-          @for (cat of categories(); track cat.id) {
-          <option [value]="cat.id">{{ cat.name }}</option>
-          }
-        </select>
-        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
-        </div>
+      <!-- Category Autocomplete Filter -->
+      <div class="relative w-full sm:w-56">
+        <app-autocomplete
+          [options]="categoryOptions()"
+          placeholder="Todas las Categorías"
+          (selectionChange)="onCategorySelect($event)"
+        ></app-autocomplete>
       </div>
     </div>
   </div>

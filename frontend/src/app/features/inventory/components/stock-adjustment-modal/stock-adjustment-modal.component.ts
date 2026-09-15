@@ -4,11 +4,19 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Product } from '../../../../core/models/product.model';
 import { CreateStockAdjustmentRequest } from '../../../../core/models/inventory.model';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
+import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
+import { ThousandsSeparatorDirective } from '../../../../shared/directives/thousands-separator.directive';
 
 @Component({
   selector: 'app-stock-adjustment-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AppButtonComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AppButtonComponent,
+    AppAutocompleteComponent,
+    ThousandsSeparatorDirective
+  ],
   templateUrl: './stock-adjustment-modal.component.html'
 })
 export class StockAdjustmentModalComponent implements OnInit {
@@ -31,6 +39,23 @@ export class StockAdjustmentModalComponent implements OnInit {
       reason: ['', [Validators.required]],
       notes: ['']
     });
+  }
+
+  reasonOptions: AutocompleteOption[] = [
+    { value: 'Conteo Físico / Auditoría', label: 'Conteo Físico / Auditoría Periódica' },
+    { value: 'Merma / Producto Dañado', label: 'Merma / Producto Dañado en Bodega' },
+    { value: 'Muestra Comercial / Demo', label: 'Muestra Comercial / Demostración' },
+    { value: 'Corrección de Inventario', label: 'Corrección de Error de Registro' },
+    { value: 'Devolución Interna', label: 'Devolución Interna de Taller/Oficina' },
+    { value: 'Otro Motivo', label: 'Otro Motivo Justificado' }
+  ];
+
+  get productOptions(): AutocompleteOption[] {
+    return this.products.map(p => ({
+      value: p.id,
+      label: `[${p.sku}] ${p.name}`,
+      sublabel: `Stock actual: ${p.currentStock}`
+    }));
   }
 
   setAdjustmentType(type: 'AdjustmentIn' | 'AdjustmentOut'): void {

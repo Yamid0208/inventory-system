@@ -7,10 +7,13 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { Product } from '../../../../core/models/product.model';
 import { ProcessReturnRequest } from '../../../../core/models/inventory.model';
 
+import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
+import { ThousandsSeparatorDirective } from '../../../../shared/directives/thousands-separator.directive';
+
 @Component({
   selector: 'app-return-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AppAutocompleteComponent, ThousandsSeparatorDirective],
   templateUrl: './return-modal.component.html'
 })
 export class ReturnModalComponent implements OnInit {
@@ -31,6 +34,27 @@ export class ReturnModalComponent implements OnInit {
   referenceDocument = '';
   notes = '';
   loading = signal<boolean>(false);
+
+  reasonOptions: AutocompleteOption[] = [
+    { value: 'Producto con defecto de fábrica', label: 'Producto con defecto de fábrica' },
+    { value: 'Garantía de calidad / Inconformidad', label: 'Garantía de calidad / Inconformidad' },
+    { value: 'Error en despacho o cantidad', label: 'Error en despacho o cantidad' },
+    { value: 'Cancelación de compra o venta', label: 'Cancelación de compra o venta' },
+    { value: 'Avería durante transporte', label: 'Avería durante transporte' }
+  ];
+
+  get productOptions(): AutocompleteOption[] {
+    return this.products().map(p => ({
+      value: p.id,
+      label: `${p.sku} — ${p.name}`,
+      sublabel: `Stock: ${p.currentStock}`
+    }));
+  }
+
+  onProductChange(val: any): void {
+    this.selectedProductId = val ? Number(val) : null;
+    this.onProductSelected();
+  }
 
   ngOnInit(): void {
     this.loadProducts();

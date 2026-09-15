@@ -38,18 +38,13 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-xs">
       <!-- Producto -->
       <div>
-        <label class="block font-semibold text-slate-700 mb-1">Producto a Ajustar *</label>
-        <select
+        <app-autocomplete
           formControlName="productId"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
-        >
-          <option [value]="null">Seleccionar producto del catálogo...</option>
-          @for (prod of products; track prod.id) {
-            <option [value]="prod.id">
-              [{{ prod.sku }}] {{ prod.name }} (Stock actual: {{ prod.currentStock }})
-            </option>
-          }
-        </select>
+          label="Producto a Ajustar"
+          [required]="true"
+          [options]="productOptions"
+          placeholder="Seleccionar o buscar producto del catálogo..."
+        ></app-autocomplete>
       </div>
 
       <!-- Tipo de Ajuste: Entrada / Salida (Segmented Control) -->
@@ -84,9 +79,11 @@
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Cantidad de Unidades *</label>
           <input
-            type="number"
+            type="text"
+            inputmode="numeric"
             formControlName="quantity"
-            min="1"
+            appThousandsSeparator
+            [allowDecimals]="false"
             placeholder="Ej. 10"
             class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-mono focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
           />
@@ -121,19 +118,13 @@
 
       <!-- Motivo del Ajuste -->
       <div>
-        <label class="block font-semibold text-slate-700 mb-1">Motivo o Referencia *</label>
-        <select
+        <app-autocomplete
           formControlName="reason"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
-        >
-          <option value="">Seleccionar motivo justificado...</option>
-          <option value="Conteo Físico / Auditoría">Conteo Físico / Auditoría Periódica</option>
-          <option value="Merma / Producto Dañado">Merma / Producto Dañado en Bodega</option>
-          <option value="Muestra Comercial / Demo">Muestra Comercial / Demostración</option>
-          <option value="Corrección de Inventario">Corrección de Error de Registro</option>
-          <option value="Devolución Interna">Devolución Interna de Taller/Oficina</option>
-          <option value="Otro Motivo">Otro Motivo Justificado</option>
-        </select>
+          label="Motivo o Referencia"
+          [required]="true"
+          [options]="reasonOptions"
+          placeholder="Seleccionar o buscar motivo justificado..."
+        ></app-autocomplete>
       </div>
 
       <!-- Observaciones / Notas -->

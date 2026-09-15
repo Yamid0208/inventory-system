@@ -1,0 +1,121 @@
+<div class="relative w-full text-xs select-none">
+  @if (label) {
+    <label class="block font-semibold text-slate-700 mb-1">
+      {{ label }} @if (required) { <span class="text-rose-500">*</span> }
+    </label>
+  }
+
+  <!-- Contenedor del Input de Búsqueda -->
+  <div
+    class="relative flex items-center w-full transition-all rounded-xl border bg-slate-50 focus-within:bg-white"
+    [ngClass]="[
+      hasError
+        ? 'border-rose-300 ring-2 ring-rose-200 bg-rose-50/40'
+        : (isOpen() ? 'border-primary-500 ring-2 ring-primary-500/20 bg-white' : 'border-slate-200 hover:border-slate-300'),
+      disabled ? 'opacity-50 cursor-not-allowed bg-slate-100' : 'cursor-pointer'
+    ]"
+    (click)="openDropdown()"
+  >
+    <!-- Icono de Búsqueda -->
+    <div class="pl-3 pr-1.5 text-slate-400 flex items-center pointer-events-none">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+
+    <!-- Input real de filtrado y búsqueda -->
+    <input
+      #searchInput
+      type="text"
+      [id]="id"
+      [name]="name"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [value]="searchQuery()"
+      (input)="onInput($event)"
+      (keydown)="onKeyDown($event)"
+      (focus)="openDropdown()"
+      autocomplete="off"
+      class="w-full py-2 px-1.5 text-xs text-slate-800 bg-transparent focus:outline-none placeholder-slate-400 font-medium cursor-text"
+      [attr.aria-expanded]="isOpen()"
+      role="combobox"
+      aria-autocomplete="list"
+    />
+
+    <!-- Botón Limpiar Selección -->
+    @if (allowClear && selectedValue() !== null && !disabled) {
+      <button
+        type="button"
+        (click)="clearSelection($event)"
+        class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200/60 transition-colors mr-1 cursor-pointer"
+        title="Limpiar selección"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    }
+
+    <!-- Caret / Flecha Desplegable -->
+    <div
+      class="pr-3 pl-1 text-slate-400 transition-transform duration-200 flex items-center cursor-pointer"
+      [class.rotate-180]="isOpen()"
+      (click)="toggleDropdown(); $event.stopPropagation()"
+    >
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Panel Desplegable de Resultados -->
+  @if (isOpen() && !disabled) {
+    <div
+      class="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-white rounded-xl shadow-xl border border-slate-200/80 py-1.5 animate-scale-up"
+      role="listbox"
+    >
+      @if (filteredOptions().length === 0) {
+        <div class="py-4 px-3 text-center text-slate-400">
+          <p class="text-xs">No se encontraron opciones</p>
+          @if (searchQuery()) {
+            <p class="text-[10px] text-slate-400 mt-0.5 font-mono truncate">"{{ searchQuery() }}"</p>
+          }
+        </div>
+      } @else {
+        @for (opt of filteredOptions(); track opt.value; let i = $index) {
+          <div
+            (click)="selectOption(opt)"
+            class="px-3.5 py-2 flex items-center justify-between cursor-pointer transition-colors"
+            [ngClass]="[
+              i === highlightedIndex() ? 'bg-primary-50 text-primary-900' : 'hover:bg-slate-50 text-slate-800',
+              isOptionSelected(opt.value) ? 'font-bold bg-primary-50/60 text-primary-700' : '',
+              opt.disabled ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''
+            ]"
+            role="option"
+            [attr.aria-selected]="isOptionSelected(opt.value)"
+          >
+            <div class="flex flex-col truncate pr-2">
+              <span class="text-xs truncate">{{ opt.label }}</span>
+              @if (opt.sublabel) {
+                <span class="text-[10px] text-slate-400 truncate">{{ opt.sublabel }}</span>
+              }
+            </div>
+
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              @if (opt.badge) {
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">
+                  {{ opt.badge }}
+                </span>
+              }
+              @if (isOptionSelected(opt.value)) {
+                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                </svg>
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

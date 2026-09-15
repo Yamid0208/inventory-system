@@ -9,5 +9,6 @@ public interface IPurchaseService
     Task<PurchaseDto> GetPurchaseByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<PurchaseDto> CreatePurchaseAsync(CreatePurchaseRequest request, int userId, CancellationToken cancellationToken = default);
     Task<PurchaseDto> ReceivePurchaseAsync(int id, int userId, CancellationToken cancellationToken = default);
+    Task<PurchaseDto> ReturnPurchaseAsync(int id, ReturnPurchaseRequest request, int userId, CancellationToken cancellationToken = default);
     Task CancelPurchaseAsync(int id, CancellationToken cancellationToken = default);
 }

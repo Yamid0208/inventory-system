@@ -7,11 +7,11 @@
 
   <input
     [id]="id"
-    [name]="name"
-    [type]="type"
+    [type]="useThousandsSeparator ? 'text' : type"
+    [attr.inputmode]="useThousandsSeparator ? 'decimal' : null"
     [placeholder]="placeholder"
     [disabled]="disabled"
-    [value]="value"
+    [value]="useThousandsSeparator ? displayValue : value"
     (input)="onInputChange($event)"
     (blur)="onBlur()"
     [ngClass]="[

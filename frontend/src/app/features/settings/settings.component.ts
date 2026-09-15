@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../core/services/settings.service';
 import { CompanySettings, UpdateCompanySettingsRequest } from '../../core/models/settings.model';
+import { isValidEmail } from '../../shared/validators';
 
 @Component({
   selector: 'app-settings',
@@ -12,6 +13,8 @@ import { CompanySettings, UpdateCompanySettingsRequest } from '../../core/models
 })
 export class SettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);
+
+  readonly isValidEmail = isValidEmail;
 
   loading = signal<boolean>(false);
   saving = signal<boolean>(false);
@@ -62,6 +65,11 @@ export class SettingsComponent implements OnInit {
   }
 
   save(): void {
+    if (!this.email.trim() || !isValidEmail(this.email.trim())) {
+      this.errorMessage.set('El correo institucional no tiene un formato válido (ej. contacto@empresa.com).');
+      return;
+    }
+
     this.saving.set(true);
     this.successMessage.set(null);
     this.errorMessage.set(null);

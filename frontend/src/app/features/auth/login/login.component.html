@@ -46,7 +46,13 @@
             class="w-full px-4 py-3 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/15 focus:border-primary-500 transition-all"
             [class.border-rose-400]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
           @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-          <p class="text-xs text-rose-500 font-medium mt-1">Ingrese un correo electrónico válido.</p>
+          <p class="text-xs text-rose-500 font-medium mt-1">
+            @if (loginForm.get('email')?.hasError('required')) {
+              El correo electrónico es obligatorio.
+            } @else {
+              Ingrese un correo electrónico válido (ej. usuario&#64;empresa.com).
+            }
+          </p>
           }
         </div>
 
@@ -67,8 +73,10 @@
         <div class="flex items-center justify-between pt-1">
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox"
+              formControlName="rememberMe"
+              id="rememberMe"
               class="w-4 h-4 rounded-md text-primary-500 border-slate-300 focus:ring-primary-500 accent-primary-500 cursor-pointer" />
-            <span class="text-xs font-medium text-slate-600">Recordar mi preferencia</span>
+            <span class="text-xs font-medium text-slate-600">Recordar usuario</span>
           </label>
           <a href="javascript:void(0)"
             class="text-xs font-bold text-primary-500 hover:text-primary-600 hover:underline transition-colors">
@@ -92,15 +100,6 @@
           </button>
         </div>
       </form>
-
-      <!-- Bottom link -->
-      <div class="text-center pt-2">
-        <p class="text-xs font-medium text-slate-500">
-          ¿No tienes una cuenta?
-          <span
-            class="font-bold text-primary-500 hover:text-primary-600 cursor-pointer hover:underline">Regístrate</span>
-        </p>
-      </div>
 
       <!-- Selector Rápido de Cuentas Demo -->
       <div class="pt-5 border-t border-slate-100">

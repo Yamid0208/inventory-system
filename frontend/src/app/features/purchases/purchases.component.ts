@@ -6,11 +6,12 @@ import { SupplierService } from '../../core/services/supplier.service';
 import { ProductService } from '../../core/services/product.service';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { AlertService } from '../../core/services/alert.service';
-import { Purchase, PurchaseFilterParams, CreatePurchaseRequest } from '../../core/models/purchase.model';
+import { Purchase, PurchaseFilterParams, CreatePurchaseRequest, ReturnPurchaseRequest } from '../../core/models/purchase.model';
 import { Supplier } from '../../core/models/supplier.model';
 import { Product } from '../../core/models/product.model';
 import { PurchaseModalComponent } from './components/purchase-modal/purchase-modal.component';
 import { PurchaseDetailModalComponent } from './components/purchase-detail-modal/purchase-detail-modal.component';
+import { PurchaseReturnModalComponent } from './components/purchase-return-modal/purchase-return-modal.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
@@ -23,6 +24,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
     CommonModule,
     PurchaseModalComponent,
     PurchaseDetailModalComponent,
+    PurchaseReturnModalComponent,
     AppButtonComponent,
     AppPaginationComponent,
     CurrencyFormatPipe
@@ -54,8 +56,11 @@ export class PurchasesComponent implements OnInit {
   // Modales
   isCreateModalOpen = signal<boolean>(false);
   selectedPurchaseForDetail = signal<Purchase | null>(null);
+  selectedPurchaseForReturn = signal<Purchase | null>(null);
   modalLoading = signal<boolean>(false);
   modalError = signal<string | null>(null);
+  returnModalLoading = signal<boolean>(false);
+  returnModalError = signal<string | null>(null);
   initialPreloadedItem = signal<{ productId?: number; quantity?: number; supplierId?: number } | null>(null);
 
   ngOnInit(): void {
@@ -158,6 +163,33 @@ export class PurchasesComponent implements OnInit {
 
   openDetail(purchase: Purchase): void {
     this.selectedPurchaseForDetail.set(purchase);
+  }
+
+  openReturnModal(purchase: Purchase): void {
+    this.returnModalError.set(null);
+    this.selectedPurchaseForReturn.set(purchase);
+  }
+
+  onConfirmReturn(request: ReturnPurchaseRequest): void {
+    const purchase = this.selectedPurchaseForReturn();
+    if (!purchase) return;
+
+    this.returnModalLoading.set(true);
+    this.returnModalError.set(null);
+
+    this.purchaseService.returnPurchase(purchase.id, request).subscribe({
+      next: () => {
+        this.returnModalLoading.set(false);
+        this.selectedPurchaseForReturn.set(null);
+        this.loadPurchases();
+        this.alertService?.checkUnreadStatus();
+      },
+      error: (err) => {
+        this.returnModalLoading.set(false);
+        const detail = err.error?.detail || err.error?.title || 'No se pudo registrar la devolución de la compra al proveedor.';
+        this.returnModalError.set(detail);
+      }
+    });
   }
 
   receivePurchase(id: number): void {

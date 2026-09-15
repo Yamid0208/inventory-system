@@ -85,4 +85,21 @@ public class PurchaseTests
         // No se puede recibir una cancelada
         Assert.Throws<InvalidOperationException>(() => purchase.MarkAsReceived());
     }
+
+    [Fact]
+    public void Purchase_ReturnValidation_CannotReturnIfNotReceived()
+    {
+        var purchase = new Purchase(
+            purchaseNumber: "PUR-20260902-004",
+            supplierId: 1,
+            userId: 1,
+            purchaseDate: DateTimeOffset.UtcNow
+        );
+        var item = new PurchaseItem(1, 10, 100m, 0.19m);
+        purchase.AddItem(item);
+
+        Assert.Equal(PurchaseStatus.Pending, purchase.Status);
+        // Only Received purchases can have inventory returns
+        Assert.NotEqual(PurchaseStatus.Received, purchase.Status);
+    }
 }

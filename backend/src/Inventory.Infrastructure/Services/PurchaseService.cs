@@ -251,6 +251,103 @@ public class PurchaseService : IPurchaseService
         });
     }
 
+    public async Task<PurchaseDto> ReturnPurchaseAsync(
+        int id,
+        ReturnPurchaseRequest request,
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (string.IsNullOrWhiteSpace(request.Reason))
+        {
+            throw new BusinessRuleViolationException("RN-PUR-DEV-01", "Debe indicar el motivo de la devolución.");
+        }
+
+        var validItems = request.Items?.Where(i => i.Quantity > 0).ToList();
+        if (validItems == null || validItems.Count == 0)
+        {
+            throw new BusinessRuleViolationException("RN-PUR-DEV-02", "Debe seleccionar al menos un producto con cantidad mayor a cero para devolver.");
+        }
+
+        var strategy = _context.Database.CreateExecutionStrategy();
+
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                var purchase = await _context.Purchases
+                    .Include(p => p.Supplier)
+                    .Include(p => p.Items)
+                        .ThenInclude(i => i.Product)
+                    .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+                if (purchase == null)
+                {
+                    throw new NotFoundException($"La compra con ID {id} no existe.");
+                }
+
+                if (purchase.Status != PurchaseStatus.Received)
+                {
+                    throw new BusinessRuleViolationException("RN-PUR-DEV-03", "Solo se pueden devolver compras que se encuentren en estado 'Recibido'.");
+                }
+
+                foreach (var itemReq in validItems)
+                {
+                    var purchaseItem = purchase.Items.FirstOrDefault(i => i.ProductId == itemReq.ProductId);
+                    if (purchaseItem == null)
+                    {
+                        throw new BusinessRuleViolationException("RN-PUR-DEV-04", $"El producto con ID {itemReq.ProductId} no pertenece a esta orden de compra.");
+                    }
+
+                    if (itemReq.Quantity > purchaseItem.Quantity)
+                    {
+                        throw new BusinessRuleViolationException("RN-PUR-DEV-05", $"La cantidad a devolver ({itemReq.Quantity}) excede la cantidad comprada ({purchaseItem.Quantity}) para el producto '{purchaseItem.Product.Name}'.");
+                    }
+
+                    var product = purchaseItem.Product;
+                    var previousStock = product.CurrentStock;
+
+                    if (previousStock < itemReq.Quantity)
+                    {
+                        throw new BusinessRuleViolationException("RN-001", $"No hay suficiente stock físico de '{product.Name}' para realizar la devolución al proveedor. Stock actual: {previousStock}, requerido para devolución: {itemReq.Quantity}.");
+                    }
+
+                    product.UpdateStock(-itemReq.Quantity);
+
+                    var movementNumber = $"DEV-{DateTimeOffset.UtcNow:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
+                    var movement = new InventoryMovement(
+                        movementNumber,
+                        product.Id,
+                        MovementType.Return,
+                        -itemReq.Quantity,
+                        previousStock,
+                        product.CurrentStock,
+                        purchaseItem.UnitPrice,
+                        userId,
+                        purchase.PurchaseNumber,
+                        $"Devolución a proveedor ({purchase.Supplier.Name}): {request.Reason}{(string.IsNullOrWhiteSpace(request.Notes) ? "" : " - " + request.Notes)}",
+                        purchase.WarehouseId ?? product.WarehouseId
+                    );
+
+                    _context.InventoryMovements.Add(movement);
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                return await GetPurchaseByIdAsync(purchase.Id, cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
+    }
+
     public async Task CancelPurchaseAsync(int id, CancellationToken cancellationToken = default)
     {
         var purchase = await _context.Purchases

@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { AppButtonComponent, AppCardComponent, AppBadgeComponent } from '../../../shared/components';
+import { appEmailValidator } from '../../../shared/validators';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,7 @@ import { AppButtonComponent, AppCardComponent, AppBadgeComponent } from '../../.
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './login.component.html'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -28,9 +29,24 @@ export class LoginComponent {
   errorMessage = signal<string | null>(null);
 
   loginForm = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    email: ['', [Validators.required, appEmailValidator(true)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    rememberMe: [false]
   });
+
+  ngOnInit(): void {
+    try {
+      const savedEmail = localStorage.getItem('sgi_remembered_email');
+      if (savedEmail) {
+        this.loginForm.patchValue({
+          email: savedEmail,
+          rememberMe: true
+        });
+      }
+    } catch {
+      // Ignorar restricciones en entornos aislados
+    }
+  }
 
   onSubmit(): void {
     if (this.loginForm.invalid) {
@@ -41,10 +57,20 @@ export class LoginComponent {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const credentials = this.loginForm.getRawValue();
+    const { email, password, rememberMe } = this.loginForm.getRawValue();
 
-    this.authService.login(credentials).subscribe({
+    this.authService.login({ email, password }).subscribe({
       next: () => {
+        try {
+          if (rememberMe) {
+            localStorage.setItem('sgi_remembered_email', email);
+          } else {
+            localStorage.removeItem('sgi_remembered_email');
+          }
+        } catch {
+          // Ignorar fallo de almacenamiento
+        }
+
         this.loading.set(false);
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
         this.router.navigateByUrl(returnUrl);

@@ -5,12 +5,14 @@ import { UserDetail } from '../../../../core/models/user-admin.model';
 import { Warehouse } from '../../../../core/models/warehouse.model';
 import { WarehouseService } from '../../../../core/services/warehouse.service';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
+import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
 import { AuthService } from '../../../../core/auth/services/auth.service';
+import { appEmailValidator } from '../../../../shared/validators';
 
 @Component({
   selector: 'app-user-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AppButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, AppButtonComponent, AppAutocompleteComponent],
   templateUrl: './user-modal.component.html'
 })
 export class UserModalComponent implements OnInit {
@@ -32,6 +34,32 @@ export class UserModalComponent implements OnInit {
     return this.authService.currentUser()?.role === 'Admin';
   }
 
+  get roleOptions(): AutocompleteOption[] {
+    const options: AutocompleteOption[] = [];
+    if (!this.isClientAdmin) {
+      options.push(
+        { value: 'SuperAdmin', label: 'Super Administrador (Control total multi-almacén)' },
+        { value: 'Admin', label: 'Administrador Titular de Almacén' }
+      );
+    }
+    options.push(
+      { value: 'Warehouse', label: 'Bodega / Almacén (Gestión de stock, compras y Kardex)' },
+      { value: 'Seller', label: 'Vendedor / Comercial (Facturación y clientes)' }
+    );
+    return options;
+  }
+
+  get warehouseOptions(): AutocompleteOption[] {
+    const options: AutocompleteOption[] = [
+      { value: null, label: '-- Sin Almacén Específico (Global) --' }
+    ];
+    return options.concat(this.warehouses().map(w => ({
+      value: w.id,
+      label: `${w.name} (${w.code})`,
+      sublabel: w.city || w.address || undefined
+    })));
+  }
+
   ngOnInit(): void {
     if (!this.isClientAdmin) {
       this.warehouseService.getWarehouses().subscribe({
@@ -45,7 +73,7 @@ export class UserModalComponent implements OnInit {
 
     this.form = this.fb.group({
       fullName: [this.user?.fullName || '', [Validators.required, Validators.maxLength(150)]],
-      email: [this.user?.email || '', [Validators.required, Validators.email, Validators.maxLength(150)]],
+      email: [this.user?.email || '', [Validators.required, appEmailValidator(true), Validators.maxLength(150)]],
       role: [defaultRole, [Validators.required]],
       warehouseId: [defaultWarehouseId],
       password: ['', this.user ? [] : [Validators.required, Validators.minLength(6)]]

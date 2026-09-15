@@ -14,6 +14,7 @@ export class PurchaseDetailModalComponent {
   @Input({ required: true }) purchase!: Purchase;
   @Output() close = new EventEmitter<void>();
   @Output() receive = new EventEmitter<number>();
+  @Output() returnPurchase = new EventEmitter<Purchase>();
 
   onClose(): void {
     this.close.emit();
@@ -21,5 +22,9 @@ export class PurchaseDetailModalComponent {
 
   onReceive(): void {
     this.receive.emit(this.purchase.id);
+  }
+
+  onReturn(): void {
+    this.returnPurchase.emit(this.purchase);
   }
 }

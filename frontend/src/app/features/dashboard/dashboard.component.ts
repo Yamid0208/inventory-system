@@ -6,11 +6,12 @@ import { AuthService } from '../../core/auth/services/auth.service';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
+import { CountUpDirective } from '../../shared/directives/count-up.directive';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CurrencyFormatPipe, AppButtonComponent],
+  imports: [CommonModule, RouterModule, CurrencyFormatPipe, AppButtonComponent, CountUpDirective],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
@@ -22,6 +23,7 @@ export class DashboardComponent implements OnInit {
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
   greeting = signal<string>('Buenos días');
+  refreshKey = signal<number>(0);
 
   ngOnInit(): void {
     this.updateGreeting();
@@ -46,6 +48,7 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.getSummary().subscribe({
       next: (data) => {
         this.summary.set(data);
+        this.refreshKey.update((k) => k + 1);
         this.loading.set(false);
       },
       error: () => {

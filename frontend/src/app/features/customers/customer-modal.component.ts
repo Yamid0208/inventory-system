@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerService } from '../../core/services/customer.service';
 import { Customer, CreateCustomerRequest, UpdateCustomerRequest } from '../../core/models/customer.model';
+import { isValidEmail } from '../../shared/validators';
 
 @Component({
   selector: 'app-customer-modal',
@@ -50,6 +51,11 @@ export class CustomerModalComponent {
 
   save(): void {
     if (!this.name.trim()) return;
+
+    if (this.email.trim() && !isValidEmail(this.email.trim())) {
+      this.errorMessage.set('Ingrese un correo electrónico válido (ej. cliente@empresa.com).');
+      return;
+    }
 
     this.saving.set(true);
     this.errorMessage.set(null);

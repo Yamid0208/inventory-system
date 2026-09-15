@@ -63,26 +63,24 @@
   <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div class="flex items-center gap-3 overflow-x-auto">
       <!-- Selector Entidad -->
-      <select
-        [value]="entityFilter()"
-        (change)="setEntityFilter($any($event.target).value)"
-        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none cursor-pointer"
-      >
-        @for (e of entities; track e.value) {
-          <option [value]="e.value">{{ e.label }}</option>
-        }
-      </select>
+      <div class="w-48">
+        <app-autocomplete
+          [value]="entityFilter()"
+          (valueChange)="setEntityFilter($any($event))"
+          [options]="entities"
+          placeholder="Todas las Entidades"
+        ></app-autocomplete>
+      </div>
 
       <!-- Selector Acción -->
-      <select
-        [value]="actionFilter()"
-        (change)="setActionFilter($any($event.target).value)"
-        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none cursor-pointer"
-      >
-        @for (a of actions; track a.value) {
-          <option [value]="a.value">{{ a.label }}</option>
-        }
-      </select>
+      <div class="w-48">
+        <app-autocomplete
+          [value]="actionFilter()"
+          (valueChange)="setActionFilter($any($event))"
+          [options]="actions"
+          placeholder="Todas las Acciones"
+        ></app-autocomplete>
+      </div>
     </div>
 
     <!-- Búsqueda -->

@@ -18,6 +18,7 @@ import { UserModalComponent } from './components/user-modal/user-modal.component
 import { ResetPasswordModalComponent } from './components/reset-password-modal/reset-password-modal.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
+import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 
 @Component({
@@ -28,7 +29,8 @@ import { PageChangeEvent } from '../../shared/models/pagination.model';
     UserModalComponent,
     ResetPasswordModalComponent,
     AppButtonComponent,
-    AppPaginationComponent
+    AppPaginationComponent,
+    AppAutocompleteComponent
   ],
   templateUrl: './users.component.html'
 })
@@ -51,6 +53,17 @@ export class UsersComponent implements OnInit {
   totalCount = signal<number>(0);
   pageNumber = signal<number>(1);
   pageSize = signal<number>(10);
+
+  statusFilterOptions: AutocompleteOption[] = [
+    { value: 'all', label: 'Todos los Estados' },
+    { value: 'active', label: 'Solo Activos' },
+    { value: 'inactive', label: 'Solo Inactivos' }
+  ];
+
+  get warehouseFilterOptions(): AutocompleteOption[] {
+    const opts: AutocompleteOption[] = [{ value: 'all', label: 'Todas las Sedes' }];
+    return opts.concat(this.warehouses().map(w => ({ value: String(w.id), label: w.name })));
+  }
 
   // Filtros
   roleFilter = signal<string>('all');

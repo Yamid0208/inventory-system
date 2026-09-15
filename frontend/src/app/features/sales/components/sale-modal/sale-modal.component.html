@@ -47,18 +47,12 @@
           </span>
 
           @if (registeredCustomers().length > 0) {
-            <div class="w-full sm:w-64">
-              <select
-                (change)="onSelectCustomerFromDropdown($event)"
-                class="w-full px-2.5 py-1 text-[11px] bg-white border border-slate-200 rounded-lg text-slate-700 font-medium focus:outline-none focus:border-primary-500 cursor-pointer"
-              >
-                <option value="">-- Seleccionar cliente registrado --</option>
-                @for (c of registeredCustomers(); track c.id) {
-                  <option [value]="c.id">
-                    {{ c.name }} {{ c.taxId ? '(' + c.taxId + ')' : '' }}
-                  </option>
-                }
-              </select>
+            <div class="w-full sm:w-72">
+              <app-autocomplete
+                [options]="customerOptions"
+                placeholder="Buscar cliente registrado..."
+                (valueChange)="onCustomerSelected($event)"
+              ></app-autocomplete>
             </div>
           }
         </div>
@@ -115,7 +109,17 @@
               formControlName="customerEmail"
               placeholder="cliente@empresa.com"
               class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+              [class.border-rose-400]="form.get('customerEmail')?.invalid && form.get('customerEmail')?.touched"
             />
+            @if (form.get('customerEmail')?.invalid && form.get('customerEmail')?.touched) {
+              <span class="text-[11px] text-rose-500 mt-1 block">
+                @if (form.get('customerEmail')?.hasError('required')) {
+                  El correo es requerido para facturación electrónica.
+                } @else {
+                  Ingrese un correo electrónico válido (ej. cliente&#64;empresa.com).
+                }
+              </span>
+            }
           </div>
         </div>
 
@@ -162,27 +166,23 @@
       <!-- Datos de Facturación y Pago -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Método de Pago *</label>
-          <select
+          <app-autocomplete
             formControlName="paymentMethod"
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
-          >
-            <option value="Cash">Efectivo</option>
-            <option value="CreditCard">Tarjeta de Débito / Crédito</option>
-            <option value="Transfer">Transferencia Bancaria</option>
-            <option value="Credit">Crédito Comercial (30 días)</option>
-          </select>
+            label="Método de Pago"
+            [required]="true"
+            [options]="paymentMethodOptions"
+            placeholder="Seleccionar método..."
+          ></app-autocomplete>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Tipo de Factura *</label>
-          <select
+          <app-autocomplete
             formControlName="invoiceType"
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all cursor-pointer"
-          >
-            <option value="Traditional">Tradicional</option>
-            <option value="Electronic">Electrónica</option>
-          </select>
+            label="Tipo de Factura"
+            [required]="true"
+            [options]="invoiceTypeOptions"
+            placeholder="Seleccionar tipo..."
+          ></app-autocomplete>
         </div>
 
         <div>
@@ -213,41 +213,40 @@
             <div [formGroupName]="i" class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">
               <!-- Selector de Producto -->
               <div class="flex-1 w-full">
-                <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Producto / SKU</label>
-                <select
+                <app-autocomplete
                   formControlName="productId"
-                  (change)="onProductSelect(i)"
-                  class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-medium focus:outline-none focus:border-primary-500 cursor-pointer"
-                >
-                  <option [value]="null">Seleccionar producto...</option>
-                  @for (p of products; track p.id) {
-                    <option [value]="p.id">
-                      [{{ p.sku }}] {{ p.name }} (Stock: {{ p.currentStock }})
-                    </option>
-                  }
-                </select>
+                  label="Producto / SKU"
+                  [options]="productOptions"
+                  placeholder="Buscar producto por SKU o nombre..."
+                  (valueChange)="onProductSelect(i)"
+                ></app-autocomplete>
               </div>
 
               <!-- Cantidad -->
-              <div class="w-full sm:w-24">
+              <div class="w-full sm:w-28">
                 <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Cantidad</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputmode="numeric"
                   formControlName="quantity"
-                  min="1"
+                  appThousandsSeparator
+                  [allowDecimals]="false"
+                  placeholder="1"
                   class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-center focus:outline-none focus:border-primary-500"
                   [class.border-rose-500]="isLineStockExceeded(i)"
                 />
               </div>
 
               <!-- Precio Unitario de Venta -->
-              <div class="w-full sm:w-28">
+              <div class="w-full sm:w-32">
                 <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Precio Venta</label>
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputmode="decimal"
                   formControlName="unitPrice"
-                  min="0"
+                  appThousandsSeparator
+                  [allowDecimals]="true"
+                  placeholder="0"
                   class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-right focus:outline-none focus:border-primary-500"
                 />
               </div>

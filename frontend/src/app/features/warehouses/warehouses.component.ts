@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { WarehouseService } from '../../core/services/warehouse.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Warehouse, CreateClientAdminRequest } from '../../core/models/warehouse.model';
+import { appEmailValidator } from '../../shared/validators';
 
 @Component({
   selector: 'app-warehouses',
@@ -26,7 +27,7 @@ export class WarehousesComponent implements OnInit {
     warehouseName: ['', [Validators.required, Validators.minLength(3)]],
     warehouseCode: ['', [Validators.required, Validators.minLength(2)]],
     adminFullName: ['', [Validators.required, Validators.minLength(3)]],
-    adminEmail: ['', [Validators.required, Validators.email]],
+    adminEmail: ['', [Validators.required, appEmailValidator(true)]],
     adminPassword: ['', [Validators.required, Validators.minLength(8)]],
     address: [''],
     city: [''],

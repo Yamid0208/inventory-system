@@ -12,4 +12,6 @@ export * from './app-toaster/app-toaster.component';
 export * from './app-form-field/app-form-field.component';
 export * from './app-input/app-input.component';
 export * from './app-select/app-select.component';
+export * from './app-autocomplete/app-autocomplete.component';
 export * from './app-date-picker/app-date-picker.component';
+

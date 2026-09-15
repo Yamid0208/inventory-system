@@ -101,22 +101,25 @@
     <div class="flex items-center gap-3">
       <!-- Selector de Sede/Almacén (Solo SuperAdmin) -->
       @if (authService.currentUser()?.role === 'SuperAdmin') {
-      <select [value]="warehouseFilter()" (change)="setWarehouseFilter($any($event.target).value)"
-        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none cursor-pointer">
-        <option value="all">Todas las Sedes</option>
-        @for (w of warehouses(); track w.id) {
-        <option [value]="w.id">{{ w.name }}</option>
-        }
-      </select>
+      <div class="w-48">
+        <app-autocomplete
+          [value]="warehouseFilter()"
+          (valueChange)="setWarehouseFilter($any($event))"
+          [options]="warehouseFilterOptions"
+          placeholder="Todas las Sedes"
+        ></app-autocomplete>
+      </div>
       }
 
       <!-- Selector de Estado -->
-      <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)"
-        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:outline-none cursor-pointer">
-        <option value="all">Todos los Estados</option>
-        <option value="active">Solo Activos</option>
-        <option value="inactive">Solo Inactivos</option>
-      </select>
+      <div class="w-44">
+        <app-autocomplete
+          [value]="statusFilter()"
+          (valueChange)="setStatusFilter($any($event))"
+          [options]="statusFilterOptions"
+          placeholder="Todos los Estados"
+        ></app-autocomplete>
+      </div>
 
       <!-- Input de Búsqueda -->
       <div class="relative w-full md:w-64">

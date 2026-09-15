@@ -2,3 +2,8 @@
 <app-toaster></app-toaster>
 <app-session-warning-modal></app-session-warning-modal>
 <app-confirm-dialog></app-confirm-dialog>
+
+@if (loadingService.isLoading()) {
+  <app-loading [overlay]="true" [message]="loadingService.message()"></app-loading>
+}
+

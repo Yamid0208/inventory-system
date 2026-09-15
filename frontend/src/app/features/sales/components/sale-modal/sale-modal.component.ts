@@ -6,14 +6,25 @@ import { Product } from '../../../../core/models/product.model';
 import { Customer } from '../../../../core/models/customer.model';
 import { CreateSaleRequest, PaymentMethod, InvoiceType } from '../../../../core/models/sale.model';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
+import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
+import { ThousandsSeparatorDirective } from '../../../../shared/directives/thousands-separator.directive';
 import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+import { emailFormatValidator, appEmailValidator } from '../../../../shared/validators';
+
 import { CustomerService } from '../../../../core/services/customer.service';
 import { SettingsService } from '../../../../core/services/settings.service';
 
 @Component({
   selector: 'app-sale-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AppButtonComponent, CurrencyFormatPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AppButtonComponent,
+    AppAutocompleteComponent,
+    ThousandsSeparatorDirective,
+    CurrencyFormatPipe
+  ],
   templateUrl: './sale-modal.component.html'
 })
 export class SaleModalComponent implements OnInit {
@@ -46,7 +57,7 @@ export class SaleModalComponent implements OnInit {
     this.form = this.fb.group({
       customerName: ['', [Validators.required, Validators.maxLength(200)]],
       customerTaxId: [''],
-      customerEmail: ['', [Validators.email]],
+      customerEmail: ['', [emailFormatValidator()]],
       paymentMethod: ['Cash', [Validators.required]],
       invoiceType: ['Traditional', [Validators.required]],
       saleDate: [new Date().toISOString().slice(0, 10), [Validators.required]],
@@ -74,10 +85,10 @@ export class SaleModalComponent implements OnInit {
       const taxCtrl = this.form.get('customerTaxId');
 
       if (type === 'Electronic') {
-        emailCtrl?.setValidators([Validators.required, Validators.email]);
+        emailCtrl?.setValidators([appEmailValidator(true)]);
         taxCtrl?.setValidators([Validators.required]);
       } else {
-        emailCtrl?.setValidators([Validators.email]);
+        emailCtrl?.setValidators([emailFormatValidator()]);
         taxCtrl?.clearValidators();
       }
       emailCtrl?.updateValueAndValidity();
@@ -92,6 +103,34 @@ export class SaleModalComponent implements OnInit {
     });
   }
 
+  paymentMethodOptions: AutocompleteOption[] = [
+    { value: 'Cash', label: 'Efectivo' },
+    { value: 'CreditCard', label: 'Tarjeta de Débito / Crédito' },
+    { value: 'Transfer', label: 'Transferencia Bancaria' },
+    { value: 'Credit', label: 'Crédito Comercial (30 días)' }
+  ];
+
+  invoiceTypeOptions: AutocompleteOption[] = [
+    { value: 'Traditional', label: 'Tradicional' },
+    { value: 'Electronic', label: 'Electrónica' }
+  ];
+
+  get customerOptions(): AutocompleteOption[] {
+    return this.registeredCustomers().map(c => ({
+      value: c.id,
+      label: c.name,
+      sublabel: c.taxId ? `NIT/CC: ${c.taxId}` : undefined
+    }));
+  }
+
+  get productOptions(): AutocompleteOption[] {
+    return this.products.map(p => ({
+      value: p.id,
+      label: `[${p.sku}] ${p.name}`,
+      sublabel: `Stock: ${p.currentStock}`
+    }));
+  }
+
   loadRegisteredCustomers(): void {
     this.customerService.getCustomers({ pageSize: 100, isActive: true }).subscribe({
       next: (res) => this.registeredCustomers.set(res.items)
@@ -101,9 +140,13 @@ export class SaleModalComponent implements OnInit {
   onSelectCustomerFromDropdown(event: Event): void {
     const select = event.target as HTMLSelectElement;
     const customerId = Number(select.value);
+    this.onCustomerSelected(customerId);
+  }
+
+  onCustomerSelected(customerId: any): void {
     if (!customerId) return;
 
-    const customer = this.registeredCustomers().find(c => c.id === customerId);
+    const customer = this.registeredCustomers().find(c => c.id === Number(customerId));
     if (customer) {
       this.form.patchValue({
         customerTaxId: customer.taxId || '',
