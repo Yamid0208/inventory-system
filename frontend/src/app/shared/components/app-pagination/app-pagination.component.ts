@@ -13,7 +13,7 @@ export class AppPaginationComponent {
   pageNumber = input<number>(1);
   pageSize = input<number>(10);
   totalCount = input<number>(0);
-  pageSizeOptions = input<number[]>([10, 25, 50]);
+  pageSizeOptions = input<number[]>([10, 20, 50, 100]);
 
   pageChange = output<PageChangeEvent>();
 

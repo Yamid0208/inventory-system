@@ -43,7 +43,7 @@ export class InventoryComponent implements OnInit {
   // Paginación
   totalCount = signal<number>(0);
   pageNumber = signal<number>(1);
-  pageSize = signal<number>(15);
+  pageSize = signal<number>(10);
 
   // Filtros
   dateRange = signal<'today' | '7d' | '1m' | '1y' | 'custom'>('7d');

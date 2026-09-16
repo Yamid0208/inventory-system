@@ -21,7 +21,7 @@ export class AuditComponent implements OnInit {
 
   totalCount = signal<number>(0);
   pageNumber = signal<number>(1);
-  pageSize = signal<number>(15);
+  pageSize = signal<number>(10);
 
   entityFilter = signal<string>('all');
   actionFilter = signal<string>('all');

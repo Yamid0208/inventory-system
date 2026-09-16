@@ -10,7 +10,68 @@ body {
   background-color: #F8F9FD;
   color: #1e293b;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: none;
 }
+
+/* ==========================================================================
+   Optimizaciones de Fluidez y Rendimiento de Scroll
+   ========================================================================== */
+.smooth-scroll,
+.overflow-y-auto,
+.overflow-x-auto,
+main {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* Barra de desplazamiento moderna y ultra-ligera (Custom Scrollbar) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Soporte de Firefox para barra de desplazamiento fina */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+html.dark * {
+  scrollbar-color: #334155 transparent;
+}
+
+/* Aceleración por GPU para contenedores de alto rendimiento */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
 
 /* ==========================================================================
    Soporte Global Integral de Modo Oscuro (Dark Mode)

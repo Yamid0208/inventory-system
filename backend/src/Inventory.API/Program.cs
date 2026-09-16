@@ -139,13 +139,58 @@ using (var scope = app.Services.CreateScope())
 
         if (!hasTables)
         {
-            logger.LogInformation("No se encontraron tablas. Creando esquema de tablas en PostgreSQL...");
+            logger.LogInformation("No se encontraron tablas. Creando esquema de tablas en la base de datos...");
             await dbCreator.CreateTablesAsync();
             logger.LogInformation("Esquema de tablas creado exitosamente.");
         }
         else
         {
-            logger.LogInformation("Las tablas ya existen en PostgreSQL.");
+            logger.LogInformation("Las tablas ya existen. Verificando integridad de esquemas...");
+            try
+            {
+                if (db.Database.IsNpgsql())
+                {
+                    await db.Database.ExecuteSqlRawAsync(@"
+                        CREATE TABLE IF NOT EXISTS ""SalePayments"" (
+                            ""Id"" SERIAL PRIMARY KEY,
+                            ""SaleId"" INTEGER NOT NULL,
+                            ""Method"" INTEGER NOT NULL,
+                            ""Amount"" NUMERIC(18,2) NOT NULL,
+                            ""Reference"" VARCHAR(100) NULL,
+                            ""CreatedAt"" TIMESTAMP WITH TIME ZONE NOT NULL,
+                            ""UpdatedAt"" TIMESTAMP WITH TIME ZONE NULL,
+                            ""IsDeleted"" BOOLEAN NOT NULL DEFAULT FALSE,
+                            CONSTRAINT ""FK_SalePayments_Sales_SaleId"" FOREIGN KEY (""SaleId"") REFERENCES ""Sales"" (""Id"") ON DELETE CASCADE
+                        );
+                        CREATE INDEX IF NOT EXISTS ""IX_SalePayments_SaleId"" ON ""SalePayments"" (""SaleId"");
+                    ");
+                }
+                else if (db.Database.IsSqlServer())
+                {
+                    await db.Database.ExecuteSqlRawAsync(@"
+                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[SalePayments]') AND type in (N'U'))
+                        BEGIN
+                            CREATE TABLE [dbo].[SalePayments] (
+                                [Id] int IDENTITY(1,1) NOT NULL,
+                                [SaleId] int NOT NULL,
+                                [Method] int NOT NULL,
+                                [Amount] decimal(18,2) NOT NULL,
+                                [Reference] nvarchar(100) NULL,
+                                [CreatedAt] datetime2 NOT NULL,
+                                [UpdatedAt] datetime2 NULL,
+                                [IsDeleted] bit NOT NULL DEFAULT 0,
+                                CONSTRAINT [PK_SalePayments] PRIMARY KEY ([Id]),
+                                CONSTRAINT [FK_SalePayments_Sales_SaleId] FOREIGN KEY ([SaleId]) REFERENCES [dbo].[Sales] ([Id]) ON DELETE CASCADE
+                            );
+                            CREATE NONCLUSTERED INDEX [IX_SalePayments_SaleId] ON [dbo].[SalePayments]([SaleId]);
+                        END
+                    ");
+                }
+            }
+            catch (Exception schemaEx)
+            {
+                logger.LogWarning(schemaEx, "Verificación de esquema SalePayments: {Msg}", schemaEx.Message);
+            }
         }
 
         await DatabaseSeeder.SeedInitialDataAsync(db, passwordHasher, logger);
