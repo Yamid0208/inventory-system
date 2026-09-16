@@ -7,6 +7,7 @@ import { ProductService } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
 import { SupplierService } from '../../core/services/supplier.service';
 import { BranchContextService } from '../../core/services/branch-context.service';
+import { AuthService } from '../../core/auth/services/auth.service';
 import { AlertService } from '../../core/services/alert.service';
 import { Product, ProductFilterParams, CreateProductRequest, UpdateProductRequest } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
@@ -41,6 +42,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private categoryService = inject(CategoryService);
   private supplierService = inject(SupplierService);
   branchContextService = inject(BranchContextService);
+  authService = inject(AuthService);
   private alertService = inject(AlertService, { optional: true });
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -234,7 +236,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     } else {
       const createReq = request as CreateProductRequest;
       if (!createReq.warehouseId) {
-        createReq.warehouseId = this.branchContextService.selectedWarehouseId();
+        createReq.warehouseId = this.branchContextService.selectedWarehouseId() ?? this.authService.currentUser()?.warehouseId ?? undefined;
       }
       action$ = this.productService.createProduct(createReq);
     }

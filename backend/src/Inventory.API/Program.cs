@@ -165,6 +165,15 @@ using (var scope = app.Services.CreateScope())
                         );
                         CREATE INDEX IF NOT EXISTS ""IX_SalePayments_SaleId"" ON ""SalePayments"" (""SaleId"");
                         ALTER TABLE ""SalePayments"" ADD COLUMN IF NOT EXISTS ""DeletedAt"" TIMESTAMP WITH TIME ZONE NULL;
+
+                        DO $$
+                        BEGIN
+                            BEGIN
+                                ALTER TABLE ""Products"" ALTER COLUMN ""RowVersion"" SET DEFAULT decode(md5(random()::text || clock_timestamp()::text), 'hex');
+                            EXCEPTION WHEN OTHERS THEN
+                                NULL;
+                            END;
+                        END $$;
                     ");
                 }
                 else if (db.Database.IsSqlServer())

@@ -23,11 +23,11 @@ public class Product : BaseEntity
     public int? WarehouseId { get; private set; }
 
     // Token de concurrencia optimista
-    public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
+    public byte[] RowVersion { get; private set; } = Guid.NewGuid().ToByteArray();
 
     public void UpdateRowVersion()
     {
-        RowVersion = Array.Empty<byte>();
+        RowVersion = Guid.NewGuid().ToByteArray();
     }
 
     protected Product() { } // Requerido por EF Core

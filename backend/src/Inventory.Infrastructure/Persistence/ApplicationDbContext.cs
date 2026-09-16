@@ -34,6 +34,25 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
+        bool isSqlServer = Database.ProviderName?.Contains("SqlServer", StringComparison.OrdinalIgnoreCase) == true;
+        if (isSqlServer)
+        {
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.Property(p => p.RowVersion)
+                    .IsRowVersion();
+            });
+        }
+        else
+        {
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.Property(p => p.RowVersion)
+                    .IsConcurrencyToken()
+                    .ValueGeneratedNever();
+            });
+        }
+
         modelBuilder.Entity<Warehouse>(entity =>
         {
             entity.HasKey(w => w.Id);
@@ -56,6 +75,17 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        bool isSqlServer = Database.ProviderName?.Contains("SqlServer", StringComparison.OrdinalIgnoreCase) == true;
+        if (!isSqlServer)
+        {
+            foreach (var entry in ChangeTracker.Entries<Product>())
+            {
+                if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                {
+                    entry.Entity.UpdateRowVersion();
+                }
+            }
+        }
 
         foreach (var entry in ChangeTracker.Entries<BaseEntity<int>>())
         {

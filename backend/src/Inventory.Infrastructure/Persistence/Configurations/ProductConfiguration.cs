@@ -59,9 +59,9 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.CreatedAt)
             .IsRequired();
 
-        // Concurrencia optimista
+        // Concurrencia optimista base
         builder.Property(p => p.RowVersion)
-            .IsRowVersion();
+            .IsConcurrencyToken();
 
         // Índice único en SKU por almacén ignorando eliminados lógicamente
         builder.HasIndex(p => new { p.WarehouseId, p.Sku })

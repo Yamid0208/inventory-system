@@ -276,6 +276,8 @@
 <!-- Modales fuera del contenedor p-8 para que el backdrop ocupe el 100% de la pantalla sin franjas -->
 @if (isModalOpen()) {
 <app-product-modal [product]="selectedProduct()" [categories]="categories()" [suppliers]="suppliers()"
+  [warehouses]="branchContextService.warehouses()"
+  [defaultWarehouseId]="branchContextService.selectedWarehouseId() ?? authService.currentUser()?.warehouseId ?? null"
   [loading]="modalLoading" [errorMessage]="modalError" (save)="onSaveProduct($event)"
   (cancel)="isModalOpen.set(false)"></app-product-modal>
 }

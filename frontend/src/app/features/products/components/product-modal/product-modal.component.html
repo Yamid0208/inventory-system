@@ -67,6 +67,19 @@
           }
         </div>
 
+        <!-- Sede / Almacén -->
+        @if (!product && warehouses.length > 0) {
+        <div class="col-span-1 md:col-span-2">
+          <app-autocomplete
+            formControlName="warehouseId"
+            label="Sede / Almacén de Destino"
+            [required]="true"
+            [options]="warehouseOptions"
+            placeholder="Selecciona la sede para el producto..."
+          ></app-autocomplete>
+        </div>
+        }
+
         <!-- Categoría -->
         <div>
           <app-autocomplete

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Product, CreateProductRequest, UpdateProductRequest } from '../../../../core/models/product.model';
 import { Category } from '../../../../core/models/category.model';
 import { Supplier } from '../../../../core/models/supplier.model';
+import { Warehouse } from '../../../../core/models/warehouse.model';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
 import { ThousandsSeparatorDirective } from '../../../../shared/directives/thousands-separator.directive';
@@ -24,6 +25,8 @@ export class ProductModalComponent implements OnInit {
   @Input() product: Product | null = null;
   @Input() categories: Category[] = [];
   @Input() suppliers: Supplier[] = [];
+  @Input() warehouses: Warehouse[] = [];
+  @Input() defaultWarehouseId: number | null = null;
   @Input() loading = signal<boolean>(false);
   @Input() errorMessage = signal<string | null>(null);
 
@@ -46,8 +49,17 @@ export class ProductModalComponent implements OnInit {
       supplierId: [this.product?.supplierId || (this.suppliers[0]?.id ?? null), [Validators.required]],
       purchasePrice: [this.product?.purchasePrice ?? 0, [Validators.required, Validators.min(0)]],
       salePrice: [this.product?.salePrice ?? 0, [Validators.required, Validators.min(0)]],
-      minimumStock: [this.product?.minimumStock ?? 5, [Validators.required, Validators.min(0)]]
+      minimumStock: [this.product?.minimumStock ?? 5, [Validators.required, Validators.min(0)]],
+      warehouseId: [this.product?.warehouseId || this.defaultWarehouseId || null]
     });
+  }
+
+  get warehouseOptions(): AutocompleteOption[] {
+    return this.warehouses.map(w => ({
+      value: w.id,
+      label: `${w.name} (${w.code})`,
+      sublabel: w.city || undefined
+    }));
   }
 
   get categoryOptions(): AutocompleteOption[] {
@@ -102,7 +114,8 @@ export class ProductModalComponent implements OnInit {
         supplierId: Number(val.supplierId),
         purchasePrice: Number(val.purchasePrice),
         salePrice: Number(val.salePrice),
-        minimumStock: Number(val.minimumStock)
+        minimumStock: Number(val.minimumStock),
+        warehouseId: val.warehouseId ? Number(val.warehouseId) : (this.defaultWarehouseId ?? undefined)
       };
       this.save.emit(createReq);
     }

@@ -17,6 +17,7 @@ export interface Product {
   rowVersion: string;
   createdAt: string;
   updatedAt: string | null;
+  warehouseId?: number | null;
 }
 
 export interface ProductFilterParams {
