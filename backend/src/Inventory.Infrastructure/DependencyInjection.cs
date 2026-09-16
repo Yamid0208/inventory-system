@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Inventory.Application.Features.Products.Services;
+using Npgsql;
 
 namespace Inventory.Infrastructure;
 
@@ -23,11 +24,48 @@ public static class DependencyInjection
         {
             if (!string.IsNullOrWhiteSpace(connectionString))
             {
-                options.UseSqlServer(connectionString, sqlOptions =>
+                bool isPostgres = connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+                                 connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase) ||
+                                 (connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase) && !connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase)) ||
+                                 connectionString.Contains("Username=", StringComparison.OrdinalIgnoreCase);
+
+                if (isPostgres)
                 {
-                    sqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
-                    sqlOptions.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
-                });
+                    string pgConnStr = connectionString;
+                    if (connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+                        connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var databaseUri = new Uri(connectionString);
+                        var userInfo = databaseUri.UserInfo.Split(':');
+                        var builder = new NpgsqlConnectionStringBuilder
+                        {
+                            Host = databaseUri.Host,
+                            Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
+                            Username = userInfo[0],
+                            Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "",
+                            Database = databaseUri.LocalPath.TrimStart('/'),
+                            SslMode = SslMode.Prefer
+                        };
+                        pgConnStr = builder.ToString() + ";Trust Server Certificate=true;";
+                    }
+                    else if (!pgConnStr.Contains("Trust Server Certificate", StringComparison.OrdinalIgnoreCase) &&
+                             !pgConnStr.Contains("TrustServerCertificate", StringComparison.OrdinalIgnoreCase))
+                    {
+                        pgConnStr += ";Trust Server Certificate=true;";
+                    }
+
+                    options.UseNpgsql(pgConnStr, sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorCodesToAdd: null);
+                    });
+                }
+                else
+                {
+                    options.UseSqlServer(connectionString, sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
+                    });
+                }
             }
         });
 
