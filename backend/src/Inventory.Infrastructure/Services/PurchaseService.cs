@@ -60,7 +60,7 @@ public class PurchaseService : IPurchaseService
 
         if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
         {
-            query = query.Where(p => p.WarehouseId == request.WarehouseId.Value);
+            query = query.Where(p => p.WarehouseId == request.WarehouseId.Value || p.WarehouseId == null);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Search))

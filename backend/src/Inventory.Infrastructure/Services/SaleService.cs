@@ -59,7 +59,7 @@ public class SaleService : ISaleService
 
         if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
         {
-            baseQuery = baseQuery.Where(s => s.WarehouseId == request.WarehouseId.Value);
+            baseQuery = baseQuery.Where(s => s.WarehouseId == request.WarehouseId.Value || s.WarehouseId == null);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Search))
