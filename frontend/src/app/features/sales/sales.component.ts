@@ -113,7 +113,7 @@ export class SalesComponent implements OnInit {
   loadSales(): void {
     this.loading.set(true);
 
-    const wid = this.branchContextService.selectedWarehouseId();
+    const wid = this.selectedWarehouseId();
 
     const params: SaleFilterParams = {
       status: this.statusFilter(),
@@ -144,7 +144,10 @@ export class SalesComponent implements OnInit {
   onWarehouseFilterChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
     const val = select.value === 'all' || !select.value ? null : Number(select.value);
+    this.selectedWarehouseId.set(val);
     this.branchContextService.setSelectedWarehouseId(val);
+    this.pageNumber.set(1);
+    this.loadSales();
   }
 
   onSearch(event: Event): void {
