@@ -30,7 +30,7 @@ public class PurchasesController : ControllerBase
         CancellationToken cancellationToken)
     {
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin")
+        if (role != "SuperAdmin" && role != "Admin")
         {
             var wid = GetCurrentWarehouseId();
             if (wid.HasValue)

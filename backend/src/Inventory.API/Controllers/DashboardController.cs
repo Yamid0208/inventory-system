@@ -37,7 +37,7 @@ public class DashboardController : ControllerBase
         int? filterUserId = (onlyMine == true || email == "demo.limpio@sgi.local") ? currentUserId : null;
 
         int? filterWarehouseId = warehouseId;
-        if (role != "SuperAdmin")
+        if (role != "SuperAdmin" && role != "Admin")
         {
             var whClaim = User.FindFirst("warehouseId")?.Value;
             if (int.TryParse(whClaim, out var wid) && wid > 0)
