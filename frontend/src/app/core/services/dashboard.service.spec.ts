@@ -19,6 +19,6 @@ describe('DashboardService (Unit Tests)', () => {
 
   it('should call get on /api/v1/dashboard/summary', () => {
     service.getSummary().subscribe();
-    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/dashboard/summary');
+    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/dashboard/summary', expect.any(Object));
   });
 });

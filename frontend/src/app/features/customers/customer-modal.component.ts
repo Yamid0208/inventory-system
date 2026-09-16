@@ -46,7 +46,7 @@ export class CustomerModalComponent {
         this.resetForm();
       }
       this.errorMessage.set(null);
-    });
+    }, { allowSignalWrites: true });
   }
 
   save(): void {

@@ -84,23 +84,15 @@
       </div>
 
       <!-- Almacén / Sede Asignada -->
-      @if (isClientAdmin) {
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
-          <span class="text-slate-600 font-medium">Sede Asignada:</span>
-          <span class="font-bold text-slate-800">
-            {{ user?.warehouseName || authService.currentUser()?.warehouseName || 'Tu Almacén' }}
-          </span>
-        </div>
-      } @else {
-        <div>
-          <app-autocomplete
-            formControlName="warehouseId"
-            label="Almacén / Sede Asignada"
-            [options]="warehouseOptions"
-            placeholder="Selecciona o busca un almacén..."
-          ></app-autocomplete>
-        </div>
-      }
+      <div>
+        <app-autocomplete
+          formControlName="warehouseId"
+          [label]="isClientAdmin ? 'Sede / Almacén Asignado *' : 'Almacén / Sede Asignada'"
+          [required]="isClientAdmin"
+          [options]="warehouseOptions"
+          placeholder="Selecciona la sede correspondiente..."
+        ></app-autocomplete>
+      </div>
 
       <!-- Contraseña (Solo en creación) -->
       @if (!user) {

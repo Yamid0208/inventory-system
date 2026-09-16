@@ -29,13 +29,29 @@ public class SalesController : BaseApiController
         [FromQuery] SaleFilterRequest request,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && role != "Admin")
+        var role = GetCurrentUserRole();
+        if (!IsSuperAdmin())
         {
-            var wid = GetCurrentWarehouseId();
-            if (wid.HasValue)
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (role == "Seller" || role == "Warehouse")
             {
-                request = request with { WarehouseId = wid.Value };
+                var wid = GetCurrentWarehouseId();
+                if (wid.HasValue && wid.Value > 0)
+                {
+                    request = request with { WarehouseId = wid.Value };
+                }
+            }
+
+            if (request.WarehouseId.HasValue)
+            {
+                if (!allowed.Contains(request.WarehouseId.Value))
+                {
+                    return Forbid();
+                }
+            }
+            else
+            {
+                request = request with { AllowedWarehouseIds = allowed };
             }
         }
 
@@ -104,11 +120,5 @@ public class SalesController : BaseApiController
 
         await _saleService.CancelSaleAsync(id, userId, cancellationToken);
         return NoContent();
-    }
-
-    private int? GetCurrentWarehouseId()
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        return int.TryParse(whClaim, out var id) && id > 0 ? id : null;
     }
 }

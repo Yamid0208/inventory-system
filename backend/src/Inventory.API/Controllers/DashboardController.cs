@@ -9,7 +9,7 @@ namespace Inventory.API.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize]
-public class DashboardController : ControllerBase
+public class DashboardController : BaseApiController
 {
     private readonly IDashboardService _dashboardService;
 
@@ -20,7 +20,7 @@ public class DashboardController : ControllerBase
 
     /// <summary>
     /// Retorna el resumen consolidado de KPIs ejecutivos, valuación, alertas y distribución por categorías.
-    /// Para Admin y empleados filtra automáticamente por su almacén asignado.
+    /// Aplica aislamiento estricto de datos por almacén y empresa (Tríada CIA).
     /// </summary>
     [HttpGet("summary")]
     [ProducesResponseType(typeof(DashboardSummaryDto), StatusCodes.Status200OK)]
@@ -29,24 +29,34 @@ public class DashboardController : ControllerBase
         [FromQuery] int? warehouseId,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int.TryParse(idClaim, out var currentUserId);
+        var role = GetCurrentUserRole();
+        var currentUserId = GetCurrentUserId();
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
         int? filterUserId = (onlyMine == true || email == "demo.limpio@sgi.local") ? currentUserId : null;
 
-        int? filterWarehouseId = warehouseId;
-        if (role != "SuperAdmin" && role != "Admin")
+        IReadOnlyList<int>? allowedWarehouseIds = null;
+        if (!IsSuperAdmin())
         {
-            var whClaim = User.FindFirst("warehouseId")?.Value;
-            if (int.TryParse(whClaim, out var wid) && wid > 0)
+            allowedWarehouseIds = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+        }
+
+        int? filterWarehouseId = warehouseId;
+        if (role == "Warehouse" || role == "Seller")
+        {
+            var wid = GetCurrentWarehouseId();
+            if (wid.HasValue && wid.Value > 0)
             {
-                filterWarehouseId = wid;
+                filterWarehouseId = wid.Value;
             }
         }
 
-        var summary = await _dashboardService.GetSummaryAsync(filterUserId, filterWarehouseId, cancellationToken);
+        if (filterWarehouseId.HasValue && allowedWarehouseIds != null && allowedWarehouseIds.Count > 0 && !allowedWarehouseIds.Contains(filterWarehouseId.Value))
+        {
+            return Forbid();
+        }
+
+        var summary = await _dashboardService.GetSummaryAsync(filterUserId, filterWarehouseId, allowedWarehouseIds, cancellationToken);
         return Ok(summary);
     }
 }

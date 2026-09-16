@@ -50,9 +50,10 @@ export class UserModalComponent implements OnInit {
   }
 
   get warehouseOptions(): AutocompleteOption[] {
-    const options: AutocompleteOption[] = [
-      { value: null, label: '-- Sin Almacén Específico (Global) --' }
-    ];
+    const options: AutocompleteOption[] = [];
+    if (!this.isClientAdmin) {
+      options.push({ value: null, label: '-- Sin Almacén Específico (Global) --' });
+    }
     return options.concat(this.warehouses().map(w => ({
       value: w.id,
       label: `${w.name} (${w.code})`,
@@ -61,21 +62,26 @@ export class UserModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.isClientAdmin) {
-      this.warehouseService.getWarehouses().subscribe({
-        next: (data) => this.warehouses.set(data),
-        error: () => {}
-      });
-    }
+    this.warehouseService.getWarehouses().subscribe({
+      next: (data) => {
+        this.warehouses.set(data);
+        if (this.isClientAdmin && !this.user && data.length > 0 && !this.form.get('warehouseId')?.value) {
+          const currentWhId = this.authService.currentUser()?.warehouseId;
+          const match = data.find(w => w.id === currentWhId);
+          this.form.patchValue({ warehouseId: match ? match.id : data[0].id });
+        }
+      },
+      error: () => {}
+    });
 
     const defaultRole = this.user?.role || (this.isClientAdmin ? 'Warehouse' : 'Seller');
-    const defaultWarehouseId = this.user?.warehouseId ?? (this.isClientAdmin ? (this.authService.currentUser()?.warehouseId ?? null) : null);
+    const defaultWarehouseId = this.user?.warehouseId ?? (this.authService.currentUser()?.warehouseId ?? null);
 
     this.form = this.fb.group({
       fullName: [this.user?.fullName || '', [Validators.required, Validators.maxLength(150)]],
       email: [this.user?.email || '', [Validators.required, appEmailValidator(true), Validators.maxLength(150)]],
       role: [defaultRole, [Validators.required]],
-      warehouseId: [defaultWarehouseId],
+      warehouseId: [defaultWarehouseId, this.isClientAdmin ? [Validators.required] : []],
       password: ['', this.user ? [] : [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -91,8 +97,10 @@ export class UserModalComponent implements OnInit {
   onSubmit(): void {
     if (this.form.valid) {
       const formValue = { ...this.form.value };
-      if (this.isClientAdmin) {
-        formValue.warehouseId = this.authService.currentUser()?.warehouseId ?? null;
+      if (formValue.warehouseId !== null && formValue.warehouseId !== undefined && formValue.warehouseId !== '') {
+        formValue.warehouseId = Number(formValue.warehouseId);
+      } else {
+        formValue.warehouseId = null;
       }
       if (this.user) {
         this.save.emit({ id: this.user.id, request: formValue });

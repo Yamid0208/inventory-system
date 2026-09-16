@@ -1,11 +1,12 @@
 import '@angular/compiler';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createEnvironmentInjector } from '@angular/core';
+import { createEnvironmentInjector, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthService } from '../../core/auth/services/auth.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 
 describe('DashboardComponent (Unit Tests)', () => {
   const mockSummary = {
@@ -37,6 +38,11 @@ describe('DashboardComponent (Unit Tests)', () => {
     currentUser: vi.fn().mockReturnValue({ fullName: 'Carlos Pérez' })
   };
 
+  const branchContextServiceMock = {
+    selectedWarehouseId: signal<number | null>(1),
+    assignedWarehouseName: signal<string>('Sede Principal Norte')
+  };
+
   let component: DashboardComponent;
 
   beforeEach(() => {
@@ -44,7 +50,8 @@ describe('DashboardComponent (Unit Tests)', () => {
       DashboardComponent,
       { provide: DashboardService, useValue: dashboardServiceMock },
       { provide: Router, useValue: routerMock },
-      { provide: AuthService, useValue: authServiceMock }
+      { provide: AuthService, useValue: authServiceMock },
+      { provide: BranchContextService, useValue: branchContextServiceMock }
     ], null as any);
 
     component = injector.get(DashboardComponent);

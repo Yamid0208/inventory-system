@@ -22,6 +22,7 @@ export interface InventoryMovement {
 
 export interface KardexFilterParams {
   productId?: number;
+  warehouseId?: number;
   movementType?: string;
   startDate?: string;
   endDate?: string;

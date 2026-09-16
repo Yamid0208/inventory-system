@@ -45,6 +45,9 @@ export interface Sale {
   notes?: string;
   items: SaleItem[];
   payments?: SalePayment[];
+  warehouseId?: number;
+  warehouseName?: string;
+  warehouseCode?: string;
 }
 
 export interface CreateSaleItemRequest {
@@ -64,6 +67,7 @@ export interface CreateSaleRequest {
   notes?: string;
   items: CreateSaleItemRequest[];
   payments?: SalePaymentRequest[];
+  warehouseId?: number;
 }
 
 export interface SaleFilterParams {
@@ -74,4 +78,5 @@ export interface SaleFilterParams {
   search?: string;
   pageNumber?: number;
   pageSize?: number;
+  warehouseId?: number;
 }

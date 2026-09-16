@@ -10,7 +10,7 @@ namespace Inventory.API.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize]
-public class InventoryController : ControllerBase
+public class InventoryController : BaseApiController
 {
     private readonly IInventoryService _inventoryService;
 
@@ -29,13 +29,29 @@ public class InventoryController : ControllerBase
         [FromQuery] KardexFilterRequest request,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && role != "Admin")
+        var role = GetCurrentUserRole();
+        if (!IsSuperAdmin())
         {
-            var wid = GetCurrentWarehouseId();
-            if (wid.HasValue)
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (role == "Warehouse" || role == "Seller")
             {
-                request = request with { WarehouseId = wid.Value };
+                var wid = GetCurrentWarehouseId();
+                if (wid.HasValue && wid.Value > 0)
+                {
+                    request = request with { WarehouseId = wid.Value };
+                }
+            }
+
+            if (request.WarehouseId.HasValue)
+            {
+                if (!allowed.Contains(request.WarehouseId.Value))
+                {
+                    return Forbid();
+                }
+            }
+            else
+            {
+                request = request with { AllowedWarehouseIds = allowed };
             }
         }
 
@@ -114,23 +130,33 @@ public class InventoryController : ControllerBase
         CancellationToken cancellationToken)
     {
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin")
+        if (!IsSuperAdmin())
         {
-            var wid = GetCurrentWarehouseId();
-            if (wid.HasValue)
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (role == "Warehouse" || role == "Seller")
             {
-                request = request with { WarehouseId = wid.Value };
+                var wid = GetCurrentWarehouseId();
+                if (wid.HasValue && wid.Value > 0)
+                {
+                    request = request with { WarehouseId = wid.Value };
+                }
+            }
+
+            if (request.WarehouseId.HasValue)
+            {
+                if (!allowed.Contains(request.WarehouseId.Value))
+                {
+                    return Forbid();
+                }
+            }
+            else
+            {
+                request = request with { AllowedWarehouseIds = allowed };
             }
         }
 
         var csvBytes = await _inventoryService.ExportKardexCsvAsync(request, cancellationToken);
         var filename = $"Kardex_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
         return File(csvBytes, "text/csv; charset=utf-8", filename);
-    }
-
-    private int? GetCurrentWarehouseId()
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        return int.TryParse(whClaim, out var id) && id > 0 ? id : null;
     }
 }

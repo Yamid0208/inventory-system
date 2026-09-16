@@ -24,6 +24,15 @@ export interface CreateClientAdminRequest {
   phone?: string;
 }
 
+export interface CreateWarehouseRequest {
+  name: string;
+  code: string;
+  address?: string;
+  city?: string;
+  phone?: string;
+  adminUserId?: number;
+}
+
 export interface UpdateWarehouseRequest {
   name: string;
   address?: string;

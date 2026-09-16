@@ -22,16 +22,22 @@ public class CategoriesController : BaseApiController
     public async Task<ActionResult<IReadOnlyList<CategoryDto>>> GetAll(
         [FromQuery] string? search,
         [FromQuery] bool? isActive,
+        [FromQuery] int? warehouseId,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        int? warehouseId = null;
-        if (role != "SuperAdmin")
+        IReadOnlyList<int>? allowedWarehouseIds = null;
+        if (!IsSuperAdmin())
         {
-            warehouseId = GetCurrentWarehouseId();
+            allowedWarehouseIds = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
         }
 
-        var categories = await _categoryService.GetAllAsync(search, isActive, warehouseId, cancellationToken);
+        int? filterWarehouseId = warehouseId;
+        if (GetCurrentUserRole() == "Warehouse" || GetCurrentUserRole() == "Seller")
+        {
+            filterWarehouseId = GetCurrentWarehouseId();
+        }
+
+        var categories = await _categoryService.GetAllAsync(search, isActive, filterWarehouseId, allowedWarehouseIds, cancellationToken);
         return Ok(categories);
     }
 
@@ -41,9 +47,8 @@ public class CategoriesController : BaseApiController
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CategoryDto>> GetById(int id, CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
         int? warehouseId = null;
-        if (role != "SuperAdmin")
+        if (!IsSuperAdmin())
         {
             warehouseId = GetCurrentWarehouseId();
         }
@@ -61,10 +66,10 @@ public class CategoriesController : BaseApiController
         [FromBody] CreateCategoryRequest request,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && !request.WarehouseId.HasValue)
+        if (!IsSuperAdmin() && !request.WarehouseId.HasValue)
         {
-            request.WarehouseId = GetCurrentWarehouseId();
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            request.WarehouseId = allowed.FirstOrDefault() > 0 ? allowed.First() : GetCurrentWarehouseId();
         }
 
         var created = await _categoryService.CreateAsync(request, cancellationToken);
@@ -109,11 +114,5 @@ public class CategoriesController : BaseApiController
     {
         await _categoryService.DeleteAsync(id, cancellationToken);
         return NoContent();
-    }
-
-    private int? GetCurrentWarehouseId()
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        return int.TryParse(whClaim, out var wid) && wid > 0 ? wid : null;
     }
 }

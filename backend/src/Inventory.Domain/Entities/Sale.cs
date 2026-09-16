@@ -23,6 +23,7 @@ public class Sale : BaseEntity
     public decimal Total { get; private set; }
     public string? Notes { get; private set; }
     public int? WarehouseId { get; private set; }
+    public Warehouse? Warehouse { get; private set; }
 
     private readonly List<SaleItem> _items = new();
     public IReadOnlyCollection<SaleItem> Items => _items.AsReadOnly();

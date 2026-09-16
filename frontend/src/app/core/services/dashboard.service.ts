@@ -10,7 +10,11 @@ export class DashboardService {
   private http = inject(HttpClient);
   private apiUrl = '/api/v1/dashboard/summary';
 
-  getSummary(): Observable<DashboardSummary> {
-    return this.http.get<DashboardSummary>(this.apiUrl);
+  getSummary(warehouseId?: number | null): Observable<DashboardSummary> {
+    const params: Record<string, string> = {};
+    if (warehouseId !== undefined && warehouseId !== null) {
+      params['warehouseId'] = warehouseId.toString();
+    }
+    return this.http.get<DashboardSummary>(this.apiUrl, { params });
   }
 }

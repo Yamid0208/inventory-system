@@ -29,6 +29,7 @@ public class CategoryService : ICategoryService
         string? search = null,
         bool? isActive = null,
         int? warehouseId = null,
+        IReadOnlyList<int>? allowedWarehouseIds = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Categories.AsNoTracking();
@@ -36,6 +37,10 @@ public class CategoryService : ICategoryService
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
             query = query.Where(c => c.WarehouseId == warehouseId.Value);
+        }
+        else if (allowedWarehouseIds != null)
+        {
+            query = query.Where(c => c.WarehouseId.HasValue && allowedWarehouseIds.Contains(c.WarehouseId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(search))

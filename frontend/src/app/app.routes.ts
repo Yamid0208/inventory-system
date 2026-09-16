@@ -25,7 +25,7 @@ export const routes: Routes = [
         path: 'warehouses',
         loadComponent: () => import('./features/warehouses/warehouses.component').then(m => m.WarehousesComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin'] }
+        data: { roles: ['SuperAdmin', 'Admin'] }
       },
       {
         path: 'products',

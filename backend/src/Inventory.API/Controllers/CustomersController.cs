@@ -10,7 +10,7 @@ namespace Inventory.API.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize]
-public class CustomersController : ControllerBase
+public class CustomersController : BaseApiController
 {
     private readonly ICustomerService _customerService;
 
@@ -20,7 +20,7 @@ public class CustomersController : ControllerBase
     }
 
     /// <summary>
-    /// Consulta paginada del directorio comercial de clientes con búsqueda y filtros de estado. Scoped por almacén.
+    /// Consulta paginada del directorio comercial de clientes con búsqueda y filtros de estado. Accesible para todas las sedes del almacén.
     /// </summary>
     [HttpGet]
     [Authorize(Roles = "SuperAdmin,Admin,Seller")]
@@ -29,16 +29,6 @@ public class CustomersController : ControllerBase
         [FromQuery] CustomerFilterRequest request,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin")
-        {
-            var wid = GetCurrentWarehouseId();
-            if (wid.HasValue)
-            {
-                request = request with { WarehouseId = wid.Value };
-            }
-        }
-
         var result = await _customerService.GetCustomersAsync(request, cancellationToken);
         return Ok(result);
     }
@@ -143,11 +133,5 @@ public class CustomersController : ControllerBase
     {
         await _customerService.DeleteCustomerAsync(id, cancellationToken);
         return NoContent();
-    }
-
-    private int? GetCurrentWarehouseId()
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        return int.TryParse(whClaim, out var id) && id > 0 ? id : null;
     }
 }

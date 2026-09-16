@@ -30,7 +30,7 @@ export class SidebarComponent {
     const role: UserRole = this.authService.currentUser()?.role || 'Seller';
     const items: NavItem[] = [
       { label: 'Panel Principal', route: '/dashboard', icon: 'grid', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse', 'Seller'] },
-      { label: 'Clientes & Almacenes', route: '/warehouses', icon: 'building', allowedRoles: ['SuperAdmin'] },
+      { label: role === 'Admin' ? 'Sedes / Almacenes' : 'Clientes & Almacenes', route: '/warehouses', icon: 'building', allowedRoles: ['SuperAdmin', 'Admin'] },
       { label: 'Productos', route: '/products', icon: 'tag', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse', 'Seller'] },
       { label: 'Inventario / Kardex', route: '/inventory', icon: 'box', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse'] },
       { label: 'Ventas', route: '/sales', icon: 'shopping-bag', allowedRoles: ['SuperAdmin', 'Admin', 'Seller'] },

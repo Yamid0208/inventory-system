@@ -4,6 +4,7 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } fr
 import { firstValueFrom } from 'rxjs';
 import { Product } from '../../../../core/models/product.model';
 import { Customer } from '../../../../core/models/customer.model';
+import { Warehouse } from '../../../../core/models/warehouse.model';
 import { CreateSaleRequest, PaymentMethod, InvoiceType } from '../../../../core/models/sale.model';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
@@ -29,6 +30,8 @@ import { SettingsService } from '../../../../core/services/settings.service';
 })
 export class SaleModalComponent implements OnInit {
   @Input() products: Product[] = [];
+  @Input() warehouses: Warehouse[] = [];
+  @Input() defaultWarehouseId: number | null = null;
   @Input() loading: any = false;
   @Input() errorMessage: any = null;
 
@@ -53,13 +56,24 @@ export class SaleModalComponent implements OnInit {
     private settingsService: SettingsService
   ) {}
 
+  get warehouseOptions(): AutocompleteOption[] {
+    return this.warehouses.map(w => ({
+      value: w.id,
+      label: `${w.name} (${w.code})`,
+      sublabel: w.city || undefined
+    }));
+  }
+
   ngOnInit(): void {
+    const initialWarehouseId = this.defaultWarehouseId || (this.warehouses.length > 0 ? this.warehouses[0].id : null);
+
     this.form = this.fb.group({
       customerName: ['', [Validators.required, Validators.maxLength(200)]],
       customerTaxId: [''],
       customerEmail: ['', [emailFormatValidator()]],
       paymentMethod: ['Cash', [Validators.required]],
       invoiceType: ['Traditional', [Validators.required]],
+      warehouseId: [initialWarehouseId],
       saleDate: [{ value: new Date().toISOString().slice(0, 10), disabled: true }, [Validators.required]],
       notes: [''],
       items: this.fb.array([]),
@@ -434,7 +448,8 @@ export class SaleModalComponent implements OnInit {
         unitPrice: Number(i.unitPrice),
         taxRate: this.taxRateDecimal()
       })),
-      payments: finalPayments
+      payments: finalPayments,
+      warehouseId: rawVal.warehouseId ? Number(rawVal.warehouseId) : undefined
     };
 
     this.save.emit(request);

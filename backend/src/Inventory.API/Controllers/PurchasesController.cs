@@ -10,7 +10,7 @@ namespace Inventory.API.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize]
-public class PurchasesController : ControllerBase
+public class PurchasesController : BaseApiController
 {
     private readonly IPurchaseService _purchaseService;
 
@@ -29,13 +29,29 @@ public class PurchasesController : ControllerBase
         [FromQuery] PurchaseFilterRequest request,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && role != "Admin")
+        var role = GetCurrentUserRole();
+        if (!IsSuperAdmin())
         {
-            var wid = GetCurrentWarehouseId();
-            if (wid.HasValue)
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (role == "Warehouse" || role == "Seller")
             {
-                request = request with { WarehouseId = wid.Value };
+                var wid = GetCurrentWarehouseId();
+                if (wid.HasValue && wid.Value > 0)
+                {
+                    request = request with { WarehouseId = wid.Value };
+                }
+            }
+
+            if (request.WarehouseId.HasValue)
+            {
+                if (!allowed.Contains(request.WarehouseId.Value))
+                {
+                    return Forbid();
+                }
+            }
+            else
+            {
+                request = request with { AllowedWarehouseIds = allowed };
             }
         }
 
@@ -142,11 +158,5 @@ public class PurchasesController : ControllerBase
     {
         await _purchaseService.CancelPurchaseAsync(id, cancellationToken);
         return NoContent();
-    }
-
-    private int? GetCurrentWarehouseId()
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        return int.TryParse(whClaim, out var id) && id > 0 ? id : null;
     }
 }

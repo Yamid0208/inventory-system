@@ -30,6 +30,9 @@ export class ProductService {
       if (filters.supplierId && filters.supplierId > 0) {
         params = params.set('supplierId', filters.supplierId.toString());
       }
+      if (filters.warehouseId && filters.warehouseId > 0) {
+        params = params.set('warehouseId', filters.warehouseId.toString());
+      }
       if (filters.stockStatus && filters.stockStatus !== 'all') {
         params = params.set('stockStatus', filters.stockStatus);
       }

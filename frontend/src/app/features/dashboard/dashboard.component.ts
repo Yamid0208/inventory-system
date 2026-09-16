@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -17,6 +18,7 @@ import { CountUpDirective } from '../../shared/directives/count-up.directive';
 export class DashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   private router = inject(Router);
+  branchContextService = inject(BranchContextService);
   authService = inject(AuthService);
 
   summary = signal<DashboardSummary | null>(null);
@@ -24,6 +26,17 @@ export class DashboardComponent implements OnInit {
   error = signal<string | null>(null);
   greeting = signal<string>('Buenos días');
   refreshKey = signal<number>(0);
+
+  constructor() {
+    try {
+      effect(() => {
+        const warehouseId = this.branchContextService.selectedWarehouseId();
+        untracked(() => {
+          this.loadDashboardData(warehouseId);
+        });
+      }, { allowSignalWrites: true });
+    } catch {}
+  }
 
   ngOnInit(): void {
     this.updateGreeting();
@@ -41,11 +54,13 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  loadDashboardData(): void {
+  loadDashboardData(warehouseId?: number | null): void {
     this.loading.set(true);
     this.error.set(null);
 
-    this.dashboardService.getSummary().subscribe({
+    const wid = warehouseId !== undefined ? warehouseId : this.branchContextService.selectedWarehouseId();
+
+    this.dashboardService.getSummary(wid).subscribe({
       next: (data) => {
         this.summary.set(data);
         this.refreshKey.update((k) => k + 1);

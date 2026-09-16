@@ -45,6 +45,7 @@ export interface CreatePurchaseRequest {
 
 export interface PurchaseFilterParams {
   supplierId?: number;
+  warehouseId?: number;
   status?: string;
   startDate?: string;
   endDate?: string;

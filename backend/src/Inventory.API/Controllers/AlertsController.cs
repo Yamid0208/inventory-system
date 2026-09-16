@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Inventory.Application.Features.Alerts.DTOs;
 using Inventory.Application.Features.Alerts.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +8,7 @@ namespace Inventory.API.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize]
-public class AlertsController : ControllerBase
+public class AlertsController : BaseApiController
 {
     private readonly IAlertService _alertService;
 
@@ -27,13 +26,20 @@ public class AlertsController : ControllerBase
         [FromQuery] StockAlertFilterRequest request,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && !request.WarehouseId.HasValue)
+        var role = GetCurrentUserRole();
+        if (role != "SuperAdmin")
         {
-            var wid = GetCurrentWarehouseId();
-            if (wid.HasValue)
+            if (role == "Warehouse" || role == "Seller")
             {
-                request = request with { WarehouseId = wid.Value };
+                var wid = GetCurrentWarehouseId();
+                if (wid.HasValue && wid.Value > 0)
+                {
+                    request = request with { WarehouseId = wid.Value };
+                }
+            }
+            else if (!request.WarehouseId.HasValue)
+            {
+                request = request with { WarehouseId = GetCurrentWarehouseId() };
             }
         }
 
@@ -47,22 +53,26 @@ public class AlertsController : ControllerBase
     [HttpGet("summary")]
     [ProducesResponseType(typeof(StockAlertSummaryDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<StockAlertSummaryDto>> GetAlertsSummary(
+        [FromQuery] int? warehouseId,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        int? warehouseId = null;
-        if (role != "SuperAdmin")
+        var role = GetCurrentUserRole();
+        int? filterWarehouseId = warehouseId;
+
+        if (role == "Warehouse" || role == "Seller")
         {
-            warehouseId = GetCurrentWarehouseId();
+            var wid = GetCurrentWarehouseId();
+            if (wid.HasValue && wid.Value > 0)
+            {
+                filterWarehouseId = wid.Value;
+            }
+        }
+        else if (role != "SuperAdmin" && !filterWarehouseId.HasValue)
+        {
+            filterWarehouseId = GetCurrentWarehouseId();
         }
 
-        var summary = await _alertService.GetAlertsSummaryAsync(warehouseId, cancellationToken);
+        var summary = await _alertService.GetAlertsSummaryAsync(filterWarehouseId, cancellationToken);
         return Ok(summary);
-    }
-
-    private int? GetCurrentWarehouseId()
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        return int.TryParse(whClaim, out var wid) && wid > 0 ? wid : null;
     }
 }

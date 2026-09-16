@@ -49,7 +49,7 @@ describe('AlertService (Unit Tests)', () => {
     httpClientMock.get.mockReturnValue(of(mockSummary));
 
     service.getSummary().subscribe();
-    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/alerts/summary');
+    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/alerts/summary', expect.any(Object));
     expect(service.totalAlerts()).toBe(3);
     expect(service.criticalCount()).toBe(1);
     expect(service.warningCount()).toBe(2);

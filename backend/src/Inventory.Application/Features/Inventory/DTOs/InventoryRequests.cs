@@ -8,7 +8,8 @@ public record KardexFilterRequest(
     string? Search = null,
     int PageNumber = 1,
     int PageSize = 15,
-    int? WarehouseId = null
+    int? WarehouseId = null,
+    IReadOnlyList<int>? AllowedWarehouseIds = null
 );
 
 public record CreateStockAdjustmentRequest(

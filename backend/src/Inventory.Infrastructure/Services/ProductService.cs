@@ -54,6 +54,10 @@ public class ProductService : IProductService
         {
             query = query.Where(p => p.WarehouseId == request.WarehouseId.Value);
         }
+        else if (request.AllowedWarehouseIds != null)
+        {
+            query = query.Where(p => p.WarehouseId.HasValue && request.AllowedWarehouseIds.Contains(p.WarehouseId.Value));
+        }
 
         // Filtro por Categoría
         if (request.CategoryId.HasValue && request.CategoryId.Value > 0)

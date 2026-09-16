@@ -19,7 +19,7 @@ public class WarehousesController : ControllerBase
     }
 
     /// <summary>
-    /// Lista todos los almacenes registrados (SuperAdmin) o el almacén asignado al usuario actual (Admin).
+    /// Lista todos los almacenes registrados (SuperAdmin) o los almacenes asignados/pertenecientes al usuario actual (Admin / Empleados).
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<WarehouseDto>), StatusCodes.Status200OK)]
@@ -36,11 +36,8 @@ public class WarehousesController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (int.TryParse(userIdClaim, out var userId))
         {
-            var warehouse = await _warehouseService.GetWarehouseByAdminUserIdAsync(userId, cancellationToken);
-            if (warehouse != null)
-            {
-                return Ok(new[] { warehouse });
-            }
+            var warehouses = await _warehouseService.GetWarehousesByAdminUserIdAsync(userId, cancellationToken);
+            return Ok(warehouses);
         }
 
         return Ok(Array.Empty<WarehouseDto>());
@@ -59,10 +56,10 @@ public class WarehousesController : ControllerBase
     }
 
     /// <summary>
-    /// Crea un nuevo almacén vinculándolo a un usuario administrador existente (Exclusivo SuperAdmin).
+    /// Crea un nuevo almacén o sede. El SuperAdmin puede asociarlo a cualquier administrador y el Admin lo crea para su propia cuenta.
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
     [ProducesResponseType(typeof(WarehouseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -70,6 +67,15 @@ public class WarehousesController : ControllerBase
         [FromBody] CreateWarehouseRequest request,
         CancellationToken cancellationToken)
     {
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        int.TryParse(userIdClaim, out var userId);
+
+        if (role == "Admin" || request.AdminUserId <= 0)
+        {
+            request = request with { AdminUserId = userId };
+        }
+
         var created = await _warehouseService.CreateWarehouseAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetWarehouseById), new { id = created.Id }, created);
     }
@@ -108,10 +114,10 @@ public class WarehousesController : ControllerBase
     }
 
     /// <summary>
-    /// Activa o desactiva un almacén (Exclusivo SuperAdmin).
+    /// Activa o desactiva un almacén (SuperAdmin y Admin).
     /// </summary>
     [HttpPatch("{id:int}/toggle-status")]
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
     [ProducesResponseType(typeof(WarehouseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<WarehouseDto>> ToggleStatus(int id, CancellationToken cancellationToken)

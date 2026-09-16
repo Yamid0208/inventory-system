@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateClientAdminRequest, UpdateWarehouseRequest, Warehouse } from '../models/warehouse.model';
+import { CreateClientAdminRequest, CreateWarehouseRequest, UpdateWarehouseRequest, Warehouse } from '../models/warehouse.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,11 +18,19 @@ export class WarehouseService {
     return this.http.get<Warehouse>(`${this.baseUrl}/${id}`);
   }
 
+  createWarehouse(request: CreateWarehouseRequest): Observable<Warehouse> {
+    return this.http.post<Warehouse>(this.baseUrl, request);
+  }
+
   createClientAdmin(request: CreateClientAdminRequest): Observable<Warehouse> {
     return this.http.post<Warehouse>(`${this.baseUrl}/client-admin`, request);
   }
 
   updateWarehouse(id: number, request: UpdateWarehouseRequest): Observable<Warehouse> {
     return this.http.put<Warehouse>(`${this.baseUrl}/${id}`, request);
+  }
+
+  toggleStatus(id: number): Observable<Warehouse> {
+    return this.http.patch<Warehouse>(`${this.baseUrl}/${id}/toggle-status`, {});
   }
 }

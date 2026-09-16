@@ -23,6 +23,7 @@ export interface ProductFilterParams {
   search?: string;
   categoryId?: number;
   supplierId?: number;
+  warehouseId?: number;
   stockStatus?: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock';
   isActive?: boolean;
   pageNumber?: number;
@@ -45,6 +46,7 @@ export interface CreateProductRequest {
   description?: string | null;
   categoryId: number;
   supplierId: number;
+  warehouseId?: number | null;
   purchasePrice: number;
   salePrice: number;
   minimumStock: number;

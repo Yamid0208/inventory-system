@@ -59,7 +59,11 @@ public class SaleService : ISaleService
 
         if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
         {
-            baseQuery = baseQuery.Where(s => s.WarehouseId == request.WarehouseId.Value || s.WarehouseId == null);
+            baseQuery = baseQuery.Where(s => s.WarehouseId == request.WarehouseId.Value);
+        }
+        else if (request.AllowedWarehouseIds != null)
+        {
+            baseQuery = baseQuery.Where(s => s.WarehouseId.HasValue && request.AllowedWarehouseIds.Contains(s.WarehouseId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Search))
@@ -82,6 +86,7 @@ public class SaleService : ISaleService
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Include(s => s.User)
+            .Include(s => s.Warehouse)
             .Include(s => s.Payments)
             .Include(s => s.Items)
                 .ThenInclude(i => i.Product)
@@ -96,6 +101,7 @@ public class SaleService : ISaleService
         var sale = await _context.Sales
             .AsNoTracking()
             .Include(s => s.User)
+            .Include(s => s.Warehouse)
             .Include(s => s.Payments)
             .Include(s => s.Items)
                 .ThenInclude(i => i.Product)
@@ -347,7 +353,9 @@ public class SaleService : ISaleService
             s.Notes,
             items,
             payments,
-            s.WarehouseId
+            s.WarehouseId,
+            s.Warehouse?.Name,
+            s.Warehouse?.Code
         );
     }
 }

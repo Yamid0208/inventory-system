@@ -26,5 +26,6 @@ export interface StockAlertFilterParams {
   severity?: string;
   categoryId?: number;
   supplierId?: number;
+  warehouseId?: number;
   search?: string;
 }

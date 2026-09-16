@@ -22,16 +22,22 @@ public class SuppliersController : BaseApiController
     public async Task<ActionResult<IReadOnlyList<SupplierDto>>> GetAll(
         [FromQuery] string? search,
         [FromQuery] bool? isActive,
+        [FromQuery] int? warehouseId,
         CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        int? warehouseId = null;
-        if (role != "SuperAdmin")
+        IReadOnlyList<int>? allowedWarehouseIds = null;
+        if (!IsSuperAdmin())
         {
-            warehouseId = GetCurrentWarehouseId();
+            allowedWarehouseIds = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
         }
 
-        var suppliers = await _supplierService.GetAllAsync(search, isActive, warehouseId, cancellationToken);
+        int? filterWarehouseId = warehouseId;
+        if (GetCurrentUserRole() == "Warehouse" || GetCurrentUserRole() == "Seller")
+        {
+            filterWarehouseId = GetCurrentWarehouseId();
+        }
+
+        var suppliers = await _supplierService.GetAllAsync(search, isActive, filterWarehouseId, allowedWarehouseIds, cancellationToken);
         return Ok(suppliers);
     }
 
@@ -109,11 +115,5 @@ public class SuppliersController : BaseApiController
     {
         await _supplierService.DeleteAsync(id, cancellationToken);
         return NoContent();
-    }
-
-    private int? GetCurrentWarehouseId()
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        return int.TryParse(whClaim, out var wid) && wid > 0 ? wid : null;
     }
 }

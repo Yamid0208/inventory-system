@@ -18,7 +18,7 @@ public record WarehouseDto(
 public record CreateWarehouseRequest(
     string Name,
     string Code,
-    int AdminUserId,
+    int AdminUserId = 0,
     string? Address = null,
     string? City = null,
     string? Phone = null

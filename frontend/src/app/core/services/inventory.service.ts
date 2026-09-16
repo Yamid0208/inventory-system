@@ -17,6 +17,9 @@ export class InventoryService {
     if (params.productId) {
       httpParams = httpParams.set('productId', params.productId.toString());
     }
+    if (params.warehouseId) {
+      httpParams = httpParams.set('warehouseId', params.warehouseId.toString());
+    }
     if (params.movementType && params.movementType !== 'all') {
       httpParams = httpParams.set('movementType', params.movementType);
     }
@@ -52,6 +55,9 @@ export class InventoryService {
 
     if (params.productId) {
       httpParams = httpParams.set('productId', params.productId.toString());
+    }
+    if (params.warehouseId) {
+      httpParams = httpParams.set('warehouseId', params.warehouseId.toString());
     }
     if (params.movementType && params.movementType !== 'all') {
       httpParams = httpParams.set('movementType', params.movementType);

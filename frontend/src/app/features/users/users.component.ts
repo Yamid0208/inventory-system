@@ -136,7 +136,8 @@ export class UsersComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    if (this.authService.currentUser()?.role === 'SuperAdmin') {
+    const role = this.authService.currentUser()?.role;
+    if (role === 'SuperAdmin' || role === 'Admin') {
       this.warehouseService.getWarehouses().subscribe({
         next: (data) => this.warehouses.set(data),
         error: () => {}

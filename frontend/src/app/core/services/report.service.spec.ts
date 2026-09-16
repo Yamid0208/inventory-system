@@ -19,7 +19,7 @@ describe('ReportService (Unit Tests)', () => {
 
   it('should call get on /api/v1/reports/summary', () => {
     service.getSummary().subscribe();
-    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/reports/summary');
+    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/reports/summary', expect.any(Object));
   });
 
   it('should call get on /api/v1/reports/products/csv with responseType blob', () => {

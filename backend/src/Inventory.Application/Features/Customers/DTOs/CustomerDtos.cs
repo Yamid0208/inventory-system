@@ -43,7 +43,8 @@ public record CustomerFilterRequest(
     int PageSize = 10,
     int? UserId = null,
     bool? OnlyMine = null,
-    int? WarehouseId = null
+    int? WarehouseId = null,
+    IReadOnlyList<int>? AllowedWarehouseIds = null
 );
 
 public record CustomerSummaryDto(

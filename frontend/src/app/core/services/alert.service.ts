@@ -81,6 +81,9 @@ export class AlertService {
     if (params?.supplierId) {
       httpParams = httpParams.set('supplierId', params.supplierId.toString());
     }
+    if (params?.warehouseId && params.warehouseId > 0) {
+      httpParams = httpParams.set('warehouseId', params.warehouseId.toString());
+    }
     if (params?.search?.trim()) {
       httpParams = httpParams.set('search', params.search.trim());
     }
@@ -98,8 +101,13 @@ export class AlertService {
     );
   }
 
-  getSummary(): Observable<StockAlertSummary> {
-    return this.http.get<StockAlertSummary>(`${this.baseUrl}/summary`).pipe(
+  getSummary(warehouseId?: number | null): Observable<StockAlertSummary> {
+    let httpParams = new HttpParams();
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      httpParams = httpParams.set('warehouseId', warehouseId.toString());
+    }
+
+    return this.http.get<StockAlertSummary>(`${this.baseUrl}/summary`, { params: httpParams }).pipe(
       tap(summary => {
         if (summary) {
           this.latestSummary.set(summary);

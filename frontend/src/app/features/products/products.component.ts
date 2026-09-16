@@ -1,35 +1,37 @@
-import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductService } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
 import { SupplierService } from '../../core/services/supplier.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import { AlertService } from '../../core/services/alert.service';
 import { Product, ProductFilterParams, CreateProductRequest, UpdateProductRequest } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Supplier } from '../../core/models/supplier.model';
 import { ProductModalComponent } from './components/product-modal/product-modal.component';
 import { ProductDetailModalComponent } from './components/product-detail-modal/product-detail-modal.component';
-import { BatchModalComponent } from './components/batch-modal/batch-modal.component';
+import { BatchManagementModalComponent } from './components/batch-management-modal/batch-management-modal.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
-import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
-import { PageChangeEvent } from '../../shared/models/pagination.model';
+import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { PageChangeEvent } from '../../shared/models/pagination.model';
 
 @Component({
   selector: 'app-products',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ProductModalComponent,
     ProductDetailModalComponent,
-    BatchModalComponent,
+    BatchManagementModalComponent,
     AppButtonComponent,
-    AppAutocompleteComponent,
     AppPaginationComponent,
+    AppAutocompleteComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './products.component.html'
@@ -38,11 +40,23 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private supplierService = inject(SupplierService);
+  branchContextService = inject(BranchContextService);
   private alertService = inject(AlertService, { optional: true });
+  private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   private searchSubject = new Subject<string>();
   private searchSub?: Subscription;
+
+  constructor() {
+    effect(() => {
+      const wid = this.branchContextService.selectedWarehouseId();
+      untracked(() => {
+        this.pageNumber.set(1);
+        this.loadProducts();
+      });
+    }, { allowSignalWrites: true });
+  }
 
   // Datos
   products = signal<Product[]>([]);
@@ -134,9 +148,12 @@ export class ProductsComponent implements OnInit, OnDestroy {
   loadProducts(): void {
     this.loading.set(true);
 
+    const wid = this.branchContextService.selectedWarehouseId();
+
     const filters: ProductFilterParams = {
       search: this.searchQuery(),
       categoryId: this.selectedCategoryId() ?? undefined,
+      warehouseId: (wid && wid > 0) ? wid : undefined,
       stockStatus: this.stockStatus(),
       pageNumber: this.pageNumber(),
       pageSize: this.pageSize()
@@ -210,9 +227,17 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.modalError.set(null);
 
     const current = this.selectedProduct();
-    const action$ = current
-      ? this.productService.updateProduct(current.id, request as UpdateProductRequest)
-      : this.productService.createProduct(request as CreateProductRequest);
+    let action$;
+
+    if (current) {
+      action$ = this.productService.updateProduct(current.id, request as UpdateProductRequest);
+    } else {
+      const createReq = request as CreateProductRequest;
+      if (!createReq.warehouseId) {
+        createReq.warehouseId = this.branchContextService.selectedWarehouseId();
+      }
+      action$ = this.productService.createProduct(createReq);
+    }
 
     action$.subscribe({
       next: () => {

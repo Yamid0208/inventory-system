@@ -99,8 +99,8 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <!-- Selector de Sede/Almacén (Solo SuperAdmin) -->
-      @if (authService.currentUser()?.role === 'SuperAdmin') {
+      <!-- Selector de Sede/Almacén (SuperAdmin o Admin) -->
+      @if (authService.currentUser()?.role === 'SuperAdmin' || authService.currentUser()?.role === 'Admin') {
       <div class="w-48">
         <app-autocomplete
           [value]="warehouseFilter()"

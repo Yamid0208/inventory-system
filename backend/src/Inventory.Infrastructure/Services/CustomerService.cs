@@ -37,6 +37,10 @@ public class CustomerService : ICustomerService
         {
             query = query.Where(c => c.WarehouseId == request.WarehouseId.Value);
         }
+        else if (request.AllowedWarehouseIds != null)
+        {
+            query = query.Where(c => c.WarehouseId.HasValue && request.AllowedWarehouseIds.Contains(c.WarehouseId.Value));
+        }
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {

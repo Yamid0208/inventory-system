@@ -1,7 +1,8 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../../core/services/inventory.service';
 import { ProductService } from '../../core/services/product.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import { AlertService } from '../../core/services/alert.service';
 import { InventoryMovement, KardexFilterParams, CreateStockAdjustmentRequest } from '../../core/models/inventory.model';
 import { Product } from '../../core/models/product.model';
@@ -30,6 +31,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 export class InventoryComponent implements OnInit {
   private inventoryService = inject(InventoryService);
   private productService = inject(ProductService);
+  branchContextService = inject(BranchContextService);
   private alertService = inject(AlertService, { optional: true });
 
   readonly Math = Math;
@@ -39,6 +41,16 @@ export class InventoryComponent implements OnInit {
   products = signal<Product[]>([]);
   loading = signal<boolean>(false);
   exporting = signal<boolean>(false);
+
+  constructor() {
+    effect(() => {
+      // Trigger reload whenever branch context changes
+      const wid = this.branchContextService.selectedWarehouseId();
+      untracked(() => {
+        this.loadKardex();
+      });
+    }, { allowSignalWrites: true });
+  }
 
   // Paginación
   totalCount = signal<number>(0);
@@ -61,7 +73,12 @@ export class InventoryComponent implements OnInit {
   }
 
   loadProductsCatalog(): void {
-    this.productService.getProducts({ pageNumber: 1, pageSize: 100 }).subscribe({
+    const wid = this.branchContextService.selectedWarehouseId();
+    this.productService.getProducts({
+      pageNumber: 1,
+      pageSize: 200,
+      warehouseId: (wid && wid > 0) ? wid : undefined
+    }).subscribe({
       next: (res) => this.products.set(res.items)
     });
   }
@@ -72,6 +89,7 @@ export class InventoryComponent implements OnInit {
     const { startDate, endDate } = this.calculateDateRange(this.dateRange());
 
     const params: KardexFilterParams = {
+      warehouseId: this.branchContextService.selectedWarehouseId() ?? undefined,
       movementType: this.selectedType(),
       startDate,
       endDate,
@@ -169,6 +187,7 @@ export class InventoryComponent implements OnInit {
     const { startDate, endDate } = this.calculateDateRange(this.dateRange());
 
     const params: KardexFilterParams = {
+      warehouseId: this.branchContextService.selectedWarehouseId() ?? undefined,
       movementType: this.selectedType(),
       startDate,
       endDate,

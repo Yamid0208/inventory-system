@@ -25,13 +25,29 @@ public class ProductsController : BaseApiController
     [ProducesResponseType(typeof(PagedResult<ProductDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProducts([FromQuery] ProductListRequest request, CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && role != "Admin")
+        var role = GetCurrentUserRole();
+        if (!IsSuperAdmin())
         {
-            var wid = GetCurrentWarehouseId();
-            if (wid.HasValue)
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (role == "Warehouse" || role == "Seller")
             {
-                request.WarehouseId = wid.Value;
+                var wid = GetCurrentWarehouseId();
+                if (wid.HasValue && wid.Value > 0)
+                {
+                    request.WarehouseId = wid.Value;
+                }
+            }
+
+            if (request.WarehouseId.HasValue)
+            {
+                if (!allowed.Contains(request.WarehouseId.Value))
+                {
+                    return Forbid();
+                }
+            }
+            else
+            {
+                request.AllowedWarehouseIds = allowed;
             }
         }
 
@@ -131,11 +147,5 @@ public class ProductsController : BaseApiController
         var relativeUrl = await _productService.UploadProductImageAsync(id, stream, file.FileName, file.ContentType, cancellationToken);
 
         return Ok(new { imageUrl = relativeUrl });
-    }
-
-    private int? GetCurrentWarehouseId()
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        return int.TryParse(whClaim, out var id) && id > 0 ? id : null;
     }
 }

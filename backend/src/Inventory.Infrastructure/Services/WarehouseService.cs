@@ -48,15 +48,17 @@ public class WarehouseService : IWarehouseService
         return MapToDto(warehouse);
     }
 
-    public async Task<WarehouseDto?> GetWarehouseByAdminUserIdAsync(int adminUserId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<WarehouseDto>> GetWarehousesByAdminUserIdAsync(int adminUserId, CancellationToken cancellationToken = default)
     {
-        var warehouse = await _context.Warehouses
+        var warehouses = await _context.Warehouses
             .AsNoTracking()
             .Include(w => w.AdminUser)
             .Include(w => w.Employees)
-            .FirstOrDefaultAsync(w => w.AdminUserId == adminUserId, cancellationToken);
+            .Where(w => w.AdminUserId == adminUserId || w.Employees.Any(e => e.Id == adminUserId))
+            .OrderBy(w => w.Name)
+            .ToListAsync(cancellationToken);
 
-        return warehouse == null ? null : MapToDto(warehouse);
+        return warehouses.Select(MapToDto).ToList();
     }
 
     public async Task<WarehouseDto> CreateWarehouseAsync(CreateWarehouseRequest request, CancellationToken cancellationToken = default)

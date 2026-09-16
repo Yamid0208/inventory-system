@@ -37,5 +37,7 @@ public record SaleDto(
     string? Notes,
     IReadOnlyCollection<SaleItemDto> Items,
     IReadOnlyCollection<SalePaymentDto>? Payments = null,
-    int? WarehouseId = null
+    int? WarehouseId = null,
+    string? WarehouseName = null,
+    string? WarehouseCode = null
 );

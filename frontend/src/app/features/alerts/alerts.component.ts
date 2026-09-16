@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AlertService } from '../../core/services/alert.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import { StockAlert, StockAlertSummary, StockAlertFilterParams } from '../../core/models/alert.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
@@ -15,6 +16,7 @@ import { AppButtonComponent } from '../../shared/components/app-button/app-butto
 export class AlertsComponent implements OnInit {
   private alertService = inject(AlertService);
   private router = inject(Router);
+  branchContextService = inject(BranchContextService);
 
   alerts = signal<StockAlert[]>([]);
   summary = signal<StockAlertSummary | null>(null);
@@ -23,16 +25,27 @@ export class AlertsComponent implements OnInit {
   severityFilter = signal<string>('all');
   searchQuery = signal<string>('');
 
+  constructor() {
+    effect(() => {
+      const wid = this.branchContextService.selectedWarehouseId();
+      untracked(() => {
+        this.loadData(wid);
+      });
+    }, { allowSignalWrites: true });
+  }
+
   ngOnInit(): void {
     this.loadData();
   }
 
-  loadData(): void {
+  loadData(warehouseId?: number | null): void {
     this.loading.set(true);
+    const wid = warehouseId !== undefined ? warehouseId : this.branchContextService.selectedWarehouseId();
 
     const params: StockAlertFilterParams = {
       severity: this.severityFilter(),
-      search: this.searchQuery()
+      search: this.searchQuery(),
+      warehouseId: (wid && wid > 0) ? wid : undefined
     };
 
     this.alertService.getStockAlerts(params).subscribe({
@@ -43,7 +56,7 @@ export class AlertsComponent implements OnInit {
       error: () => this.loading.set(false)
     });
 
-    this.alertService.getSummary().subscribe({
+    this.alertService.getSummary(wid).subscribe({
       next: (sum) => {
         this.summary.set(sum);
         this.alertService.markAsSeen(sum.totalAlerts);

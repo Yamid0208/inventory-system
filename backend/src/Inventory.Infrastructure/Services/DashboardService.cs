@@ -15,7 +15,7 @@ public class DashboardService : IDashboardService
         _context = context;
     }
 
-    public async Task<DashboardSummaryDto> GetSummaryAsync(int? userId = null, int? warehouseId = null, CancellationToken cancellationToken = default)
+    public async Task<DashboardSummaryDto> GetSummaryAsync(int? userId = null, int? warehouseId = null, IReadOnlyList<int>? allowedWarehouseIds = null, CancellationToken cancellationToken = default)
     {
         // 1. Productos y Valuación de Inventario
         var productsQuery = _context.Products
@@ -26,6 +26,10 @@ public class DashboardService : IDashboardService
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
             productsQuery = productsQuery.Where(p => p.WarehouseId == warehouseId.Value);
+        }
+        else if (allowedWarehouseIds != null && allowedWarehouseIds.Count > 0)
+        {
+            productsQuery = productsQuery.Where(p => p.WarehouseId.HasValue && allowedWarehouseIds.Contains(p.WarehouseId.Value));
         }
 
         var products = await productsQuery.ToListAsync(cancellationToken);
@@ -54,6 +58,10 @@ public class DashboardService : IDashboardService
         {
             salesQuery = salesQuery.Where(s => s.WarehouseId == warehouseId.Value);
         }
+        else if (allowedWarehouseIds != null && allowedWarehouseIds.Count > 0)
+        {
+            salesQuery = salesQuery.Where(s => s.WarehouseId.HasValue && allowedWarehouseIds.Contains(s.WarehouseId.Value));
+        }
 
         var sales = await salesQuery.ToListAsync(cancellationToken);
 
@@ -77,6 +85,10 @@ public class DashboardService : IDashboardService
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
             purchasesQuery = purchasesQuery.Where(p => p.WarehouseId == warehouseId.Value);
+        }
+        else if (allowedWarehouseIds != null && allowedWarehouseIds.Count > 0)
+        {
+            purchasesQuery = purchasesQuery.Where(p => p.WarehouseId.HasValue && allowedWarehouseIds.Contains(p.WarehouseId.Value));
         }
 
         var purchases = await purchasesQuery.ToListAsync(cancellationToken);
@@ -137,7 +149,12 @@ public class DashboardService : IDashboardService
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
             movementsQuery = movementsQuery.Where(m => m.WarehouseId == warehouseId.Value ||
-                                                       (m.WarehouseId == null && m.Product.WarehouseId == warehouseId.Value));
+                                                       (m.WarehouseId == null && m.Product != null && m.Product.WarehouseId == warehouseId.Value));
+        }
+        else if (allowedWarehouseIds != null && allowedWarehouseIds.Count > 0)
+        {
+            movementsQuery = movementsQuery.Where(m => (m.WarehouseId.HasValue && allowedWarehouseIds.Contains(m.WarehouseId.Value)) ||
+                                                       (m.WarehouseId == null && m.Product != null && m.Product.WarehouseId.HasValue && allowedWarehouseIds.Contains(m.Product.WarehouseId.Value)));
         }
 
         var movements = await movementsQuery

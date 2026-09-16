@@ -37,7 +37,32 @@ public class UsersController : ControllerBase
 
         if (role == "Admin")
         {
-            warehouseId = await GetCurrentAdminWarehouseIdAsync(cancellationToken);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out var userId))
+            {
+                var userWarehouses = await _warehouseService.GetWarehousesByAdminUserIdAsync(userId, cancellationToken);
+                var validIds = userWarehouses.Select(w => w.Id).ToList();
+
+                if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
+                {
+                    if (validIds.Contains(request.WarehouseId.Value))
+                    {
+                        warehouseId = request.WarehouseId.Value;
+                    }
+                    else
+                    {
+                        return Ok(new PagedResult<UserDetailDto>(Array.Empty<UserDetailDto>(), 0, request.PageNumber, request.PageSize));
+                    }
+                }
+                else if (validIds.Count == 1)
+                {
+                    warehouseId = validIds[0];
+                }
+            }
+        }
+        else if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
+        {
+            warehouseId = request.WarehouseId.Value;
         }
 
         var result = await _userService.GetUsersAsync(request, warehouseId, role, cancellationToken);
@@ -53,14 +78,13 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<UserDetailDto>> GetUserById(int id, CancellationToken cancellationToken)
     {
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        var warehouseId = role == "Admin" ? await GetCurrentAdminWarehouseIdAsync(cancellationToken) : null;
-        var user = await _userService.GetUserByIdAsync(id, warehouseId, role, cancellationToken);
+        var user = await _userService.GetUserByIdAsync(id, null, role, cancellationToken);
         return Ok(user);
     }
 
     /// <summary>
     /// Registra una nueva cuenta de usuario.
-    /// Si quien crea es un Admin, solo puede crear empleados (Warehouse o Seller) para su propio almacén.
+    /// Si quien crea es un Admin, solo puede crear empleados (Warehouse o Seller) para sus propios almacenes.
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(UserDetailDto), StatusCodes.Status201Created)]
@@ -79,13 +103,27 @@ public class UsersController : ControllerBase
                 return BadRequest(new { message = "Los administradores de cliente solo pueden registrar empleados operativos con rol 'Warehouse' o 'Seller'." });
             }
 
-            var warehouseId = await GetCurrentAdminWarehouseIdAsync(cancellationToken);
-            if (!warehouseId.HasValue)
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(userIdClaim, out var userId);
+            var userWarehouses = await _warehouseService.GetWarehousesByAdminUserIdAsync(userId, cancellationToken);
+            var validIds = userWarehouses.Select(w => w.Id).ToList();
+
+            if (validIds.Count == 0)
             {
-                return BadRequest(new { message = "El administrador actual no tiene un almacén asignado." });
+                return BadRequest(new { message = "El administrador actual no tiene sedes o almacenes asignados." });
             }
 
-            request = request with { WarehouseId = warehouseId.Value };
+            if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
+            {
+                if (!validIds.Contains(request.WarehouseId.Value))
+                {
+                    return BadRequest(new { message = "El almacén seleccionado no pertenece a sus sedes autorizadas." });
+                }
+            }
+            else
+            {
+                request = request with { WarehouseId = validIds.First() };
+            }
         }
 
         var user = await _userService.CreateUserAsync(request, cancellationToken);
@@ -105,7 +143,6 @@ public class UsersController : ControllerBase
         CancellationToken cancellationToken)
     {
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        var warehouseId = role == "Admin" ? await GetCurrentAdminWarehouseIdAsync(cancellationToken) : null;
 
         if (role == "Admin")
         {
@@ -113,10 +150,19 @@ public class UsersController : ControllerBase
             {
                 return BadRequest(new { message = "No tiene permisos para asignar roles de nivel administrativo." });
             }
-            request = request with { WarehouseId = warehouseId };
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(userIdClaim, out var userId);
+            var userWarehouses = await _warehouseService.GetWarehousesByAdminUserIdAsync(userId, cancellationToken);
+            var validIds = userWarehouses.Select(w => w.Id).ToList();
+
+            if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0 && !validIds.Contains(request.WarehouseId.Value))
+            {
+                return BadRequest(new { message = "El almacén seleccionado no pertenece a sus sedes autorizadas." });
+            }
         }
 
-        var updated = await _userService.UpdateUserAsync(id, request, warehouseId, role, cancellationToken);
+        var updated = await _userService.UpdateUserAsync(id, request, null, role, cancellationToken);
         return Ok(updated);
     }
 
@@ -131,11 +177,9 @@ public class UsersController : ControllerBase
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         int.TryParse(idClaim, out var currentUserId);
-
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        var warehouseId = role == "Admin" ? await GetCurrentAdminWarehouseIdAsync(cancellationToken) : null;
 
-        var updated = await _userService.ToggleUserStatusAsync(id, currentUserId, warehouseId, role, cancellationToken);
+        var updated = await _userService.ToggleUserStatusAsync(id, currentUserId, null, role, cancellationToken);
         return Ok(updated);
     }
 
@@ -152,27 +196,7 @@ public class UsersController : ControllerBase
         CancellationToken cancellationToken)
     {
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        var warehouseId = role == "Admin" ? await GetCurrentAdminWarehouseIdAsync(cancellationToken) : null;
-
-        await _userService.ResetPasswordAsync(id, request, warehouseId, role, cancellationToken);
+        await _userService.ResetPasswordAsync(id, request, null, role, cancellationToken);
         return NoContent();
-    }
-
-    private async Task<int?> GetCurrentAdminWarehouseIdAsync(CancellationToken cancellationToken)
-    {
-        var whClaim = User.FindFirst("warehouseId")?.Value;
-        if (int.TryParse(whClaim, out var wid) && wid > 0)
-        {
-            return wid;
-        }
-
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (int.TryParse(userIdClaim, out var userId))
-        {
-            var wh = await _warehouseService.GetWarehouseByAdminUserIdAsync(userId, cancellationToken);
-            return wh?.Id;
-        }
-
-        return null;
     }
 }

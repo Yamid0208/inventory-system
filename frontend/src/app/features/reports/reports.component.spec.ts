@@ -1,9 +1,10 @@
 import '@angular/compiler';
 import { describe, it, expect, vi } from 'vitest';
-import { createEnvironmentInjector } from '@angular/core';
+import { createEnvironmentInjector, signal } from '@angular/core';
 import { ReportsComponent } from './reports.component';
 import { ReportService } from '../../core/services/report.service';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import { of } from 'rxjs';
 
 describe('ReportsComponent (Unit Tests)', () => {
@@ -28,10 +29,16 @@ describe('ReportsComponent (Unit Tests)', () => {
     }))
   };
 
+  const branchContextServiceMock = {
+    selectedWarehouseId: signal<number | null>(1),
+    assignedWarehouseName: signal<string>('Sede Principal Norte')
+  };
+
   const injector = createEnvironmentInjector([
     ReportsComponent,
     { provide: ReportService, useValue: reportServiceMock },
-    { provide: DashboardService, useValue: dashboardServiceMock }
+    { provide: DashboardService, useValue: dashboardServiceMock },
+    { provide: BranchContextService, useValue: branchContextServiceMock }
   ], null as any);
 
   const component = injector.get(ReportsComponent);

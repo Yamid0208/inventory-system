@@ -17,6 +17,9 @@ export class PurchaseService {
     if (params.supplierId) {
       httpParams = httpParams.set('supplierId', params.supplierId.toString());
     }
+    if (params.warehouseId) {
+      httpParams = httpParams.set('warehouseId', params.warehouseId.toString());
+    }
     if (params.status && params.status !== 'all') {
       httpParams = httpParams.set('status', params.status);
     }

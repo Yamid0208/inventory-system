@@ -10,6 +10,7 @@ public class ProductListRequest
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public int? WarehouseId { get; set; }
+    public IReadOnlyList<int>? AllowedWarehouseIds { get; set; }
 }
 
 public class CreateProductRequest

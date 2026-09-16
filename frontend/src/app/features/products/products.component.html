@@ -186,16 +186,18 @@
 
             <!-- Nivel de Stock (Estado + Barra de Progreso + Conteo) -->
             <td class="py-4 px-6">
-              <div class="space-y-1.5">
+              <div class="space-y-1.5 min-w-[140px]">
                 <div class="flex items-center justify-between text-[11px]">
-                  <span class="font-bold" [class]="product.stockStatus === 'InStock'
+                  <span class="font-bold flex items-center gap-1.5" [class]="product.stockStatus === 'InStock'
                             ? 'text-emerald-600'
                             : (product.stockStatus === 'LowStock' ? 'text-amber-500' : 'text-rose-500')">
-                    {{ product.stockStatus === 'InStock' ? 'En Stock' : (product.stockStatus === 'LowStock' ? 'Stock
-                    Bajo' : 'Agotado') }}
+                    <span class="w-1.5 h-1.5 rounded-full" [class]="product.stockStatus === 'InStock'
+                              ? 'bg-emerald-500'
+                              : (product.stockStatus === 'LowStock' ? 'bg-amber-400 animate-pulse' : 'bg-rose-500')"></span>
+                    {{ product.stockStatus === 'InStock' ? 'En Stock' : (product.stockStatus === 'LowStock' ? 'Stock Bajo' : 'Agotado') }}
                   </span>
-                  <span class="font-mono text-slate-400">
-                    {{ product.currentStock }}/{{ product.minimumStock * 3 }}
+                  <span class="font-mono font-bold text-slate-800">
+                    {{ product.currentStock }} uds.
                   </span>
                 </div>
 
@@ -204,7 +206,11 @@
                   <div class="h-1.5 rounded-full transition-all duration-300" [class]="product.stockStatus === 'InStock'
                             ? 'bg-emerald-500'
                             : (product.stockStatus === 'LowStock' ? 'bg-amber-400' : 'bg-rose-400')"
-                    [style.width.%]="getStockBarWidth(product.currentStock, product.minimumStock)"></div>
+                    [style.width.%]="product.currentStock <= 0 ? 0 : Math.min(100, Math.round((product.currentStock / Math.max(product.minimumStock * 2, product.currentStock, 1)) * 100))"></div>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-slate-400">
+                  <span>Mínimo requerido:</span>
+                  <span class="font-medium text-slate-500">{{ product.minimumStock }} uds.</span>
                 </div>
               </div>
             </td>

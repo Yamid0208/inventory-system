@@ -1,30 +1,33 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ReportService } from '../../core/services/report.service';
 import { DashboardService } from '../../core/services/dashboard.service';
-import { ReportsCatalogSummary, ReportMetadata } from '../../core/models/report.model';
+import { BranchContextService } from '../../core/services/branch-context.service';
+import { ReportMetadata, ReportSummary } from '../../core/models/report.model';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
+import { CountUpDirective } from '../../shared/directives/count-up.directive';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyFormatPipe],
+  imports: [CommonModule, CurrencyFormatPipe, AppButtonComponent, CountUpDirective],
   templateUrl: './reports.component.html'
 })
 export class ReportsComponent implements OnInit {
   private reportService = inject(ReportService);
   private dashboardService = inject(DashboardService);
+  branchContextService = inject(BranchContextService);
 
-  summary = signal<ReportsCatalogSummary | null>(null);
+  summary = signal<ReportSummary | null>(null);
   dashboardData = signal<DashboardSummary | null>(null);
   loading = signal<boolean>(false);
   downloadingKey = signal<string | null>(null);
 
   startDate = signal<string>('');
   endDate = signal<string>('');
-  activePreset = signal<string>('all');
+  activePreset = signal<'all' | '7days' | '30days'>('all');
 
   profitMargin = computed(() => {
     const d = this.dashboardData();
@@ -33,14 +36,27 @@ export class ReportsComponent implements OnInit {
     return Math.round(margin * 10) / 10;
   });
 
+  constructor() {
+    try {
+      effect(() => {
+        const wid = this.branchContextService.selectedWarehouseId();
+        untracked(() => {
+          this.loadSummary(wid);
+          this.loadAnalytics(wid);
+        });
+      }, { allowSignalWrites: true });
+    } catch {}
+  }
+
   ngOnInit(): void {
     this.loadSummary();
     this.loadAnalytics();
   }
 
-  loadSummary(): void {
+  loadSummary(warehouseId?: number | null): void {
     this.loading.set(true);
-    this.reportService.getSummary().subscribe({
+    const wid = warehouseId !== undefined ? warehouseId : this.branchContextService.selectedWarehouseId();
+    this.reportService.getSummary(wid).subscribe({
       next: (res) => {
         this.summary.set(res);
         this.loading.set(false);
@@ -49,8 +65,9 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  loadAnalytics(): void {
-    this.dashboardService.getSummary().subscribe({
+  loadAnalytics(warehouseId?: number | null): void {
+    const wid = warehouseId !== undefined ? warehouseId : this.branchContextService.selectedWarehouseId();
+    this.dashboardService.getSummary(wid).subscribe({
       next: (data) => this.dashboardData.set(data),
       error: () => { }
     });
@@ -81,11 +98,13 @@ export class ReportsComponent implements OnInit {
 
   downloadCsv(report: ReportMetadata): void {
     this.downloadingKey.set(report.key);
+    const wid = this.branchContextService.selectedWarehouseId();
 
     this.reportService.downloadReport(
       report.key,
       this.startDate() || undefined,
-      this.endDate() || undefined
+      this.endDate() || undefined,
+      wid
     ).subscribe({
       next: (blob) => {
         this.reportService.triggerBrowserDownload(

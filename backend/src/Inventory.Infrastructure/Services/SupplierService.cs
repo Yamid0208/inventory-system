@@ -29,6 +29,7 @@ public class SupplierService : ISupplierService
         string? search = null,
         bool? isActive = null,
         int? warehouseId = null,
+        IReadOnlyList<int>? allowedWarehouseIds = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Suppliers.AsNoTracking();
@@ -36,6 +37,10 @@ public class SupplierService : ISupplierService
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
             query = query.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+        else if (allowedWarehouseIds != null)
+        {
+            query = query.Where(s => s.WarehouseId.HasValue && allowedWarehouseIds.Contains(s.WarehouseId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(search))

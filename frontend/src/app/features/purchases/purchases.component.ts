@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { PurchaseService } from '../../core/services/purchase.service';
 import { SupplierService } from '../../core/services/supplier.service';
 import { ProductService } from '../../core/services/product.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { AlertService } from '../../core/services/alert.service';
 import { Purchase, PurchaseFilterParams, CreatePurchaseRequest, ReturnPurchaseRequest } from '../../core/models/purchase.model';
@@ -35,6 +36,7 @@ export class PurchasesComponent implements OnInit {
   private purchaseService = inject(PurchaseService);
   private supplierService = inject(SupplierService);
   private productService = inject(ProductService);
+  branchContextService = inject(BranchContextService);
   private confirmationService = inject(ConfirmationService);
   private alertService = inject(AlertService, { optional: true });
   private route = inject(ActivatedRoute);
@@ -43,6 +45,15 @@ export class PurchasesComponent implements OnInit {
   suppliers = signal<Supplier[]>([]);
   products = signal<Product[]>([]);
   loading = signal<boolean>(false);
+
+  constructor() {
+    effect(() => {
+      const wid = this.branchContextService.selectedWarehouseId();
+      untracked(() => {
+        this.loadPurchases();
+      });
+    }, { allowSignalWrites: true });
+  }
 
   // Paginación
   totalCount = signal<number>(0);
@@ -91,7 +102,12 @@ export class PurchasesComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.productService.getProducts({ pageNumber: 1, pageSize: 100 }).subscribe({
+    const wid = this.branchContextService.selectedWarehouseId();
+    this.productService.getProducts({
+      pageNumber: 1,
+      pageSize: 200,
+      warehouseId: (wid && wid > 0) ? wid : undefined
+    }).subscribe({
       next: (res) => this.products.set(res.items)
     });
   }
@@ -100,6 +116,7 @@ export class PurchasesComponent implements OnInit {
     this.loading.set(true);
 
     const params: PurchaseFilterParams = {
+      warehouseId: this.branchContextService.selectedWarehouseId() ?? undefined,
       status: this.statusFilter(),
       search: this.searchQuery(),
       pageNumber: this.pageNumber(),

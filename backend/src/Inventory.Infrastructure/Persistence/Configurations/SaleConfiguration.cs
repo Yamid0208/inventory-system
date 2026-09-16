@@ -59,6 +59,11 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .HasForeignKey(s => s.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(s => s.Warehouse)
+            .WithMany()
+            .HasForeignKey(s => s.WarehouseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasMany(s => s.Items)
             .WithOne(i => i.Sale)
             .HasForeignKey(i => i.SaleId)

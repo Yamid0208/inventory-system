@@ -1,12 +1,16 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { SaleService } from '../../core/services/sale.service';
 import { ProductService } from '../../core/services/product.service';
+import { WarehouseService } from '../../core/services/warehouse.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
+import { AuthService } from '../../core/auth/services/auth.service';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { AlertService } from '../../core/services/alert.service';
 import { Sale, SaleFilterParams, CreateSaleRequest } from '../../core/models/sale.model';
 import { Product } from '../../core/models/product.model';
+import { Warehouse } from '../../core/models/warehouse.model';
 import { SaleModalComponent } from './components/sale-modal/sale-modal.component';
 import { SaleDetailModalComponent } from './components/sale-detail-modal/sale-detail-modal.component';
 import { InvoiceViewerComponent } from './components/invoice-viewer/invoice-viewer.component';
@@ -32,13 +36,20 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 export class SalesComponent implements OnInit {
   private saleService = inject(SaleService);
   private productService = inject(ProductService);
+  private warehouseService = inject(WarehouseService);
+  branchContextService = inject(BranchContextService);
+  private authService = inject(AuthService);
   private confirmationService = inject(ConfirmationService);
   private alertService = inject(AlertService, { optional: true });
   private route = inject(ActivatedRoute);
 
   sales = signal<Sale[]>([]);
   products = signal<Product[]>([]);
+  warehouses = signal<Warehouse[]>([]);
   loading = signal<boolean>(false);
+
+  userRole = computed(() => this.authService.currentUser()?.role || 'Seller');
+  canFilterByWarehouse = computed(() => this.userRole() === 'SuperAdmin' || this.userRole() === 'Admin');
 
   // Paginación
   totalCount = signal<number>(0);
@@ -47,6 +58,7 @@ export class SalesComponent implements OnInit {
 
   // Filtros
   statusFilter = signal<string>('all');
+  selectedWarehouseId = signal<number | null>(null);
   searchQuery = signal<string>('');
 
   // Modales
@@ -57,8 +69,21 @@ export class SalesComponent implements OnInit {
   modalLoading = signal<boolean>(false);
   modalError = signal<string | null>(null);
 
+  constructor() {
+    effect(() => {
+      const activeBranchId = this.branchContextService.selectedWarehouseId();
+      untracked(() => {
+        this.selectedWarehouseId.set(activeBranchId);
+        this.pageNumber.set(1);
+        this.loadSales();
+      });
+    }, { allowSignalWrites: true });
+  }
+
   ngOnInit(): void {
-    this.loadSales();
+    if (this.canFilterByWarehouse()) {
+      this.loadWarehouses();
+    }
 
     this.route.queryParams.subscribe(params => {
       if (params['new'] === 'true') {
@@ -67,8 +92,20 @@ export class SalesComponent implements OnInit {
     });
   }
 
+  loadWarehouses(): void {
+    this.warehouseService.getWarehouses().subscribe({
+      next: (res) => this.warehouses.set(res),
+      error: () => {}
+    });
+  }
+
   loadProducts(): void {
-    this.productService.getProducts({ pageNumber: 1, pageSize: 100 }).subscribe({
+    const wid = this.branchContextService.selectedWarehouseId();
+    this.productService.getProducts({
+      pageNumber: 1,
+      pageSize: 200,
+      warehouseId: (wid && wid > 0) ? wid : undefined
+    }).subscribe({
       next: (res) => this.products.set(res.items)
     });
   }
@@ -76,11 +113,14 @@ export class SalesComponent implements OnInit {
   loadSales(): void {
     this.loading.set(true);
 
+    const wid = this.branchContextService.selectedWarehouseId();
+
     const params: SaleFilterParams = {
       status: this.statusFilter(),
       search: this.searchQuery(),
       pageNumber: this.pageNumber(),
-      pageSize: this.pageSize()
+      pageSize: this.pageSize(),
+      warehouseId: (wid && wid > 0) ? wid : undefined
     };
 
     this.saleService.getSales(params).subscribe({
@@ -99,6 +139,12 @@ export class SalesComponent implements OnInit {
     this.statusFilter.set(status);
     this.pageNumber.set(1);
     this.loadSales();
+  }
+
+  onWarehouseFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const val = select.value === 'all' || !select.value ? null : Number(select.value);
+    this.branchContextService.setSelectedWarehouseId(val);
   }
 
   onSearch(event: Event): void {
