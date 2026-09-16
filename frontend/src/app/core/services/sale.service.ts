@@ -35,6 +35,9 @@ export class SaleService {
     if (params.pageSize) {
       httpParams = httpParams.set('pageSize', params.pageSize.toString());
     }
+    if (params.warehouseId) {
+      httpParams = httpParams.set('warehouseId', params.warehouseId.toString());
+    }
 
     return this.http.get<PagedResult<Sale>>(this.baseUrl, { params: httpParams });
   }
