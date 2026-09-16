@@ -146,36 +146,176 @@
         }
       </div>
 
-      <!-- Datos de Facturación y Pago -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <app-autocomplete formControlName="paymentMethod" label="Método de Pago" [required]="true"
-            [options]="paymentMethodOptions" placeholder="Seleccionar método..."></app-autocomplete>
-        </div>
-
+      <!-- Datos de Facturación -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <app-autocomplete formControlName="invoiceType" label="Tipo de Factura" [required]="true"
             [options]="invoiceTypeOptions" placeholder="Seleccionar tipo..."></app-autocomplete>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Fecha de Facturación *</label>
-          <input type="date" formControlName="saleDate"
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all" />
+          <label class="block font-semibold text-slate-700 mb-1 flex items-center justify-between">
+            <span>Fecha de Facturación</span>
+            <span class="text-[10px] text-slate-400 font-normal flex items-center gap-1">
+              <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                </path>
+              </svg>
+              Solo Lectura (Automática)
+            </span>
+          </label>
+          <div class="relative flex items-center">
+            <input type="date" formControlName="saleDate"
+              class="w-full pl-3 pr-8 py-2 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 font-medium cursor-not-allowed select-none transition-all shadow-inner" />
+            <svg class="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
         </div>
       </div>
 
-      <!-- Líneas de Detalle de Venta -->
-      <div class="space-y-3 pt-2">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-slate-800">Productos a Facturar</h3>
-          <button type="button" (click)="addItem()"
-            class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer">
-            <span>Agregar Producto</span>
+      <!-- Sección de Medios de Pago (Soporte para Pagos Divididos / Múltiples) -->
+      <div class="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/80 space-y-3">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                </path>
+              </svg>
+              Medio de Pago *
+            </span>
+            <p class="text-[11px] text-slate-500">
+              {{ isSplitPayment() ? 'Pago distribuido en varios métodos (Efectivo, Nequi, Tarjeta, etc.).' : 'Pago con
+              un único método que cubre el total de la venta.' }}
+            </p>
+          </div>
+
+          <!-- Botón de Alternar Modo Pago Único / Dividido -->
+          <button type="button" (click)="toggleSplitPayment()"
+            class="px-3 py-1 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            [class]="isSplitPayment()
+              ? 'bg-primary-600 text-white shadow-sm'
+              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+            </svg>
+            <span>{{ isSplitPayment() ? '✓ Pago Mixto Activado' : '+ Dividir / Varios Medios' }}</span>
           </button>
         </div>
 
-        <div formArrayName="items" class="space-y-2 max-h-60 pr-1">
+        <!-- MODO 1: Pago Único (Simple) -->
+        @if (!isSplitPayment()) {
+        <div class="max-w-md">
+          <app-autocomplete formControlName="paymentMethod" label="Método de Pago" [required]="true"
+            [options]="paymentMethodOptions" placeholder="Seleccionar método..."></app-autocomplete>
+        </div>
+        } @else {
+        <!-- MODO 2: Pago Mixto (Múltiples Medios) -->
+        <div formArrayName="payments" class="space-y-2.5 pt-1">
+          @for (payCtrl of paymentsArray.controls; track $index; let pi = $index) {
+          <div [formGroupName]="pi"
+            class="p-2.5 bg-white rounded-xl border border-slate-200/90 flex flex-col sm:flex-row items-center gap-2.5 shadow-sm">
+            <!-- Selector de Medio de Pago -->
+            <div class="w-full sm:w-56">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Medio {{ pi + 1 }}</label>
+              <select formControlName="method"
+                class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-primary-500 font-medium">
+                @for (opt of paymentMethodOptions; track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Monto a Pagar -->
+            <div class="w-full sm:w-36">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Monto Asignado</label>
+              <input type="text" inputmode="decimal" formControlName="amount" appThousandsSeparator
+                [allowDecimals]="false" placeholder="0"
+                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-right focus:outline-none focus:border-primary-500" />
+            </div>
+
+            <!-- Referencia Opcional -->
+            <div class="flex-1 w-full sm:w-auto">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Referencia / Comprobante
+                (Opcional)</label>
+              <input type="text" formControlName="reference" placeholder="Ej. Aprobación Nequi o Voucher..."
+                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-primary-500" />
+            </div>
+
+            <!-- Acciones Rápidas de Fila -->
+            <div class="flex items-center gap-1 self-end sm:self-center pt-2 sm:pt-4">
+              <button type="button" (click)="fillRemainingAmount(pi)"
+                class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-semibold transition-colors whitespace-nowrap"
+                title="Ajustar esta línea con el saldo restante">
+                Saldar Restante
+              </button>
+
+              <button type="button" (click)="removePayment(pi)" [disabled]="paymentsArray.length <= 1"
+                class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors disabled:opacity-20 cursor-pointer"
+                title="Quitar medio de pago">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                  </path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          }
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1">
+            <button type="button" (click)="addPaymentRow('Nequi', remainingPayment() > 0 ? remainingPayment() : 0)"
+              class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-primary-700 rounded-xl font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>+ Agregar Otro Medio de Pago</span>
+            </button>
+
+            <!-- Indicador de Cuadre Financiero -->
+            <div class="px-3 py-1.5 rounded-xl text-xs font-mono flex items-center gap-3" [class]="isPaymentBalanced()
+                  ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold'
+                  : 'bg-rose-50 border border-rose-200 text-rose-700 font-bold'">
+              <span>Pagado: {{ totalPaid() | currencyFormat }}</span>
+              <span>/</span>
+              <span>Total: {{ calculatedTotal() | currencyFormat }}</span>
+              @if (isPaymentBalanced()) {
+              <span class="text-emerald-600">✓ Cuadrado</span>
+              } @else {
+              <span class="text-rose-600">
+                {{ remainingPayment() > 0 ? '(Faltan ' + (remainingPayment() | currencyFormat) + ')' : '(Sobran ' +
+                (-remainingPayment() | currencyFormat) + ')' }}
+              </span>
+              }
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Líneas de Detalle de Venta -->
+      <div class="space-y-3 pt-1">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800">Productos a Facturar</h3>
+            <p class="text-[11px] text-slate-400">Cada nuevo producto se inserta en la parte superior.</p>
+          </div>
+          <button type="button" (click)="addItem()"
+            class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>+ Agregar Producto Arriba</span>
+          </button>
+        </div>
+
+        <div formArrayName="items" class="space-y-2.5 max-h-72 sm:max-h-80 overflow-y-auto pr-1">
           @for (item of itemsArray.controls; track $index; let i = $index) {
           <div [formGroupName]="i"
             class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">
@@ -263,7 +403,7 @@
           Cancelar
         </app-button>
         <app-button variant="primary" size="sm" type="submit"
-          [disabled]="form.invalid || itemsArray.length === 0 || anyStockExceeded() || isLoading() || isRegisteringCustomer()">
+          [disabled]="form.invalid || itemsArray.length === 0 || anyStockExceeded() || !isPaymentBalanced() || isLoading() || isRegisteringCustomer()">
           {{ isLoading() ? 'Procesando Venta...' : 'Completar Venta y Descontar Stock' }}
         </app-button>
       </div>

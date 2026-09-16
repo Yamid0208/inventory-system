@@ -82,8 +82,11 @@
             </span>
           </h3>
           <button type="button" (click)="addItem()" [disabled]="filteredProducts().length === 0"
-            class="px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
-            <span>+ Agregar Línea</span>
+            class="px-3.5 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>+ Agregar Producto Arriba</span>
           </button>
         </div>
 
@@ -96,7 +99,7 @@
           </p>
         </div>
         } @else {
-        <div formArrayName="items" class="space-y-2 max-h-60  pr-1">
+        <div formArrayName="items" class="space-y-2.5 max-h-72 sm:max-h-80 overflow-y-auto pr-1">
           @for (item of itemsArray.controls; track $index; let i = $index) {
           <div [formGroupName]="i"
             class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">

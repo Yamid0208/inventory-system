@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -14,7 +15,8 @@ html, body {
 /* ==========================================================================
    Soporte Global Integral de Modo Oscuro (Dark Mode)
    ========================================================================== */
-html.dark, html.dark body {
+html.dark,
+html.dark body {
   background-color: #0b0f19 !important;
   color: #f1f5f9 !important;
   color-scheme: dark;
@@ -65,8 +67,8 @@ html.dark .border-slate-100 {
   border-color: #1f2937 !important;
 }
 
-html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
-html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+html.dark .divide-slate-100> :not([hidden])~ :not([hidden]),
+html.dark .divide-slate-200> :not([hidden])~ :not([hidden]) {
   border-color: #1f2937 !important;
 }
 
@@ -104,7 +106,8 @@ html.dark .shadow-2xl {
     size: portrait;
   }
 
-  html, body {
+  html,
+  body {
     background-color: #ffffff !important;
     color: #000000 !important;
     font-size: 11pt !important;
@@ -140,7 +143,7 @@ html.dark .shadow-2xl {
   }
 
   /* Si hay visor de factura presente, ocultar todo lo demás de app-sales */
-  body:has(app-invoice-viewer) app-sales > div:not(app-invoice-viewer) {
+  body:has(app-invoice-viewer) app-sales>div:not(app-invoice-viewer) {
     display: none !important;
   }
 
@@ -167,7 +170,8 @@ html.dark .shadow-2xl {
     border-collapse: collapse !important;
   }
 
-  th, td {
+  th,
+  td {
     border-bottom: 1px solid #cbd5e1 !important;
     padding: 8px 6px !important;
     color: #0f172a !important;

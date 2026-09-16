@@ -170,7 +170,7 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
       unitPrice: [0, [Validators.required, Validators.min(0)]],
       taxRate: [this.taxRateDecimal()]
     });
-    this.itemsArray.push(itemGroup);
+    this.itemsArray.insert(0, itemGroup);
   }
 
   removeItem(index: number): void {

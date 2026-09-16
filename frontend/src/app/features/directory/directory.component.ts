@@ -56,7 +56,7 @@ export class DirectoryComponent implements OnInit {
 
   // Diálogo de confirmación de borrado
   confirmDialogOpen = signal<boolean>(false);
-  itemToDelete = signal<{ type: 'category' | 'supplier'; id: number; name: string } | null>(null);
+  itemToDelete = signal<{ type: 'category' | 'supplier'; id: number; name: string; hasProducts?: boolean; productCount?: number; totalStock?: number } | null>(null);
   deleteWarning = signal<string | null>(null);
 
   // Computados
@@ -247,10 +247,15 @@ export class DirectoryComponent implements OnInit {
 
   promptDeleteCategory(category: Category): void {
     this.deleteWarning.set(null);
+    const productCount = category.productCount ?? 0;
+    const totalStock = category.totalStock ?? 0;
     this.itemToDelete.set({
       type: 'category',
       id: category.id,
-      name: category.name
+      name: category.name,
+      hasProducts: productCount > 0,
+      productCount,
+      totalStock
     });
     this.confirmDialogOpen.set(true);
   }

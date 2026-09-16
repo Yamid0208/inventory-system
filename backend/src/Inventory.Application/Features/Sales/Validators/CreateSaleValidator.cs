@@ -56,6 +56,17 @@ public class CreateSaleValidator : AbstractValidator<CreateSaleRequest>
                 .WithMessage("El precio de venta no puede ser negativo.");
         });
 
+        RuleForEach(x => x.Payments!).ChildRules(payment =>
+        {
+            payment.RuleFor(p => p.Method)
+                .Must(m => Enum.TryParse<PaymentMethod>(m, true, out _))
+                .WithMessage("El método de pago es inválido.");
+
+            payment.RuleFor(p => p.Amount)
+                .GreaterThan(0)
+                .WithMessage("El monto asignado a cada método de pago debe ser mayor a cero.");
+        }).When(x => x.Payments != null && x.Payments.Count > 0);
+
         RuleFor(x => x.Notes)
             .MaximumLength(500)
             .WithMessage("Las observaciones no pueden superar los 500 caracteres.");

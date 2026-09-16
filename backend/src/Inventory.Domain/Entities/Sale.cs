@@ -27,6 +27,9 @@ public class Sale : BaseEntity
     private readonly List<SaleItem> _items = new();
     public IReadOnlyCollection<SaleItem> Items => _items.AsReadOnly();
 
+    private readonly List<SalePayment> _payments = new();
+    public IReadOnlyCollection<SalePayment> Payments => _payments.AsReadOnly();
+
     protected Sale() { } // Requerido por EF Core
 
     public Sale(
@@ -85,6 +88,19 @@ public class Sale : BaseEntity
         ArgumentNullException.ThrowIfNull(item);
         _items.Add(item);
         RecalculateTotals();
+    }
+
+    public void AddPayment(SalePayment payment)
+    {
+        ArgumentNullException.ThrowIfNull(payment);
+        _payments.Add(payment);
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void SetPaymentMethod(PaymentMethod method)
+    {
+        PaymentMethod = method;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public void RecalculateTotals()

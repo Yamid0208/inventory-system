@@ -332,7 +332,8 @@
   @if (confirmDialogOpen()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div class="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4 my-auto max-h-[92vh] overflow-y-auto">
-        <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto"
+          [class]="itemToDelete()?.hasProducts ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
           </svg>
@@ -340,13 +341,34 @@
 
         <div class="text-center">
           <h3 class="text-base font-bold text-slate-900">
-            ¿Confirmas la eliminación?
+            @if (itemToDelete()?.hasProducts) {
+              Categoría con Productos Asociados
+            } @else {
+              ¿Confirmas la eliminación?
+            }
           </h3>
           <p class="text-xs text-slate-500 mt-1">
-            Se dará de baja lógica a
-            <strong class="text-slate-800">"{{ itemToDelete()?.name }}"</strong>.
+            @if (itemToDelete()?.hasProducts) {
+              La categoría <strong class="text-slate-800">"{{ itemToDelete()?.name }}"</strong> tiene <strong class="text-rose-600 font-semibold">{{ itemToDelete()?.productCount }} producto(s)</strong> asociado(s) en el catálogo@if ((itemToDelete()?.totalStock ?? 0) > 0) { con un total de {{ itemToDelete()?.totalStock | number }} unidades en inventario } @else { (existencias en 0) }.
+            } @else {
+              Se dará de baja lógica a
+              <strong class="text-slate-800">"{{ itemToDelete()?.name }}"</strong>.
+            }
           </p>
         </div>
+
+        <!-- Alerta restrictiva si tiene productos asociados -->
+        @if (itemToDelete()?.hasProducts) {
+          <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+            <svg class="w-4 h-4 flex-shrink-0 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="flex-1">
+              <strong class="font-semibold block text-amber-900">Restricción de Integridad (RN-005):</strong>
+              <span>No está permitido eliminar una categoría si esta tiene asociado al menos un producto, sin importar si su stock es 0. Debe reasignar o dar de baja los productos asociados antes de poder eliminar la categoría.</span>
+            </div>
+          </div>
+        }
 
         <!-- Alerta de Regla de Negocio (RN-005 / RN-006) si la API rechazó -->
         @if (deleteWarning()) {
@@ -363,10 +385,10 @@
 
         <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-2">
           <app-button variant="outline" size="sm" (clicked)="closeDeleteDialog()">
-            {{ deleteWarning() ? 'Entendido / Cerrar' : 'Cancelar' }}
+            {{ itemToDelete()?.hasProducts || deleteWarning() ? 'Entendido / Cerrar' : 'Cancelar' }}
           </app-button>
 
-          @if (!deleteWarning()) {
+          @if (!itemToDelete()?.hasProducts && !deleteWarning()) {
             <app-button variant="danger" size="sm" (clicked)="executeDelete()">
               Confirmar Eliminación
             </app-button>

@@ -69,4 +69,34 @@ public class SaleTests
         // No se puede cancelar nuevamente
         Assert.Throws<InvalidOperationException>(() => sale.Cancel());
     }
+
+    [Fact]
+    public void Sale_AddMultiplePayments_RegistersCorrectly()
+    {
+        var sale = new Sale(
+            saleNumber: "VEN-20260916-003",
+            customerName: "Melissa Rodríguez",
+            userId: 1,
+            saleDate: DateTimeOffset.UtcNow,
+            paymentMethod: PaymentMethod.Mixed
+        );
+
+        var payment1 = new SalePayment(PaymentMethod.Cash, 50000m);
+        var payment2 = new SalePayment(PaymentMethod.Nequi, 100000m, "REF-NQ-12345");
+
+        sale.AddPayment(payment1);
+        sale.AddPayment(payment2);
+
+        Assert.Equal(2, sale.Payments.Count);
+        Assert.Equal(150000m, sale.Payments.Sum(p => p.Amount));
+        Assert.Equal(PaymentMethod.Mixed, sale.PaymentMethod);
+        Assert.Contains(sale.Payments, p => p.Method == PaymentMethod.Nequi && p.Reference == "REF-NQ-12345");
+    }
+
+    [Fact]
+    public void SalePayment_InvalidAmount_ThrowsException()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SalePayment(PaymentMethod.Cash, 0m));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SalePayment(PaymentMethod.Nequi, -100m));
+    }
 }

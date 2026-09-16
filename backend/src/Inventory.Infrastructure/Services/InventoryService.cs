@@ -25,8 +25,6 @@ public class InventoryService : IInventoryService
     {
         var query = _context.InventoryMovements
             .AsNoTracking()
-            .Include(m => m.Product)
-            .Include(m => m.User)
             .AsQueryable();
 
         if (request.ProductId.HasValue && request.ProductId.Value > 0)

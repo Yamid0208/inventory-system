@@ -12,6 +12,13 @@ public record SaleItemDto(
     decimal Total
 );
 
+public record SalePaymentDto(
+    int Id,
+    string Method,
+    decimal Amount,
+    string? Reference
+);
+
 public record SaleDto(
     int Id,
     string SaleNumber,
@@ -29,5 +36,6 @@ public record SaleDto(
     decimal Total,
     string? Notes,
     IReadOnlyCollection<SaleItemDto> Items,
+    IReadOnlyCollection<SalePaymentDto>? Payments = null,
     int? WarehouseId = null
 );

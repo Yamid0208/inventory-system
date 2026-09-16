@@ -59,6 +59,7 @@ public class CategoryService : ICategoryService
                 Description = c.Description,
                 IsActive = c.IsActive,
                 ProductCount = c.Products.Count(p => !p.IsDeleted),
+                TotalStock = c.Products.Where(p => !p.IsDeleted).Sum(p => (int?)p.CurrentStock) ?? 0,
                 CreatedAt = c.CreatedAt,
                 UpdatedAt = c.UpdatedAt,
                 WarehouseId = c.WarehouseId
@@ -85,6 +86,7 @@ public class CategoryService : ICategoryService
                 Description = c.Description,
                 IsActive = c.IsActive,
                 ProductCount = c.Products.Count(p => !p.IsDeleted),
+                TotalStock = c.Products.Where(p => !p.IsDeleted).Sum(p => (int?)p.CurrentStock) ?? 0,
                 CreatedAt = c.CreatedAt,
                 UpdatedAt = c.UpdatedAt,
                 WarehouseId = c.WarehouseId
@@ -107,6 +109,16 @@ public class CategoryService : ICategoryService
             throw new ValidationException(validationResult.Errors);
         }
 
+        // Comprobación de unicidad de nombre dentro del mismo almacén
+        var normalizedName = request.Name.Trim().ToLower();
+        var existsDuplicate = await _context.Categories
+            .AnyAsync(c => c.WarehouseId == request.WarehouseId && c.Name.ToLower() == normalizedName, cancellationToken);
+
+        if (existsDuplicate)
+        {
+            throw new ConflictException($"Ya existe una categoría registrada con el nombre '{request.Name.Trim()}'.");
+        }
+
         var category = new Category(request.Name, request.Description);
         if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
         {
@@ -123,6 +135,7 @@ public class CategoryService : ICategoryService
             Description = category.Description,
             IsActive = category.IsActive,
             ProductCount = 0,
+            TotalStock = 0,
             CreatedAt = category.CreatedAt,
             UpdatedAt = category.UpdatedAt,
             WarehouseId = category.WarehouseId
@@ -166,6 +179,7 @@ public class CategoryService : ICategoryService
             Description = category.Description,
             IsActive = category.IsActive,
             ProductCount = category.Products.Count(p => !p.IsDeleted),
+            TotalStock = category.Products.Where(p => !p.IsDeleted).Sum(p => p.CurrentStock),
             CreatedAt = category.CreatedAt,
             UpdatedAt = category.UpdatedAt,
             WarehouseId = category.WarehouseId
@@ -201,6 +215,7 @@ public class CategoryService : ICategoryService
             Description = category.Description,
             IsActive = category.IsActive,
             ProductCount = category.Products.Count(p => !p.IsDeleted),
+            TotalStock = category.Products.Where(p => !p.IsDeleted).Sum(p => p.CurrentStock),
             CreatedAt = category.CreatedAt,
             UpdatedAt = category.UpdatedAt
         };
@@ -216,15 +231,21 @@ public class CategoryService : ICategoryService
             throw new NotFoundException("Categoría", id);
         }
 
-        // RN-005: Integridad de Categorías
-        var hasActiveProducts = await _context.Products
-            .AnyAsync(p => p.CategoryId == id && !p.IsDeleted, cancellationToken);
+        // RN-005: Integridad de Categorías (No permitir eliminar si tiene al menos un producto asociado, incluso con stock 0)
+        var associatedProductsCount = await _context.Products
+            .CountAsync(p => p.CategoryId == id && !p.IsDeleted, cancellationToken);
 
-        if (hasActiveProducts)
+        if (associatedProductsCount > 0)
         {
+            var totalStock = await _context.Products
+                .Where(p => p.CategoryId == id && !p.IsDeleted)
+                .SumAsync(p => p.CurrentStock, cancellationToken);
+
+            var stockDetail = totalStock > 0 ? $" con un total de {totalStock} unidades en existencias" : " (incluso con stock en 0)";
+
             throw new BusinessRuleViolationException(
                 "RN-005",
-                $"No es posible eliminar la categoría '{category.Name}' porque tiene productos asociados activos en el catálogo. Desactiva la categoría en su lugar.");
+                $"No es posible eliminar la categoría '{category.Name}' porque tiene {associatedProductsCount} producto(s) asociado(s) en el catálogo{stockDetail}. No se permite eliminar categorías con productos asociados; debe reasignar o dar de baja los productos primero.");
         }
 
         _context.Categories.Remove(category);

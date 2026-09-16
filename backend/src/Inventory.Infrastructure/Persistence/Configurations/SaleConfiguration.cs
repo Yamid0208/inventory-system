@@ -64,6 +64,11 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .HasForeignKey(i => i.SaleId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(s => s.Payments)
+            .WithOne(p => p.Sale)
+            .HasForeignKey(p => p.SaleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(s => s.SaleDate)
             .HasDatabaseName("IX_Sales_SaleDate");
 

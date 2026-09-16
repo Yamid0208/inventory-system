@@ -58,7 +58,6 @@ export class SalesComponent implements OnInit {
   modalError = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.loadProducts();
     this.loadSales();
 
     this.route.queryParams.subscribe(params => {

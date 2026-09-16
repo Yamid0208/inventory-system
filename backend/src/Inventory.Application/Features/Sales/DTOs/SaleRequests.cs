@@ -20,6 +20,12 @@ public record CreateSaleItemRequest(
     decimal TaxRate = 0.19m
 );
 
+public record SalePaymentRequest(
+    string Method,
+    decimal Amount,
+    string? Reference = null
+);
+
 public record CreateSaleRequest(
     string CustomerName,
     string? CustomerTaxId,
@@ -29,5 +35,6 @@ public record CreateSaleRequest(
     DateTimeOffset SaleDate,
     string? Notes,
     List<CreateSaleItemRequest> Items,
+    List<SalePaymentRequest>? Payments = null,
     int? WarehouseId = null
 );

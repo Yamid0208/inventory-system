@@ -22,18 +22,15 @@ public class SaleService : ISaleService
         SaleFilterRequest request,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.Sales
+        var baseQuery = _context.Sales
             .AsNoTracking()
-            .Include(s => s.User)
-            .Include(s => s.Items)
-                .ThenInclude(i => i.Product)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.Status) && request.Status != "all")
         {
             if (Enum.TryParse<SaleStatus>(request.Status, true, out var status))
             {
-                query = query.Where(s => s.Status == status);
+                baseQuery = baseQuery.Where(s => s.Status == status);
             }
         }
 
@@ -41,34 +38,34 @@ public class SaleService : ISaleService
         {
             if (Enum.TryParse<PaymentMethod>(request.PaymentMethod, true, out var method))
             {
-                query = query.Where(s => s.PaymentMethod == method);
+                baseQuery = baseQuery.Where(s => s.PaymentMethod == method);
             }
         }
 
         if (request.StartDate.HasValue)
         {
-            query = query.Where(s => s.SaleDate >= request.StartDate.Value);
+            baseQuery = baseQuery.Where(s => s.SaleDate >= request.StartDate.Value);
         }
 
         if (request.EndDate.HasValue)
         {
-            query = query.Where(s => s.SaleDate <= request.EndDate.Value);
+            baseQuery = baseQuery.Where(s => s.SaleDate <= request.EndDate.Value);
         }
 
         if (request.UserId.HasValue && request.UserId.Value > 0)
         {
-            query = query.Where(s => s.UserId == request.UserId.Value);
+            baseQuery = baseQuery.Where(s => s.UserId == request.UserId.Value);
         }
 
         if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == request.WarehouseId.Value);
+            baseQuery = baseQuery.Where(s => s.WarehouseId == request.WarehouseId.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.Trim().ToLower();
-            query = query.Where(s =>
+            baseQuery = baseQuery.Where(s =>
                 s.SaleNumber.ToLower().Contains(search) ||
                 s.CustomerName.ToLower().Contains(search) ||
                 (s.CustomerTaxId != null && s.CustomerTaxId.ToLower().Contains(search)) ||
@@ -76,14 +73,18 @@ public class SaleService : ISaleService
                 (s.Notes != null && s.Notes.ToLower().Contains(search)));
         }
 
-        var totalCount = await query.CountAsync(cancellationToken);
+        var totalCount = await baseQuery.CountAsync(cancellationToken);
         var pageNumber = Math.Max(1, request.PageNumber);
         var pageSize = Math.Clamp(request.PageSize, 1, 100);
 
-        var sales = await query
+        var sales = await baseQuery
             .OrderByDescending(s => s.SaleDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
+            .Include(s => s.User)
+            .Include(s => s.Payments)
+            .Include(s => s.Items)
+                .ThenInclude(i => i.Product)
             .ToListAsync(cancellationToken);
 
         var dtos = sales.Select(MapToDto).ToList();
@@ -95,6 +96,7 @@ public class SaleService : ISaleService
         var sale = await _context.Sales
             .AsNoTracking()
             .Include(s => s.User)
+            .Include(s => s.Payments)
             .Include(s => s.Items)
                 .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
@@ -196,6 +198,43 @@ public class SaleService : ISaleService
                     _context.InventoryMovements.Add(movement);
                 }
 
+                // 3. Procesamiento de Medios de Pago (Pagos individuales o divididos)
+                if (request.Payments != null && request.Payments.Count > 0)
+                {
+                    var totalPayments = decimal.Round(request.Payments.Sum(p => p.Amount), 2, MidpointRounding.AwayFromZero);
+                    if (Math.Abs(totalPayments - sale.Total) > 0.05m)
+                    {
+                        throw new BusinessRuleViolationException(
+                            "RN-009",
+                            $"La suma de los métodos de pago (${totalPayments:N0}) no coincide con el total de la venta (${sale.Total:N0}).");
+                    }
+
+                    foreach (var pReq in request.Payments)
+                    {
+                        if (!Enum.TryParse<PaymentMethod>(pReq.Method, true, out var pMethod))
+                        {
+                            pMethod = PaymentMethod.Cash;
+                        }
+                        sale.AddPayment(new SalePayment(pMethod, pReq.Amount, pReq.Reference));
+                    }
+
+                    if (request.Payments.Count > 1)
+                    {
+                        sale.SetPaymentMethod(PaymentMethod.Mixed);
+                    }
+                    else
+                    {
+                        if (Enum.TryParse<PaymentMethod>(request.Payments[0].Method, true, out var singleMethod))
+                        {
+                            sale.SetPaymentMethod(singleMethod);
+                        }
+                    }
+                }
+                else
+                {
+                    sale.AddPayment(new SalePayment(paymentMethod, sale.Total));
+                }
+
                 _context.Sales.Add(sale);
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
@@ -283,6 +322,13 @@ public class SaleService : ISaleService
             i.Total
         )).ToList();
 
+        var payments = s.Payments?.Select(p => new SalePaymentDto(
+            p.Id,
+            p.Method.ToString(),
+            p.Amount,
+            p.Reference
+        )).ToList() ?? new List<SalePaymentDto>();
+
         return new SaleDto(
             s.Id,
             s.SaleNumber,
@@ -300,6 +346,7 @@ public class SaleService : ISaleService
             s.Total,
             s.Notes,
             items,
+            payments,
             s.WarehouseId
         );
     }

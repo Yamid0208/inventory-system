@@ -60,9 +60,10 @@ export class SaleModalComponent implements OnInit {
       customerEmail: ['', [emailFormatValidator()]],
       paymentMethod: ['Cash', [Validators.required]],
       invoiceType: ['Traditional', [Validators.required]],
-      saleDate: [new Date().toISOString().slice(0, 10), [Validators.required]],
+      saleDate: [{ value: new Date().toISOString().slice(0, 10), disabled: true }, [Validators.required]],
       notes: [''],
-      items: this.fb.array([])
+      items: this.fb.array([]),
+      payments: this.fb.array([])
     });
 
     this.settingsService.getSettings().subscribe({
@@ -103,10 +104,15 @@ export class SaleModalComponent implements OnInit {
     });
   }
 
+  isSplitPayment = signal<boolean>(false);
+
   paymentMethodOptions: AutocompleteOption[] = [
     { value: 'Cash', label: 'Efectivo' },
-    { value: 'CreditCard', label: 'Tarjeta de Débito / Crédito' },
-    { value: 'Transfer', label: 'Transferencia Bancaria' },
+    { value: 'Nequi', label: 'Nequi' },
+    { value: 'Daviplata', label: 'Daviplata' },
+    { value: 'CreditCard', label: 'Tarjeta de Crédito' },
+    { value: 'DebitCard', label: 'Tarjeta de Débito' },
+    { value: 'Transfer', label: 'Transferencia Bancaria / PSE' },
     { value: 'Credit', label: 'Crédito Comercial (30 días)' }
   ];
 
@@ -180,12 +186,10 @@ export class SaleModalComponent implements OnInit {
     }
 
     this.isSearchingCustomer.set(true);
-    this.customerService.getCustomers({ search: taxId }).subscribe({
+    this.customerService.getCustomers({ search: taxId, pageSize: 1 }).subscribe({
       next: (res) => {
         this.isSearchingCustomer.set(false);
-        const match = res.items.find(c =>
-          c.taxId && c.taxId.trim().toLowerCase() === taxId.toLowerCase()
-        ) || res.items[0];
+        const match = res.items[0];
 
         if (match && match.taxId && match.taxId.trim().toLowerCase() === taxId.toLowerCase()) {
           this.form.patchValue({
@@ -236,6 +240,10 @@ export class SaleModalComponent implements OnInit {
     return this.form.get('items') as FormArray;
   }
 
+  get paymentsArray(): FormArray {
+    return this.form.get('payments') as FormArray;
+  }
+
   addItem(): void {
     const itemGroup = this.fb.group({
       productId: [null, [Validators.required]],
@@ -243,13 +251,73 @@ export class SaleModalComponent implements OnInit {
       unitPrice: [0, [Validators.required, Validators.min(0)]],
       taxRate: [this.taxRateDecimal()]
     });
-    this.itemsArray.push(itemGroup);
+    // Inserción al inicio para que el nuevo producto aparezca arriba
+    this.itemsArray.insert(0, itemGroup);
   }
 
   removeItem(index: number): void {
     if (this.itemsArray.length > 1) {
       this.itemsArray.removeAt(index);
     }
+  }
+
+  toggleSplitPayment(): void {
+    const next = !this.isSplitPayment();
+    this.isSplitPayment.set(next);
+
+    if (next) {
+      if (this.paymentsArray.length === 0) {
+        const total = this.calculatedTotal();
+        const half1 = Math.floor(total / 2);
+        const half2 = total - half1;
+        this.addPaymentRow('Cash', half1 > 0 ? half1 : total);
+        this.addPaymentRow('Nequi', half2 > 0 ? half2 : 0);
+      }
+    } else {
+      this.paymentsArray.clear();
+    }
+  }
+
+  addPaymentRow(defaultMethod: string = 'Cash', initialAmount: number = 0): void {
+    const paymentGroup = this.fb.group({
+      method: [defaultMethod, [Validators.required]],
+      amount: [initialAmount, [Validators.required, Validators.min(0.01)]],
+      reference: ['']
+    });
+    this.paymentsArray.push(paymentGroup);
+  }
+
+  removePayment(index: number): void {
+    if (this.paymentsArray.length > 1) {
+      this.paymentsArray.removeAt(index);
+    }
+  }
+
+  totalPaid(): number {
+    if (!this.isSplitPayment()) {
+      return this.calculatedTotal();
+    }
+    return this.paymentsArray.controls.reduce((sum, curr) => {
+      const amt = Number(curr.get('amount')?.value) || 0;
+      return sum + amt;
+    }, 0);
+  }
+
+  remainingPayment(): number {
+    return this.calculatedTotal() - this.totalPaid();
+  }
+
+  fillRemainingAmount(index: number): void {
+    const currentControl = this.paymentsArray.at(index);
+    const currentVal = Number(currentControl.get('amount')?.value) || 0;
+    const remaining = this.remainingPayment();
+    const newAmount = Math.max(0, currentVal + remaining);
+    currentControl.patchValue({ amount: newAmount });
+  }
+
+  isPaymentBalanced(): boolean {
+    if (!this.isSplitPayment()) return true;
+    return Math.abs(this.calculatedTotal() - this.totalPaid()) < 0.05 && this.paymentsArray.length > 0;
   }
 
   onProductSelect(index: number): void {
@@ -311,12 +379,12 @@ export class SaleModalComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid || this.anyStockExceeded()) return;
+    if (this.form.invalid || this.anyStockExceeded() || !this.isPaymentBalanced()) return;
 
-    const val = this.form.value;
-    const name = val.customerName.trim();
-    const taxId = val.customerTaxId?.trim();
-    const email = val.customerEmail?.trim();
+    const rawVal = this.form.getRawValue();
+    const name = rawVal.customerName.trim();
+    const taxId = rawVal.customerTaxId?.trim();
+    const email = rawVal.customerEmail?.trim();
 
     if (this.customerSearchStatus() === 'not_found' && this.autoRegisterCustomer() && name && taxId) {
       try {
@@ -335,20 +403,38 @@ export class SaleModalComponent implements OnInit {
       }
     }
 
+    let finalMethod: PaymentMethod = rawVal.paymentMethod as PaymentMethod;
+    let finalPayments = undefined;
+
+    if (this.isSplitPayment() && this.paymentsArray.length > 0) {
+      finalMethod = 'Mixed' as PaymentMethod;
+      finalPayments = this.paymentsArray.controls.map(p => ({
+        method: p.get('method')?.value,
+        amount: Number(p.get('amount')?.value) || 0,
+        reference: p.get('reference')?.value?.trim() || undefined
+      }));
+    } else {
+      finalPayments = [{
+        method: finalMethod,
+        amount: this.calculatedTotal()
+      }];
+    }
+
     const request: CreateSaleRequest = {
       customerName: name,
       customerTaxId: taxId || undefined,
       customerEmail: email || undefined,
-      paymentMethod: val.paymentMethod as PaymentMethod,
-      invoiceType: val.invoiceType as InvoiceType,
-      saleDate: new Date(val.saleDate).toISOString(),
-      notes: val.notes?.trim() || undefined,
-      items: val.items.map((i: any) => ({
+      paymentMethod: finalMethod,
+      invoiceType: rawVal.invoiceType as InvoiceType,
+      saleDate: new Date().toISOString(),
+      notes: rawVal.notes?.trim() || undefined,
+      items: rawVal.items.map((i: any) => ({
         productId: Number(i.productId),
         quantity: Number(i.quantity),
         unitPrice: Number(i.unitPrice),
         taxRate: this.taxRateDecimal()
-      }))
+      })),
+      payments: finalPayments
     };
 
     this.save.emit(request);
@@ -358,4 +444,3 @@ export class SaleModalComponent implements OnInit {
     this.cancel.emit();
   }
 }
-

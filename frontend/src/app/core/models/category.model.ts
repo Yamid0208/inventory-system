@@ -4,6 +4,8 @@ export interface Category {
   description: string | null;
   isActive: boolean;
   productCount: number;
+  totalStock?: number;
+  hasInventory?: boolean;
   createdAt: string;
   updatedAt: string | null;
   warehouseId?: number | null;

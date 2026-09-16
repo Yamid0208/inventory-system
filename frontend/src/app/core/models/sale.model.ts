@@ -1,6 +1,19 @@
 export type SaleStatus = 'Draft' | 'Completed' | 'Cancelled';
-export type PaymentMethod = 'Cash' | 'CreditCard' | 'Transfer' | 'Credit';
+export type PaymentMethod = 'Cash' | 'CreditCard' | 'Transfer' | 'Credit' | 'Nequi' | 'Daviplata' | 'DebitCard' | 'Mixed';
 export type InvoiceType = 'Traditional' | 'Electronic';
+
+export interface SalePayment {
+  id?: number;
+  method: PaymentMethod | string;
+  amount: number;
+  reference?: string;
+}
+
+export interface SalePaymentRequest {
+  method: PaymentMethod | string;
+  amount: number;
+  reference?: string;
+}
 
 export interface SaleItem {
   id: number;
@@ -31,6 +44,7 @@ export interface Sale {
   total: number;
   notes?: string;
   items: SaleItem[];
+  payments?: SalePayment[];
 }
 
 export interface CreateSaleItemRequest {
@@ -49,6 +63,7 @@ export interface CreateSaleRequest {
   saleDate: string;
   notes?: string;
   items: CreateSaleItemRequest[];
+  payments?: SalePaymentRequest[];
 }
 
 export interface SaleFilterParams {

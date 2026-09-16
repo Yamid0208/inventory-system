@@ -57,7 +57,6 @@ export class InventoryComponent implements OnInit {
   modalError = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.loadProductsCatalog();
     this.loadKardex();
   }
 
@@ -134,6 +133,7 @@ export class InventoryComponent implements OnInit {
 
   openAdjustmentModal(): void {
     this.modalError.set(null);
+    this.loadProductsCatalog();
     this.isAdjustmentModalOpen.set(true);
   }
 
