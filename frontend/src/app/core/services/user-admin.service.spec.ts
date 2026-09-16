@@ -20,9 +20,12 @@ describe('UserAdminService (Unit Tests)', () => {
 
   const service = injector.get(UserAdminService);
 
-  it('should call get on /api/v1/users with params', () => {
-    service.getUsers({ role: 'Admin', search: 'Carlos' }).subscribe();
+  it('should call get on /api/v1/users with params including warehouseId', () => {
+    service.getUsers({ role: 'Admin', search: 'Carlos', warehouseId: 3 }).subscribe();
     expect(httpClientMock.get).toHaveBeenCalled();
+    const lastCall = httpClientMock.get.mock.calls[httpClientMock.get.mock.calls.length - 1];
+    expect(lastCall[0]).toBe('/api/v1/users');
+    expect(lastCall[1]?.params?.get('warehouseId')).toBe('3');
   });
 
   it('should call post to create user', () => {

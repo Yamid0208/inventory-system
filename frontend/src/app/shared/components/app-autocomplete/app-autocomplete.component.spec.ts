@@ -69,4 +69,23 @@ describe('AppAutocompleteComponent (Unit Tests)', () => {
     expect(component.selectedOption()?.label).toBe('Comercial Gamma');
     expect(component.searchQuery()).toBe('Comercial Gamma');
   });
+
+  it('should reactively sync searchQuery when options arrive after writeValue', () => {
+    const mockElRef: any = { nativeElement: { contains: () => false } };
+    const freshComponent = new AppAutocompleteComponent(mockElRef);
+
+    // Initial writeValue before options are loaded
+    freshComponent.writeValue(2);
+    expect(freshComponent.searchQuery()).toBe('');
+
+    // Asynchronous arrival of options
+    freshComponent.options = mockOptions;
+    expect(freshComponent.searchQuery()).toBe('Distribuidora Beta');
+  });
+
+  it('should return all options when searchQuery matches the selected option label', () => {
+    component.selectOption(mockOptions[1]);
+    expect(component.searchQuery()).toBe('Distribuidora Beta');
+    expect(component.filteredOptions().length).toBe(3);
+  });
 });

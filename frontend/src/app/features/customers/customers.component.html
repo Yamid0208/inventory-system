@@ -253,12 +253,12 @@
       </div>
     }
   </div>
-
-  <!-- MODAL DE CLIENTE -->
-  <app-customer-modal
-    [isOpen]="isModalOpen()"
-    [customer]="selectedCustomer()"
-    (closed)="closeModal()"
-    (saved)="onCustomerSaved()"
-  ></app-customer-modal>
 </div>
+
+<!-- MODAL DE CLIENTE -->
+<app-customer-modal
+  [isOpen]="isModalOpen()"
+  [customer]="selectedCustomer()"
+  (closed)="closeModal()"
+  (saved)="onCustomerSaved()"
+></app-customer-modal>

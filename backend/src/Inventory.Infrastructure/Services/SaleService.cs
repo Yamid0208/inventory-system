@@ -122,7 +122,7 @@ public class SaleService : ISaleService
     {
         var strategy = _context.Database.CreateExecutionStrategy();
 
-        return await strategy.ExecuteAsync(async () =>
+        var createdSaleId = await strategy.ExecuteAsync(async () =>
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
 
@@ -245,7 +245,7 @@ public class SaleService : ISaleService
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
 
-                return await GetSaleByIdAsync(sale.Id, cancellationToken);
+                return sale.Id;
             }
             catch
             {
@@ -253,6 +253,8 @@ public class SaleService : ISaleService
                 throw;
             }
         });
+
+        return await GetSaleByIdAsync(createdSaleId, cancellationToken);
     }
 
     public async Task CancelSaleAsync(int id, int userId, CancellationToken cancellationToken = default)

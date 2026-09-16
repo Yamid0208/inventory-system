@@ -76,4 +76,53 @@ describe('PurchaseModalComponent (Supplier Filtering & Line Visibility Tests)', 
     expect(component.filteredProducts().length).toBe(0);
     expect(component.itemsArray.length).toBe(0);
   });
+
+  it('should reactively update supplierOptions when suppliers arrive asynchronously', () => {
+    // Start with empty suppliers array (as happens during async page load)
+    const freshModal = new PurchaseModalComponent(new FormBuilder(), settingsServiceMock);
+    freshModal.suppliers = [];
+    freshModal.ngOnInit();
+
+    expect(freshModal.supplierOptions().length).toBe(0);
+
+    // Asynchronous arrival of suppliers
+    freshModal.suppliers = mockSuppliers;
+    expect(freshModal.supplierOptions().length).toBe(3);
+    expect(freshModal.supplierOptions()[0].label).toBe('Proveedor Alpha');
+  });
+
+  it('should preload item from alert and reactively update unit price when products arrive asynchronously', () => {
+    const freshModal = new PurchaseModalComponent(new FormBuilder(), settingsServiceMock);
+    freshModal.preloadedItem = { productId: 101, quantity: 8, supplierId: 1 };
+    freshModal.suppliers = mockSuppliers;
+    freshModal.products = []; // Products not loaded yet
+
+    freshModal.ngOnInit();
+
+    expect(freshModal.selectedSupplierId()).toBe(1);
+    expect(freshModal.itemsArray.length).toBe(1);
+    expect(freshModal.itemsArray.at(0).get('productId')?.value).toBe(101);
+    expect(freshModal.itemsArray.at(0).get('quantity')?.value).toBe(8);
+    // Price was 0 before products arrived
+    expect(freshModal.itemsArray.at(0).get('unitPrice')?.value).toBe(0);
+
+    // Asynchronous arrival of products
+    freshModal.products = mockProducts;
+    // Price should now be populated with product's purchasePrice (5000)
+    expect(freshModal.itemsArray.at(0).get('unitPrice')?.value).toBe(5000);
+  });
+
+  it('should initialize completely empty and clean when preloadedItem is null', () => {
+    const freshModal = new PurchaseModalComponent(new FormBuilder(), settingsServiceMock);
+    freshModal.suppliers = mockSuppliers;
+    freshModal.products = mockProducts;
+    freshModal.preloadedItem = null;
+
+    freshModal.ngOnInit();
+
+    expect(freshModal.selectedSupplierId()).toBeNull();
+    expect(freshModal.form.get('supplierId')?.value).toBeNull();
+    expect(freshModal.itemsArray.length).toBe(0);
+    expect(freshModal.filteredProducts().length).toBe(0);
+  });
 });

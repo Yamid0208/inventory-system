@@ -47,7 +47,15 @@ export class AppAutocompleteComponent implements ControlValueAccessor {
   @Input() required = false;
 
   @Input() set options(val: AutocompleteOption[] | null | undefined) {
-    this._optionsSignal.set(val || []);
+    const list = val || [];
+    this._optionsSignal.set(list);
+    const curVal = this.selectedValue();
+    if (curVal !== null && curVal !== undefined && curVal !== '') {
+      const matched = list.find(opt => String(opt.value) === String(curVal));
+      if (matched && !this.isOpen()) {
+        this.searchQuery.set(matched.label);
+      }
+    }
   }
 
   @Input() set value(val: any) {
@@ -80,6 +88,10 @@ export class AppAutocompleteComponent implements ControlValueAccessor {
     const query = this.normalize(this.searchQuery().trim());
     const all = this.optionsSignal();
     if (!query) {
+      return all.slice(0, 80);
+    }
+    const selected = this.selectedOption();
+    if (selected && this.normalize(selected.label) === query) {
       return all.slice(0, 80);
     }
     return all.filter(opt => {

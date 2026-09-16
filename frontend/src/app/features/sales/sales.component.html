@@ -144,7 +144,8 @@
 
             <!-- Sede / Almacén -->
             <td class="py-4 px-4 whitespace-nowrap">
-              <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 font-medium text-[11px] inline-flex items-center gap-1">
+              <span
+                class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 font-medium text-[11px] inline-flex items-center gap-1">
                 <span>🏢</span>
                 <span>{{ s.warehouseName || 'Sede Principal' }}</span>
               </span>
@@ -234,8 +235,9 @@
 
 <!-- Modales -->
 @if (isCreateModalOpen()) {
-<app-sale-modal [products]="products()" [warehouses]="warehouses()" [defaultWarehouseId]="selectedWarehouseId()" [loading]="modalLoading" [errorMessage]="modalError"
-  (save)="onCreateSale($event)" (cancel)="isCreateModalOpen.set(false)"></app-sale-modal>
+<app-sale-modal [products]="products()" [warehouses]="warehouses()" [defaultWarehouseId]="selectedWarehouseId()"
+  [loading]="modalLoading" [errorMessage]="modalError" (save)="onCreateSale($event)"
+  (cancel)="isCreateModalOpen.set(false)"></app-sale-modal>
 }
 
 @if (selectedSaleForDetail()) {

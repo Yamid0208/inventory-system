@@ -54,9 +54,9 @@ public class UsersController : ControllerBase
                         return Ok(new PagedResult<UserDetailDto>(Array.Empty<UserDetailDto>(), 0, request.PageNumber, request.PageSize));
                     }
                 }
-                else if (validIds.Count == 1)
+                else
                 {
-                    warehouseId = validIds[0];
+                    request = request with { AllowedWarehouseIds = validIds };
                 }
             }
         }

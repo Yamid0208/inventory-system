@@ -174,7 +174,6 @@
               <th class="py-3.5 pl-6">Producto y Referencia</th>
               <th class="py-3.5 px-4">Proveedor Registrado</th>
               <th class="py-3.5 px-4 text-center">Nivel de Stock</th>
-              <th class="py-3.5 px-4 text-center">Sugerido Compra</th>
               <th class="py-3.5 px-4 text-right">Inversión Estimada</th>
               <th class="py-3.5 pr-6 text-right">Acción</th>
             </tr>
@@ -235,14 +234,6 @@
                       [style.width.%]="getStockBarPercentage(a.currentStock, a.minimumStock)"
                     ></div>
                   </div>
-                </td>
-
-                <!-- Sugerido Compra -->
-                <td class="py-3.5 px-4 text-center">
-                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 font-mono font-bold text-xs border border-purple-200">
-                    +{{ a.suggestedQuantity }} uds
-                  </span>
-                  <span class="block text-[10px] text-slate-400 mt-0.5">Déficit: -{{ a.deficit }}</span>
                 </td>
 
                 <!-- Inversión Estimada -->

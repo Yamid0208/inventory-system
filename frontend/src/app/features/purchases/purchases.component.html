@@ -15,7 +15,7 @@
       </p>
     </div>
 
-    <button type="button" (click)="openCreateModal()"
+    <button type="button" (click)="openCreateModal(null)"
       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer select-none">
       <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
@@ -228,12 +228,13 @@
     }
   </div>
   }
+</div>
 
   <!-- Modales -->
   @if (isCreateModalOpen()) {
   <app-purchase-modal [suppliers]="suppliers()" [products]="products()" [preloadedItem]="initialPreloadedItem()" [loading]="modalLoading"
     [errorMessage]="modalError" (save)="onCreatePurchase($event)"
-    (cancel)="isCreateModalOpen.set(false)"></app-purchase-modal>
+    (cancel)="closeCreateModal()"></app-purchase-modal>
   }
 
   @if (selectedPurchaseForDetail()) {
@@ -251,4 +252,3 @@
     (cancel)="selectedPurchaseForReturn.set(null)">
   </app-purchase-return-modal>
   }
-</div>

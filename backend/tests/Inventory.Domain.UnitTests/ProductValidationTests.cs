@@ -87,4 +87,25 @@ public class ProductValidationTests
         Assert.Equal("RN-007", ex.RuleCode);
         Assert.Contains("10 unidades", ex.Message);
     }
+
+    [Fact]
+    public void Product_Constructor_AllowsCategoryAndSupplierFromAnyOrigin()
+    {
+        // Producto creado en la sede 2 con categoría y proveedor originados en otra sede o global
+        var product = new Product(
+            sku: "GDETGT35",
+            name: "JBL flip 6",
+            categoryId: 10,
+            supplierId: 20,
+            purchasePrice: 200000m,
+            salePrice: 350000m,
+            minimumStock: 5,
+            warehouseId: 2
+        );
+
+        Assert.Equal("GDETGT35", product.Sku);
+        Assert.Equal(10, product.CategoryId);
+        Assert.Equal(20, product.SupplierId);
+        Assert.Equal(2, product.WarehouseId);
+    }
 }

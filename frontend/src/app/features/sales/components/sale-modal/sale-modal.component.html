@@ -117,8 +117,6 @@
             <span class="text-emerald-600 font-bold">✓</span>
             <span>Cliente registrado en el directorio: <strong>{{ foundCustomerName() }}</strong></span>
           </div>
-          <span
-            class="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Verificado</span>
         </div>
         } @else if (customerSearchStatus() === 'not_found') {
         <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2">
@@ -160,17 +158,9 @@
             [options]="invoiceTypeOptions" placeholder="Seleccionar tipo..."></app-autocomplete>
         </div>
 
-        <div>
+        <div class="mt-4">
           <label class="block font-semibold text-slate-700 mb-1 flex items-center justify-between">
             <span>Fecha de Facturación</span>
-            <span class="text-[10px] text-slate-400 font-normal flex items-center gap-1">
-              <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                </path>
-              </svg>
-              Automática
-            </span>
           </label>
           <div class="relative flex items-center">
             <input type="date" formControlName="saleDate"
@@ -233,7 +223,7 @@
               <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Medio {{ pi + 1 }}</label>
               <select formControlName="method"
                 class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-primary-500 font-medium">
-                @for (opt of paymentMethodOptions; track opt.value) {
+                @for (opt of individualPaymentMethodOptions; track opt.value) {
                 <option [value]="opt.value">{{ opt.label }}</option>
                 }
               </select>
@@ -277,13 +267,32 @@
           }
 
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1">
-            <button type="button" (click)="addPaymentRow('Nequi', remainingPayment() > 0 ? remainingPayment() : 0)"
-              class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-primary-700 rounded-xl font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              <span>+ Agregar Otro Medio de Pago</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <button type="button"
+                (click)="addPaymentRow(suggestNextPaymentMethod(), remainingPayment() > 0 ? remainingPayment() : 0)"
+                [disabled]="!canAddPaymentRow()"
+                [class]="canAddPaymentRow()
+                  ? 'bg-white border-slate-200 hover:bg-slate-100 text-primary-700 cursor-pointer shadow-sm'
+                  : 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60'"
+                [title]="!canAddPaymentRow()
+                  ? 'El valor total ya está cubierto con los medios de pago seleccionados. Reduzca algún monto si desea agregar otro medio.'
+                  : 'Agregar otro medio de pago'"
+                class="px-3 py-1.5 border rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>+ Agregar Otro Medio de Pago</span>
+              </button>
+
+              @if (!canAddPaymentRow() && isPaymentBalanced()) {
+              <span class="text-[11px] text-emerald-700 font-medium hidden sm:flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Total 100% cubierto
+              </span>
+              }
+            </div>
 
             <!-- Indicador de Cuadre Financiero -->
             <div class="px-3 py-1.5 rounded-xl text-xs font-mono flex items-center gap-3" [class]="isPaymentBalanced()
@@ -318,11 +327,11 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
-            <span>+ Agregar Producto Arriba</span>
+            <span> Agregar Producto</span>
           </button>
         </div>
 
-        <div formArrayName="items" class="space-y-2.5 max-h-72 sm:max-h-80 overflow-y-auto pr-1">
+        <div formArrayName="items" class="space-y-2.5 max-h-72 sm:max-h-80  pr-1">
           @for (item of itemsArray.controls; track $index; let i = $index) {
           <div [formGroupName]="i"
             class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">
@@ -345,8 +354,8 @@
             <div class="w-full sm:w-32">
               <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Precio Venta</label>
               <input type="text" inputmode="decimal" formControlName="unitPrice" appThousandsSeparator
-                [allowDecimals]="true" placeholder="0"
-                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-right focus:outline-none focus:border-primary-500" />
+                [allowDecimals]="true" placeholder="0" readonly tabindex="-1"
+                class="w-full px-2.5 py-1.5 bg-slate-100/80 border border-slate-200 rounded-lg text-xs text-slate-600 font-mono text-right focus:outline-none cursor-not-allowed select-none" />
             </div>
 
             <!-- Total Línea -->

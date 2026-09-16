@@ -163,12 +163,11 @@ public class InventoryService : IInventoryService
 
                 _context.InventoryMovements.Add(movement);
 
-                await _context.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-
-                // Cargar datos de usuario para el DTO resultante
                 var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
                 var userName = user != null ? user.FullName : "Sistema";
+
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
 
                 return new InventoryMovementDto(
                     movement.Id,
@@ -250,11 +249,11 @@ public class InventoryService : IInventoryService
 
                 _context.InventoryMovements.Add(movement);
 
-                await _context.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-
                 var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
                 var userName = user != null ? user.FullName : "Sistema";
+
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
 
                 return new InventoryMovementDto(
                     movement.Id,

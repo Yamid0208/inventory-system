@@ -80,13 +80,16 @@ export class AlertsComponent implements OnInit {
   }
 
   createOrderForAlert(alert: StockAlert): void {
-    this.router.navigate(['/purchases'], {
-      queryParams: {
-        new: 'true',
-        productId: alert.productId,
-        supplierId: alert.supplierId
-      }
-    });
+    const qParams: Record<string, any> = {
+      new: 'true',
+      productId: alert.productId
+    };
+
+    if (alert.supplierId && alert.supplierId > 0) {
+      qParams['supplierId'] = alert.supplierId;
+    }
+
+    this.router.navigate(['/purchases'], { queryParams: qParams });
   }
 
   goToProducts(): void {

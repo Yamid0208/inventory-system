@@ -25,9 +25,32 @@ import { formatThousands } from '../../../../shared/utils/number-format.util';
   templateUrl: './purchase-modal.component.html'
 })
 export class PurchaseModalComponent implements OnInit, OnChanges {
-  @Input() suppliers: Supplier[] = [];
-  @Input() products: Product[] = [];
-  @Input() preloadedItem: { productId?: number; quantity?: number; supplierId?: number } | null = null;
+  private _suppliersSignal = signal<Supplier[]>([]);
+  @Input() set suppliers(val: Supplier[]) {
+    this._suppliersSignal.set(val || []);
+  }
+  get suppliers(): Supplier[] {
+    return this._suppliersSignal();
+  }
+
+  private _productsSignal = signal<Product[]>([]);
+  @Input() set products(val: Product[]) {
+    this._productsSignal.set(val || []);
+    this.syncPreloadedItem();
+  }
+  get products(): Product[] {
+    return this._productsSignal();
+  }
+
+  private _preloadedItemSignal = signal<{ productId?: number; quantity?: number; supplierId?: number } | null>(null);
+  @Input() set preloadedItem(val: { productId?: number; quantity?: number; supplierId?: number } | null) {
+    this._preloadedItemSignal.set(val);
+    this.syncPreloadedItem();
+  }
+  get preloadedItem(): { productId?: number; quantity?: number; supplierId?: number } | null {
+    return this._preloadedItemSignal();
+  }
+
   @Input() loading: any = false;
   @Input() errorMessage: any = null;
 
@@ -41,7 +64,7 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
 
   // Opciones de proveedores para el autocomplete
   supplierOptions = computed<AutocompleteOption[]>(() => {
-    return this.suppliers.map(s => ({
+    return this._suppliersSignal().map(s => ({
       value: s.id,
       label: s.name,
       sublabel: `NIT: ${s.taxId} | ${s.contactName || 'Sin contacto'}`
@@ -52,7 +75,7 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
   filteredProducts = computed<Product[]>(() => {
     const supId = this.selectedSupplierId();
     if (!supId) return [];
-    return this.products.filter(p => Number(p.supplierId) === Number(supId) && p.isActive);
+    return this._productsSignal().filter(p => Number(p.supplierId) === Number(supId) && p.isActive);
   });
 
   // Opciones de productos para el autocomplete de líneas
@@ -70,7 +93,8 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit(): void {
-    const initialSupplier = this.preloadedItem?.supplierId ? Number(this.preloadedItem.supplierId) : null;
+    const preloaded = this._preloadedItemSignal();
+    const initialSupplier = preloaded?.supplierId ? Number(preloaded.supplierId) : null;
     this.selectedSupplierId.set(initialSupplier);
 
     this.form = this.fb.group({
@@ -94,20 +118,8 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
       error: () => {}
     });
 
-    // Si viene un item precargado con proveedor y producto
-    if (this.preloadedItem?.productId && initialSupplier) {
-      const prodId = Number(this.preloadedItem.productId);
-      const qty = Number(this.preloadedItem.quantity) || 1;
-      const prod = this.products.find(p => p.id === prodId);
-      const price = prod ? prod.purchasePrice : 0;
-
-      const itemGroup = this.fb.group({
-        productId: [prodId, [Validators.required]],
-        quantity: [qty, [Validators.required, Validators.min(1)]],
-        unitPrice: [price, [Validators.required, Validators.min(0)]],
-        taxRate: [this.taxRateDecimal()]
-      });
-      this.itemsArray.push(itemGroup);
+    if (preloaded?.productId) {
+      this.syncPreloadedItem();
     } else if (initialSupplier) {
       this.addItem();
     }
@@ -115,22 +127,49 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['preloadedItem'] && this.preloadedItem && this.form) {
-      if (this.preloadedItem.supplierId) {
-        const supId = Number(this.preloadedItem.supplierId);
+      this.syncPreloadedItem();
+    }
+  }
+
+  private syncPreloadedItem(): void {
+    if (!this.form) return;
+    const preloaded = this._preloadedItemSignal();
+    const prods = this._productsSignal();
+
+    if (!preloaded) return;
+
+    if (preloaded.supplierId) {
+      const supId = Number(preloaded.supplierId);
+      if (this.selectedSupplierId() !== supId) {
         this.selectedSupplierId.set(supId);
         this.form.patchValue({ supplierId: supId });
       }
+    }
 
-      if (this.preloadedItem.productId) {
-        const prodId = Number(this.preloadedItem.productId);
-        const qty = Number(this.preloadedItem.quantity) || 1;
-        const prod = this.products.find(p => p.id === prodId);
+    if (preloaded.productId) {
+      const prodId = Number(preloaded.productId);
+      const prod = prods.find(p => p.id === prodId);
 
-        this.itemsArray.clear();
+      if (prod && !this.selectedSupplierId()) {
+        this.selectedSupplierId.set(prod.supplierId);
+        this.form.patchValue({ supplierId: prod.supplierId });
+      }
+
+      const existingItem = this.itemsArray.controls.find(
+        c => Number(c.get('productId')?.value) === prodId
+      );
+
+      if (existingItem) {
+        if (prod && (!existingItem.get('unitPrice')?.value || existingItem.get('unitPrice')?.value === 0)) {
+          existingItem.patchValue({ unitPrice: prod.purchasePrice });
+        }
+      } else if (this.itemsArray.length === 0) {
+        const qty = Number(preloaded.quantity) || 1;
+        const price = prod ? prod.purchasePrice : 0;
         const itemGroup = this.fb.group({
           productId: [prodId, [Validators.required]],
           quantity: [qty, [Validators.required, Validators.min(1)]],
-          unitPrice: [prod ? prod.purchasePrice : 0, [Validators.required, Validators.min(0)]],
+          unitPrice: [price, [Validators.required, Validators.min(0)]],
           taxRate: [this.taxRateDecimal()]
         });
         this.itemsArray.push(itemGroup);

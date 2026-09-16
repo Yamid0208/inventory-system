@@ -25,19 +25,7 @@ public class SuppliersController : BaseApiController
         [FromQuery] int? warehouseId,
         CancellationToken cancellationToken)
     {
-        IReadOnlyList<int>? allowedWarehouseIds = null;
-        if (!IsSuperAdmin())
-        {
-            allowedWarehouseIds = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
-        }
-
-        int? filterWarehouseId = warehouseId;
-        if (GetCurrentUserRole() == "Warehouse" || GetCurrentUserRole() == "Seller")
-        {
-            filterWarehouseId = GetCurrentWarehouseId();
-        }
-
-        var suppliers = await _supplierService.GetAllAsync(search, isActive, filterWarehouseId, allowedWarehouseIds, cancellationToken);
+        var suppliers = await _supplierService.GetAllAsync(search, isActive, warehouseId, null, cancellationToken);
         return Ok(suppliers);
     }
 
@@ -47,14 +35,7 @@ public class SuppliersController : BaseApiController
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<SupplierDto>> GetById(int id, CancellationToken cancellationToken)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        int? warehouseId = null;
-        if (role != "SuperAdmin")
-        {
-            warehouseId = GetCurrentWarehouseId();
-        }
-
-        var supplier = await _supplierService.GetByIdAsync(id, warehouseId, cancellationToken);
+        var supplier = await _supplierService.GetByIdAsync(id, null, cancellationToken);
         return Ok(supplier);
     }
 

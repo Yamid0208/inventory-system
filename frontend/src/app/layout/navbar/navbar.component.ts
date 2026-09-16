@@ -33,6 +33,9 @@ export class NavbarComponent implements OnInit {
   toggleBranchDropdown(): void {
     if (this.branchContextService.canChangeBranch()) {
       this.isBranchDropdownOpen.update(v => !v);
+      if (this.isBranchDropdownOpen()) {
+        this.branchContextService.refreshWarehouses();
+      }
     }
   }
 

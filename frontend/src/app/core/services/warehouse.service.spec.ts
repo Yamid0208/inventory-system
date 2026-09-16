@@ -80,4 +80,24 @@ describe('WarehouseService (Unit Tests)', () => {
 
     expect(httpClientMock.post).toHaveBeenCalledWith('/api/v1/warehouses/client-admin', newRequest);
   });
+
+  it('debe emitir en warehousesChanged$ al registrar una nueva sede', () => {
+    const emitted: (Warehouse | null)[] = [];
+    service.warehousesChanged$.subscribe(w => emitted.push(w));
+
+    const mockWarehouse: Warehouse = {
+      id: 5,
+      name: 'Nueva Sede Occidente',
+      code: 'BOD-05',
+      isActive: true,
+      createdAt: '2026-09-16T00:00:00Z'
+    };
+
+    httpClientMock.post.mockReturnValue(of(mockWarehouse));
+
+    service.createWarehouse({ name: 'Nueva Sede Occidente', code: 'BOD-05' }).subscribe();
+
+    expect(emitted.length).toBe(1);
+    expect(emitted[0]?.name).toBe('Nueva Sede Occidente');
+  });
 });

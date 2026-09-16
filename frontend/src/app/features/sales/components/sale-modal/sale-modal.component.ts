@@ -54,7 +54,7 @@ export class SaleModalComponent implements OnInit {
     private fb: FormBuilder,
     private customerService: CustomerService,
     private settingsService: SettingsService
-  ) {}
+  ) { }
 
   get warehouseOptions(): AutocompleteOption[] {
     return this.warehouses.map(w => ({
@@ -77,6 +77,7 @@ export class SaleModalComponent implements OnInit {
       saleDate: [{ value: new Date().toISOString().slice(0, 10), disabled: true }, [Validators.required]],
       notes: [''],
       items: this.fb.array([]),
+
       payments: this.fb.array([])
     });
 
@@ -89,7 +90,7 @@ export class SaleModalComponent implements OnInit {
           control.patchValue({ taxRate: this.taxRateDecimal() });
         });
       },
-      error: () => {}
+      error: () => { }
     });
 
     this.addItem();
@@ -116,6 +117,17 @@ export class SaleModalComponent implements OnInit {
         this.foundCustomerName.set('');
       }
     });
+
+    this.form.get('paymentMethod')?.valueChanges.subscribe(val => {
+      if (val === 'Mixed') {
+        if (!this.isSplitPayment()) {
+          this.toggleSplitPayment();
+        }
+      } else if (this.isSplitPayment()) {
+        this.isSplitPayment.set(false);
+        this.paymentsArray.clear();
+      }
+    });
   }
 
   isSplitPayment = signal<boolean>(false);
@@ -127,8 +139,13 @@ export class SaleModalComponent implements OnInit {
     { value: 'CreditCard', label: 'Tarjeta de Crédito' },
     { value: 'DebitCard', label: 'Tarjeta de Débito' },
     { value: 'Transfer', label: 'Transferencia Bancaria / PSE' },
-    { value: 'Credit', label: 'Crédito Comercial (30 días)' }
+    { value: 'Credit', label: 'Crédito Comercial (30 días)' },
+    { value: 'Mixed', label: 'Pago Mixto (Varios Medios)' }
   ];
+
+  get individualPaymentMethodOptions(): AutocompleteOption[] {
+    return this.paymentMethodOptions.filter(opt => opt.value !== 'Mixed');
+  }
 
   invoiceTypeOptions: AutocompleteOption[] = [
     { value: 'Traditional', label: 'Tradicional' },
@@ -262,7 +279,7 @@ export class SaleModalComponent implements OnInit {
     const itemGroup = this.fb.group({
       productId: [null, [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
-      unitPrice: [0, [Validators.required, Validators.min(0)]],
+      unitPrice: [{ value: 0, disabled: true }, [Validators.required, Validators.min(0)]],
       taxRate: [this.taxRateDecimal()]
     });
     // Inserción al inicio para que el nuevo producto aparezca arriba
@@ -275,24 +292,43 @@ export class SaleModalComponent implements OnInit {
     }
   }
 
+  canAddPaymentRow(): boolean {
+    const total = this.calculatedTotal();
+    if (total <= 0) return false;
+    // No permitir agregar más medios de pago si lo seleccionado/asignado ya cubre o supera el valor total
+    return this.remainingPayment() > 0.05;
+  }
+
+  suggestNextPaymentMethod(): string {
+    const usedMethods = this.paymentsArray.controls.map(c => c.get('method')?.value);
+    const available = this.individualPaymentMethodOptions.find(opt => !usedMethods.includes(opt.value));
+    return available ? available.value : 'Nequi';
+  }
+
   toggleSplitPayment(): void {
     const next = !this.isSplitPayment();
     this.isSplitPayment.set(next);
 
     if (next) {
+      this.form.patchValue({ paymentMethod: 'Mixed' }, { emitEvent: false });
       if (this.paymentsArray.length === 0) {
-        const total = this.calculatedTotal();
-        const half1 = Math.floor(total / 2);
-        const half2 = total - half1;
-        this.addPaymentRow('Cash', half1 > 0 ? half1 : total);
-        this.addPaymentRow('Nequi', half2 > 0 ? half2 : 0);
+        const currentMethod = this.form.get('paymentMethod')?.value;
+        const firstMethod = (currentMethod && currentMethod !== 'Mixed') ? currentMethod : 'Cash';
+        const secondMethod = firstMethod === 'Nequi' ? 'Cash' : 'Nequi';
+        this.addPaymentRow(firstMethod, 0, true);
+        this.addPaymentRow(secondMethod, 0, true);
       }
     } else {
+      this.form.patchValue({ paymentMethod: 'Cash' }, { emitEvent: false });
       this.paymentsArray.clear();
     }
   }
 
-  addPaymentRow(defaultMethod: string = 'Cash', initialAmount: number = 0): void {
+  addPaymentRow(defaultMethod: string = 'Nequi', initialAmount: number = 0, force: boolean = false): void {
+    // Restricción: Si ya se cubre el valor total de la venta, no permitir agregar más medios de pago
+    if (!force && this.paymentsArray.length > 0 && !this.canAddPaymentRow()) {
+      return;
+    }
     const paymentGroup = this.fb.group({
       method: [defaultMethod, [Validators.required]],
       amount: [initialAmount, [Validators.required, Validators.min(0.01)]],

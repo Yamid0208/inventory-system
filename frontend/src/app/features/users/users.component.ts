@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserAdminService } from '../../core/services/user-admin.service';
 import { RoleService } from '../../core/services/role.service';
@@ -7,6 +7,7 @@ import { ConfirmationService } from '../../core/services/confirmation.service';
 import { RolePermissionMatrixItem } from '../../core/models/role.model';
 import { Warehouse } from '../../core/models/warehouse.model';
 import { AuthService } from '../../core/auth/services/auth.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import {
   UserDetail,
   CreateUserAdminRequest,
@@ -40,6 +41,23 @@ export class UsersComponent implements OnInit {
   private warehouseService = inject(WarehouseService);
   private confirmationService = inject(ConfirmationService);
   authService = inject(AuthService);
+  branchContextService = inject(BranchContextService);
+
+  constructor() {
+    try {
+      effect(() => {
+        const wid = this.branchContextService.selectedWarehouseId();
+        untracked(() => {
+          const filterVal = wid ? String(wid) : 'all';
+          if (this.warehouseFilter() !== filterVal) {
+            this.warehouseFilter.set(filterVal);
+            this.pageNumber.set(1);
+            this.loadUsers();
+          }
+        });
+      }, { allowSignalWrites: true });
+    } catch {}
+  }
 
   // Pestañas
   activeTab = signal<'users' | 'matrix'>('users');
@@ -62,7 +80,10 @@ export class UsersComponent implements OnInit {
 
   get warehouseFilterOptions(): AutocompleteOption[] {
     const opts: AutocompleteOption[] = [{ value: 'all', label: 'Todas las Sedes' }];
-    return opts.concat(this.warehouses().map(w => ({ value: String(w.id), label: w.name })));
+    const list = this.branchContextService.warehouses().length > 0
+      ? this.branchContextService.warehouses()
+      : this.warehouses();
+    return opts.concat(list.map(w => ({ value: String(w.id), label: w.name })));
   }
 
   // Filtros
@@ -143,6 +164,10 @@ export class UsersComponent implements OnInit {
         error: () => {}
       });
     }
+    const currentWid = this.branchContextService.selectedWarehouseId();
+    if (currentWid) {
+      this.warehouseFilter.set(String(currentWid));
+    }
     this.loadUsers();
     this.loadMatrix();
   }
@@ -212,6 +237,10 @@ export class UsersComponent implements OnInit {
 
   setWarehouseFilter(warehouseId: string): void {
     this.warehouseFilter.set(warehouseId);
+    const wid = warehouseId === 'all' || !warehouseId ? null : Number(warehouseId);
+    if (this.branchContextService.canChangeBranch() && this.branchContextService.selectedWarehouseId() !== wid) {
+      this.branchContextService.setSelectedWarehouseId(wid);
+    }
     this.pageNumber.set(1);
     this.loadUsers();
   }

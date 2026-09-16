@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PurchaseService } from '../../core/services/purchase.service';
 import { SupplierService } from '../../core/services/supplier.service';
 import { ProductService } from '../../core/services/product.service';
@@ -40,6 +40,7 @@ export class PurchasesComponent implements OnInit {
   private confirmationService = inject(ConfirmationService);
   private alertService = inject(AlertService, { optional: true });
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   purchases = signal<Purchase[]>([]);
   suppliers = signal<Supplier[]>([]);
@@ -87,10 +88,32 @@ export class PurchasesComponent implements OnInit {
 
         if (productId || quantity || supplierId) {
           this.initialPreloadedItem.set({ productId, quantity, supplierId });
+
+          if (productId) {
+            this.productService.getProductById(productId).subscribe({
+              next: (prod) => {
+                if (!this.products().some(p => p.id === prod.id)) {
+                  this.products.update(list => [...list, prod]);
+                }
+              },
+              error: () => {}
+            });
+          }
+
+          if (supplierId) {
+            this.supplierService.getSupplier(supplierId).subscribe({
+              next: (sup) => {
+                if (!this.suppliers().some(s => s.id === sup.id)) {
+                  this.suppliers.update(list => [...list, sup]);
+                }
+              },
+              error: () => {}
+            });
+          }
         } else {
           this.initialPreloadedItem.set(null);
         }
-        this.openCreateModal();
+        this.openCreateModal(this.initialPreloadedItem());
       }
     });
   }
@@ -154,9 +177,31 @@ export class PurchasesComponent implements OnInit {
     this.loadPurchases();
   }
 
-  openCreateModal(): void {
+  openCreateModal(preloaded: { productId?: number; quantity?: number; supplierId?: number } | null = null): void {
     this.modalError.set(null);
+    this.initialPreloadedItem.set(preloaded);
+    if (!preloaded && (this.route.snapshot.queryParams['new'] || this.route.snapshot.queryParams['productId'])) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+    }
     this.isCreateModalOpen.set(true);
+  }
+
+  closeCreateModal(): void {
+    this.isCreateModalOpen.set(false);
+    this.initialPreloadedItem.set(null);
+    this.modalError.set(null);
+
+    if (this.route.snapshot.queryParams['new'] || this.route.snapshot.queryParams['productId']) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+    }
   }
 
   onCreatePurchase(request: CreatePurchaseRequest): void {
@@ -166,7 +211,7 @@ export class PurchasesComponent implements OnInit {
     this.purchaseService.createPurchase(request).subscribe({
       next: () => {
         this.modalLoading.set(false);
-        this.isCreateModalOpen.set(false);
+        this.closeCreateModal();
         this.loadPurchases();
         this.alertService?.checkUnreadStatus();
       },

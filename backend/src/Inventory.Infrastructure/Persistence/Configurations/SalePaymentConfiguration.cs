@@ -13,6 +13,7 @@ public class SalePaymentConfiguration : IEntityTypeConfiguration<SalePayment>
         builder.HasKey(sp => sp.Id);
 
         builder.Property(sp => sp.Method)
+            .HasColumnType("tinyint")
             .IsRequired();
 
         builder.Property(sp => sp.Amount)
@@ -21,6 +22,16 @@ public class SalePaymentConfiguration : IEntityTypeConfiguration<SalePayment>
 
         builder.Property(sp => sp.Reference)
             .HasMaxLength(100);
+
+        builder.Property(sp => sp.CreatedAt)
+            .HasColumnType("datetimeoffset")
+            .IsRequired();
+
+        builder.Property(sp => sp.UpdatedAt)
+            .HasColumnType("datetimeoffset");
+
+        builder.Property(sp => sp.DeletedAt)
+            .HasColumnType("datetimeoffset");
 
         builder.HasOne(sp => sp.Sale)
             .WithMany(s => s.Payments)

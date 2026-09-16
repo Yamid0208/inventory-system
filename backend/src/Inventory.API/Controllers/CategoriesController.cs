@@ -25,19 +25,7 @@ public class CategoriesController : BaseApiController
         [FromQuery] int? warehouseId,
         CancellationToken cancellationToken)
     {
-        IReadOnlyList<int>? allowedWarehouseIds = null;
-        if (!IsSuperAdmin())
-        {
-            allowedWarehouseIds = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
-        }
-
-        int? filterWarehouseId = warehouseId;
-        if (GetCurrentUserRole() == "Warehouse" || GetCurrentUserRole() == "Seller")
-        {
-            filterWarehouseId = GetCurrentWarehouseId();
-        }
-
-        var categories = await _categoryService.GetAllAsync(search, isActive, filterWarehouseId, allowedWarehouseIds, cancellationToken);
+        var categories = await _categoryService.GetAllAsync(search, isActive, warehouseId, null, cancellationToken);
         return Ok(categories);
     }
 
@@ -47,13 +35,7 @@ public class CategoriesController : BaseApiController
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CategoryDto>> GetById(int id, CancellationToken cancellationToken)
     {
-        int? warehouseId = null;
-        if (!IsSuperAdmin())
-        {
-            warehouseId = GetCurrentWarehouseId();
-        }
-
-        var category = await _categoryService.GetByIdAsync(id, warehouseId, cancellationToken);
+        var category = await _categoryService.GetByIdAsync(id, null, cancellationToken);
         return Ok(category);
     }
 

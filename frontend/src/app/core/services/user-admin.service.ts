@@ -35,6 +35,9 @@ export class UserAdminService {
     if (params.pageSize) {
       httpParams = httpParams.set('pageSize', params.pageSize.toString());
     }
+    if (params.warehouseId !== undefined && params.warehouseId !== null) {
+      httpParams = httpParams.set('warehouseId', params.warehouseId.toString());
+    }
 
     return this.http.get<PagedResult<UserDetail>>(this.baseUrl, { params: httpParams });
   }

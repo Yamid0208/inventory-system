@@ -36,11 +36,11 @@ public class CategoryService : ICategoryService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(c => c.WarehouseId == warehouseId.Value);
+            query = query.Where(c => c.WarehouseId == warehouseId.Value || c.WarehouseId == null);
         }
-        else if (allowedWarehouseIds != null)
+        else if (allowedWarehouseIds != null && allowedWarehouseIds.Count > 0)
         {
-            query = query.Where(c => c.WarehouseId.HasValue && allowedWarehouseIds.Contains(c.WarehouseId.Value));
+            query = query.Where(c => !c.WarehouseId.HasValue || allowedWarehouseIds.Contains(c.WarehouseId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -80,7 +80,7 @@ public class CategoryService : ICategoryService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(c => c.WarehouseId == warehouseId.Value);
+            query = query.Where(c => c.WarehouseId == warehouseId.Value || c.WarehouseId == null);
         }
 
         var category = await query

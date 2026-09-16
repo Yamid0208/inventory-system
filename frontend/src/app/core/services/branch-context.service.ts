@@ -1,4 +1,5 @@
-import { Injectable, inject, signal, computed, effect } from '@angular/core';
+import { Injectable, inject, signal, computed, effect, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { WarehouseService } from './warehouse.service';
 import { AuthService } from '../auth/services/auth.service';
 import { Warehouse } from '../models/warehouse.model';
@@ -6,9 +7,10 @@ import { Warehouse } from '../models/warehouse.model';
 @Injectable({
   providedIn: 'root'
 })
-export class BranchContextService {
+export class BranchContextService implements OnDestroy {
   private warehouseService = inject(WarehouseService);
   private authService = inject(AuthService);
+  private changeSub?: Subscription;
 
   private readonly STORAGE_KEY = 'inventory_active_branch_id';
 
@@ -39,20 +41,38 @@ export class BranchContextService {
     return 'Todas las Sedes (Consolidado)';
   });
 
+  private isInitialized = false;
+
   constructor() {
     // Escuchar cambios de sesión
-    effect(() => {
-      const user = this.authService.currentUser();
-      if (user) {
-        this.initializeBranchContext();
-      } else {
-        this.warehouses.set([]);
-        this.selectedWarehouseId.set(null);
-      }
-    }, { allowSignalWrites: true });
+    try {
+      effect(() => {
+        const user = this.authService.currentUser();
+        if (user) {
+          this.initializeBranchContext();
+        } else {
+          this.isInitialized = false;
+          this.warehouses.set([]);
+          this.selectedWarehouseId.set(null);
+        }
+      }, { allowSignalWrites: true });
+    } catch {}
+
+    // Escuchar mutaciones globales de sedes para refrescar en tiempo real
+    this.changeSub = this.warehouseService.warehousesChanged$.subscribe((changed) => {
+      this.refreshWarehouses(changed?.id);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.changeSub?.unsubscribe();
   }
 
   initializeBranchContext(): void {
+    this.refreshWarehouses();
+  }
+
+  refreshWarehouses(autoSelectId?: number): void {
     const user = this.authService.currentUser();
     if (!user) return;
 
@@ -63,12 +83,35 @@ export class BranchContextService {
           this.warehouses.set(data);
           this.loading.set(false);
 
+          // Si se indicó seleccionar una sede en particular (por ejemplo la recién creada)
+          if (autoSelectId !== undefined) {
+            if (autoSelectId === null || data.some(w => w.id === autoSelectId)) {
+              this.setSelectedWarehouseId(autoSelectId);
+              this.isInitialized = true;
+              return;
+            }
+          }
+
+          // Si ya estaba inicializado y la sede actual sigue siendo válida, mantenerla
+          if (this.isInitialized) {
+            const currentId = this.selectedWarehouseId();
+            if (currentId === null || data.some(w => w.id === currentId)) {
+              return;
+            }
+          }
+
           // Recuperar sede guardada en localStorage si existe en la lista
           const savedIdStr = localStorage.getItem(this.STORAGE_KEY);
+          if (savedIdStr === 'all') {
+            this.selectedWarehouseId.set(null);
+            this.isInitialized = true;
+            return;
+          }
           if (savedIdStr) {
             const savedId = Number(savedIdStr);
             if (data.some(w => w.id === savedId)) {
               this.selectedWarehouseId.set(savedId);
+              this.isInitialized = true;
               return;
             }
           }
@@ -77,6 +120,7 @@ export class BranchContextService {
           if (user.warehouseId && data.some(w => w.id === user.warehouseId)) {
             this.selectedWarehouseId.set(user.warehouseId);
             localStorage.setItem(this.STORAGE_KEY, String(user.warehouseId));
+            this.isInitialized = true;
             return;
           }
 
@@ -87,6 +131,7 @@ export class BranchContextService {
           } else {
             this.selectedWarehouseId.set(null);
           }
+          this.isInitialized = true;
         },
         error: () => this.loading.set(false)
       });
@@ -95,6 +140,7 @@ export class BranchContextService {
       if (user.warehouseId) {
         this.selectedWarehouseId.set(user.warehouseId);
       }
+      this.isInitialized = true;
     }
   }
 
@@ -105,7 +151,7 @@ export class BranchContextService {
     if (id !== null && id !== undefined) {
       localStorage.setItem(this.STORAGE_KEY, String(id));
     } else {
-      localStorage.removeItem(this.STORAGE_KEY);
+      localStorage.setItem(this.STORAGE_KEY, 'all');
     }
   }
 

@@ -31,12 +31,16 @@ public class UserManagementService : IUserManagementService
 
         if (callerRole == "Admin")
         {
-            // Un Administrador de Sede solo gestiona colaboradores operativos (Bodega y Ventas) de su propia sede.
+            // Un Administrador de Sede solo gestiona colaboradores operativos (Bodega y Ventas) de su propia sede o sedes autorizadas.
             query = query.Where(u => u.Role != UserRole.SuperAdmin && u.Role != UserRole.Admin);
 
             if (callerWarehouseId.HasValue && callerWarehouseId.Value > 0)
             {
                 query = query.Where(u => u.WarehouseId == callerWarehouseId.Value);
+            }
+            else if (request.AllowedWarehouseIds != null && request.AllowedWarehouseIds.Count > 0)
+            {
+                query = query.Where(u => u.WarehouseId.HasValue && request.AllowedWarehouseIds.Contains(u.WarehouseId.Value));
             }
             else
             {

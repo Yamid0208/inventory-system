@@ -5,6 +5,7 @@ import { WarehouseService } from '../../core/services/warehouse.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { Warehouse, CreateClientAdminRequest, CreateWarehouseRequest } from '../../core/models/warehouse.model';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import { appEmailValidator } from '../../shared/validators';
 
 @Component({
@@ -17,6 +18,7 @@ export class WarehousesComponent implements OnInit {
   private warehouseService = inject(WarehouseService);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
+  branchContextService = inject(BranchContextService);
   private fb = inject(FormBuilder);
 
   warehouses = signal<Warehouse[]>([]);
@@ -129,6 +131,7 @@ export class WarehousesComponent implements OnInit {
             `El almacén '${created.name}' (${created.code}) y su administrador '${created.adminUserName}' fueron registrados exitosamente.`
           );
           this.loadWarehouses();
+          this.branchContextService.refreshWarehouses(created.id);
         },
         error: (err) => {
           this.isSubmitting.set(false);
@@ -156,6 +159,7 @@ export class WarehousesComponent implements OnInit {
             `La sede '${created.name}' (${created.code}) fue registrada exitosamente para tu empresa.`
           );
           this.loadWarehouses();
+          this.branchContextService.refreshWarehouses(created.id);
         },
         error: (err) => {
           this.isSubmitting.set(false);
@@ -176,6 +180,7 @@ export class WarehousesComponent implements OnInit {
           `La sede '${updated.name}' ahora está ${updated.isActive ? 'activa' : 'inactiva'}.`
         );
         this.loadWarehouses();
+        this.branchContextService.refreshWarehouses();
       },
       error: (err) => {
         this.notificationService.error(

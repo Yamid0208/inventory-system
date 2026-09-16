@@ -61,7 +61,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         // Concurrencia optimista
         builder.Property(p => p.RowVersion)
-            .IsConcurrencyToken();
+            .IsRowVersion();
 
         // Índice único en SKU por almacén ignorando eliminados lógicamente
         builder.HasIndex(p => new { p.WarehouseId, p.Sku })

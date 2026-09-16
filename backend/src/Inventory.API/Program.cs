@@ -160,9 +160,11 @@ using (var scope = app.Services.CreateScope())
                             ""CreatedAt"" TIMESTAMP WITH TIME ZONE NOT NULL,
                             ""UpdatedAt"" TIMESTAMP WITH TIME ZONE NULL,
                             ""IsDeleted"" BOOLEAN NOT NULL DEFAULT FALSE,
+                            ""DeletedAt"" TIMESTAMP WITH TIME ZONE NULL,
                             CONSTRAINT ""FK_SalePayments_Sales_SaleId"" FOREIGN KEY (""SaleId"") REFERENCES ""Sales"" (""Id"") ON DELETE CASCADE
                         );
                         CREATE INDEX IF NOT EXISTS ""IX_SalePayments_SaleId"" ON ""SalePayments"" (""SaleId"");
+                        ALTER TABLE ""SalePayments"" ADD COLUMN IF NOT EXISTS ""DeletedAt"" TIMESTAMP WITH TIME ZONE NULL;
                     ");
                 }
                 else if (db.Database.IsSqlServer())
@@ -179,10 +181,18 @@ using (var scope = app.Services.CreateScope())
                                 [CreatedAt] datetime2 NOT NULL,
                                 [UpdatedAt] datetime2 NULL,
                                 [IsDeleted] bit NOT NULL DEFAULT 0,
+                                [DeletedAt] datetimeoffset NULL,
                                 CONSTRAINT [PK_SalePayments] PRIMARY KEY ([Id]),
                                 CONSTRAINT [FK_SalePayments_Sales_SaleId] FOREIGN KEY ([SaleId]) REFERENCES [dbo].[Sales] ([Id]) ON DELETE CASCADE
                             );
                             CREATE NONCLUSTERED INDEX [IX_SalePayments_SaleId] ON [dbo].[SalePayments]([SaleId]);
+                        END
+                        ELSE
+                        BEGIN
+                            IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[SalePayments]') AND name = 'DeletedAt')
+                            BEGIN
+                                ALTER TABLE [dbo].[SalePayments] ADD [DeletedAt] datetimeoffset NULL;
+                            END
                         END
                     ");
                 }

@@ -36,11 +36,11 @@ public class SupplierService : ISupplierService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value || s.WarehouseId == null);
         }
-        else if (allowedWarehouseIds != null)
+        else if (allowedWarehouseIds != null && allowedWarehouseIds.Count > 0)
         {
-            query = query.Where(s => s.WarehouseId.HasValue && allowedWarehouseIds.Contains(s.WarehouseId.Value));
+            query = query.Where(s => !s.WarehouseId.HasValue || allowedWarehouseIds.Contains(s.WarehouseId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -85,7 +85,7 @@ public class SupplierService : ISupplierService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value || s.WarehouseId == null);
         }
 
         var supplier = await query

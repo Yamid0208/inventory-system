@@ -116,7 +116,7 @@ public class PurchaseService : IPurchaseService
     {
         var strategy = _context.Database.CreateExecutionStrategy();
 
-        return await strategy.ExecuteAsync(async () =>
+        var createdPurchaseId = await strategy.ExecuteAsync(async () =>
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
 
@@ -184,8 +184,7 @@ public class PurchaseService : IPurchaseService
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
 
-                // Recargar con relaciones para DTO limpio
-                return await GetPurchaseByIdAsync(purchase.Id, cancellationToken);
+                return purchase.Id;
             }
             catch
             {
@@ -193,13 +192,15 @@ public class PurchaseService : IPurchaseService
                 throw;
             }
         });
+
+        return await GetPurchaseByIdAsync(createdPurchaseId, cancellationToken);
     }
 
     public async Task<PurchaseDto> ReceivePurchaseAsync(int id, int userId, CancellationToken cancellationToken = default)
     {
         var strategy = _context.Database.CreateExecutionStrategy();
 
-        return await strategy.ExecuteAsync(async () =>
+        var purchaseId = await strategy.ExecuteAsync(async () =>
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
 
@@ -245,7 +246,7 @@ public class PurchaseService : IPurchaseService
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
 
-                return await GetPurchaseByIdAsync(purchase.Id, cancellationToken);
+                return purchase.Id;
             }
             catch
             {
@@ -253,6 +254,8 @@ public class PurchaseService : IPurchaseService
                 throw;
             }
         });
+
+        return await GetPurchaseByIdAsync(purchaseId, cancellationToken);
     }
 
     public async Task<PurchaseDto> ReturnPurchaseAsync(
@@ -276,7 +279,7 @@ public class PurchaseService : IPurchaseService
 
         var strategy = _context.Database.CreateExecutionStrategy();
 
-        return await strategy.ExecuteAsync(async () =>
+        var purchaseId = await strategy.ExecuteAsync(async () =>
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
 
@@ -342,7 +345,7 @@ public class PurchaseService : IPurchaseService
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
 
-                return await GetPurchaseByIdAsync(purchase.Id, cancellationToken);
+                return purchase.Id;
             }
             catch
             {
@@ -350,6 +353,8 @@ public class PurchaseService : IPurchaseService
                 throw;
             }
         });
+
+        return await GetPurchaseByIdAsync(purchaseId, cancellationToken);
     }
 
     public async Task CancelPurchaseAsync(int id, CancellationToken cancellationToken = default)

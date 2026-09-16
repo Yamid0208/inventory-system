@@ -7,6 +7,7 @@ import { WarehouseService } from '../../../../core/services/warehouse.service';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
 import { AuthService } from '../../../../core/auth/services/auth.service';
+import { BranchContextService } from '../../../../core/services/branch-context.service';
 import { appEmailValidator } from '../../../../shared/validators';
 
 @Component({
@@ -18,6 +19,7 @@ import { appEmailValidator } from '../../../../shared/validators';
 export class UserModalComponent implements OnInit {
   authService = inject(AuthService);
   private warehouseService = inject(WarehouseService);
+  private branchContextService = inject(BranchContextService);
   private fb = inject(FormBuilder);
 
   @Input() user: UserDetail | null = null;
@@ -66,7 +68,7 @@ export class UserModalComponent implements OnInit {
       next: (data) => {
         this.warehouses.set(data);
         if (this.isClientAdmin && !this.user && data.length > 0 && !this.form.get('warehouseId')?.value) {
-          const currentWhId = this.authService.currentUser()?.warehouseId;
+          const currentWhId = this.branchContextService.selectedWarehouseId() ?? this.authService.currentUser()?.warehouseId;
           const match = data.find(w => w.id === currentWhId);
           this.form.patchValue({ warehouseId: match ? match.id : data[0].id });
         }
@@ -75,7 +77,7 @@ export class UserModalComponent implements OnInit {
     });
 
     const defaultRole = this.user?.role || (this.isClientAdmin ? 'Warehouse' : 'Seller');
-    const defaultWarehouseId = this.user?.warehouseId ?? (this.authService.currentUser()?.warehouseId ?? null);
+    const defaultWarehouseId = this.user?.warehouseId ?? (this.branchContextService.selectedWarehouseId() ?? this.authService.currentUser()?.warehouseId ?? null);
 
     this.form = this.fb.group({
       fullName: [this.user?.fullName || '', [Validators.required, Validators.maxLength(150)]],

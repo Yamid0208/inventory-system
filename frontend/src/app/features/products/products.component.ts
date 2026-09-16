@@ -248,7 +248,13 @@ export class ProductsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.modalLoading.set(false);
-        const detail = err.error?.detail || err.error?.title || 'No se pudo guardar el producto.';
+        let detail = err.error?.detail || err.error?.title || 'No se pudo guardar el producto.';
+        if (err.error?.errors && typeof err.error.errors === 'object') {
+          const messages = Object.values(err.error.errors).flat().filter(Boolean);
+          if (messages.length > 0) {
+            detail = messages.join(' ');
+          }
+        }
         this.modalError.set(detail);
       }
     });
@@ -262,7 +268,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   executeDelete(): void {
     const product = this.productToDelete();
-    if (!product) return;
+    if (!product || (product.currentStock ?? 0) > 0) return;
 
     this.productService.deleteProduct(product.id).subscribe({
       next: () => {

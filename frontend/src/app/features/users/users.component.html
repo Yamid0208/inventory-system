@@ -417,16 +417,16 @@
     </div>
   </div>
   }
-
-  <!-- MODAL DE USUARIO -->
-  @if (isUserModalOpen()) {
-  <app-user-modal [user]="selectedUserForEdit()" [loading]="modalLoading()" [errorMessage]="modalError()"
-    (save)="onSaveUser($event)" (cancel)="isUserModalOpen.set(false)"></app-user-modal>
-  }
-
-  <!-- MODAL RESTABLECER CONTRASEÑA -->
-  @if (selectedUserForPassword()) {
-  <app-reset-password-modal [user]="selectedUserForPassword()!" [loading]="modalLoading()"
-    (save)="onSavePassword($event)" (cancel)="selectedUserForPassword.set(null)"></app-reset-password-modal>
-  }
 </div>
+
+<!-- MODAL DE USUARIO -->
+@if (isUserModalOpen()) {
+<app-user-modal [user]="selectedUserForEdit()" [loading]="modalLoading()" [errorMessage]="modalError()"
+  (save)="onSaveUser($event)" (cancel)="isUserModalOpen.set(false)"></app-user-modal>
+}
+
+<!-- MODAL RESTABLECER CONTRASEÑA -->
+@if (selectedUserForPassword()) {
+<app-reset-password-modal [user]="selectedUserForPassword()!" [loading]="modalLoading()"
+  (save)="onSavePassword($event)" (cancel)="selectedUserForPassword.set(null)"></app-reset-password-modal>
+}

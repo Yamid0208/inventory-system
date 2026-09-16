@@ -74,11 +74,8 @@
 
       <!-- Category Autocomplete Filter -->
       <div class="relative w-full sm:w-56">
-        <app-autocomplete
-          [options]="categoryOptions()"
-          placeholder="Todas las Categorías"
-          (selectionChange)="onCategorySelect($event)"
-        ></app-autocomplete>
+        <app-autocomplete [options]="categoryOptions()" placeholder="Todas las Categorías"
+          (selectionChange)="onCategorySelect($event)"></app-autocomplete>
       </div>
     </div>
   </div>
@@ -191,10 +188,12 @@
                   <span class="font-bold flex items-center gap-1.5" [class]="product.stockStatus === 'InStock'
                             ? 'text-emerald-600'
                             : (product.stockStatus === 'LowStock' ? 'text-amber-500' : 'text-rose-500')">
-                    <span class="w-1.5 h-1.5 rounded-full" [class]="product.stockStatus === 'InStock'
+                    <span class="w-1.5 h-1.5 rounded-full"
+                      [class]="product.stockStatus === 'InStock'
                               ? 'bg-emerald-500'
                               : (product.stockStatus === 'LowStock' ? 'bg-amber-400 animate-pulse' : 'bg-rose-500')"></span>
-                    {{ product.stockStatus === 'InStock' ? 'En Stock' : (product.stockStatus === 'LowStock' ? 'Stock Bajo' : 'Agotado') }}
+                    {{ product.stockStatus === 'InStock' ? 'En Stock' : (product.stockStatus === 'LowStock' ? 'Stock
+                    Bajo' : 'Agotado') }}
                   </span>
                   <span class="font-mono font-bold text-slate-800">
                     {{ product.currentStock }} uds.
@@ -206,7 +205,8 @@
                   <div class="h-1.5 rounded-full transition-all duration-300" [class]="product.stockStatus === 'InStock'
                             ? 'bg-emerald-500'
                             : (product.stockStatus === 'LowStock' ? 'bg-amber-400' : 'bg-rose-400')"
-                    [style.width.%]="product.currentStock <= 0 ? 0 : Math.min(100, Math.round((product.currentStock / Math.max(product.minimumStock * 2, product.currentStock, 1)) * 100))"></div>
+                    [style.width.%]="product.currentStock <= 0 ? 0 : Math.min(100, Math.round((product.currentStock / Math.max(product.minimumStock * 2, product.currentStock, 1)) * 100))">
+                  </div>
                 </div>
                 <div class="flex items-center justify-between text-[10px] text-slate-400">
                   <span>Mínimo requerido:</span>
@@ -271,71 +271,99 @@
     }
   </div>
   }
+</div>
 
-  <!-- Modales -->
-  @if (isModalOpen()) {
-  <app-product-modal [product]="selectedProduct()" [categories]="categories()" [suppliers]="suppliers()"
-    [loading]="modalLoading" [errorMessage]="modalError" (save)="onSaveProduct($event)"
-    (cancel)="isModalOpen.set(false)"></app-product-modal>
-  }
+<!-- Modales fuera del contenedor p-8 para que el backdrop ocupe el 100% de la pantalla sin franjas -->
+@if (isModalOpen()) {
+<app-product-modal [product]="selectedProduct()" [categories]="categories()" [suppliers]="suppliers()"
+  [loading]="modalLoading" [errorMessage]="modalError" (save)="onSaveProduct($event)"
+  (cancel)="isModalOpen.set(false)"></app-product-modal>
+}
 
-  @if (isDetailModalOpen() && detailProduct()) {
-  <app-product-detail-modal [product]="detailProduct()!"
-    (close)="isDetailModalOpen.set(false)"></app-product-detail-modal>
-  }
+@if (isDetailModalOpen() && detailProduct()) {
+<app-product-detail-modal [product]="detailProduct()!"
+  (close)="isDetailModalOpen.set(false)"></app-product-detail-modal>
+}
 
-  <!-- Diálogo de Confirmación de Borrado con validación RN-007 -->
-  @if (confirmDialogOpen()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-    <div class="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4 my-auto max-h-[92vh] overflow-y-auto">
-      <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-          </path>
-        </svg>
-      </div>
+<!-- Diálogo de Confirmación de Borrado con validación RN-007 -->
+@if (confirmDialogOpen()) {
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+  <div
+    class="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4 my-auto max-h-[92vh] overflow-y-auto">
+    <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto"
+      [class]="(productToDelete()?.currentStock ?? 0) > 0 ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+        </path>
+      </svg>
+    </div>
 
-      <div class="text-center">
-        <h3 class="text-base font-bold text-slate-900">¿Confirmas la baja del producto?</h3>
-        <p class="text-xs text-slate-500 mt-1">
-          Se dará de baja lógica a
-          <strong class="text-slate-800">"{{ productToDelete()?.name }}"</strong> (SKU: {{ productToDelete()?.sku }}).
-        </p>
-      </div>
-
-      <!-- Alerta de Restricción de Negocio RN-007 si la API rechazó -->
-      @if (deleteWarning()) {
-      <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2.5">
-        <svg class="w-4 h-4 flex-shrink-0 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-          </path>
-        </svg>
-        <div class="flex-1">
-          <strong class="font-semibold block text-amber-900">Restricción de Integridad (RN-007):</strong>
-          <span>{{ deleteWarning() }}</span>
-        </div>
-      </div>
-      }
-
-      <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-2">
-        <app-button variant="outline" size="sm" (clicked)="closeDeleteDialog()">
-          {{ deleteWarning() ? 'Entendido / Cerrar' : 'Cancelar' }}
-        </app-button>
-
-        @if (!deleteWarning()) {
-        <app-button variant="danger" size="sm" (clicked)="executeDelete()">
-          Confirmar Eliminación
-        </app-button>
+    <div class="text-center">
+      <h3 class="text-base font-bold text-slate-900">
+        @if ((productToDelete()?.currentStock ?? 0) > 0) {
+          Producto con Existencias Activas
+        } @else {
+          ¿Confirmas la baja del producto?
         }
+      </h3>
+      <p class="text-xs text-slate-500 mt-1">
+        @if ((productToDelete()?.currentStock ?? 0) > 0) {
+          El producto <strong class="text-slate-800">"{{ productToDelete()?.name }}"</strong> (SKU: {{ productToDelete()?.sku }}) tiene <strong class="text-rose-600 font-semibold">{{ productToDelete()?.currentStock | number }} unidad(es)</strong> disponibles en inventario.
+        } @else {
+          Se dará de baja a producto
+          <strong class="text-slate-800">"{{ productToDelete()?.name }}"</strong> (SKU: {{ productToDelete()?.sku }}).
+        }
+      </p>
+    </div>
+
+    <!-- Alerta restrictiva si tiene stock físico activo (RN-007) -->
+    @if ((productToDelete()?.currentStock ?? 0) > 0) {
+    <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+      <svg class="w-4 h-4 flex-shrink-0 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+        </path>
+      </svg>
+      <div class="flex-1">
+        <strong class="font-semibold block text-amber-900">Restricción (RN-007)</strong>
+        <span>No está permitido eliminar un producto que tenga existencias físicas activas (Stock > 0). Debe registrar una salida, ajuste o venta de inventario para dejar el stock en 0 antes de proceder con la eliminación.</span>
       </div>
     </div>
-  </div>
-  }
+    }
 
-  <!-- Modal de Lotes y Vencimientos -->
-  @if (isBatchModalOpen() && batchProduct()) {
-  <app-batch-modal [product]="batchProduct()!" (closed)="isBatchModalOpen.set(false)"></app-batch-modal>
-  }
+    <!-- Alerta de Restricción de Negocio RN-007 si la API rechazó -->
+    @if (deleteWarning()) {
+    <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2.5">
+      <svg class="w-4 h-4 flex-shrink-0 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+        </path>
+      </svg>
+      <div class="flex-1">
+        <strong class="font-semibold block text-amber-900">Restricción de Integridad (RN-007):</strong>
+        <span>{{ deleteWarning() }}</span>
+      </div>
+    </div>
+    }
+
+    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 pt-2">
+      <app-button variant="outline" size="sm" (clicked)="closeDeleteDialog()">
+        {{ (productToDelete()?.currentStock ?? 0) > 0 || deleteWarning() ? 'Entendido / Cerrar' : 'Cancelar' }}
+      </app-button>
+
+      @if ((productToDelete()?.currentStock ?? 0) <= 0 && !deleteWarning()) {
+      <app-button variant="danger" size="sm" (clicked)="executeDelete()">
+        Confirmar Eliminación
+      </app-button>
+      }
+    </div>
+  </div>
 </div>
+}
+
+<!-- Modal de Lotes y Vencimientos -->
+@if (isBatchModalOpen() && batchProduct()) {
+<app-batch-modal [product]="batchProduct()!" (closed)="isBatchModalOpen.set(false)"></app-batch-modal>
+}

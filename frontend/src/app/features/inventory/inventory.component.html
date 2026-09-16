@@ -248,6 +248,7 @@
     }
   </div>
   }
+</div>
 
   <!-- Modal de Ajuste Manual -->
   @if (isAdjustmentModalOpen()) {
@@ -259,4 +260,3 @@
   @if (isReturnModalOpen()) {
   <app-return-modal (closed)="isReturnModalOpen.set(false)" (saved)="onReturnSaved()"></app-return-modal>
   }
-</div>

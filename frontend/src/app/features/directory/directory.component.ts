@@ -262,17 +262,20 @@ export class DirectoryComponent implements OnInit {
 
   promptDeleteSupplier(supplier: Supplier): void {
     this.deleteWarning.set(null);
+    const productCount = supplier.productCount ?? 0;
     this.itemToDelete.set({
       type: 'supplier',
       id: supplier.id,
-      name: supplier.name
+      name: supplier.name,
+      hasProducts: productCount > 0,
+      productCount
     });
     this.confirmDialogOpen.set(true);
   }
 
   executeDelete(): void {
     const target = this.itemToDelete();
-    if (!target) return;
+    if (!target || target.hasProducts) return;
 
     if (target.type === 'category') {
       this.categoryService.deleteCategory(target.id).subscribe({

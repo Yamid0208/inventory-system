@@ -54,23 +54,15 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequest>
             .AnyAsync(p => p.WarehouseId == request.WarehouseId && p.Sku == normalized, cancellationToken);
     }
 
-    private async Task<bool> CategoryExists(CreateProductRequest request, int categoryId, CancellationToken cancellationToken)
+    private async Task<bool> CategoryExists(int categoryId, CancellationToken cancellationToken)
     {
-        var query = _context.Categories.Where(c => c.Id == categoryId && c.IsActive);
-        if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
-        {
-            query = query.Where(c => c.WarehouseId == request.WarehouseId.Value);
-        }
-        return await query.AnyAsync(cancellationToken);
+        return await _context.Categories
+            .AnyAsync(c => c.Id == categoryId && c.IsActive, cancellationToken);
     }
 
-    private async Task<bool> SupplierExists(CreateProductRequest request, int supplierId, CancellationToken cancellationToken)
+    private async Task<bool> SupplierExists(int supplierId, CancellationToken cancellationToken)
     {
-        var query = _context.Suppliers.Where(s => s.Id == supplierId && s.IsActive);
-        if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
-        {
-            query = query.Where(s => s.WarehouseId == request.WarehouseId.Value);
-        }
-        return await query.AnyAsync(cancellationToken);
+        return await _context.Suppliers
+            .AnyAsync(s => s.Id == supplierId && s.IsActive, cancellationToken);
     }
 }
