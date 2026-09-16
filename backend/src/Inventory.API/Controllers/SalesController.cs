@@ -105,7 +105,7 @@ public class SalesController : BaseApiController
     /// Cancela una venta, reingresando los productos al inventario y registrando el retorno en Kardex.
     /// </summary>
     [HttpPatch("{id:int}/cancel")]
-    [Authorize(Roles = "SuperAdmin,Admin")]
+    [Authorize(Roles = "SuperAdmin,Admin,Seller")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -44,6 +44,7 @@ public class RolePermissionsTests
 
         Assert.Contains(AppPermissions.ProductsRead, permissions);
         Assert.Contains(AppPermissions.SalesCreate, permissions);
+        Assert.Contains(AppPermissions.SalesCancel, permissions);
 
         // Seguridad: no debe poder modificar existencias directamente ni crear compras ni usuarios
         Assert.DoesNotContain(AppPermissions.InventoryAdjust, permissions);
