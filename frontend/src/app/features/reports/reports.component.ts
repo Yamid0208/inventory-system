@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReportService } from '../../core/services/report.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { BranchContextService } from '../../core/services/branch-context.service';
-import { ReportMetadata, ReportSummary } from '../../core/models/report.model';
+import { ReportMetadata, ReportsCatalogSummary } from '../../core/models/report.model';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
@@ -20,14 +20,14 @@ export class ReportsComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   branchContextService = inject(BranchContextService);
 
-  summary = signal<ReportSummary | null>(null);
+  summary = signal<ReportsCatalogSummary | null>(null);
   dashboardData = signal<DashboardSummary | null>(null);
   loading = signal<boolean>(false);
   downloadingKey = signal<string | null>(null);
 
   startDate = signal<string>('');
   endDate = signal<string>('');
-  activePreset = signal<'all' | '7days' | '30days'>('all');
+  activePreset = signal<'all' | '7days' | '30days' | 'custom'>('all');
 
   profitMargin = computed(() => {
     const d = this.dashboardData();
@@ -45,7 +45,7 @@ export class ReportsComponent implements OnInit {
           this.loadAnalytics(wid);
         });
       }, { allowSignalWrites: true });
-    } catch {}
+    } catch { }
   }
 
   ngOnInit(): void {
@@ -73,13 +73,15 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  setDatePreset(preset: 'all' | '7days' | '30days'): void {
+  setDatePreset(preset: 'all' | '7days' | '30days' | 'custom'): void {
     this.activePreset.set(preset);
     const now = new Date();
 
-    if (preset === 'all') {
-      this.startDate.set('');
-      this.endDate.set('');
+    if (preset === 'all' || preset === 'custom') {
+      if (preset === 'all') {
+        this.startDate.set('');
+        this.endDate.set('');
+      }
       return;
     }
 

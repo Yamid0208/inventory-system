@@ -11,3 +11,5 @@ export interface ReportsCatalogSummary {
   reports: ReportMetadata[];
   totalExportableRecords: number;
 }
+
+export type ReportSummary = ReportsCatalogSummary;

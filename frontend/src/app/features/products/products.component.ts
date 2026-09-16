@@ -13,7 +13,7 @@ import { Category } from '../../core/models/category.model';
 import { Supplier } from '../../core/models/supplier.model';
 import { ProductModalComponent } from './components/product-modal/product-modal.component';
 import { ProductDetailModalComponent } from './components/product-detail-modal/product-detail-modal.component';
-import { BatchManagementModalComponent } from './components/batch-management-modal/batch-management-modal.component';
+import { BatchModalComponent } from './components/batch-modal/batch-modal.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
@@ -28,7 +28,7 @@ import { PageChangeEvent } from '../../shared/models/pagination.model';
     RouterModule,
     ProductModalComponent,
     ProductDetailModalComponent,
-    BatchManagementModalComponent,
+    BatchModalComponent,
     AppButtonComponent,
     AppPaginationComponent,
     AppAutocompleteComponent,
