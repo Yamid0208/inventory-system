@@ -1,27 +1,27 @@
 <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
-  <!-- Top Greeting & Header StockFlow Style -->
+  <!-- Top Greeting & Header Vercel Style -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <div class="flex items-center gap-2 mb-1.5">
         <span
-          class="text-[11px] font-extrabold px-3 py-1 rounded-full bg-primary-50 text-primary-500 border border-primary-100">
+          class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded bg-[var(--surface-subtle)] text-[var(--text-main)] border border-[var(--border-subtle)] uppercase tracking-wider">
           Panel de Control Operativo
         </span>
       </div>
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+      <h1 class="text-xl sm:text-2xl font-bold text-[var(--text-main)] tracking-tight">
         {{ greeting() }}, {{ authService.currentUser()?.fullName || 'Administrador' }}
       </h1>
-      <p class="text-xs sm:text-sm text-slate-400 font-medium mt-1">
-        Visualiza el estado del inventario, flujos de caja y alertas de reabastecimiento en tiempo real.
+      <p class="text-xs sm:text-sm text-[var(--text-muted)] font-medium mt-1">
+        Métricas de inventario multi-almacén, flujos de ventas y alertas en tiempo real.
       </p>
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
       <button type="button" (click)="loadDashboardData()" [disabled]="loading()"
-        class="inline-flex items-center gap-2 px-4.5 py-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50">
-        <svg class="w-4 h-4 text-slate-500" [class.animate-spin]="loading()" fill="none" stroke="currentColor"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[var(--surface-card)] hover:bg-[var(--surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-main)] text-xs font-semibold shadow-sm transition-all cursor-pointer disabled:opacity-50">
+        <svg class="w-3.5 h-3.5 text-[var(--text-muted)]" [class.animate-spin]="loading()" fill="none" stroke="currentColor"
           viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
           </path>
         </svg>
@@ -29,8 +29,8 @@
       </button>
 
       <button type="button" (click)="navigateTo('/sales', { new: 'true' })"
-        class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold shadow-coral-glow transition-all cursor-pointer">
-        <svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-[var(--color-brand-text)] text-xs font-semibold shadow-sm transition-all cursor-pointer border border-[var(--border-strong)]">
+        <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
         </svg>
         <span>Nueva Venta</span>

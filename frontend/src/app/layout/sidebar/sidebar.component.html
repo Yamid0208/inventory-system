@@ -1,35 +1,34 @@
 <!-- Backdrop para móviles -->
 @if (sidebarService.isOpen()) {
-<div class="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-opacity"
+<div class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
   (click)="sidebarService.close()" aria-hidden="true"></div>
 }
 
-<!-- Menú Lateral / Drawer Responsive StockFlow Style -->
+<!-- Menú Lateral / Drawer Responsive Vercel Style -->
 <aside
-  class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 flex flex-col flex-shrink-0 h-full select-none transition-transform duration-300 ease-in-out lg:static lg:translate-x-0"
+  class="fixed inset-y-0 left-0 z-50 w-64 bg-[var(--surface-card)] border-r border-[var(--border-subtle)] flex flex-col flex-shrink-0 h-full select-none transition-transform duration-300 ease-in-out lg:static lg:translate-x-0"
   [class.translate-x-0]="sidebarService.isOpen()" [class.-translate-x-full]="!sidebarService.isOpen()"
   aria-label="Menú principal de navegación">
-  <!-- Brand Header con Logo Estilo StockFlow -->
-  <div class="h-20 px-6 flex items-center justify-between">
+  <!-- Brand Header con Logo Estilo Vercel -->
+  <div class="h-16 px-5 flex items-center justify-between border-b border-[var(--border-subtle)]">
     <div class="flex items-center gap-3">
-      <!-- Isotipo StockFlow Style (Caja redondeada Coral con símbolo blanco) -->
+      <!-- Isotipo Vercel Monochrome (Triángulo/Caja Nítida Monocromática) -->
       <div
-        class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-primary-500 to-primary-400 flex items-center justify-center text-white shadow-coral-glow">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        class="w-8 h-8 rounded-lg bg-[var(--text-main)] text-[var(--surface-canvas)] flex items-center justify-center font-extrabold text-sm shadow-sm">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+          <path d="M12 2L24 22H0L12 2Z"></path>
         </svg>
       </div>
       <div class="flex flex-col">
-        <span class="font-extrabold text-slate-900 text-lg tracking-tight lowercase">stockflow<span
-            class="text-primary-500 font-black">.</span></span>
-        <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase -mt-1">Inventory</span>
+        <span class="font-bold text-[var(--text-main)] text-sm tracking-wider uppercase font-mono">STOCKFLOW</span>
+        <span class="text-[9px] text-[var(--text-muted)] font-semibold tracking-widest uppercase -mt-0.5">INVENTORY
+          v2.0</span>
       </div>
     </div>
 
     <!-- Botón Cerrar (Solo Móvil) -->
     <button type="button" (click)="sidebarService.close()"
-      class="lg:hidden p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+      class="lg:hidden p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer"
       aria-label="Cerrar menú lateral">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -37,11 +36,11 @@
     </button>
   </div>
 
-  <!-- Botón Destacado '+ Nueva Operación' estilo StockFlow '+ New Event' -->
-  <div class="px-4 mb-3">
+  <!-- Botón Destacado '+ Nueva Venta' estilo Vercel Primary Button -->
+  <div class="px-3 pt-3 mb-2">
     <a routerLink="/sales" [queryParams]="{ new: 'true' }" (click)="onNavClick()"
-      class="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-400 hover:from-primary-600 hover:to-primary-500 text-white font-bold text-xs shadow-coral-glow hover:shadow-lg transform active:scale-98 transition-all cursor-pointer select-none">
-      <svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      class="w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-md bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-[var(--color-brand-text)] font-semibold text-xs transition-all cursor-pointer select-none border border-[var(--border-strong)] shadow-sm">
+      <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
       </svg>
       <span>Nueva Venta</span>
@@ -51,8 +50,9 @@
   <!-- Sede / Almacén Badge si aplica -->
   @if (authService.currentUser()?.warehouseName) {
   <div
-    class="mx-4 mb-2 px-3.5 py-2.5 rounded-2xl bg-primary-50/70 border border-primary-100/60 flex items-center gap-2.5 text-primary-900">
-    <div class="w-7 h-7 rounded-xl bg-white text-primary-500 flex items-center justify-center shadow-sm shrink-0">
+    class="mx-3 mb-2 px-3 py-2 rounded-md bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center gap-2.5">
+    <div
+      class="w-6 h-6 rounded bg-[var(--surface-card)] text-[var(--text-main)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
@@ -60,32 +60,33 @@
       </svg>
     </div>
     <div class="truncate">
-      <p class="text-[9px] font-bold uppercase tracking-wider text-primary-500 leading-none">Sede Asignada</p>
-      <p class="text-xs font-bold text-slate-800 truncate leading-tight mt-0.5">{{
+      <p class="text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)] leading-none font-mono">Sede
+        Asignada</p>
+      <p class="text-xs font-bold text-[var(--text-main)] truncate leading-tight mt-0.5">{{
         authService.currentUser()?.warehouseName }}</p>
     </div>
   </div>
   } @else if (authService.currentUser()?.role === 'SuperAdmin') {
   <div
-    class="mx-4 mb-2 px-3.5 py-2 rounded-2xl bg-amber-50/80 border border-amber-200/60 flex items-center gap-2.5 text-amber-900">
-    <span class="text-sm">👑</span>
+    class="mx-3 mb-2 px-3 py-2 rounded-md bg-[var(--surface-subtle)] border border-[var(--border-subtle)] flex items-center gap-2.5">
+    <span class="text-xs">⚡</span>
     <div class="truncate">
-      <p class="text-[9px] font-bold uppercase tracking-wider text-amber-600 leading-none">Super Administrador</p>
-      <p class="text-xs font-bold text-slate-800 truncate leading-tight mt-0.5">Control Multi-Sede</p>
+      <p class="text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)] leading-none font-mono">Super
+        Administrador</p>
+      <p class="text-xs font-bold text-[var(--text-main)] truncate leading-tight mt-0.5">Control Multi-Sede</p>
     </div>
   </div>
   }
 
   <!-- Navigation Links -->
-  <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
+  <nav class="flex-1 px-3 py-1 space-y-0.5 overflow-y-auto">
     @for (item of navItems; track item.label) {
     <a [routerLink]="item.route" (click)="onNavClick()"
       [class]="isActive(item.route)
-          ? 'flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-primary-50 text-primary-500 font-bold transition-all shadow-sm'
-          : 'flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold transition-all'">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
-          [class]="isActive(item.route) ? 'bg-white text-primary-500 shadow-sm' : 'text-slate-400 group-hover:text-slate-600'">
+          ? 'flex items-center justify-between px-3 py-2 rounded-md bg-[var(--surface-subtle)] text-[var(--text-main)] font-bold transition-all '
+          : 'flex items-center justify-between px-3 py-2 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-subtle)] font-medium transition-all'">
+      <div class="flex items-center gap-2.5">
+        <div class="w-6 h-6 rounded flex items-center justify-center transition-colors text-[var(--text-muted)]">
           @switch (item.icon) {
           @case ('grid') {
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,12 +170,12 @@
           }
           }
         </div>
-        <span class="text-xs">{{ item.label }}</span>
+        <span class="text-xs tracking-tight">{{ item.label }}</span>
       </div>
 
       @if (item.badge) {
       <span
-        class="text-[9px] uppercase font-black tracking-wider px-2 py-0.5 rounded-full bg-primary-500 text-white shadow-sm animate-pulse">
+        class="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500 border border-amber-500/30">
         {{ item.badge }}
       </span>
       }
@@ -184,10 +185,10 @@
 
   <!-- Bottom Settings Link (Solo SuperAdmin y Admin) -->
   @if (canAccessSettings) {
-  <div class="p-3 border-t border-slate-100">
+  <div class="p-2.5 border-t border-[var(--border-subtle)]">
     <a routerLink="/settings" (click)="onNavClick()"
-      class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-xs font-semibold transition-colors">
-      <div class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400">
+      class="flex items-center gap-2.5 px-3 py-2 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-subtle)] text-xs font-medium transition-colors">
+      <div class="w-6 h-6 rounded flex items-center justify-center text-[var(--text-muted)]">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
