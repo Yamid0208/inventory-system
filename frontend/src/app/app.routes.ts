@@ -1,6 +1,8 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { roleGuard } from './core/auth/guards/role.guard';
+import { AuthService } from './core/auth/services/auth.service';
 
 export const routes: Routes = [
   {
@@ -15,8 +17,10 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        canActivate: [roleGuard],
-        redirectTo: 'dashboard'
+        redirectTo: () => {
+          const authService = inject(AuthService);
+          return authService.getDefaultRouteForRole();
+        }
       },
       {
         path: 'dashboard',
