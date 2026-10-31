@@ -35,6 +35,11 @@ export class LoginComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.authService.isAuthenticated() && this.authService.accessToken()) {
+      this.router.navigate([this.authService.getDefaultRouteForRole()]);
+      return;
+    }
+
     try {
       const savedEmail = localStorage.getItem('sgi_remembered_email');
       if (savedEmail) {

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError, of, shareReplay } from 'rxjs';
+import { Observable, tap, catchError, throwError, of, shareReplay, finalize } from 'rxjs';
 import { AuthResponse, LoginCredentials, User, UserRole } from '../models/auth.models';
 
 @Injectable({
@@ -55,15 +55,16 @@ export class AuthService {
     this.refreshInProgress$ = this.http.post<AuthResponse>('/api/v1/auth/refresh', {}, { withCredentials: true }).pipe(
       tap((res) => {
         this.setSession(res);
-        this.refreshInProgress$ = null;
       }),
       catchError((err) => {
-        this.refreshInProgress$ = null;
-        // No destruir la sesión activa si todavía disponemos de un token en memoria
+        // Si el refresco falla y no disponemos de un token vigente en memoria, limpiar sesión local
         if (!this.accessTokenSignal()) {
           this.clearSession();
         }
         return throwError(() => err);
+      }),
+      finalize(() => {
+        this.refreshInProgress$ = null;
       }),
       shareReplay(1)
     );
@@ -72,16 +73,14 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+    // Limpieza síncrona e inequívoca del estado local
+    this.clearSession();
+    this.router.navigate(['/login']);
+
+    // Notificación en segundo plano al backend para revocar token en base de datos
     return this.http.post('/api/v1/auth/logout', {}, { withCredentials: true }).pipe(
-      tap(() => {
-        this.clearSession();
-        this.router.navigate(['/login']);
-      }),
-      catchError(() => {
-        this.clearSession();
-        this.router.navigate(['/login']);
-        return of(null);
-      })
+      catchError(() => of(null)),
+      shareReplay(1)
     );
   }
 

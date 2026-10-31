@@ -72,4 +72,25 @@ test.describe('E2E Pre-Production Verification Suite', () => {
     expect(page.url()).toContain('/login');
   });
 
+  test('TC-05: Recarga de página (F5) en ruta autenticada NO redirige al login y preserva la sesión activa', async ({ page }) => {
+    await page.goto('/login');
+    const emailInput = page.locator('input[type="email"], input[formcontrolname="email"], #email').first();
+    const passwordInput = page.locator('input[type="password"], input[formcontrolname="password"], #password').first();
+    const submitBtn = page.locator('button[type="submit"]').first();
+
+    await emailInput.fill('admin@sgi.local');
+    await passwordInput.fill('Admin123*');
+    await submitBtn.click();
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
+
+    // Ejecutar recarga de página (F5)
+    await page.reload();
+
+    // Validar que NO redirija a /login y se mantenga en /dashboard
+    await page.waitForTimeout(1500);
+    expect(page.url()).not.toContain('/login');
+    expect(page.url()).toContain('/dashboard');
+    await expect(page.locator('body')).not.toBeEmpty();
+  });
+
 });

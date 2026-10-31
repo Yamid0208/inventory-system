@@ -25,11 +25,14 @@ describe('LoginComponent (Unit Tests - Remember Me & Email Validation)', () => {
 
     authServiceMock = {
       login: vi.fn().mockReturnValue(of({ accessToken: 'fake-token', user: { email: 'admin@prueba.com' } })),
+      isAuthenticated: vi.fn().mockReturnValue(false),
+      accessToken: vi.fn().mockReturnValue(null),
       isSuperAdmin: vi.fn().mockReturnValue(false),
       getDefaultRouteForRole: vi.fn().mockReturnValue('/dashboard')
     };
 
     routerMock = {
+      navigate: vi.fn(),
       navigateByUrl: vi.fn()
     };
 

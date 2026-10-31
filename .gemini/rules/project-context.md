@@ -28,3 +28,4 @@ git pull origin main
 - Docker Compose de producción: `/var/www/inventory-system/docker-compose.prod.yml`
 - Script de despliegue: `/var/www/inventory-system/deploy/deploy.sh`
 - Nginx en el Host: `/etc/nginx/sites-available/insincro.conf` (enlace simbólico en `sites-enabled`)
+

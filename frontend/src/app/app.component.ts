@@ -22,16 +22,6 @@ export class AppComponent implements OnInit {
       this.sessionTimeoutService.startMonitoring();
     }
 
-    // Intento de refresco de sesión en segundo plano
-    this.authService.refresh().subscribe({
-      next: () => {
-        this.sessionTimeoutService.startMonitoring();
-      },
-      error: () => {
-        // Si no hay cookie de refresco, la sesión del token actual se mantiene
-      }
-    });
-
     this.sessionTimeoutService.init();
   }
 }
