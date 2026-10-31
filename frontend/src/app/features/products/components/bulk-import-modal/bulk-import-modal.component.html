@@ -420,17 +420,17 @@
         <div class="grid grid-cols-3 gap-3 max-w-md mx-auto">
           <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-3">
             <p class="text-[11px] text-emerald-700 font-medium">Creados</p>
-            <p class="text-xl font-extrabold text-emerald-800">{{ res.createdCount }}</p>
+            <p class="text-xl font-extrabold text-emerald-800">{{ res.createdCount ?? res.productsCreated ?? 0 }}</p>
           </div>
 
           <div class="bg-amber-50 border border-amber-100 rounded-2xl p-3">
             <p class="text-[11px] text-amber-700 font-medium">Actualizados</p>
-            <p class="text-xl font-extrabold text-amber-800">{{ res.updatedCount }}</p>
+            <p class="text-xl font-extrabold text-amber-800">{{ res.updatedCount ?? res.productsUpdated ?? 0 }}</p>
           </div>
 
           <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3">
             <p class="text-[11px] text-slate-600 font-medium">Total Procesados</p>
-            <p class="text-xl font-extrabold text-slate-800">{{ res.totalProcessed }}</p>
+            <p class="text-xl font-extrabold text-slate-800">{{ res.totalProcessed || ((res.createdCount ?? res.productsCreated ?? 0) + (res.updatedCount ?? res.productsUpdated ?? 0)) }}</p>
           </div>
         </div>
 

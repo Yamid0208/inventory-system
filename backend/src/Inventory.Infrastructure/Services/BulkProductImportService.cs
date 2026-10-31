@@ -170,27 +170,40 @@ public class BulkProductImportService : IBulkProductImportService
                 item.MinimumStock = 5;
             }
 
+            // Sanitizaciones y defaults tolerantes
+            if (string.IsNullOrWhiteSpace(item.CategoryName))
+            {
+                item.CategoryName = "General";
+            }
+
+            if (item.PurchasePrice < 0) item.PurchasePrice = 0;
+
+            if (item.SalePrice <= 0 || item.SalePrice < item.PurchasePrice)
+            {
+                item.SalePrice = item.PurchasePrice > 0 ? Math.Round(item.PurchasePrice * 1.3m, 2) : 1000m;
+            }
+
+            if (item.InitialStock < 0) item.InitialStock = 0;
+
             // Validaciones de negocio
             if (string.IsNullOrWhiteSpace(item.Sku)) item.ValidationErrors.Add("El SKU es obligatorio.");
             if (string.IsNullOrWhiteSpace(item.Name)) item.ValidationErrors.Add("El nombre es obligatorio.");
-            if (string.IsNullOrWhiteSpace(item.CategoryName)) item.ValidationErrors.Add("La categoría es obligatoria.");
-            if (item.PurchasePrice < 0) item.ValidationErrors.Add("El precio de compra no puede ser negativo.");
-            if (item.SalePrice < item.PurchasePrice) item.ValidationErrors.Add("El precio de venta debería ser mayor al de compra.");
-            if (item.InitialStock < 0) item.ValidationErrors.Add("El stock inicial no puede ser negativo.");
 
             if (!string.IsNullOrWhiteSpace(item.Sku))
             {
-                if (!skusInBatch.Add(item.Sku))
+                var normalizedSku = item.Sku.Trim().ToUpperInvariant();
+                if (!skusInBatch.Add(normalizedSku))
                 {
                     item.ValidationErrors.Add($"El SKU '{item.Sku}' está duplicado en el archivo.");
                 }
-                else if (existingSkus.Contains(item.Sku.ToUpper()))
+                else if (existingSkus.Contains(normalizedSku))
                 {
+                    item.IsExisting = true;
                     item.ValidationErrors.Add($"El SKU '{item.Sku}' ya existe en el catálogo (se actualizará precio/stock si confirma).");
                 }
             }
 
-            item.IsValid = item.ValidationErrors.Count == 0 || (item.ValidationErrors.Count == 1 && item.ValidationErrors[0].Contains("ya existe"));
+            item.IsValid = item.ValidationErrors.Count == 0 || (item.IsExisting && item.ValidationErrors.Count == 1);
             result.Add(item);
         }
 
@@ -306,14 +319,22 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
             if (string.IsNullOrWhiteSpace(item.Sku)) item.Sku = $"AI-{rowNum:D3}";
             if (string.IsNullOrWhiteSpace(item.Name)) item.ValidationErrors.Add("Nombre no detectado.");
             if (string.IsNullOrWhiteSpace(item.CategoryName)) item.CategoryName = "General";
+            if (item.PurchasePrice < 0) item.PurchasePrice = 0;
+            if (item.SalePrice <= 0 || item.SalePrice < item.PurchasePrice)
+            {
+                item.SalePrice = item.PurchasePrice > 0 ? Math.Round(item.PurchasePrice * 1.3m, 2) : 1000m;
+            }
+            if (item.InitialStock < 0) item.InitialStock = 0;
             if (item.MinimumStock <= 0) item.MinimumStock = 5;
 
-            if (existingSkus.Contains(item.Sku.ToUpper()))
+            var normalizedSku = item.Sku.Trim().ToUpperInvariant();
+            if (existingSkus.Contains(normalizedSku))
             {
+                item.IsExisting = true;
                 item.ValidationErrors.Add($"El SKU '{item.Sku}' ya existe en el sistema.");
             }
 
-            item.IsValid = item.ValidationErrors.Count == 0 || (item.ValidationErrors.Count == 1 && item.ValidationErrors[0].Contains("ya existe"));
+            item.IsValid = item.ValidationErrors.Count == 0 || (item.IsExisting && item.ValidationErrors.Count == 1);
         }
 
         return extractedItems;
@@ -338,8 +359,12 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
             await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             try
             {
-                // Cachear o crear categorías al vuelo
-                var categoryNames = items.Select(i => i.CategoryName.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                // Cachear o crear categorías al vuelo de forma segura
+                var categoryNames = items
+                    .Select(i => string.IsNullOrWhiteSpace(i.CategoryName) ? "General" : i.CategoryName.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
                 var existingCategories = await _context.Categories
                     .Where(c => !c.IsDeleted)
                     .ToListAsync(cancellationToken);
@@ -365,7 +390,7 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                 var defaultSupplier = await _context.Suppliers.FirstOrDefaultAsync(s => !s.IsDeleted, cancellationToken);
                 if (defaultSupplier == null)
                 {
-                    defaultSupplier = new Supplier("Proveedor General", "00000000-0", contactName: "General", email: "contacto@general.com", warehouseId: request.WarehouseId);
+                    defaultSupplier = new Supplier("Proveedor General", "900000000-1", contactName: "General", email: "contacto@general.com", warehouseId: request.WarehouseId);
                     _context.Suppliers.Add(defaultSupplier);
                     await _context.SaveChangesAsync(cancellationToken);
                 }
@@ -401,19 +426,25 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                         var sup = await _context.Suppliers.FirstOrDefaultAsync(s => s.Name.ToLower() == supName.ToLower() && !s.IsDeleted, cancellationToken);
                         if (sup == null)
                         {
-                            sup = new Supplier(supName, "00000000-0", contactName: supName, email: "proveedor@auto.com", warehouseId: request.WarehouseId);
+                            var randomNit = $"{Random.Shared.Next(10000000, 99999999)}-{Random.Shared.Next(0, 9)}";
+                            sup = new Supplier(supName, randomNit, contactName: supName, email: $"contacto@{Guid.NewGuid().ToString()[..6]}.com", warehouseId: request.WarehouseId);
                             _context.Suppliers.Add(sup);
                             await _context.SaveChangesAsync(cancellationToken);
                         }
                         supplierId = sup.Id;
                     }
 
-                    if (item.SalePrice <= 0)
+                    if (item.PurchasePrice < 0) item.PurchasePrice = 0;
+                    if (item.SalePrice <= 0 || item.SalePrice < item.PurchasePrice)
                     {
-                        item.SalePrice = item.PurchasePrice > 0 ? item.PurchasePrice * 1.3m : 1000m;
+                        item.SalePrice = item.PurchasePrice > 0 ? Math.Round(item.PurchasePrice * 1.3m, 2) : 1000m;
                     }
+                    if (item.InitialStock < 0) item.InitialStock = 0;
+                    if (item.MinimumStock <= 0) item.MinimumStock = 5;
 
-                    var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Sku == item.Sku && !p.IsDeleted, cancellationToken);
+                    var normalizedSku = item.Sku.Trim().ToUpperInvariant();
+                    var existingProduct = await _context.Products
+                        .FirstOrDefaultAsync(p => p.Sku.ToUpper() == normalizedSku && !p.IsDeleted, cancellationToken);
 
                     if (existingProduct != null)
                     {
@@ -508,7 +539,7 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
             catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
-                _logger.LogError(ex, "Fallo en transacción de carga masiva");
+                _logger.LogError(ex, "Fallo en transacción de carga masiva: {Message}", ex.Message);
                 result.ErrorsCount++;
                 result.Messages.Add($"Error crítico en la transacción: {ex.Message}");
             }

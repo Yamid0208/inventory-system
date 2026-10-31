@@ -52,11 +52,11 @@ public class ProductService : IProductService
 
         if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
         {
-            query = query.Where(p => p.WarehouseId == request.WarehouseId.Value);
+            query = query.Where(p => p.WarehouseId == request.WarehouseId.Value || p.WarehouseId == null);
         }
         else if (request.AllowedWarehouseIds != null)
         {
-            query = query.Where(p => p.WarehouseId.HasValue && request.AllowedWarehouseIds.Contains(p.WarehouseId.Value));
+            query = query.Where(p => !p.WarehouseId.HasValue || request.AllowedWarehouseIds.Contains(p.WarehouseId.Value));
         }
 
         // Filtro por Categoría

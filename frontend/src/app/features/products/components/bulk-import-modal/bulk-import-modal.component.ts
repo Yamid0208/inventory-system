@@ -18,8 +18,8 @@ export class BulkImportModalComponent {
   @Output() closed = new EventEmitter<void>();
   @Output() imported = new EventEmitter<BulkImportResult>();
 
+  public branchContextService = inject(BranchContextService);
   private productService = inject(ProductService);
-  private branchContextService = inject(BranchContextService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
 
@@ -240,14 +240,24 @@ export class BulkImportModalComponent {
     this.productService.commitBulkImport(request).subscribe({
       next: (result) => {
         this.isCommitting.set(false);
+        const created = result.createdCount ?? result.productsCreated ?? 0;
+        const updated = result.updatedCount ?? result.productsUpdated ?? 0;
+        const total = result.totalProcessed ?? (created + updated);
+
+        if ((result.errorCount > 0 || (result.errorsCount && result.errorsCount > 0)) && total === 0) {
+          const errMsg = result.details?.join('\n') || result.messages?.join('\n') || 'Ocurrió un error al procesar la carga masiva.';
+          this.notificationService.error(errMsg);
+          return;
+        }
+
         this.resultSummary.set(result);
         this.step.set('success');
         this.imported.emit(result);
-        this.notificationService.success(`Importación completada: ${result.createdCount} creados, ${result.updatedCount} actualizados.`);
+        this.notificationService.success(`Importación completada: ${created} creados, ${updated} actualizados.`);
       },
       error: (err) => {
         this.isCommitting.set(false);
-        const detail = err.error?.detail || err.error?.title || 'Ocurrió un error al guardar los productos en inventario.';
+        const detail = err.error?.detail || err.error?.title || err.error?.messages?.[0] || 'Ocurrió un error al guardar los productos en inventario.';
         this.notificationService.error(detail);
       }
     });

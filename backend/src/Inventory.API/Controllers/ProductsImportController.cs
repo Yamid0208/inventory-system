@@ -92,7 +92,20 @@ public class ProductsImportController : ControllerBase
         int.TryParse(userIdStr, out var userId);
         var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@sgi.local";
 
+        if (!request.WarehouseId.HasValue || request.WarehouseId.Value <= 0)
+        {
+            var userWh = User.FindFirstValue("WarehouseId");
+            if (int.TryParse(userWh, out var wh) && wh > 0)
+            {
+                request.WarehouseId = wh;
+            }
+        }
+
         var result = await _importService.CommitBulkImportAsync(request, userId, userEmail, cancellationToken);
+        if (result.ErrorCount > 0 && result.TotalProcessed == 0)
+        {
+            return BadRequest(result);
+        }
         return Ok(result);
     }
 }
