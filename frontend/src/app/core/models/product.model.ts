@@ -45,7 +45,9 @@ export interface CreateProductRequest {
   sku: string;
   name: string;
   description?: string | null;
-  categoryId: number;
+  categoryId?: number | null;
+  categoryName?: string | null;
+  newCategoryName?: string | null;
   supplierId: number;
   warehouseId?: number | null;
   purchasePrice: number;
@@ -57,7 +59,9 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest {
   name: string;
   description?: string | null;
-  categoryId: number;
+  categoryId?: number | null;
+  categoryName?: string | null;
+  newCategoryName?: string | null;
   supplierId: number;
   purchasePrice: number;
   salePrice: number;
@@ -90,3 +94,36 @@ export interface CreateProductBatchRequest {
   manufacturingDate?: string;
 }
 
+export interface ProductImportRow {
+  rowNumber: number;
+  sku: string;
+  name: string;
+  categoryName: string;
+  supplierName?: string | null;
+  purchasePrice: number;
+  salePrice: number;
+  initialStock: number;
+  minimumStock: number;
+  description?: string | null;
+  isValid: boolean;
+  isExisting: boolean;
+  validationErrors: string[];
+}
+
+export interface BulkImportRequest {
+  warehouseId?: number | null;
+  updateExisting: boolean;
+  products: ProductImportRow[];
+}
+
+export interface BulkImportResult {
+  totalProcessed: number;
+  createdCount: number;
+  productsCreated?: number;
+  updatedCount: number;
+  productsUpdated?: number;
+  errorCount: number;
+  errorsCount?: number;
+  details: string[];
+  messages?: string[];
+}

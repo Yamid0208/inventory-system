@@ -13,12 +13,17 @@ public record KardexFilterRequest(
 );
 
 public record CreateStockAdjustmentRequest(
-    int ProductId,
+    int? ProductId,
     string AdjustmentType, // "AdjustmentIn" | "AdjustmentOut"
     int Quantity,
     string Reason,
     string? Notes = null,
-    int? WarehouseId = null
+    int? WarehouseId = null,
+    string? NewProductSku = null,
+    string? NewProductName = null,
+    string? NewProductCategory = null,
+    decimal? NewProductPurchasePrice = null,
+    decimal? NewProductSalePrice = null
 );
 
 public record ProcessReturnRequest(

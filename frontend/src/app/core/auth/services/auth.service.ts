@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError, of } from 'rxjs';
+import { Observable, tap, catchError, throwError, of, shareReplay } from 'rxjs';
 import { AuthResponse, LoginCredentials, User, UserRole } from '../models/auth.models';
 
 @Injectable({
@@ -10,6 +10,9 @@ import { AuthResponse, LoginCredentials, User, UserRole } from '../models/auth.m
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+
+  // Control de concurrencia para rotación atómica de Refresh Token
+  private refreshInProgress$: Observable<AuthResponse> | null = null;
 
   // Estado reactivo con Signals
   private currentUserSignal = signal<User | null>(null);
@@ -22,9 +25,15 @@ export class AuthService {
 
   readonly isAuthenticated = computed(() => !!this.currentUserSignal());
   readonly userRole = computed(() => this.currentUserSignal()?.role ?? null);
+  readonly isSuperAdmin = computed(() => this.currentUserSignal()?.role === 'SuperAdmin');
   readonly isAdmin = computed(() => this.currentUserSignal()?.role === 'Admin');
   readonly isWarehouse = computed(() => this.currentUserSignal()?.role === 'Warehouse' || this.isAdmin());
   readonly isSeller = computed(() => this.currentUserSignal()?.role === 'Seller' || this.isAdmin());
+
+  getDefaultRouteForRole(role?: UserRole | null): string {
+    const userRole = role ?? this.userRole();
+    return userRole === 'SuperAdmin' ? '/users' : '/dashboard';
+  }
 
   constructor() {
     this.restoreUserFromStorage();
@@ -39,18 +48,27 @@ export class AuthService {
   }
 
   refresh(): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/v1/auth/refresh', {}, { withCredentials: true }).pipe(
+    if (this.refreshInProgress$) {
+      return this.refreshInProgress$;
+    }
+
+    this.refreshInProgress$ = this.http.post<AuthResponse>('/api/v1/auth/refresh', {}, { withCredentials: true }).pipe(
       tap((res) => {
         this.setSession(res);
+        this.refreshInProgress$ = null;
       }),
       catchError((err) => {
-        // No destruir la sesión activa si todavía disponemos de un token en memoria/storage
+        this.refreshInProgress$ = null;
+        // No destruir la sesión activa si todavía disponemos de un token en memoria
         if (!this.accessTokenSignal()) {
           this.clearSession();
         }
         return throwError(() => err);
-      })
+      }),
+      shareReplay(1)
     );
+
+    return this.refreshInProgress$;
   }
 
   logout(): Observable<any> {
@@ -107,11 +125,11 @@ export class AuthService {
   }
 
   private setSession(authResponse: AuthResponse): void {
+    // SEC-004: El access token reside exclusivamente en memoria (Signals reactivos)
     this.accessTokenSignal.set(authResponse.accessToken);
     this.currentUserSignal.set(authResponse.user);
     try {
       localStorage.setItem('sgi_user', JSON.stringify(authResponse.user));
-      localStorage.setItem('sgi_token', authResponse.accessToken);
     } catch {
       // Ignorar fallo de almacenamiento en modo incógnito/privado
     }
@@ -122,7 +140,6 @@ export class AuthService {
     this.currentUserSignal.set(null);
     try {
       localStorage.removeItem('sgi_user');
-      localStorage.removeItem('sgi_token');
     } catch {
       // Ignorar
     }
@@ -131,17 +148,23 @@ export class AuthService {
   private restoreUserFromStorage(): void {
     try {
       const savedUser = localStorage.getItem('sgi_user');
-      const savedToken = localStorage.getItem('sgi_token');
       if (savedUser) {
         this.currentUserSignal.set(JSON.parse(savedUser));
-      }
-      if (savedToken) {
-        this.accessTokenSignal.set(savedToken);
+        // Renovar silenciosamente el access token en memoria mediante la cookie HttpOnly
+        this.refresh().subscribe({
+          next: () => {
+            this.isCheckingAuthSignal.set(false);
+          },
+          error: () => {
+            this.clearSession();
+            this.isCheckingAuthSignal.set(false);
+          }
+        });
+        return;
       }
     } catch {
       this.clearSession();
-    } finally {
-      this.isCheckingAuthSignal.set(false);
     }
+    this.isCheckingAuthSignal.set(false);
   }
 }

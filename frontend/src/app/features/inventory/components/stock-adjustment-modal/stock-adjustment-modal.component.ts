@@ -27,6 +27,8 @@ export class StockAdjustmentModalComponent implements OnInit {
   @Output() save = new EventEmitter<CreateStockAdjustmentRequest>();
   @Output() cancel = new EventEmitter<void>();
 
+  isNewProduct = signal<boolean>(false);
+
   form!: FormGroup;
 
   constructor(private fb: FormBuilder) {}
@@ -37,8 +39,33 @@ export class StockAdjustmentModalComponent implements OnInit {
       adjustmentType: ['AdjustmentIn', [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
       reason: ['', [Validators.required]],
-      notes: ['']
+      notes: [''],
+      newProductName: [''],
+      newProductSku: [''],
+      newProductCategory: ['General'],
+      newProductPurchasePrice: [0],
+      newProductSalePrice: [0]
     });
+  }
+
+  toggleNewProduct(): void {
+    const nextState = !this.isNewProduct();
+    this.isNewProduct.set(nextState);
+
+    const productIdCtrl = this.form.get('productId');
+    const newNameCtrl = this.form.get('newProductName');
+
+    if (nextState) {
+      productIdCtrl?.clearValidators();
+      newNameCtrl?.setValidators([Validators.required]);
+      this.form.patchValue({ adjustmentType: 'AdjustmentIn' });
+    } else {
+      productIdCtrl?.setValidators([Validators.required]);
+      newNameCtrl?.clearValidators();
+    }
+
+    productIdCtrl?.updateValueAndValidity();
+    newNameCtrl?.updateValueAndValidity();
   }
 
   reasonOptions: AutocompleteOption[] = [
@@ -59,10 +86,12 @@ export class StockAdjustmentModalComponent implements OnInit {
   }
 
   setAdjustmentType(type: 'AdjustmentIn' | 'AdjustmentOut'): void {
+    if (this.isNewProduct() && type === 'AdjustmentOut') return;
     this.form.patchValue({ adjustmentType: type });
   }
 
   selectedProduct(): Product | undefined {
+    if (this.isNewProduct()) return undefined;
     const pId = this.form?.get('productId')?.value;
     if (!pId) return undefined;
     return this.products.find(p => p.id === Number(pId));
@@ -70,13 +99,15 @@ export class StockAdjustmentModalComponent implements OnInit {
 
   projectedStock(): number {
     const prod = this.selectedProduct();
-    if (!prod) return 0;
     const qty = Number(this.form.get('quantity')?.value) || 0;
+    if (this.isNewProduct()) return qty;
+    if (!prod) return 0;
     const isEntry = this.form.get('adjustmentType')?.value === 'AdjustmentIn';
     return isEntry ? prod.currentStock + qty : prod.currentStock - qty;
   }
 
   isNegativeStock(): boolean {
+    if (this.isNewProduct()) return false;
     const prod = this.selectedProduct();
     if (!prod) return false;
     const isEntry = this.form.get('adjustmentType')?.value === 'AdjustmentIn';
@@ -97,12 +128,19 @@ export class StockAdjustmentModalComponent implements OnInit {
     if (this.form.invalid || this.isNegativeStock()) return;
 
     const val = this.form.value;
+    const isNew = this.isNewProduct();
+
     const request: CreateStockAdjustmentRequest = {
-      productId: Number(val.productId),
+      productId: isNew ? undefined : Number(val.productId),
       adjustmentType: val.adjustmentType,
       quantity: Number(val.quantity),
       reason: val.reason,
-      notes: val.notes?.trim() || undefined
+      notes: val.notes?.trim() || undefined,
+      newProductName: isNew ? val.newProductName?.trim() : undefined,
+      newProductSku: isNew && val.newProductSku?.trim() ? val.newProductSku.trim() : undefined,
+      newProductCategory: isNew ? val.newProductCategory?.trim() : undefined,
+      newProductPurchasePrice: isNew ? Number(val.newProductPurchasePrice) || 0 : undefined,
+      newProductSalePrice: isNew ? Number(val.newProductSalePrice) || 0 : undefined
     };
 
     this.save.emit(request);

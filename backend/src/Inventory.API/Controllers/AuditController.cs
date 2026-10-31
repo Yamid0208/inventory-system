@@ -8,7 +8,7 @@ namespace Inventory.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "SuperAdmin,Admin")]
 public class AuditController : ControllerBase
 {
     private readonly IAuditService _auditService;

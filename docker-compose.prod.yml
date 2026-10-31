@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: inventory-postgres-prod
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-InventoryDb}
+      - POSTGRES_USER=${POSTGRES_USER:-inventory_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # SEGURIDAD CRÍTICA: NO exponer el puerto 5432 hacia Internet
+    # El backend se conecta de forma privada a través de 'inventory-network'
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-inventory_user} -d ${POSTGRES_DB:-InventoryDb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - inventory-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inventory-backend-prod
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
+      - Jwt__Key=${Jwt__Key}
+      - Jwt__Issuer=${Jwt__Issuer:-InventoryManagementAPI}
+      - Jwt__Audience=${Jwt__Audience:-InventoryManagementApp}
+      - Jwt__AccessTokenExpirationMinutes=${Jwt__AccessTokenExpirationMinutes:-15}
+      - Jwt__RefreshTokenExpirationDays=${Jwt__RefreshTokenExpirationDays:-7}
+      - Gemini__ApiKey=${Gemini__ApiKey}
+      - Gemini__Model=${Gemini__Model:-gemini-3.5-flash-lite}
+      - Cors__AllowedOrigins=${Cors__AllowedOrigins}
+      - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
+      - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
+    # SEGURIDAD: El backend no se expone directamente a Internet, se comunica por la red Docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - uploads_prod_data:/app/uploads
+    networks:
+      - inventory-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: inventory-frontend-prod
+    restart: always
+    environment:
+      - BACKEND_URL=http://backend:8080
+    ports:
+      # Expone a localhost en puerto no conflictivo (8081) para convivir con otros proyectos (como GymTrak)
+      - "127.0.0.1:${APP_PORT:-8081}:80"
+    depends_on:
+      - backend
+    networks:
+      - inventory-network
+
+volumes:
+  postgres_prod_data:
+    driver: local
+  uploads_prod_data:
+    driver: local
+
+networks:
+  inventory-network:
+    driver: bridge

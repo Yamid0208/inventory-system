@@ -66,9 +66,18 @@ public class PurchasesController : BaseApiController
     [Authorize(Roles = "SuperAdmin,Admin,Warehouse")]
     [ProducesResponseType(typeof(PurchaseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<PurchaseDto>> GetPurchaseById(int id, CancellationToken cancellationToken)
     {
         var purchase = await _purchaseService.GetPurchaseByIdAsync(id, cancellationToken);
+        if (!IsSuperAdmin())
+        {
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (allowed.Count > 0 && purchase.WarehouseId.HasValue && !allowed.Contains(purchase.WarehouseId.Value))
+            {
+                return Forbid();
+            }
+        }
         return Ok(purchase);
     }
 
@@ -79,22 +88,27 @@ public class PurchasesController : BaseApiController
     [Authorize(Roles = "SuperAdmin,Admin,Warehouse")]
     [ProducesResponseType(typeof(PurchaseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PurchaseDto>> CreatePurchase(
         [FromBody] CreatePurchaseRequest request,
         CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int.TryParse(userIdClaim, out var userId);
+        var userId = GetCurrentUserId();
         if (userId <= 0)
         {
-            userId = 1;
+            return Unauthorized();
         }
 
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && !request.WarehouseId.HasValue)
+        if (!IsSuperAdmin())
         {
-            request = request with { WarehouseId = GetCurrentWarehouseId() };
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            var targetWh = request.WarehouseId ?? GetCurrentWarehouseId();
+            if (!targetWh.HasValue || (allowed.Count > 0 && !allowed.Contains(targetWh.Value)))
+            {
+                return Forbid();
+            }
+            request = request with { WarehouseId = targetWh.Value };
         }
 
         var purchase = await _purchaseService.CreatePurchaseAsync(request, userId, cancellationToken);
@@ -109,17 +123,27 @@ public class PurchasesController : BaseApiController
     [ProducesResponseType(typeof(PurchaseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<PurchaseDto>> ReceivePurchase(int id, CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int.TryParse(userIdClaim, out var userId);
-        if (userId <= 0)
+        var purchase = await _purchaseService.GetPurchaseByIdAsync(id, cancellationToken);
+        if (!IsSuperAdmin())
         {
-            userId = 1;
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (allowed.Count > 0 && purchase.WarehouseId.HasValue && !allowed.Contains(purchase.WarehouseId.Value))
+            {
+                return Forbid();
+            }
         }
 
-        var purchase = await _purchaseService.ReceivePurchaseAsync(id, userId, cancellationToken);
-        return Ok(purchase);
+        var userId = GetCurrentUserId();
+        if (userId <= 0)
+        {
+            return Unauthorized();
+        }
+
+        var updatedPurchase = await _purchaseService.ReceivePurchaseAsync(id, userId, cancellationToken);
+        return Ok(updatedPurchase);
     }
 
     /// <summary>
@@ -130,20 +154,30 @@ public class PurchasesController : BaseApiController
     [ProducesResponseType(typeof(PurchaseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<PurchaseDto>> ReturnPurchase(
         int id,
         [FromBody] ReturnPurchaseRequest request,
         CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int.TryParse(userIdClaim, out var userId);
-        if (userId <= 0)
+        var purchase = await _purchaseService.GetPurchaseByIdAsync(id, cancellationToken);
+        if (!IsSuperAdmin())
         {
-            userId = 1;
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (allowed.Count > 0 && purchase.WarehouseId.HasValue && !allowed.Contains(purchase.WarehouseId.Value))
+            {
+                return Forbid();
+            }
         }
 
-        var purchase = await _purchaseService.ReturnPurchaseAsync(id, request, userId, cancellationToken);
-        return Ok(purchase);
+        var userId = GetCurrentUserId();
+        if (userId <= 0)
+        {
+            return Unauthorized();
+        }
+
+        var updatedPurchase = await _purchaseService.ReturnPurchaseAsync(id, request, userId, cancellationToken);
+        return Ok(updatedPurchase);
     }
 
     /// <summary>
@@ -154,8 +188,19 @@ public class PurchasesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CancelPurchase(int id, CancellationToken cancellationToken)
     {
+        var purchase = await _purchaseService.GetPurchaseByIdAsync(id, cancellationToken);
+        if (!IsSuperAdmin())
+        {
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (allowed.Count > 0 && purchase.WarehouseId.HasValue && !allowed.Contains(purchase.WarehouseId.Value))
+            {
+                return Forbid();
+            }
+        }
+
         await _purchaseService.CancelPurchaseAsync(id, cancellationToken);
         return NoContent();
     }

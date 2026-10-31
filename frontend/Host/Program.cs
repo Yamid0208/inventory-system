@@ -1,9 +1,11 @@
 using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
+var backendUrl = Environment.GetEnvironmentVariable("BACKEND_URL") ?? "http://backend:8080";
+
 builder.Services.AddHttpClient("BackendApi", client =>
 {
-    client.BaseAddress = new Uri("http://backend:8080");
+    client.BaseAddress = new Uri(backendUrl);
 }).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
 {
     UseCookies = false
@@ -14,8 +16,8 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Proxy inverso para peticiones /api hacia el contenedor backend
-app.Map("/api/{**catch-all}", async (HttpContext context, IHttpClientFactory clientFactory) =>
+// Proxy inverso para peticiones /api y /uploads hacia el contenedor backend
+var proxyHandler = async (HttpContext context, IHttpClientFactory clientFactory) =>
 {
     var client = clientFactory.CreateClient("BackendApi");
     var requestMessage = new HttpRequestMessage(new HttpMethod(context.Request.Method), $"{context.Request.Path}{context.Request.QueryString}");
@@ -61,7 +63,10 @@ app.Map("/api/{**catch-all}", async (HttpContext context, IHttpClientFactory cli
     context.Response.Headers.Remove("transfer-encoding");
 
     await response.Content.CopyToAsync(context.Response.Body);
-});
+};
+
+app.Map("/api/{**catch-all}", proxyHandler);
+app.Map("/uploads/{**catch-all}", proxyHandler);
 
 app.MapFallbackToFile("index.html");
 

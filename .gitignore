@@ -22,6 +22,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 coverage/
+test-results/
 
 # IDEs
 .idea/
@@ -40,10 +41,12 @@ uploads/*
 !uploads/.gitkeep
 sqlserver_data/
 
-# Environment files
+# Environment & Secret files
 .env
 .env.local
 .env.*.local
+appsettings.Development.json
+appsettings.*.local.json
 
 # Scratch / Temporary workspace files
 scratch/

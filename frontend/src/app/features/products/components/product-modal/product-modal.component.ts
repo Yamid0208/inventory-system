@@ -34,6 +34,7 @@ export class ProductModalComponent implements OnInit {
   @Output() cancel = new EventEmitter<void>();
 
   form!: FormGroup;
+  isNewCategory = signal<boolean>(false);
 
   constructor(private fb: FormBuilder) {}
 
@@ -46,12 +47,37 @@ export class ProductModalComponent implements OnInit {
       name: [this.product?.name || '', [Validators.required, Validators.maxLength(200)]],
       description: [this.product?.description || '', [Validators.maxLength(1000)]],
       categoryId: [this.product?.categoryId || (this.categories[0]?.id ?? null), [Validators.required]],
+      newCategoryName: [''],
       supplierId: [this.product?.supplierId || (this.suppliers[0]?.id ?? null), [Validators.required]],
       purchasePrice: [this.product?.purchasePrice ?? 0, [Validators.required, Validators.min(0)]],
       salePrice: [this.product?.salePrice ?? 0, [Validators.required, Validators.min(0)]],
       minimumStock: [this.product?.minimumStock ?? 5, [Validators.required, Validators.min(0)]],
       warehouseId: [this.product?.warehouseId || this.defaultWarehouseId || null]
     });
+  }
+
+  toggleNewCategory(): void {
+    const current = this.isNewCategory();
+    this.isNewCategory.set(!current);
+
+    const categoryIdCtrl = this.form.get('categoryId');
+    const newCategoryCtrl = this.form.get('newCategoryName');
+
+    if (!current) {
+      categoryIdCtrl?.clearValidators();
+      categoryIdCtrl?.setValue(null);
+      newCategoryCtrl?.setValidators([Validators.required, Validators.maxLength(100)]);
+    } else {
+      newCategoryCtrl?.clearValidators();
+      newCategoryCtrl?.setValue('');
+      categoryIdCtrl?.setValidators([Validators.required]);
+      if (this.categories.length > 0) {
+        categoryIdCtrl?.setValue(this.product?.categoryId || this.categories[0].id);
+      }
+    }
+
+    categoryIdCtrl?.updateValueAndValidity();
+    newCategoryCtrl?.updateValueAndValidity();
   }
 
   get warehouseOptions(): AutocompleteOption[] {
@@ -92,12 +118,16 @@ export class ProductModalComponent implements OnInit {
     }
 
     const val = this.form.value;
+    const isNewCat = this.isNewCategory();
+    const newCatName = isNewCat ? val.newCategoryName?.trim() : null;
+    const catId = isNewCat ? null : (val.categoryId ? Number(val.categoryId) : null);
 
     if (this.product) {
       const updateReq: UpdateProductRequest = {
         name: val.name,
         description: val.description,
-        categoryId: Number(val.categoryId),
+        categoryId: catId,
+        newCategoryName: newCatName,
         supplierId: Number(val.supplierId),
         purchasePrice: Number(val.purchasePrice),
         salePrice: Number(val.salePrice),
@@ -110,7 +140,8 @@ export class ProductModalComponent implements OnInit {
         sku: val.sku.trim().toUpperCase(),
         name: val.name,
         description: val.description,
-        categoryId: Number(val.categoryId),
+        categoryId: catId,
+        newCategoryName: newCatName,
         supplierId: Number(val.supplierId),
         purchasePrice: Number(val.purchasePrice),
         salePrice: Number(val.salePrice),

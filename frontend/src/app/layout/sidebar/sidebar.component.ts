@@ -28,16 +28,25 @@ export class SidebarComponent {
 
   get navItems(): NavItem[] {
     const role: UserRole = this.authService.currentUser()?.role || 'Seller';
+
+    // Para SuperAdmin, únicamente mostrar Usuarios del Sistema y Auditoría
+    if (role === 'SuperAdmin') {
+      return [
+        { label: 'Usuarios del Sistema', route: '/users', icon: 'users', allowedRoles: ['SuperAdmin'] },
+        { label: 'Auditoría', route: '/audit', icon: 'shield', allowedRoles: ['SuperAdmin'] }
+      ];
+    }
+
     const items: NavItem[] = [
-      { label: 'Panel Principal', route: '/dashboard', icon: 'grid', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse', 'Seller'] },
-      { label: role === 'Admin' ? 'Sedes / Almacenes' : 'Clientes & Almacenes', route: '/warehouses', icon: 'building', allowedRoles: ['SuperAdmin', 'Admin'] },
-      { label: 'Productos', route: '/products', icon: 'tag', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse', 'Seller'] },
-      { label: 'Inventario / Kardex', route: '/inventory', icon: 'box', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse'] },
-      { label: 'Ventas', route: '/sales', icon: 'shopping-bag', allowedRoles: ['SuperAdmin', 'Admin', 'Seller'] },
-      { label: 'Compras', route: '/purchases', icon: 'truck', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse'] },
-      { label: 'Clientes', route: '/customers', icon: 'user', allowedRoles: ['SuperAdmin', 'Admin', 'Seller'] },
-      { label: 'Categorías & Prov.', route: '/directory', icon: 'folder', allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse'] },
-      { label: 'Reportes', route: '/reports', icon: 'chart', allowedRoles: ['SuperAdmin', 'Admin'] },
+      { label: 'Panel Principal', route: '/dashboard', icon: 'grid', allowedRoles: ['Admin', 'Warehouse', 'Seller'] },
+      { label: role === 'Admin' ? 'Sedes / Almacenes' : 'Clientes & Almacenes', route: '/warehouses', icon: 'building', allowedRoles: ['Admin'] },
+      { label: 'Productos', route: '/products', icon: 'tag', allowedRoles: ['Admin', 'Warehouse', 'Seller'] },
+      { label: 'Inventario / Kardex', route: '/inventory', icon: 'box', allowedRoles: ['Admin', 'Warehouse'] },
+      { label: 'Ventas', route: '/sales', icon: 'shopping-bag', allowedRoles: ['Admin', 'Seller'] },
+      { label: 'Compras', route: '/purchases', icon: 'truck', allowedRoles: ['Admin', 'Warehouse'] },
+      { label: 'Clientes', route: '/customers', icon: 'user', allowedRoles: ['Admin', 'Seller'] },
+      { label: 'Categorías & Prov.', route: '/directory', icon: 'folder', allowedRoles: ['Admin', 'Warehouse'] },
+      { label: 'Reportes', route: '/reports', icon: 'chart', allowedRoles: ['Admin'] },
       {
         label: 'Alertas',
         route: '/alerts',
@@ -45,14 +54,14 @@ export class SidebarComponent {
         badge: this.alertService?.hasUnreadAlerts()
           ? (this.alertService.unreadCount() > 0 ? (this.alertService.unreadCount() > 9 ? '9+' : `${this.alertService.unreadCount()}`) : '!')
           : undefined,
-        allowedRoles: ['SuperAdmin', 'Admin', 'Warehouse']
+        allowedRoles: ['Admin', 'Warehouse']
       },
-      { label: 'Auditoría', route: '/audit', icon: 'shield', allowedRoles: ['SuperAdmin'] },
+      { label: 'Auditoría', route: '/audit', icon: 'shield', allowedRoles: ['Admin'] },
       {
-        label: role === 'Admin' ? 'Empleados de Sede' : 'Usuarios del Sistema',
+        label: 'Empleados de Sede',
         route: '/users',
         icon: 'users',
-        allowedRoles: ['SuperAdmin', 'Admin']
+        allowedRoles: ['Admin']
       }
     ];
 
@@ -64,7 +73,7 @@ export class SidebarComponent {
   }
 
   get canAccessSettings(): boolean {
-    return this.userRole === 'SuperAdmin' || this.userRole === 'Admin';
+    return this.userRole === 'Admin';
   }
 
   isActive(route: string): boolean {

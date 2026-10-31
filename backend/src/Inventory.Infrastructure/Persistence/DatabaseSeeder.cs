@@ -8,50 +8,83 @@ namespace Inventory.Infrastructure.Persistence;
 
 public static class DatabaseSeeder
 {
-    public static async Task SeedInitialDataAsync(ApplicationDbContext context, IPasswordHasher passwordHasher, ILogger logger)
+    public static async Task SeedInitialDataAsync(
+        ApplicationDbContext context, 
+        IPasswordHasher passwordHasher, 
+        ILogger logger, 
+        Microsoft.Extensions.Configuration.IConfiguration configuration, 
+        bool isDevelopment)
     {
         if (!await context.Users.AnyAsync())
         {
-            logger.LogInformation("Sembrando usuarios iniciales en la base de datos...");
-
-            var users = new List<User>
+            if (isDevelopment)
             {
-                new(
-                    fullName: "Super Administrador",
-                    email: "superadmin@sgi.local",
-                    passwordHash: passwordHasher.Hash("SuperAdmin123*"),
-                    role: UserRole.SuperAdmin
-                ),
-                new(
-                    fullName: "Administrador del Sistema",
-                    email: "admin@sgi.local",
-                    passwordHash: passwordHasher.Hash("Admin123*"),
-                    role: UserRole.Admin
-                ),
-                new(
-                    fullName: "Encargado de Almacén",
-                    email: "almacen@sgi.local",
-                    passwordHash: passwordHasher.Hash("Almacen123*"),
-                    role: UserRole.Warehouse
-                ),
-                new(
-                    fullName: "Vendedor de Mostrador",
-                    email: "vendedor@sgi.local",
-                    passwordHash: passwordHasher.Hash("Vendedor123*"),
-                    role: UserRole.Seller
-                ),
-                new(
-                    fullName: "Usuario Demo Limpio",
-                    email: "demo.limpio@sgi.local",
-                    passwordHash: passwordHasher.Hash("Password123*"),
-                    role: UserRole.Admin
-                )
-            };
+                logger.LogInformation("Entorno de Desarrollo: Sembrando usuarios de prueba en la base de datos...");
 
-            await context.Users.AddRangeAsync(users);
-            await context.SaveChangesAsync();
+                var users = new List<User>
+                {
+                    new(
+                        fullName: "Super Administrador",
+                        email: "superadmin@sgi.local",
+                        passwordHash: passwordHasher.Hash("SuperAdmin123*"),
+                        role: UserRole.SuperAdmin
+                    ),
+                    new(
+                        fullName: "Administrador del Sistema",
+                        email: "admin@sgi.local",
+                        passwordHash: passwordHasher.Hash("Admin123*"),
+                        role: UserRole.Admin
+                    ),
+                    new(
+                        fullName: "Encargado de Almacén",
+                        email: "almacen@sgi.local",
+                        passwordHash: passwordHasher.Hash("Almacen123*"),
+                        role: UserRole.Warehouse
+                    ),
+                    new(
+                        fullName: "Vendedor de Mostrador",
+                        email: "vendedor@sgi.local",
+                        passwordHash: passwordHasher.Hash("Vendedor123*"),
+                        role: UserRole.Seller
+                    ),
+                    new(
+                        fullName: "Usuario Demo Limpio",
+                        email: "demo.limpio@sgi.local",
+                        passwordHash: passwordHasher.Hash("Password123*"),
+                        role: UserRole.Admin
+                    )
+                };
 
-            logger.LogInformation("Usuarios sembrados exitosamente: admin@sgi.local, almacen@sgi.local, vendedor@sgi.local, demo.limpio@sgi.local");
+                await context.Users.AddRangeAsync(users);
+                await context.SaveChangesAsync();
+
+                logger.LogInformation("Usuarios de prueba sembrados exitosamente (superadmin@sgi.local, admin@sgi.local, almacen@sgi.local, vendedor@sgi.local).");
+            }
+            else
+            {
+                // Entorno de Producción: Solo se crea el SuperAdmin inicial si se configuran variables de entorno
+                var prodAdminEmail = configuration["InitialAdmin:Email"] ?? Environment.GetEnvironmentVariable("INITIAL_ADMIN_EMAIL");
+                var prodAdminPassword = configuration["InitialAdmin:Password"] ?? Environment.GetEnvironmentVariable("INITIAL_ADMIN_PASSWORD");
+
+                if (!string.IsNullOrWhiteSpace(prodAdminEmail) && !string.IsNullOrWhiteSpace(prodAdminPassword))
+                {
+                    logger.LogInformation("Entorno de Producción: Creando usuario SuperAdmin inicial desde variables de configuración...");
+                    var initialAdmin = new User(
+                        fullName: "Super Administrador",
+                        email: prodAdminEmail.Trim(),
+                        passwordHash: passwordHasher.Hash(prodAdminPassword),
+                        role: UserRole.SuperAdmin
+                    );
+
+                    await context.Users.AddAsync(initialAdmin);
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("SuperAdmin de producción '{Email}' creado exitosamente.", prodAdminEmail);
+                }
+                else
+                {
+                    logger.LogWarning("Entorno de Producción: No se especificó INITIAL_ADMIN_EMAIL o INITIAL_ADMIN_PASSWORD. No se sembraron credenciales por defecto.");
+                }
+            }
         }
 
         if (!await context.Warehouses.AnyAsync())

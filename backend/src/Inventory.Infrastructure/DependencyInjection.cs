@@ -78,11 +78,12 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IAuthService, AuthService>();
 
-        // Servicios de Catálogo (Categorías, Proveedores y Productos)
+        services.AddHttpClient();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ISupplierService, SupplierService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IBatchService, BatchService>();
+        services.AddScoped<Inventory.Application.Features.Products.Services.IBulkProductImportService, BulkProductImportService>();
 
         // Servicios de Inventario y Kardex
         services.AddScoped<Inventory.Application.Features.Inventory.Services.IInventoryService, InventoryService>();

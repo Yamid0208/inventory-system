@@ -5,6 +5,8 @@ using Inventory.Application.Common.Interfaces;
 using Inventory.Infrastructure;
 using Inventory.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.FileProviders;
@@ -17,10 +19,29 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// 2. Controladores y ProblemDetails
+// 2. Controladores, ProblemDetails y Rate Limiting
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("AuthLimiter", opt =>
+    {
+        opt.PermitLimit = 15;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;
+    });
+    options.AddFixedWindowLimiter("AiImportLimiter", opt =>
+    {
+        opt.PermitLimit = 10;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;
+    });
+});
 
 // 3. Swagger con soporte para JWT Bearer
 builder.Services.AddSwaggerGen(c =>
@@ -59,7 +80,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // 4. Autenticación JWT y Autorización
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "SUPER_SECRET_INVENTORY_MANAGEMENT_KEY_2026_DEV_ENVIRONMENT_987654321";
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key no está configurada. Verifique las variables de entorno o configuración.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "InventoryManagementAPI";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "InventoryManagementApp";
 
@@ -70,7 +92,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -112,7 +134,34 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Middleware Pipeline
+// 1. Soporte para Reverse Proxy (Nginx en VPS Hostinger)
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedOptions.KnownNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
+
+// 2. Cabeceras HTTP de Seguridad (OWASP Hardening)
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("X-XSS-Protection", "0");
+    context.Response.Headers.Append("Content-Security-Policy", 
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; frame-ancestors 'none';");
+    context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    await next();
+});
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
+// 3. Manejo Global de Excepciones
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -124,7 +173,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Migraciones y sembrado inicial de datos (ahora en todos los entornos)
+// 4. Migraciones y sembrado inicial de datos
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -133,7 +182,7 @@ using (var scope = app.Services.CreateScope())
     var passwordHasher = services.GetRequiredService<IPasswordHasher>();
     try
     {
-        logger.LogInformation("Verificando la existencia de tablas en la base de datos PostgreSQL...");
+        logger.LogInformation("Verificando la existencia de tablas en la base de datos...");
         var dbCreator = db.Database.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
         bool hasTables = await dbCreator.HasTablesAsync();
 
@@ -212,12 +261,12 @@ using (var scope = app.Services.CreateScope())
             }
         }
 
-        await DatabaseSeeder.SeedInitialDataAsync(db, passwordHasher, logger);
-        logger.LogInformation("Sembrado de datos iniciales completado con éxito.");
+        await DatabaseSeeder.SeedInitialDataAsync(db, passwordHasher, logger, builder.Configuration, app.Environment.IsDevelopment());
+        logger.LogInformation("Verificación de datos iniciales completada con éxito.");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Error crítico al inicializar la base de datos PostgreSQL: {Message}", ex.Message);
+        logger.LogError(ex, "Error crítico al inicializar la base de datos: {Message}", ex.Message);
     }
 }
 
@@ -238,6 +287,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

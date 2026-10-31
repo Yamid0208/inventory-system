@@ -7,7 +7,10 @@ import {
   PagedResult,
   CreateProductRequest,
   UpdateProductRequest,
-  UpdateProductStatusRequest
+  UpdateProductStatusRequest,
+  ProductImportRow,
+  BulkImportRequest,
+  BulkImportResult
 } from '../models/product.model';
 
 @Injectable({
@@ -79,5 +82,25 @@ export class ProductService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<{ imageUrl: string }>(`${this.apiUrl}/${id}/image`, formData);
+  }
+
+  downloadImportTemplate(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/import/template`, { responseType: 'blob' });
+  }
+
+  previewExcelImport(file: File): Observable<ProductImportRow[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ProductImportRow[]>(`${this.apiUrl}/import/preview-excel`, formData);
+  }
+
+  previewImageImport(file: File): Observable<ProductImportRow[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ProductImportRow[]>(`${this.apiUrl}/import/preview-image`, formData);
+  }
+
+  commitBulkImport(request: BulkImportRequest): Observable<BulkImportResult> {
+    return this.http.post<BulkImportResult>(`${this.apiUrl}/import/commit`, request);
   }
 }

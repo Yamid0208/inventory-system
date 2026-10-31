@@ -29,10 +29,10 @@ public class SettingsController : ControllerBase
     }
 
     /// <summary>
-    /// Actualiza los parámetros institucionales de la empresa (Requiere rol Administrador).
+    /// Actualiza los parámetros institucionales de la empresa (Requiere rol SuperAdmin o Admin).
     /// </summary>
     [HttpPut]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
     [ProducesResponseType(typeof(CompanySettingsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

@@ -9,7 +9,13 @@ public class CreateStockAdjustmentValidator : AbstractValidator<CreateStockAdjus
     {
         RuleFor(x => x.ProductId)
             .GreaterThan(0)
-            .WithMessage("Debe seleccionar un producto válido.");
+            .When(x => string.IsNullOrWhiteSpace(x.NewProductName) && string.IsNullOrWhiteSpace(x.NewProductSku))
+            .WithMessage("Debe seleccionar un producto válido o registrar el nuevo producto.");
+
+        RuleFor(x => x.NewProductName)
+            .NotEmpty()
+            .When(x => !x.ProductId.HasValue || x.ProductId <= 0)
+            .WithMessage("El nombre del nuevo producto es obligatorio.");
 
         RuleFor(x => x.AdjustmentType)
             .NotEmpty()

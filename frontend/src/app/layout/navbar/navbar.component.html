@@ -11,25 +11,30 @@
 
     <!-- Título de Página / Dashboard Header -->
     <div class="hidden sm:block">
-      <h2 class="text-sm font-bold text-[var(--text-main)] tracking-tight uppercase font-mono">Control Panel</h2>
+      <h2 class="text-sm font-bold text-[var(--text-main)] tracking-tight uppercase font-mono">
+        {{ authService.isSuperAdmin() ? 'Panel de Super Administrador' : 'Control Panel' }}
+      </h2>
     </div>
 
-    <!-- Search Input Pill (Búsqueda Global Vercel Style) -->
-    <div class="relative w-36 sm:w-56 md:w-72 ml-2 hidden md:block">
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--text-muted)]">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
+    <!-- Search Input Pill (Búsqueda Global Vercel Style - Solo para roles operativos) -->
+    @if (!authService.isSuperAdmin()) {
+      <div class="relative w-36 sm:w-56 md:w-72 ml-2 hidden md:block">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--text-muted)]">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input type="text" [(ngModel)]="searchQuery" (keydown.enter)="onGlobalSearch()" placeholder="Buscar producto o SKU..."
+          class="w-full pl-9 pr-3 py-1.5 bg-[var(--surface-subtle)] hover:bg-[var(--surface-card)] focus:bg-[var(--surface-card)] border border-[var(--border-subtle)] focus:border-[var(--border-strong)] focus:outline-none rounded-md text-xs font-mono text-[var(--text-main)] placeholder-[var(--text-faint)] transition-all"
+          aria-label="Búsqueda global de inventario" />
       </div>
-      <input type="text" [(ngModel)]="searchQuery" (keydown.enter)="onGlobalSearch()" placeholder="Buscar producto o SKU..."
-        class="w-full pl-9 pr-3 py-1.5 bg-[var(--surface-subtle)] hover:bg-[var(--surface-card)] focus:bg-[var(--surface-card)] border border-[var(--border-subtle)] focus:border-[var(--border-strong)] focus:outline-none rounded-md text-xs font-mono text-[var(--text-main)] placeholder-[var(--text-faint)] transition-all"
-        aria-label="Búsqueda global de inventario" />
-    </div>
+    }
 
-    <!-- Selector de Sede Activa -->
-    <div class="relative">
-      @if (branchContextService.canChangeBranch()) {
+    <!-- Selector de Sede Activa (Oculto para SuperAdmin) -->
+    @if (!authService.isSuperAdmin()) {
+      <div class="relative">
+        @if (branchContextService.canChangeBranch()) {
         <button
           type="button"
           (click)="toggleBranchDropdown()"
@@ -126,26 +131,29 @@
           </div>
         </div>
       }
-    </div>
+      </div>
+    }
   </div>
 
   <!-- Right Actions Vercel Style -->
   <div class="flex items-center gap-2">
-    <!-- Notification Bell -->
-    <button type="button" (click)="goToAlerts()"
-      class="relative w-9 h-9 flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)] bg-[var(--surface-subtle)] border border-[var(--border-subtle)] rounded-md transition-all cursor-pointer"
-      title="Ver Alertas y Notificaciones" aria-label="Notificaciones y Alertas">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-        </path>
-      </svg>
-      @if (alertService.hasUnreadAlerts()) {
-        <span class="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-[var(--status-critical)] text-white text-[9px] font-mono font-bold rounded-full flex items-center justify-center border border-[var(--surface-card)]">
-          {{ alertService.unreadCount() > 9 ? '9+' : (alertService.unreadCount() > 0 ? alertService.unreadCount() : '!') }}
-        </span>
-      }
-    </button>
+    <!-- Notification Bell (Solo visible para roles con módulo de alertas) -->
+    @if (!authService.isSuperAdmin()) {
+      <button type="button" (click)="goToAlerts()"
+        class="relative w-9 h-9 flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)] bg-[var(--surface-subtle)] border border-[var(--border-subtle)] rounded-md transition-all cursor-pointer"
+        title="Ver Alertas y Notificaciones" aria-label="Notificaciones y Alertas">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+          </path>
+        </svg>
+        @if (alertService.hasUnreadAlerts()) {
+          <span class="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-[var(--status-critical)] text-white text-[9px] font-mono font-bold rounded-full flex items-center justify-center border border-[var(--surface-card)]">
+            {{ alertService.unreadCount() > 9 ? '9+' : (alertService.unreadCount() > 0 ? alertService.unreadCount() : '!') }}
+          </span>
+        }
+      </button>
+    }
 
     <!-- Dark Mode / Theme Toggle -->
     <button type="button" (click)="toggleTheme()"

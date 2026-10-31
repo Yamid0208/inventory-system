@@ -1,0 +1,447 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+  <div class="bg-white rounded-2xl sm:rounded-3xl max-w-5xl w-full p-4 sm:p-6 shadow-2xl border border-slate-100 flex flex-col space-y-4 sm:space-y-5 max-h-[92vh] overflow-y-auto my-auto transition-all">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-primary-600 text-white flex items-center justify-center font-bold shadow-md shadow-primary-500/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span>Carga Masiva de Inventario</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-700 border border-primary-200">
+              Excel & IA Vision
+            </span>
+          </h3>
+          <p class="text-xs text-slate-400">
+            Importa múltiples productos mediante hoja de cálculo estructurada o capturando tablas físicas con Gemini Vision.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- PASO 1: SUBIDA (UPLOAD) -->
+    @if (step() === 'upload') {
+      <div class="space-y-5">
+        <!-- Selector de Modo / Tabs -->
+        <div class="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl max-w-md mx-auto">
+          <button
+            type="button"
+            (click)="setTab('excel')"
+            [class]="activeTab() === 'excel' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+            class="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs transition-all cursor-pointer">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span>Archivo Excel / CSV</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="setTab('image')"
+            [class]="activeTab() === 'image' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+            class="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs transition-all cursor-pointer">
+            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span class="flex items-center gap-1">
+              <span>Foto / Imagen IA</span>
+              <span class="px-1.5 py-0.2 rounded bg-purple-100 text-purple-700 text-[9px] font-bold">OCR</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Guía y descarga de plantilla si es Excel -->
+        @if (activeTab() === 'excel') {
+          <div class="bg-gradient-to-r from-emerald-50/60 to-teal-50/40 border border-emerald-100 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="text-left">
+                <p class="text-xs font-bold text-slate-800">Usa nuestra plantilla oficial prediseñada</p>
+                <p class="text-[11px] text-slate-500">Incluye columnas para SKU, Nombre, Categoría, Costos, Precios y Stock Inicial con validación automática.</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              (click)="downloadTemplate()"
+              class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 text-xs font-semibold shadow-xs transition-all shrink-0 cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              <span>Descargar Plantilla .XLSX</span>
+            </button>
+          </div>
+        } @else {
+          <!-- Guía para OCR con Gemini -->
+          <div class="bg-gradient-to-r from-purple-50/60 to-indigo-50/40 border border-purple-100 rounded-2xl p-4 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-800">Extracción Inteligente Multimodal con Google Gemini</p>
+              <p class="text-[11px] text-slate-500">Sube una foto clara de tu lista física de productos, factura de proveedor o catálogo impreso. La IA identificará automáticamente nombres, precios y stock.</p>
+            </div>
+          </div>
+        }
+
+        <!-- Dropzone de archivo -->
+        <div
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          [class.border-primary-500]="isDragging()"
+          [class.bg-primary-50]="isDragging()"
+          class="border-2 border-dashed border-slate-200 hover:border-primary-400 rounded-3xl p-8 text-center transition-all bg-slate-50/50 flex flex-col items-center justify-center cursor-pointer relative group">
+          
+          <input
+            #fileInput
+            type="file"
+            (change)="onFileInputChange($event)"
+            [accept]="activeTab() === 'excel' ? '.xlsx,.xls,.csv' : 'image/*'"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+
+          @if (isAnalyzing()) {
+            <!-- Spinner animado de análisis -->
+            <div class="flex flex-col items-center justify-center space-y-3 py-6">
+              <div class="relative w-14 h-14">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-200"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-primary-600 border-t-transparent animate-spin"></div>
+                <div class="absolute inset-2 rounded-full bg-primary-50 flex items-center justify-center text-primary-600">
+                  <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm font-bold text-slate-800">
+                {{ activeTab() === 'excel' ? 'Leyendo filas y validando estructura...' : 'Google Gemini está interpretando la tabla visual...' }}
+              </p>
+              <p class="text-xs text-slate-400">Esto tomará solo unos segundos.</p>
+            </div>
+          } @else {
+            <div class="w-16 h-16 rounded-2xl bg-white shadow-sm border border-slate-200/80 flex items-center justify-center text-slate-400 group-hover:scale-105 group-hover:text-primary-600 transition-all mb-3">
+              @if (activeTab() === 'excel') {
+                <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              } @else {
+                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              }
+            </div>
+
+            <p class="text-sm font-semibold text-slate-700 mb-1">
+              Arrastra y suelta tu {{ activeTab() === 'excel' ? 'archivo Excel (.xlsx)' : 'imagen con la tabla de productos' }} aquí
+            </p>
+            <p class="text-xs text-slate-400 mb-4">
+              o haz clic para explorar en tu ordenador {{ activeTab() === 'excel' ? '(.xlsx, .csv)' : '(.png, .jpg, .webp)' }}
+            </p>
+
+            <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 shadow-xs group-hover:bg-slate-50 transition-colors">
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>Seleccionar Archivo</span>
+            </span>
+          }
+        </div>
+
+        <!-- Alerta de Error en Análisis -->
+        @if (parsingError()) {
+          <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 text-xs animate-shake">
+            <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="flex-1">
+              <p class="font-bold">No se pudo procesar el archivo:</p>
+              <p class="mt-0.5">{{ parsingError() }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- PASO 2: PREVISUALIZACIÓN Y EDICIÓN EN GRILLA (PREVIEW) -->
+    @if (step() === 'preview') {
+      <div class="space-y-4">
+        <!-- Barra de métricas y filtros -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              (click)="filterStatus.set('all')"
+              [class]="filterStatus() === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-colors">
+              Todos ({{ totalRowsCount() }})
+            </button>
+
+            <button
+              type="button"
+              (click)="filterStatus.set('valid')"
+              [class]="filterStatus() === 'valid' ? 'bg-emerald-600 text-white' : 'bg-white text-emerald-700 hover:bg-emerald-50'"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-colors">
+              Nuevos Válidos ({{ validCount() }})
+            </button>
+
+            <button
+              type="button"
+              (click)="filterStatus.set('existing')"
+              [class]="filterStatus() === 'existing' ? 'bg-amber-600 text-white' : 'bg-white text-amber-700 hover:bg-amber-50'"
+              class="px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-colors">
+              Existentes / Coincidentes ({{ existingCount() }})
+            </button>
+
+            @if (errorCount() > 0) {
+              <button
+                type="button"
+                (click)="filterStatus.set('errors')"
+                [class]="filterStatus() === 'errors' ? 'bg-rose-600 text-white' : 'bg-white text-rose-700 hover:bg-rose-50'"
+                class="px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs transition-colors">
+                Con Errores ({{ errorCount() }})
+              </button>
+            }
+          </div>
+
+          <!-- Opción: Actualizar existentes -->
+          <label class="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              [checked]="updateExisting()"
+              (change)="updateExisting.set(!updateExisting())"
+              class="w-4 h-4 rounded text-primary-600 focus:ring-primary-500 border-slate-300" />
+            <span>Actualizar datos de productos existentes si el SKU coincide</span>
+          </label>
+        </div>
+
+        <!-- Tabla editable de filas -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs max-h-[46vh] overflow-y-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="bg-slate-100/80 sticky top-0 z-10 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="py-2.5 px-3 w-12 text-center">#</th>
+                <th class="py-2.5 px-3 w-28">Estado</th>
+                <th class="py-2.5 px-3">SKU</th>
+                <th class="py-2.5 px-3 min-w-[160px]">Nombre</th>
+                <th class="py-2.5 px-3">Categoría</th>
+                <th class="py-2.5 px-3 w-24">P. Compra</th>
+                <th class="py-2.5 px-3 w-24">P. Venta</th>
+                <th class="py-2.5 px-3 w-20">Stock</th>
+                <th class="py-2.5 px-3 w-12 text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @for (row of filteredRows(); track $index) {
+                <tr class="hover:bg-slate-50/70 transition-colors" [class.bg-rose-50]="!row.isValid && !row.isExisting">
+                  <!-- Número de fila -->
+                  <td class="py-2 px-3 text-center text-slate-400 font-mono text-[11px]">
+                    {{ row.rowNumber }}
+                  </td>
+
+                  <!-- Estado / Badges -->
+                  <td class="py-2 px-3 whitespace-nowrap">
+                    @if (row.isExisting) {
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200" title="El SKU ya existe. Se actualizará si la casilla está marcada.">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        Existente
+                      </span>
+                    } @else if (row.isValid) {
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Listo
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200" [title]="row.validationErrors.join(', ')">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        Error
+                      </span>
+                    }
+                  </td>
+
+                  <!-- SKU Editable -->
+                  <td class="py-1 px-2">
+                    <input
+                      type="text"
+                      [value]="row.sku"
+                      (input)="onRowFieldChange(row, 'sku', $event)"
+                      class="w-full px-2 py-1 rounded-lg border border-slate-200 font-mono text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
+                  </td>
+
+                  <!-- Nombre Editable -->
+                  <td class="py-1 px-2">
+                    <input
+                      type="text"
+                      [value]="row.name"
+                      (input)="onRowFieldChange(row, 'name', $event)"
+                      class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
+                  </td>
+
+                  <!-- Categoría Editable -->
+                  <td class="py-1 px-2">
+                    <input
+                      type="text"
+                      [value]="row.categoryName"
+                      (input)="onRowFieldChange(row, 'categoryName', $event)"
+                      class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
+                  </td>
+
+                  <!-- P. Compra -->
+                  <td class="py-1 px-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      [value]="row.purchasePrice"
+                      (input)="onRowFieldChange(row, 'purchasePrice', $event)"
+                      class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs text-right focus:ring-1 focus:ring-primary-500" />
+                  </td>
+
+                  <!-- P. Venta -->
+                  <td class="py-1 px-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      [value]="row.salePrice"
+                      (input)="onRowFieldChange(row, 'salePrice', $event)"
+                      class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs text-right font-semibold text-slate-800 focus:ring-1 focus:ring-primary-500" />
+                  </td>
+
+                  <!-- Stock Inicial -->
+                  <td class="py-1 px-2">
+                    <input
+                      type="number"
+                      [value]="row.initialStock"
+                      (input)="onRowFieldChange(row, 'initialStock', $event)"
+                      class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs text-right font-bold text-primary-700 focus:ring-1 focus:ring-primary-500" />
+                  </td>
+
+                  <!-- Eliminar fila de la lista -->
+                  <td class="py-1 px-2 text-center">
+                    <button
+                      type="button"
+                      (click)="removeRow($index)"
+                      class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
+                      title="Quitar producto de la importación">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+
+                @if (!row.isValid && row.validationErrors.length > 0 && !row.isExisting) {
+                  <tr class="bg-rose-50/50">
+                    <td></td>
+                    <td colspan="8" class="px-3 py-1 text-[11px] text-rose-600">
+                      <strong>Detalles:</strong> {{ row.validationErrors.join(' | ') }}
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Botones de Acción al pie de Preview -->
+        <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+          <button
+            type="button"
+            (click)="resetUpload()"
+            class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-colors cursor-pointer">
+            ← Cargar otro archivo
+          </button>
+
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              (click)="closeModal()"
+              class="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors cursor-pointer">
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              (click)="commitImport()"
+              [disabled]="!canCommit() || isCommitting()"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+              @if (isCommitting()) {
+                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Guardando en Inventario...</span>
+              } @else {
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Confirmar e Importar ({{ validCount() + (updateExisting() ? existingCount() : 0) }} productos)</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- PASO 3: RESUMEN EXITOSO (SUCCESS) -->
+    @if (step() === 'success' && resultSummary(); as res) {
+      <div class="text-center py-8 space-y-5 animate-fade-in">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+
+        <div>
+          <h4 class="text-lg font-bold text-slate-900">¡Carga Masiva Exitosa!</h4>
+          <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+            El inventario se ha actualizado de manera atómica con sus respectivos movimientos en el Kardex.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 max-w-md mx-auto">
+          <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-3">
+            <p class="text-[11px] text-emerald-700 font-medium">Creados</p>
+            <p class="text-xl font-extrabold text-emerald-800">{{ res.createdCount }}</p>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-100 rounded-2xl p-3">
+            <p class="text-[11px] text-amber-700 font-medium">Actualizados</p>
+            <p class="text-xl font-extrabold text-amber-800">{{ res.updatedCount }}</p>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3">
+            <p class="text-[11px] text-slate-600 font-medium">Total Procesados</p>
+            <p class="text-xl font-extrabold text-slate-800">{{ res.totalProcessed }}</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-md transition-all cursor-pointer">
+          Cerrar y Ver Catálogo
+        </button>
+      </div>
+    }
+
+  </div>
+</div>
