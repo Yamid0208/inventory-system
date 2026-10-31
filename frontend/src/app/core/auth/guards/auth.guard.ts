@@ -12,11 +12,9 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // Si no hay sesión previa guardada en el cliente, redirigir al login
+  // Si no hay sesión previa guardada en el cliente, redirigir limpiamente al login
   if (!authService.isAuthenticated()) {
-    return router.createUrlTree(['/login'], {
-      queryParams: { returnUrl: state.url }
-    });
+    return router.createUrlTree(['/login']);
   }
 
   // Caso: Recarga de página (F5) con sesión guardada en localStorage
@@ -25,9 +23,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     map(() => true),
     catchError(() => {
       authService.logout();
-      return of(router.createUrlTree(['/login'], {
-        queryParams: { returnUrl: state.url }
-      }));
+      return of(router.createUrlTree(['/login']));
     })
   );
 };

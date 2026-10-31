@@ -67,9 +67,10 @@ test.describe('E2E Pre-Production Verification Suite', () => {
   test('TC-04: Protección contra accesos no autenticados (Guard)', async ({ page }) => {
     // Intentar acceder a /users directamente sin sesión
     await page.goto('/users');
-    // Debe redirigir a /login
+    // Debe redirigir limpiamente a /login sin query parameters como returnUrl
     await page.waitForURL('**/login', { timeout: 10000 });
     expect(page.url()).toContain('/login');
+    expect(page.url()).not.toContain('returnUrl');
   });
 
   test('TC-05: Recarga de página (F5) en ruta autenticada NO redirige al login y preserva la sesión activa', async ({ page }) => {

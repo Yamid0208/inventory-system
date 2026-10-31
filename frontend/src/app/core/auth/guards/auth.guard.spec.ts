@@ -47,7 +47,7 @@ describe('authGuard (Unit Tests)', () => {
     expect(routerMock.createUrlTree).not.toHaveBeenCalled();
   });
 
-  it('redirige a /login si no hay usuario autenticado', () => {
+  it('redirige limpiamente a /login sin queryParams si no hay usuario autenticado', () => {
     authServiceMock.isAuthenticated.set(false);
     authServiceMock.accessToken.set(null);
 
@@ -55,9 +55,7 @@ describe('authGuard (Unit Tests)', () => {
     const state = { url: '/dashboard' } as RouterStateSnapshot;
 
     const result = injector.runInContext(() => authGuard(route, state));
-    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login'], {
-      queryParams: { returnUrl: '/dashboard' }
-    });
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
     expect(authServiceMock.refresh).not.toHaveBeenCalled();
   });
 
@@ -76,7 +74,7 @@ describe('authGuard (Unit Tests)', () => {
     expect(allowed).toBe(true);
   });
 
-  it('cierra sesión y redirige a /login si el refresco de token falla en recarga F5', async () => {
+  it('cierra sesión y redirige a /login sin queryParams si el refresco de token falla en recarga F5', async () => {
     authServiceMock.isAuthenticated.set(true);
     authServiceMock.accessToken.set(null);
     authServiceMock.refresh.mockReturnValue(throwError(() => new Error('Refresh token expirado')));
@@ -88,9 +86,7 @@ describe('authGuard (Unit Tests)', () => {
     const redirectTarget = await firstValueFrom(guardResult as any);
 
     expect(authServiceMock.logout).toHaveBeenCalled();
-    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login'], {
-      queryParams: { returnUrl: '/dashboard' }
-    });
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
     expect(redirectTarget).toBeDefined();
   });
 });
