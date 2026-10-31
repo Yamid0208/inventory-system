@@ -398,3 +398,37 @@ html.dark .shadow-2xl,
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   Skeleton Shimmer Animation
+   ========================================================================== */
+@keyframes shimmerWave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(228, 228, 231, 0.4) 0%,
+    rgba(244, 244, 245, 0.9) 50%,
+    rgba(228, 228, 231, 0.4) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerWave 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+[data-theme="dark"] .skeleton-shimmer,
+html.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(39, 39, 42, 0.5) 0%,
+    rgba(63, 63, 70, 0.8) 50%,
+    rgba(39, 39, 42, 0.5) 100%
+  );
+  background-size: 200% 100%;
+}

@@ -7,5 +7,6 @@ public record UserDto(
     string Role,
     bool IsActive,
     int? WarehouseId = null,
-    string? WarehouseName = null
+    string? WarehouseName = null,
+    bool HasAcceptedTerms = false
 );

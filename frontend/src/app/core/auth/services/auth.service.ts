@@ -124,6 +124,19 @@ export class AuthService {
     this.accessTokenSignal.set(token);
   }
 
+  updateTermsAccepted(hasAccepted: boolean = true): void {
+    this.currentUserSignal.update((user) => {
+      if (!user) return null;
+      const updated = { ...user, hasAcceptedTerms: hasAccepted };
+      try {
+        localStorage.setItem('sgi_user', JSON.stringify(updated));
+      } catch {
+        // Ignorar
+      }
+      return updated;
+    });
+  }
+
   private setSession(authResponse: AuthResponse): void {
     // SEC-004: El access token reside exclusivamente en memoria (Signals reactivos)
     this.accessTokenSignal.set(authResponse.accessToken);

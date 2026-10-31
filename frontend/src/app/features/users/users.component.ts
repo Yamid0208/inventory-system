@@ -20,6 +20,7 @@ import { ResetPasswordModalComponent } from './components/reset-password-modal/r
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
+import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 
 @Component({
@@ -31,7 +32,8 @@ import { PageChangeEvent } from '../../shared/models/pagination.model';
     ResetPasswordModalComponent,
     AppButtonComponent,
     AppPaginationComponent,
-    AppAutocompleteComponent
+    AppAutocompleteComponent,
+    AppSkeletonComponent
   ],
   templateUrl: './users.component.html'
 })

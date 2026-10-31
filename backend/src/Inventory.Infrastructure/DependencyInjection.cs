@@ -118,6 +118,9 @@ public static class DependencyInjection
         // Servicios de Almacenes y Tenancy
         services.AddScoped<Inventory.Application.Features.Warehouses.Services.IWarehouseService, WarehouseService>();
 
+        // Servicios de Cumplimiento Legal y Consentimiento Informado
+        services.AddScoped<Inventory.Application.Features.Legal.Services.ILegalService, LegalService>();
+
         return services;
     }
 }

@@ -12,4 +12,11 @@
       <router-outlet></router-outlet>
     </main>
   </div>
+
+  <!-- Modal de Términos y Condiciones / Política de Privacidad -->
+  @if (mustAcceptTerms()) {
+    <app-terms-modal [isMandatory]="true" [isOpen]="true" (accepted)="onTermsAccepted()"></app-terms-modal>
+  } @else if (isViewerOpen()) {
+    <app-terms-modal [isMandatory]="false" [isOpen]="true" (closed)="onCloseViewer()"></app-terms-modal>
+  }
 </div>

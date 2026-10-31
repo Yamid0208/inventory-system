@@ -20,7 +20,7 @@
         </svg>
       </div>
       <div class="flex flex-col">
-        <span class="font-bold text-[var(--text-main)] text-sm tracking-wider uppercase font-mono">STOCKFLOW</span>
+        <span class="font-bold text-[var(--text-main)] text-sm tracking-wider uppercase font-mono">INSINCRO</span>
         <span class="text-[9px] text-[var(--text-muted)] font-semibold tracking-widest uppercase -mt-0.5">INVENTORY
           v2.0</span>
       </div>
@@ -203,4 +203,12 @@
     </a>
   </div>
   }
+
+  <!-- Pie con Acceso Legal (Términos & Privacidad) -->
+  <div class="p-2 border-t border-[var(--border-subtle)] text-center">
+    <button type="button" (click)="openLegalModal()"
+      class="text-[10px] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:underline font-mono tracking-tight transition-colors cursor-pointer py-1 px-2 rounded">
+      Términos & Privacidad
+    </button>
+  </div>
 </aside>

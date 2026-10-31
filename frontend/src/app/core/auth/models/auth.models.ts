@@ -8,6 +8,7 @@ export interface User {
   isActive: boolean;
   warehouseId?: number | null;
   warehouseName?: string | null;
+  hasAcceptedTerms?: boolean;
 }
 
 export interface LoginCredentials {

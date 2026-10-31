@@ -20,6 +20,7 @@ public interface IApplicationDbContext
     DbSet<CompanySettings> CompanySettings { get; }
     DbSet<ProductBatch> ProductBatches { get; }
     DbSet<Warehouse> Warehouses { get; }
+    DbSet<TermsAcceptance> TermsAcceptances { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

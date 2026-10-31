@@ -28,6 +28,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<CompanySettings> CompanySettings => Set<CompanySettings>();
     public DbSet<ProductBatch> ProductBatches => Set<ProductBatch>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+    public DbSet<TermsAcceptance> TermsAcceptances => Set<TermsAcceptance>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,6 +71,27 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .WithMany(w => w.Employees)
                 .HasForeignKey(u => u.WarehouseId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasMany(u => u.TermsAcceptances)
+                .WithOne(t => t.User)
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TermsAcceptance>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.Property(t => t.UserEmail).HasMaxLength(256).IsRequired();
+            entity.Property(t => t.UserName).HasMaxLength(150).IsRequired();
+            entity.Property(t => t.UserRole).HasMaxLength(50).IsRequired();
+            entity.Property(t => t.TermsVersion).HasMaxLength(20).IsRequired();
+            entity.Property(t => t.PrivacyPolicyVersion).HasMaxLength(20).IsRequired();
+            entity.Property(t => t.IpAddress).HasMaxLength(64).IsRequired();
+            entity.Property(t => t.UserAgent).HasMaxLength(512);
+
+            entity.HasIndex(t => t.UserId);
+            entity.HasIndex(t => t.AcceptedAt);
+            entity.HasIndex(t => new { t.UserId, t.TermsVersion });
         });
     }
 

@@ -14,4 +14,6 @@ export * from './app-input/app-input.component';
 export * from './app-select/app-select.component';
 export * from './app-autocomplete/app-autocomplete.component';
 export * from './app-date-picker/app-date-picker.component';
+export * from './app-skeleton/app-skeleton.component';
+export * from './terms-modal/terms-modal.component';
 

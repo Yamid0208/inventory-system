@@ -19,6 +19,7 @@ import { BulkImportModalComponent } from './components/bulk-import-modal/bulk-im
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
+import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { BulkImportResult } from '../../core/models/product.model';
@@ -36,6 +37,7 @@ import { BulkImportResult } from '../../core/models/product.model';
     AppButtonComponent,
     AppPaginationComponent,
     AppAutocompleteComponent,
+    AppSkeletonComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './products.component.html'
