@@ -80,7 +80,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // 4. Autenticación JWT y Autorización
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "SUPER_SECRET_INVENTORY_MANAGEMENT_KEY_2026_DEV_ENVIRONMENT_987654321";
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key no está configurada. Verifique las variables de entorno o configuración.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "InventoryManagementAPI";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "InventoryManagementApp";
 
@@ -91,7 +92,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -148,7 +149,10 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
     context.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Append("X-XSS-Protection", "0");
+    context.Response.Headers.Append("Content-Security-Policy", 
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; frame-ancestors 'none';");
+    context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
     await next();
 });
 

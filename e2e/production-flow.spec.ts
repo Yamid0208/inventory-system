@@ -45,8 +45,13 @@ test.describe('E2E Pre-Production Verification Suite', () => {
     await submitBtn.click();
     await page.waitForURL('**/dashboard', { timeout: 10000 });
 
-    // Navegar a Productos
-    await page.goto('/products');
+    // Navegar a Productos mediante el menú lateral de la SPA
+    const productsLink = page.locator('a[href="/products"]').first();
+    if (await productsLink.isVisible()) {
+      await productsLink.click();
+    } else {
+      await page.goto('/products');
+    }
     await page.waitForURL('**/products', { timeout: 10000 });
 
     // Verificar botón de Carga Masiva

@@ -11,6 +11,25 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     withCredentials: true
   });
 
+  // Si no hay token en memoria pero hay sesión guardada (recarga F5), esperar refresco silencioso
+  if (!token && authService.currentUser() && !req.url.includes('/api/v1/auth/login') && !req.url.includes('/api/v1/auth/refresh')) {
+    return authService.refresh().pipe(
+      switchMap((authResponse) => {
+        const authedReq = req.clone({
+          withCredentials: true,
+          setHeaders: {
+            Authorization: `Bearer ${authResponse.accessToken}`
+          }
+        });
+        return next(authedReq);
+      }),
+      catchError((refreshErr) => {
+        authService.logout();
+        return throwError(() => refreshErr);
+      })
+    );
+  }
+
   if (token && !req.headers.has('Authorization')) {
     modifiedReq = modifiedReq.clone({
       setHeaders: {

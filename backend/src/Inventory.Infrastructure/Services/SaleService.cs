@@ -83,13 +83,14 @@ public class SaleService : ISaleService
 
         var sales = await baseQuery
             .OrderByDescending(s => s.SaleDate)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
             .Include(s => s.User)
             .Include(s => s.Warehouse)
             .Include(s => s.Payments)
             .Include(s => s.Items)
                 .ThenInclude(i => i.Product)
+            .AsSplitQuery()
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
 
         var dtos = sales.Select(MapToDto).ToList();

@@ -57,14 +57,7 @@ public abstract class BaseApiController : ControllerBase
             {
                 ids.Add(currentWhId.Value);
             }
-            else if (ids.Count == 0)
-            {
-                ids = await dbContext.Warehouses
-                    .AsNoTracking()
-                    .Where(w => w.IsActive)
-                    .Select(w => w.Id)
-                    .ToListAsync(cancellationToken);
-            }
+            // SEC-021: Si un Admin no tiene almacenes asignados, retorna lista vacía en lugar de acceso a todos los almacenes.
 
             return ids;
         }

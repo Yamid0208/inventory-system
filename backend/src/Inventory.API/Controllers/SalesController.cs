@@ -97,7 +97,7 @@ public class SalesController : BaseApiController
         var userId = GetCurrentUserId();
         if (userId <= 0)
         {
-            userId = 1;
+            return Unauthorized();
         }
 
         if (!IsSuperAdmin())
@@ -139,7 +139,7 @@ public class SalesController : BaseApiController
         var userId = GetCurrentUserId();
         if (userId <= 0)
         {
-            userId = 1;
+            return Unauthorized();
         }
 
         await _saleService.CancelSaleAsync(id, userId, cancellationToken);

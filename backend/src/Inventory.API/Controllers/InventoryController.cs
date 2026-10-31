@@ -76,7 +76,7 @@ public class InventoryController : BaseApiController
         var userId = GetCurrentUserId();
         if (userId <= 0)
         {
-            userId = 1;
+            return Unauthorized();
         }
 
         if (!IsSuperAdmin())
@@ -111,7 +111,7 @@ public class InventoryController : BaseApiController
         var userId = GetCurrentUserId();
         if (userId <= 0)
         {
-            userId = 1;
+            return Unauthorized();
         }
 
         if (!IsSuperAdmin())

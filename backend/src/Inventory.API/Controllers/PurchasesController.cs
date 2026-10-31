@@ -97,7 +97,7 @@ public class PurchasesController : BaseApiController
         var userId = GetCurrentUserId();
         if (userId <= 0)
         {
-            userId = 1;
+            return Unauthorized();
         }
 
         if (!IsSuperAdmin())
@@ -139,7 +139,7 @@ public class PurchasesController : BaseApiController
         var userId = GetCurrentUserId();
         if (userId <= 0)
         {
-            userId = 1;
+            return Unauthorized();
         }
 
         var updatedPurchase = await _purchaseService.ReceivePurchaseAsync(id, userId, cancellationToken);
@@ -173,7 +173,7 @@ public class PurchasesController : BaseApiController
         var userId = GetCurrentUserId();
         if (userId <= 0)
         {
-            userId = 1;
+            return Unauthorized();
         }
 
         var updatedPurchase = await _purchaseService.ReturnPurchaseAsync(id, request, userId, cancellationToken);

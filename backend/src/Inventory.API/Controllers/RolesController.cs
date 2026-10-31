@@ -15,7 +15,7 @@ public record RolePermissionMatrixItem(
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize]
+[Authorize(Roles = "SuperAdmin,Admin")]
 public class RolesController : ControllerBase
 {
     /// <summary>
