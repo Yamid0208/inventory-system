@@ -117,12 +117,63 @@ public class InventoryService : IInventoryService
 
             try
             {
-                var product = await _context.Products
-                    .FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken);
+                Product? product = null;
+                if (request.ProductId.HasValue && request.ProductId.Value > 0)
+                {
+                    product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.Id == request.ProductId.Value, cancellationToken);
+                }
+                else if (!string.IsNullOrWhiteSpace(request.NewProductSku))
+                {
+                    product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.Sku.ToUpper() == request.NewProductSku.ToUpper() && !p.IsDeleted, cancellationToken);
+                }
 
                 if (product == null)
                 {
-                    throw new NotFoundException($"El producto con ID {request.ProductId} no existe o se encuentra inactivo.");
+                    if (!string.IsNullOrWhiteSpace(request.NewProductName) || !string.IsNullOrWhiteSpace(request.NewProductSku))
+                    {
+                        var sku = !string.IsNullOrWhiteSpace(request.NewProductSku) ? request.NewProductSku.Trim() : $"PROD-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+                        var name = !string.IsNullOrWhiteSpace(request.NewProductName) ? request.NewProductName.Trim() : $"Producto {sku}";
+
+                        var catName = !string.IsNullOrWhiteSpace(request.NewProductCategory) ? request.NewProductCategory.Trim() : "General";
+                        var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name.ToLower() == catName.ToLower() && !c.IsDeleted, cancellationToken);
+                        if (category == null)
+                        {
+                            category = new Category(catName, "Categoría autogenerada en ajuste", warehouseId: request.WarehouseId);
+                            _context.Categories.Add(category);
+                            await _context.SaveChangesAsync(cancellationToken);
+                        }
+
+                        var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => !s.IsDeleted, cancellationToken);
+                        if (supplier == null)
+                        {
+                            supplier = new Supplier("Proveedor General", "00000000-0", contactName: "General", email: "contacto@general.com", warehouseId: request.WarehouseId);
+                            _context.Suppliers.Add(supplier);
+                            await _context.SaveChangesAsync(cancellationToken);
+                        }
+
+                        var pPrice = request.NewProductPurchasePrice ?? 0m;
+                        var sPrice = request.NewProductSalePrice ?? (pPrice > 0 ? pPrice * 1.3m : 1000m);
+
+                        product = new Product(
+                            sku: sku,
+                            name: name,
+                            categoryId: category.Id,
+                            supplierId: supplier.Id,
+                            purchasePrice: pPrice,
+                            salePrice: sPrice,
+                            minimumStock: 5,
+                            warehouseId: request.WarehouseId
+                        );
+
+                        _context.Products.Add(product);
+                        await _context.SaveChangesAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        throw new NotFoundException($"El producto especificado no existe o se encuentra inactivo.");
+                    }
                 }
 
                 var previousStock = product.CurrentStock;

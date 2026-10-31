@@ -370,10 +370,48 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                     await _context.SaveChangesAsync(cancellationToken);
                 }
 
-                foreach (var item in items.Where(i => i.IsValid))
+                foreach (var item in items)
                 {
-                    var catId = categoryMap.TryGetValue(item.CategoryName, out var cId) ? cId : categoryMap.Values.First();
+                    if (string.IsNullOrWhiteSpace(item.Name) && string.IsNullOrWhiteSpace(item.Sku)) continue;
+
+                    if (string.IsNullOrWhiteSpace(item.Sku))
+                    {
+                        item.Sku = $"PROD-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+                    }
+
+                    if (string.IsNullOrWhiteSpace(item.Name))
+                    {
+                        item.Name = $"Producto {item.Sku}";
+                    }
+
+                    var catName = string.IsNullOrWhiteSpace(item.CategoryName) ? "General" : item.CategoryName.Trim();
+                    if (!categoryMap.TryGetValue(catName, out var catId))
+                    {
+                        var newCat = new Category(catName, "Categoría autogenerada", warehouseId: request.WarehouseId);
+                        _context.Categories.Add(newCat);
+                        await _context.SaveChangesAsync(cancellationToken);
+                        catId = newCat.Id;
+                        categoryMap[catName] = catId;
+                    }
+
                     var supplierId = defaultSupplier.Id;
+                    if (!string.IsNullOrWhiteSpace(item.SupplierName))
+                    {
+                        var supName = item.SupplierName.Trim();
+                        var sup = await _context.Suppliers.FirstOrDefaultAsync(s => s.Name.ToLower() == supName.ToLower() && !s.IsDeleted, cancellationToken);
+                        if (sup == null)
+                        {
+                            sup = new Supplier(supName, "00000000-0", contactName: supName, email: "proveedor@auto.com", warehouseId: request.WarehouseId);
+                            _context.Suppliers.Add(sup);
+                            await _context.SaveChangesAsync(cancellationToken);
+                        }
+                        supplierId = sup.Id;
+                    }
+
+                    if (item.SalePrice <= 0)
+                    {
+                        item.SalePrice = item.PurchasePrice > 0 ? item.PurchasePrice * 1.3m : 1000m;
+                    }
 
                     var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Sku == item.Sku && !p.IsDeleted, cancellationToken);
 
@@ -384,7 +422,7 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                             existingProduct.Update(
                                 name: string.IsNullOrWhiteSpace(item.Name) ? existingProduct.Name : item.Name,
                                 categoryId: catId,
-                                supplierId: existingProduct.SupplierId,
+                                supplierId: supplierId,
                                 purchasePrice: item.PurchasePrice,
                                 salePrice: item.SalePrice,
                                 minimumStock: item.MinimumStock > 0 ? item.MinimumStock : existingProduct.MinimumStock,

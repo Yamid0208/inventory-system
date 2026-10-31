@@ -32,11 +32,16 @@ export interface KardexFilterParams {
 }
 
 export interface CreateStockAdjustmentRequest {
-  productId: number;
+  productId?: number | null;
   adjustmentType: 'AdjustmentIn' | 'AdjustmentOut';
   quantity: number;
   reason: string;
   notes?: string;
+  newProductSku?: string;
+  newProductName?: string;
+  newProductCategory?: string;
+  newProductPurchasePrice?: number;
+  newProductSalePrice?: number;
 }
 
 export interface ProcessReturnRequest {
