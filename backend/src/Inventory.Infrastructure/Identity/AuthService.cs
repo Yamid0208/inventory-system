@@ -112,6 +112,18 @@ public class AuthService : IAuthService
                 .OrderByDescending(t => t.CreatedAt)
                 .FirstOrDefaultAsync(cancellationToken);
 
+            if (latestActiveToken == null)
+            {
+                var newRawToken = _tokenGenerator.GenerateRefreshToken();
+                var refreshDaysGrace = int.TryParse(_configuration["Jwt:RefreshTokenExpirationDays"], out var daysG) ? daysG : 7;
+                var expiresAtGrace = DateTimeOffset.UtcNow.AddDays(refreshDaysGrace);
+                tokenEntity.User.AddRefreshToken(newRawToken, expiresAtGrace, ipAddress);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                latestActiveToken = await _context.RefreshTokens
+                    .FirstOrDefaultAsync(t => t.Token == newRawToken, cancellationToken);
+            }
+
             if (latestActiveToken != null)
             {
                 var graceAccessToken = _tokenGenerator.GenerateAccessToken(tokenEntity.User);
@@ -128,6 +140,8 @@ public class AuthService : IAuthService
                 );
                 return Result<AuthResponse>.Success(new AuthResponse(graceAccessToken, graceUserDto, latestActiveToken.ExpiresAt, latestActiveToken.Token));
             }
+
+            return Result<AuthResponse>.Failure("Sesión expirada. Debe iniciar sesión nuevamente.");
         }
 
         if (DateTimeOffset.UtcNow >= tokenEntity.ExpiresAt)

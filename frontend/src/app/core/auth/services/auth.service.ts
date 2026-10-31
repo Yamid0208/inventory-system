@@ -191,21 +191,11 @@ export class AuthService {
       const savedUser = localStorage.getItem('sgi_user');
       if (savedUser) {
         this.currentUserSignal.set(JSON.parse(savedUser));
-        // Renovar silenciosamente el access token en memoria mediante la cookie HttpOnly
-        this.refresh().subscribe({
-          next: () => {
-            this.isCheckingAuthSignal.set(false);
-          },
-          error: () => {
-            this.clearSession();
-            this.isCheckingAuthSignal.set(false);
-          }
-        });
-        return;
       }
     } catch {
       this.clearSession();
+    } finally {
+      this.isCheckingAuthSignal.set(false);
     }
-    this.isCheckingAuthSignal.set(false);
   }
 }

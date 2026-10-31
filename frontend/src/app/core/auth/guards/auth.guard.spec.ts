@@ -7,6 +7,7 @@ import { signal, createEnvironmentInjector } from '@angular/core';
 import { of, throwError, firstValueFrom, isObservable } from 'rxjs';
 
 describe('authGuard (Unit Tests)', () => {
+  let localStorageMock: Record<string, string> = {};
   let authServiceMock: {
     isAuthenticated: ReturnType<typeof signal>;
     accessToken: ReturnType<typeof signal>;
@@ -20,6 +21,14 @@ describe('authGuard (Unit Tests)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorageMock = {};
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn((key: string) => localStorageMock[key] ?? null),
+      setItem: vi.fn((key: string, val: string) => { localStorageMock[key] = val; }),
+      removeItem: vi.fn((key: string) => { delete localStorageMock[key]; }),
+      clear: vi.fn(() => { localStorageMock = {}; })
+    });
+
     authServiceMock = {
       isAuthenticated: signal(true),
       accessToken: signal<string | null>('valid.access.token'),
@@ -88,6 +97,24 @@ describe('authGuard (Unit Tests)', () => {
     expect(authServiceMock.logout).toHaveBeenCalled();
     expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/login']);
     expect(redirectTarget).toBeDefined();
+  });
+
+  it('intenta refresco silencioso si no hay usuario en memoria pero existe sgi_refresh_token en localStorage', async () => {
+    authServiceMock.isAuthenticated.set(false);
+    authServiceMock.accessToken.set(null);
+    localStorage.setItem('sgi_refresh_token', 'stored-refresh-token');
+
+    const route = {} as ActivatedRouteSnapshot;
+    const state = { url: '/dashboard' } as RouterStateSnapshot;
+
+    const guardResult = injector.runInContext(() => authGuard(route, state));
+    expect(isObservable(guardResult)).toBe(true);
+    expect(authServiceMock.refresh).toHaveBeenCalled();
+
+    const allowed = await firstValueFrom(guardResult as any);
+    expect(allowed).toBe(true);
+
+    localStorage.removeItem('sgi_refresh_token');
   });
 });
 

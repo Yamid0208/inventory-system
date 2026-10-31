@@ -59,20 +59,20 @@ public class AuthController : ControllerBase
     {
         string? refreshToken = null;
 
-        // 1. Prioridad: Cookie HttpOnly
-        if (Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
-        {
-            refreshToken = cookieToken;
-        }
-        // 2. Fallback resiliente: Cabecera personalizada X-Refresh-Token (mitiga proxies que filtran cookies)
-        else if (Request.Headers.TryGetValue("X-Refresh-Token", out var headerToken) && !string.IsNullOrWhiteSpace(headerToken))
+        // 1. Prioridad: Cabecera explícita X-Refresh-Token enviada por la SPA
+        if (Request.Headers.TryGetValue("X-Refresh-Token", out var headerToken) && !string.IsNullOrWhiteSpace(headerToken))
         {
             refreshToken = headerToken.ToString();
         }
-        // 3. Fallback: Cuerpo de la petición JSON
+        // 2. Prioridad: Cuerpo de la petición JSON
         else if (request != null && !string.IsNullOrWhiteSpace(request.RefreshToken))
         {
             refreshToken = request.RefreshToken;
+        }
+        // 3. Fallback: Cookie HttpOnly
+        else if (Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
+        {
+            refreshToken = cookieToken;
         }
 
         if (string.IsNullOrWhiteSpace(refreshToken))
@@ -116,17 +116,17 @@ public class AuthController : ControllerBase
     {
         string? refreshToken = null;
 
-        if (Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
-        {
-            refreshToken = cookieToken;
-        }
-        else if (Request.Headers.TryGetValue("X-Refresh-Token", out var headerToken) && !string.IsNullOrWhiteSpace(headerToken))
+        if (Request.Headers.TryGetValue("X-Refresh-Token", out var headerToken) && !string.IsNullOrWhiteSpace(headerToken))
         {
             refreshToken = headerToken.ToString();
         }
         else if (request != null && !string.IsNullOrWhiteSpace(request.RefreshToken))
         {
             refreshToken = request.RefreshToken;
+        }
+        else if (Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
+        {
+            refreshToken = cookieToken;
         }
 
         if (!string.IsNullOrWhiteSpace(refreshToken))

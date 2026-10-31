@@ -30,10 +30,12 @@ export class AlertService {
   }
 
   private setupAutoRefresh(): void {
+    const canCheck = () => !this.authService || (this.authService.isAuthenticated() && !!this.authService.accessToken());
+
     // 1. Verificación periódica cada 30 segundos
     timer(1000, 30000)
       .pipe(
-        filter(() => !this.authService || this.authService.isAuthenticated()),
+        filter(() => canCheck()),
         catchError(() => of(null))
       )
       .subscribe(() => {
@@ -50,7 +52,7 @@ export class AlertService {
         .subscribe((event: any) => {
           if (event?.urlAfterRedirects?.includes('/alerts') || event?.url?.includes('/alerts')) {
             this.markAsSeen();
-          } else if (!this.authService || this.authService.isAuthenticated()) {
+          } else if (canCheck()) {
             this.checkUnreadStatus();
           }
         });
@@ -60,7 +62,7 @@ export class AlertService {
     if (typeof window !== 'undefined') {
       fromEvent(window, 'focus')
         .pipe(
-          filter(() => !this.authService || this.authService.isAuthenticated()),
+          filter(() => canCheck()),
           catchError(() => of(null))
         )
         .subscribe(() => {
@@ -180,6 +182,10 @@ export class AlertService {
   }
 
   checkUnreadStatus(): void {
+    if (this.authService && (!this.authService.isAuthenticated() || !this.authService.accessToken())) {
+      return;
+    }
+
     this.getStockAlerts().pipe(
       catchError(() => of([]))
     ).subscribe();

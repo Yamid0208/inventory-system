@@ -12,16 +12,24 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // Si no hay sesión previa guardada en el cliente, redirigir limpiamente al login
-  if (!authService.isAuthenticated()) {
+  let hasStoredRefreshToken = false;
+  try {
+    hasStoredRefreshToken = !!localStorage.getItem('sgi_refresh_token');
+  } catch {
+    // Ignorar fallo de lectura en navegadores restringidos
+  }
+
+  // Si no hay sesión previa guardada ni refresh token en el cliente, redirigir limpiamente al login
+  if (!authService.isAuthenticated() && !hasStoredRefreshToken) {
     return router.createUrlTree(['/login']);
   }
 
-  // Caso: Recarga de página (F5) con sesión guardada en localStorage
+  // Caso: Recarga de página (F5) con sesión o token guardado en cliente
   // Esperar la renovación silenciosa del token en memoria antes de permitir la navegación y montaje de componentes
   return authService.refresh().pipe(
     map(() => true),
-    catchError(() => {
+    catchError((err) => {
+      console.warn('[AuthGuard] Falló la renovación silenciosa de token en recarga F5:', err);
       authService.logout();
       return of(router.createUrlTree(['/login']));
     })
