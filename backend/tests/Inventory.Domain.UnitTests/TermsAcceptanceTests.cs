@@ -61,5 +61,22 @@ public class TermsAcceptanceTests
             ip
         ));
     }
+
+    [Fact]
+    public void Test_SetCookie_Enumeration()
+    {
+        var resp = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+        resp.Headers.TryAddWithoutValidation("Set-Cookie", "refreshToken=abc123token; Path=/; Secure; HttpOnly; SameSite=Lax");
+        
+        bool foundInForeach = false;
+        foreach (var h in resp.Headers)
+        {
+            if (h.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase))
+            {
+                foundInForeach = true;
+            }
+        }
+        Assert.True(foundInForeach, "Set-Cookie must be found in foreach loop of resp.Headers");
+    }
 }
 
