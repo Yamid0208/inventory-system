@@ -43,9 +43,9 @@ server {
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
-    # Proxy hacia el contenedor Docker de la aplicación
+    # Proxy hacia el contenedor Docker de la aplicación (puerto 8081 para no colisionar con GymTrak)
     location / {
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://127.0.0.1:8081;
         proxy_http_version 1.1;
 
         proxy_set_header Upgrade $http_upgrade;

@@ -64,8 +64,8 @@ services:
     environment:
       - BACKEND_URL=http://backend:8080
     ports:
-      # Expone solo a localhost para ser servido detrás del Reverse Proxy (Nginx + SSL)
-      - "127.0.0.1:${APP_PORT:-8080}:80"
+      # Expone a localhost en puerto no conflictivo (8081) para convivir con otros proyectos (como GymTrak)
+      - "127.0.0.1:${APP_PORT:-8081}:80"
     depends_on:
       - backend
     networks:
