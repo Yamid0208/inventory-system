@@ -9,8 +9,11 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-InventoryDb}
       - POSTGRES_USER=${POSTGRES_USER:-inventory_user}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    # SEGURIDAD CRÍTICA: NO exponer el puerto 5432 hacia Internet
-    # El backend se conecta de forma privada a través de 'inventory-network'
+    # SEGURIDAD CRÍTICA: NO exponer el puerto hacia Internet.
+    # Se expone exclusivamente a 127.0.0.1 en el puerto 5433 para permitir acceso administrativo vía SSH Tunnel (TablePlus, pgAdmin)
+    # sin colisionar con el PostgreSQL de GymTrak (5432).
+    ports:
+      - "127.0.0.1:5433:5432"
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
     healthcheck:
