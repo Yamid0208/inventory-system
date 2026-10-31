@@ -36,16 +36,18 @@
     </button>
   </div>
 
-  <!-- Botón Destacado '+ Nueva Venta' estilo Vercel Primary Button -->
-  <div class="px-3 pt-3 mb-2">
-    <a routerLink="/sales" [queryParams]="{ new: 'true' }" (click)="onNavClick()"
-      class="w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-md bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-[var(--color-brand-text)] font-semibold text-xs transition-all cursor-pointer select-none border border-[var(--border-strong)] shadow-sm">
-      <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-      </svg>
-      <span>Nueva Venta</span>
-    </a>
-  </div>
+  <!-- Botón Destacado '+ Nueva Venta' estilo Vercel Primary Button (Oculto para SuperAdmin) -->
+  @if (!authService.isSuperAdmin()) {
+    <div class="px-3 pt-3 mb-2">
+      <a routerLink="/sales" [queryParams]="{ new: 'true' }" (click)="onNavClick()"
+        class="w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-md bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-primary-hover)] text-[var(--color-brand-text)] font-semibold text-xs transition-all cursor-pointer select-none border border-[var(--border-strong)] shadow-sm">
+        <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>Nueva Venta</span>
+      </a>
+    </div>
+  }
 
   <!-- Sede / Almacén Badge si aplica -->
   @if (authService.currentUser()?.warehouseName) {
