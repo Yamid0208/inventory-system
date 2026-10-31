@@ -250,7 +250,12 @@ export class BulkImportModalComponent {
           return;
         }
 
-        this.resultSummary.set(result);
+        this.resultSummary.set({
+          ...result,
+          createdCount: created,
+          updatedCount: updated,
+          totalProcessed: total
+        });
         this.step.set('success');
         this.imported.emit(result);
         this.notificationService.success(`Importación completada: ${created} creados, ${updated} actualizados.`);

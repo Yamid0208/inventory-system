@@ -223,7 +223,12 @@ public class BulkProductImportService : IBulkProductImportService
             throw new InvalidOperationException("Clave de API de Gemini no configurada. Agrega tu clave en Gemini:ApiKey en appsettings.Development.json o variable de entorno GEMINI_API_KEY.");
         }
 
-        var model = _configuration["Gemini:Model"] ?? "gemini-2.0-flash";
+        var configuredModel = _configuration["Gemini:Model"] ?? "gemini-3.5-flash-lite";
+        var candidateModels = new[] { configuredModel, "gemini-3.5-flash-lite", "gemini-3.8-flash" }
+            .Where(m => !string.IsNullOrWhiteSpace(m))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
         using var memoryStream = new MemoryStream();
         await imageStream.CopyToAsync(memoryStream, cancellationToken);
         var base64Image = Convert.ToBase64String(memoryStream.ToArray());
@@ -242,54 +247,124 @@ Extrae los productos en un array JSON con los siguientes campos estrictos:
 
 Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... ```";
 
-        var requestBody = new
+        var client = _httpClientFactory.CreateClient();
+        client.Timeout = TimeSpan.FromSeconds(45);
+
+        HttpResponseMessage? response = null;
+        string? respString = null;
+
+        // Intento 1: API Moderna de Interacciones con modelos candidatos
+        foreach (var candidateModel in candidateModels)
         {
-            contents = new[]
+            try
             {
-                new
+                var interactionsUrl = $"https://generativelanguage.googleapis.com/v1beta/interactions?key={apiKey}";
+                var interactionsBody = new
                 {
-                    parts = new object[]
+                    model = candidateModel,
+                    input = new object[]
                     {
-                        new { text = prompt },
-                        new
+                        new { type = "text", text = prompt },
+                        new { type = "image", data = base64Image, mime_type = string.IsNullOrWhiteSpace(mimeType) ? "image/jpeg" : mimeType }
+                    }
+                };
+
+                var intContent = new StringContent(JsonSerializer.Serialize(interactionsBody), Encoding.UTF8, "application/json");
+                response = await client.PostAsync(interactionsUrl, intContent, cancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    respString = await response.Content.ReadAsStringAsync(cancellationToken);
+                    break;
+                }
+                else
+                {
+                    var err = await response.Content.ReadAsStringAsync(cancellationToken);
+                    _logger.LogWarning("Modelo {Model} en Interactions retornó {Status}: {Err}", candidateModel, response.StatusCode, err);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Excepción con modelo {Model} en Interactions API", candidateModel);
+            }
+        }
+
+        // Intento 2: Fallback a generateContent si interactions no fue exitoso
+        if (respString == null)
+        {
+            var fallbackUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{configuredModel}:generateContent?key={apiKey}";
+            var requestBody = new
+            {
+                contents = new[]
+                {
+                    new
+                    {
+                        parts = new object[]
                         {
-                            inline_data = new
+                            new { text = prompt },
+                            new
                             {
-                                mime_type = string.IsNullOrWhiteSpace(mimeType) ? "image/jpeg" : mimeType,
-                                data = base64Image
+                                inline_data = new
+                                {
+                                    mime_type = string.IsNullOrWhiteSpace(mimeType) ? "image/jpeg" : mimeType,
+                                    data = base64Image
+                                }
                             }
                         }
                     }
+                },
+                generationConfig = new
+                {
+                    temperature = 0.1,
+                    response_mime_type = "application/json"
                 }
-            },
-            generationConfig = new
+            };
+
+            var jsonContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+            response = await client.PostAsync(fallbackUrl, jsonContent, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
             {
-                temperature = 0.1,
-                response_mime_type = "application/json"
+                var err = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("Error al invocar Gemini API: {Err}", err);
+                throw new InvalidOperationException($"Error comunicándose con el servicio de Inteligencia Artificial: {response.StatusCode}");
             }
-        };
 
-        var client = _httpClientFactory.CreateClient();
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
-
-        var jsonContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync(url, jsonContent, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var err = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogError("Error al invocar Gemini API: {Err}", err);
-            throw new InvalidOperationException($"Error comunicándose con el servicio de Inteligencia Artificial: {response.StatusCode}");
+            respString = await response.Content.ReadAsStringAsync(cancellationToken);
         }
 
-        var respString = await response.Content.ReadAsStringAsync(cancellationToken);
-        using var doc = JsonDocument.Parse(respString);
-        var candidateText = doc.RootElement
-            .GetProperty("candidates")[0]
-            .GetProperty("content")
-            .GetProperty("parts")[0]
-            .GetProperty("text")
-            .GetString();
+        string? candidateText = null;
+        using (var doc = JsonDocument.Parse(respString))
+        {
+            if (doc.RootElement.TryGetProperty("steps", out var steps))
+            {
+                foreach (var step in steps.EnumerateArray())
+                {
+                    if (step.TryGetProperty("type", out var typeEl) && typeEl.GetString() == "model_output")
+                    {
+                        if (step.TryGetProperty("content", out var contents))
+                        {
+                            foreach (var c in contents.EnumerateArray())
+                            {
+                                if (c.TryGetProperty("type", out var cType) && cType.GetString() == "text")
+                                {
+                                    candidateText = c.GetProperty("text").GetString();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!string.IsNullOrWhiteSpace(candidateText)) break;
+                }
+            }
+            else if (doc.RootElement.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
+            {
+                candidateText = candidates[0]
+                    .GetProperty("content")
+                    .GetProperty("parts")[0]
+                    .GetProperty("text")
+                    .GetString();
+            }
+        }
 
         if (string.IsNullOrWhiteSpace(candidateText))
         {
