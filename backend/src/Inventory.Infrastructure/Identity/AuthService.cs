@@ -30,8 +30,9 @@ public class AuthService : IAuthService
     public async Task<Result<AuthResponse>> LoginAsync(LoginRequest request, string? ipAddress, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+        // PERF-005: Cargar solo tokens activos en memoria, evitando arrastrar historiales obsoletos
         var user = await _context.Users
-            .Include(u => u.RefreshTokens)
+            .Include(u => u.RefreshTokens.Where(rt => rt.RevokedAt == null && rt.ExpiresAt > DateTimeOffset.UtcNow))
             .Include(u => u.Warehouse)
             .FirstOrDefaultAsync(u => u.Email == normalizedEmail && !u.IsDeleted, cancellationToken);
 

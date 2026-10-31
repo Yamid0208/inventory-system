@@ -34,13 +34,22 @@ public abstract class BaseApiController : ControllerBase
 
     protected async Task<IReadOnlyList<int>> GetAuthorizedWarehouseIdsAsync(CancellationToken cancellationToken = default)
     {
+        // PERF-004: Cachear por petición HTTP para evitar consultas repetidas dentro de la misma solicitud
+        const string cacheKey = "_CachedAuthorizedWarehouseIds";
+        if (HttpContext.Items.TryGetValue(cacheKey, out var cached) && cached is IReadOnlyList<int> cachedList)
+        {
+            return cachedList;
+        }
+
         var role = GetCurrentUserRole();
         var userId = GetCurrentUserId();
         var currentWhId = GetCurrentWarehouseId();
 
         if (role == "SuperAdmin")
         {
-            return Array.Empty<int>();
+            var empty = Array.Empty<int>();
+            HttpContext.Items[cacheKey] = empty;
+            return empty;
         }
 
         var dbContext = HttpContext.RequestServices.GetRequiredService<IApplicationDbContext>();
@@ -59,14 +68,19 @@ public abstract class BaseApiController : ControllerBase
             }
             // SEC-021: Si un Admin no tiene almacenes asignados, retorna lista vacía en lugar de acceso a todos los almacenes.
 
+            HttpContext.Items[cacheKey] = ids;
             return ids;
         }
 
         if (currentWhId.HasValue && currentWhId.Value > 0)
         {
-            return new List<int> { currentWhId.Value };
+            var single = new List<int> { currentWhId.Value };
+            HttpContext.Items[cacheKey] = single;
+            return single;
         }
 
-        return Array.Empty<int>();
+        var none = Array.Empty<int>();
+        HttpContext.Items[cacheKey] = none;
+        return none;
     }
 }

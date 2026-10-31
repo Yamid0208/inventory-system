@@ -102,39 +102,65 @@ public class BulkProductImportService : IBulkProductImportService
         }
 
         int rowNum = 2;
-        var existingSkus = await _context.Products.Select(p => p.Sku.ToUpper()).ToListAsync(cancellationToken);
-        var skusInBatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var rawRows = new List<(IXLRangeRow row, int rowNum, string sku, string name, string category, string? supplier, string? purchasePriceStr, string? salePriceStr, string? stockStr, string? minStockStr, string? description)>();
+        var batchSkus = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var row in rows)
         {
             var sku = row.Cell(1).GetString()?.Trim() ?? string.Empty;
             var name = row.Cell(2).GetString()?.Trim() ?? string.Empty;
-            var category = row.Cell(3).GetString()?.Trim() ?? string.Empty;
-            var supplier = row.Cell(4).GetString()?.Trim();
-            var purchasePriceStr = row.Cell(5).GetString()?.Trim();
-            var salePriceStr = row.Cell(6).GetString()?.Trim();
-            var stockStr = row.Cell(7).GetString()?.Trim();
-            var minStockStr = row.Cell(8).GetString()?.Trim();
-            var description = row.Cell(9).GetString()?.Trim();
 
-            // Si la fila está completamente vacía, omitir
             if (string.IsNullOrWhiteSpace(sku) && string.IsNullOrWhiteSpace(name))
             {
                 continue;
             }
 
+            if (!string.IsNullOrWhiteSpace(sku))
+            {
+                batchSkus.Add(sku.ToUpperInvariant());
+            }
+
+            rawRows.Add((
+                row,
+                rowNum++,
+                sku,
+                name,
+                row.Cell(3).GetString()?.Trim() ?? string.Empty,
+                row.Cell(4).GetString()?.Trim(),
+                row.Cell(5).GetString()?.Trim(),
+                row.Cell(6).GetString()?.Trim(),
+                row.Cell(7).GetString()?.Trim(),
+                row.Cell(8).GetString()?.Trim(),
+                row.Cell(9).GetString()?.Trim()
+            ));
+        }
+
+        // PERF-002: Consultar ÚNICAMENTE los SKUs presentes en el lote importado, no todo el catálogo
+        var existingSkus = batchSkus.Count > 0
+            ? (await _context.Products
+                .AsNoTracking()
+                .Where(p => batchSkus.Contains(p.Sku.ToUpper()) && !p.IsDeleted)
+                .Select(p => p.Sku.ToUpper())
+                .ToListAsync(cancellationToken))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase)
+            : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        var skusInBatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var raw in rawRows)
+        {
             var item = new ProductImportRowDto
             {
-                RowNumber = rowNum++,
-                Sku = sku,
-                Name = name,
-                CategoryName = category,
-                SupplierName = string.IsNullOrWhiteSpace(supplier) ? null : supplier,
-                Description = string.IsNullOrWhiteSpace(description) ? null : description
+                RowNumber = raw.rowNum,
+                Sku = raw.sku,
+                Name = raw.name,
+                CategoryName = raw.category,
+                SupplierName = string.IsNullOrWhiteSpace(raw.supplier) ? null : raw.supplier,
+                Description = string.IsNullOrWhiteSpace(raw.description) ? null : raw.description
             };
 
             // Parseo de números tolerante a formatos con moneda o comas
-            if (TryExtractDecimal(purchasePriceStr, out var pPrice) || row.Cell(5).TryGetValue(out pPrice))
+            if (TryExtractDecimal(raw.purchasePriceStr, out var pPrice) || raw.row.Cell(5).TryGetValue(out pPrice))
             {
                 item.PurchasePrice = pPrice;
             }
@@ -143,7 +169,7 @@ public class BulkProductImportService : IBulkProductImportService
                 item.ValidationErrors.Add("Precio de compra inválido.");
             }
 
-            if (TryExtractDecimal(salePriceStr, out var sPrice) || row.Cell(6).TryGetValue(out sPrice))
+            if (TryExtractDecimal(raw.salePriceStr, out var sPrice) || raw.row.Cell(6).TryGetValue(out sPrice))
             {
                 item.SalePrice = sPrice;
             }
@@ -152,7 +178,7 @@ public class BulkProductImportService : IBulkProductImportService
                 item.ValidationErrors.Add("Precio de venta inválido.");
             }
 
-            if (TryExtractInt(stockStr, out var stock) || row.Cell(7).TryGetValue(out stock))
+            if (TryExtractInt(raw.stockStr, out var stock) || raw.row.Cell(7).TryGetValue(out stock))
             {
                 item.InitialStock = stock;
             }
@@ -161,7 +187,7 @@ public class BulkProductImportService : IBulkProductImportService
                 item.ValidationErrors.Add("Stock inicial inválido.");
             }
 
-            if (TryExtractInt(minStockStr, out var minStock) || row.Cell(8).TryGetValue(out minStock))
+            if (TryExtractInt(raw.minStockStr, out var minStock) || raw.row.Cell(8).TryGetValue(out minStock))
             {
                 item.MinimumStock = minStock > 0 ? minStock : 5;
             }
@@ -434,7 +460,7 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
             await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             try
             {
-                // Cachear o crear categorías al vuelo de forma segura
+                // PERF-003: Categorías al vuelo en lote (un solo SaveChanges)
                 var categoryNames = items
                     .Select(i => string.IsNullOrWhiteSpace(i.CategoryName) ? "General" : i.CategoryName.Trim())
                     .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -445,6 +471,7 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                     .ToListAsync(cancellationToken);
 
                 var categoryMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                bool hasNewCategories = false;
                 foreach (var catName in categoryNames)
                 {
                     var found = existingCategories.FirstOrDefault(c => c.Name.Equals(catName, StringComparison.OrdinalIgnoreCase));
@@ -456,8 +483,19 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                     {
                         var newCat = new Category(catName, $"Categoría autogenerada en carga masiva", warehouseId: request.WarehouseId);
                         _context.Categories.Add(newCat);
-                        await _context.SaveChangesAsync(cancellationToken);
-                        categoryMap[catName] = newCat.Id;
+                        hasNewCategories = true;
+                    }
+                }
+
+                if (hasNewCategories)
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                    var refreshedCategories = await _context.Categories
+                        .Where(c => !c.IsDeleted)
+                        .ToListAsync(cancellationToken);
+                    foreach (var cat in refreshedCategories)
+                    {
+                        categoryMap[cat.Name] = cat.Id;
                     }
                 }
 
@@ -469,6 +507,65 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                     _context.Suppliers.Add(defaultSupplier);
                     await _context.SaveChangesAsync(cancellationToken);
                 }
+
+                // PERF-003: Proveedores al vuelo en lote
+                var supplierNames = items
+                    .Where(i => !string.IsNullOrWhiteSpace(i.SupplierName))
+                    .Select(i => i.SupplierName!.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var existingSuppliers = await _context.Suppliers
+                    .Where(s => !s.IsDeleted)
+                    .ToListAsync(cancellationToken);
+
+                var supplierMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                bool hasNewSuppliers = false;
+                foreach (var sName in supplierNames)
+                {
+                    var found = existingSuppliers.FirstOrDefault(s => s.Name.Equals(sName, StringComparison.OrdinalIgnoreCase));
+                    if (found != null)
+                    {
+                        supplierMap[sName] = found.Id;
+                    }
+                    else
+                    {
+                        var randomNit = $"{Random.Shared.Next(10000000, 99999999)}-{Random.Shared.Next(0, 9)}";
+                        var sup = new Supplier(sName, randomNit, contactName: sName, email: $"contacto@{Guid.NewGuid().ToString()[..6]}.com", warehouseId: request.WarehouseId);
+                        _context.Suppliers.Add(sup);
+                        hasNewSuppliers = true;
+                    }
+                }
+
+                if (hasNewSuppliers)
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                    var refreshedSuppliers = await _context.Suppliers
+                        .Where(s => !s.IsDeleted)
+                        .ToListAsync(cancellationToken);
+                    foreach (var s in refreshedSuppliers)
+                    {
+                        supplierMap[s.Name] = s.Id;
+                    }
+                }
+
+                // PERF-003: Pre-cargar en UNA sola consulta los productos existentes en el lote (elimina N+1)
+                var allSkusInBatch = items
+                    .Where(i => !string.IsNullOrWhiteSpace(i.Sku))
+                    .Select(i => i.Sku.Trim().ToUpperInvariant())
+                    .Distinct()
+                    .ToList();
+
+                var existingProducts = allSkusInBatch.Count > 0
+                    ? await _context.Products
+                        .Where(p => allSkusInBatch.Contains(p.Sku.ToUpper()) && !p.IsDeleted)
+                        .ToListAsync(cancellationToken)
+                    : new List<Product>();
+
+                var productMap = existingProducts.ToDictionary(p => p.Sku.Trim().ToUpperInvariant(), StringComparer.OrdinalIgnoreCase);
+
+                var newProductsWithStock = new List<(Product Product, int Stock, decimal PurchasePrice)>();
+                var updatedMovements = new List<InventoryMovement>();
 
                 foreach (var item in items)
                 {
@@ -487,26 +584,13 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                     var catName = string.IsNullOrWhiteSpace(item.CategoryName) ? "General" : item.CategoryName.Trim();
                     if (!categoryMap.TryGetValue(catName, out var catId))
                     {
-                        var newCat = new Category(catName, "Categoría autogenerada", warehouseId: request.WarehouseId);
-                        _context.Categories.Add(newCat);
-                        await _context.SaveChangesAsync(cancellationToken);
-                        catId = newCat.Id;
-                        categoryMap[catName] = catId;
+                        catId = categoryMap.Values.FirstOrDefault();
                     }
 
                     var supplierId = defaultSupplier.Id;
-                    if (!string.IsNullOrWhiteSpace(item.SupplierName))
+                    if (!string.IsNullOrWhiteSpace(item.SupplierName) && supplierMap.TryGetValue(item.SupplierName.Trim(), out var sId))
                     {
-                        var supName = item.SupplierName.Trim();
-                        var sup = await _context.Suppliers.FirstOrDefaultAsync(s => s.Name.ToLower() == supName.ToLower() && !s.IsDeleted, cancellationToken);
-                        if (sup == null)
-                        {
-                            var randomNit = $"{Random.Shared.Next(10000000, 99999999)}-{Random.Shared.Next(0, 9)}";
-                            sup = new Supplier(supName, randomNit, contactName: supName, email: $"contacto@{Guid.NewGuid().ToString()[..6]}.com", warehouseId: request.WarehouseId);
-                            _context.Suppliers.Add(sup);
-                            await _context.SaveChangesAsync(cancellationToken);
-                        }
-                        supplierId = sup.Id;
+                        supplierId = sId;
                     }
 
                     if (item.PurchasePrice < 0) item.PurchasePrice = 0;
@@ -518,10 +602,8 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                     if (item.MinimumStock <= 0) item.MinimumStock = 5;
 
                     var normalizedSku = item.Sku.Trim().ToUpperInvariant();
-                    var existingProduct = await _context.Products
-                        .FirstOrDefaultAsync(p => p.Sku.ToUpper() == normalizedSku && !p.IsDeleted, cancellationToken);
 
-                    if (existingProduct != null)
+                    if (productMap.TryGetValue(normalizedSku, out var existingProduct))
                     {
                         if (updateExisting)
                         {
@@ -541,7 +623,6 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                                 var prevStock = existingProduct.CurrentStock;
                                 existingProduct.UpdateStock(item.InitialStock);
                                 
-                                // Movimiento en Kardex
                                 var movement = new InventoryMovement(
                                     movementNumber: $"MOV-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}",
                                     productId: existingProduct.Id,
@@ -555,7 +636,7 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                                     notes: "Carga Masiva (Actualización de Stock)",
                                     warehouseId: request.WarehouseId ?? existingProduct.WarehouseId
                                 );
-                                _context.InventoryMovements.Add(movement);
+                                updatedMovements.Add(movement);
                             }
                             result.ProductsUpdated++;
                         }
@@ -580,24 +661,11 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                         }
 
                         _context.Products.Add(newProduct);
-                        await _context.SaveChangesAsync(cancellationToken);
+                        productMap[normalizedSku] = newProduct;
 
                         if (item.InitialStock > 0)
                         {
-                            var movement = new InventoryMovement(
-                                movementNumber: $"MOV-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}",
-                                productId: newProduct.Id,
-                                type: Domain.Enums.MovementType.AdjustmentIn,
-                                quantityDelta: item.InitialStock,
-                                previousStock: 0,
-                                newStock: item.InitialStock,
-                                unitPrice: item.PurchasePrice,
-                                userId: userId,
-                                reference: "CARGA-MASIVA",
-                                notes: "Carga Masiva (Inventario Inicial)",
-                                warehouseId: request.WarehouseId
-                            );
-                            _context.InventoryMovements.Add(movement);
+                            newProductsWithStock.Add((newProduct, item.InitialStock, item.PurchasePrice));
                         }
 
                         result.ProductsCreated++;
@@ -606,7 +674,38 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                     result.TotalProcessed++;
                 }
 
+                // PERF-003: Persistir todos los productos insertados y actualizados en una sola operación atómica
                 await _context.SaveChangesAsync(cancellationToken);
+
+                // Crear los movimientos de inventario ahora que los nuevos productos tienen Id generado
+                foreach (var (newProd, stock, price) in newProductsWithStock)
+                {
+                    var movement = new InventoryMovement(
+                        movementNumber: $"MOV-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}",
+                        productId: newProd.Id,
+                        type: Domain.Enums.MovementType.AdjustmentIn,
+                        quantityDelta: stock,
+                        previousStock: 0,
+                        newStock: stock,
+                        unitPrice: price,
+                        userId: userId,
+                        reference: "CARGA-MASIVA",
+                        notes: "Carga Masiva (Inventario Inicial)",
+                        warehouseId: request.WarehouseId
+                    );
+                    _context.InventoryMovements.Add(movement);
+                }
+
+                foreach (var mov in updatedMovements)
+                {
+                    _context.InventoryMovements.Add(mov);
+                }
+
+                if (newProductsWithStock.Count > 0 || updatedMovements.Count > 0)
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
                 await transaction.CommitAsync(cancellationToken);
 
                 result.Messages.Add($"Carga masiva completada: {result.ProductsCreated} creados, {result.ProductsUpdated} actualizados.");
