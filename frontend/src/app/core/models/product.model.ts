@@ -90,3 +90,32 @@ export interface CreateProductBatchRequest {
   manufacturingDate?: string;
 }
 
+export interface ProductImportRow {
+  rowNumber: number;
+  sku: string;
+  name: string;
+  categoryName: string;
+  supplierName?: string | null;
+  purchasePrice: number;
+  salePrice: number;
+  initialStock: number;
+  minimumStock: number;
+  description?: string | null;
+  isValid: boolean;
+  isExisting: boolean;
+  validationErrors: string[];
+}
+
+export interface BulkImportRequest {
+  warehouseId?: number | null;
+  updateExisting: boolean;
+  products: ProductImportRow[];
+}
+
+export interface BulkImportResult {
+  totalProcessed: number;
+  createdCount: number;
+  updatedCount: number;
+  errorCount: number;
+  details: string[];
+}

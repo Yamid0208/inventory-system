@@ -15,11 +15,13 @@ import { Supplier } from '../../core/models/supplier.model';
 import { ProductModalComponent } from './components/product-modal/product-modal.component';
 import { ProductDetailModalComponent } from './components/product-detail-modal/product-detail-modal.component';
 import { BatchModalComponent } from './components/batch-modal/batch-modal.component';
+import { BulkImportModalComponent } from './components/bulk-import-modal/bulk-import-modal.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
+import { BulkImportResult } from '../../core/models/product.model';
 
 @Component({
   selector: 'app-products',
@@ -30,6 +32,7 @@ import { PageChangeEvent } from '../../shared/models/pagination.model';
     ProductModalComponent,
     ProductDetailModalComponent,
     BatchModalComponent,
+    BulkImportModalComponent,
     AppButtonComponent,
     AppPaginationComponent,
     AppAutocompleteComponent,
@@ -99,6 +102,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   isBatchModalOpen = signal<boolean>(false);
   batchProduct = signal<Product | null>(null);
 
+  // Modal de Carga Masiva (Excel / IA)
+  isBulkImportOpen = signal<boolean>(false);
+
   // Diálogo de eliminación
   confirmDialogOpen = signal<boolean>(false);
   productToDelete = signal<Product | null>(null);
@@ -107,6 +113,15 @@ export class ProductsComponent implements OnInit, OnDestroy {
   openBatchModal(product: Product): void {
     this.batchProduct.set(product);
     this.isBatchModalOpen.set(true);
+  }
+
+  openBulkImportModal(): void {
+    this.isBulkImportOpen.set(true);
+  }
+
+  onBulkImportSuccess(result: BulkImportResult): void {
+    this.loadProducts();
+    this.alertService?.checkUnreadStatus();
   }
 
   ngOnInit(): void {
