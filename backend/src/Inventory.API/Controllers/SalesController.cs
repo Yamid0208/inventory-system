@@ -66,9 +66,18 @@ public class SalesController : BaseApiController
     [Authorize(Roles = "SuperAdmin,Admin,Seller")]
     [ProducesResponseType(typeof(SaleDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<SaleDto>> GetSaleById(int id, CancellationToken cancellationToken)
     {
         var sale = await _saleService.GetSaleByIdAsync(id, cancellationToken);
+        if (!IsSuperAdmin())
+        {
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (allowed.Count > 0 && sale.WarehouseId.HasValue && !allowed.Contains(sale.WarehouseId.Value))
+            {
+                return Forbid();
+            }
+        }
         return Ok(sale);
     }
 
@@ -79,22 +88,27 @@ public class SalesController : BaseApiController
     [Authorize(Roles = "SuperAdmin,Admin,Seller")]
     [ProducesResponseType(typeof(SaleDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<SaleDto>> CreateSale(
         [FromBody] CreateSaleRequest request,
         CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int.TryParse(userIdClaim, out var userId);
+        var userId = GetCurrentUserId();
         if (userId <= 0)
         {
             userId = 1;
         }
 
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && !request.WarehouseId.HasValue)
+        if (!IsSuperAdmin())
         {
-            request = request with { WarehouseId = GetCurrentWarehouseId() };
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            var targetWh = request.WarehouseId ?? GetCurrentWarehouseId();
+            if (!targetWh.HasValue || (allowed.Count > 0 && !allowed.Contains(targetWh.Value)))
+            {
+                return Forbid();
+            }
+            request = request with { WarehouseId = targetWh.Value };
         }
 
         var sale = await _saleService.CreateSaleAsync(request, userId, cancellationToken);
@@ -109,10 +123,20 @@ public class SalesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CancelSale(int id, CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int.TryParse(userIdClaim, out var userId);
+        var sale = await _saleService.GetSaleByIdAsync(id, cancellationToken);
+        if (!IsSuperAdmin())
+        {
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            if (allowed.Count > 0 && sale.WarehouseId.HasValue && !allowed.Contains(sale.WarehouseId.Value))
+            {
+                return Forbid();
+            }
+        }
+
+        var userId = GetCurrentUserId();
         if (userId <= 0)
         {
             userId = 1;

@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: inventory-sqlserver-prod
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=Express
+      - MSSQL_MEMORY_LIMIT_MB=1536
+    # SEGURIDAD CRÍTICA: NO exponer el puerto 1433 hacia Internet
+    # El backend se conecta de forma privada a través de 'inventory-network'
+    volumes:
+      - sqlserver_prod_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+    networks:
+      - inventory-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inventory-backend-prod
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
+      - Jwt__Key=${Jwt__Key}
+      - Jwt__Issuer=${Jwt__Issuer:-InventoryManagementAPI}
+      - Jwt__Audience=${Jwt__Audience:-InventoryManagementApp}
+      - Jwt__AccessTokenExpirationMinutes=${Jwt__AccessTokenExpirationMinutes:-15}
+      - Jwt__RefreshTokenExpirationDays=${Jwt__RefreshTokenExpirationDays:-7}
+      - Gemini__ApiKey=${Gemini__ApiKey}
+      - Gemini__Model=${Gemini__Model:-gemini-3.5-flash-lite}
+      - Cors__AllowedOrigins=${Cors__AllowedOrigins}
+      - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
+      - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
+    # SEGURIDAD: El backend no se expone directamente a Internet, se comunica por la red Docker
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - uploads_prod_data:/app/uploads
+    networks:
+      - inventory-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: inventory-frontend-prod
+    restart: always
+    environment:
+      - BACKEND_URL=http://backend:8080
+    ports:
+      # Expone solo a localhost para ser servido detrás del Reverse Proxy (Nginx + SSL)
+      - "127.0.0.1:${APP_PORT:-8080}:80"
+    depends_on:
+      - backend
+    networks:
+      - inventory-network
+
+volumes:
+  sqlserver_prod_data:
+    driver: local
+  uploads_prod_data:
+    driver: local
+
+networks:
+  inventory-network:
+    driver: bridge

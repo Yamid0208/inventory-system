@@ -66,23 +66,28 @@ public class InventoryController : BaseApiController
     [Authorize(Roles = "SuperAdmin,Admin,Warehouse")]
     [ProducesResponseType(typeof(InventoryMovementDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<InventoryMovementDto>> CreateAdjustment(
         [FromBody] CreateStockAdjustmentRequest request,
         CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int.TryParse(userIdClaim, out var userId);
+        var userId = GetCurrentUserId();
         if (userId <= 0)
         {
             userId = 1;
         }
 
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && !request.WarehouseId.HasValue)
+        if (!IsSuperAdmin())
         {
-            request = request with { WarehouseId = GetCurrentWarehouseId() };
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            var targetWh = request.WarehouseId ?? GetCurrentWarehouseId();
+            if (!targetWh.HasValue || (allowed.Count > 0 && !allowed.Contains(targetWh.Value)))
+            {
+                return Forbid();
+            }
+            request = request with { WarehouseId = targetWh.Value };
         }
 
         var movement = await _inventoryService.CreateAdjustmentAsync(request, userId, cancellationToken);
@@ -96,23 +101,28 @@ public class InventoryController : BaseApiController
     [Authorize(Roles = "SuperAdmin,Admin,Warehouse")]
     [ProducesResponseType(typeof(InventoryMovementDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<InventoryMovementDto>> ProcessReturn(
         [FromBody] ProcessReturnRequest request,
         CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        int.TryParse(userIdClaim, out var userId);
+        var userId = GetCurrentUserId();
         if (userId <= 0)
         {
             userId = 1;
         }
 
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        if (role != "SuperAdmin" && !request.WarehouseId.HasValue)
+        if (!IsSuperAdmin())
         {
-            request = request with { WarehouseId = GetCurrentWarehouseId() };
+            var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+            var targetWh = request.WarehouseId ?? GetCurrentWarehouseId();
+            if (!targetWh.HasValue || (allowed.Count > 0 && !allowed.Contains(targetWh.Value)))
+            {
+                return Forbid();
+            }
+            request = request with { WarehouseId = targetWh.Value };
         }
 
         var movement = await _inventoryService.ProcessReturnAsync(request, userId, cancellationToken);
