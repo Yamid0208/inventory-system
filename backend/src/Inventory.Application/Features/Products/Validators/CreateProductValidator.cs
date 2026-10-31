@@ -26,9 +26,15 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequest>
         RuleFor(x => x.Description)
             .MaximumLength(1000).WithMessage("La descripción no puede exceder los 1000 caracteres.");
 
-        RuleFor(x => x.CategoryId)
-            .GreaterThan(0).WithMessage("Debes seleccionar una categoría válida.")
-            .MustAsync(CategoryExists).WithMessage("La categoría seleccionada no existe o se encuentra inactiva.");
+        RuleFor(x => x)
+            .Must(x => (x.CategoryId.HasValue && x.CategoryId.Value > 0) || !string.IsNullOrWhiteSpace(x.CategoryName) || !string.IsNullOrWhiteSpace(x.NewCategoryName))
+            .WithMessage("Debes seleccionar una categoría o ingresar el nombre de una categoría.");
+
+        When(x => x.CategoryId.HasValue && x.CategoryId.Value > 0, () =>
+        {
+            RuleFor(x => x.CategoryId!.Value)
+                .MustAsync(CategoryExists).WithMessage("La categoría seleccionada no existe o se encuentra inactiva.");
+        });
 
         RuleFor(x => x.SupplierId)
             .GreaterThan(0).WithMessage("Debes seleccionar un proveedor válido.")

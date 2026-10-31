@@ -112,4 +112,34 @@ describe('ProductModalComponent (Unit Tests)', () => {
     expect(emittedPayload.name).toBe('Producto Actualizado');
     expect(emittedPayload.rowVersion).toBe('QkNERUY=');
   });
+
+  it('debe permitir alternar a nueva categoría y emitir newCategoryName', () => {
+    component.ngOnInit();
+    expect(component.isNewCategory()).toBe(false);
+
+    component.toggleNewCategory();
+    expect(component.isNewCategory()).toBe(true);
+    expect(component.form.get('categoryId')?.value).toBeNull();
+
+    component.form.patchValue({
+      sku: 'SKU-NEW-CAT',
+      name: 'Taladro Inalámbrico',
+      newCategoryName: 'Maquinaria Pesada',
+      supplierId: 1,
+      purchasePrice: 150000,
+      salePrice: 220000,
+      minimumStock: 4
+    });
+
+    let emittedPayload: any = null;
+    component.save.subscribe(payload => {
+      emittedPayload = payload;
+    });
+
+    component.onSubmit();
+
+    expect(emittedPayload).not.toBeNull();
+    expect(emittedPayload.newCategoryName).toBe('Maquinaria Pesada');
+    expect(emittedPayload.categoryId).toBeNull();
+  });
 });

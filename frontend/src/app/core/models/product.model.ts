@@ -45,7 +45,9 @@ export interface CreateProductRequest {
   sku: string;
   name: string;
   description?: string | null;
-  categoryId: number;
+  categoryId?: number | null;
+  categoryName?: string | null;
+  newCategoryName?: string | null;
   supplierId: number;
   warehouseId?: number | null;
   purchasePrice: number;
@@ -57,7 +59,9 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest {
   name: string;
   description?: string | null;
-  categoryId: number;
+  categoryId?: number | null;
+  categoryName?: string | null;
+  newCategoryName?: string | null;
   supplierId: number;
   purchasePrice: number;
   salePrice: number;

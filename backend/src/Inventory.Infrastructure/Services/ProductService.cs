@@ -160,10 +160,17 @@ public class ProductService : IProductService
             throw new ConflictException($"Ya existe otro producto registrado con el SKU '{request.Sku.Trim()}' en este almacén.");
         }
 
+        var categoryId = await ResolveCategoryIdAsync(
+            request.CategoryId,
+            request.CategoryName,
+            request.NewCategoryName,
+            request.WarehouseId,
+            cancellationToken);
+
         var product = new Product(
             sku: request.Sku,
             name: request.Name,
-            categoryId: request.CategoryId,
+            categoryId: categoryId,
             supplierId: request.SupplierId,
             purchasePrice: request.PurchasePrice,
             salePrice: request.SalePrice,
@@ -215,9 +222,16 @@ public class ProductService : IProductService
             }
         }
 
+        var categoryId = await ResolveCategoryIdAsync(
+            request.CategoryId,
+            request.CategoryName,
+            request.NewCategoryName,
+            product.WarehouseId,
+            cancellationToken);
+
         product.Update(
             name: request.Name,
-            categoryId: request.CategoryId,
+            categoryId: categoryId,
             supplierId: request.SupplierId,
             purchasePrice: request.PurchasePrice,
             salePrice: request.SalePrice,
@@ -353,5 +367,53 @@ public class ProductService : IProductService
             UpdatedAt = product.UpdatedAt,
             WarehouseId = product.WarehouseId
         };
+    }
+
+    private async Task<int> ResolveCategoryIdAsync(
+        int? categoryId,
+        string? categoryName,
+        string? newCategoryName,
+        int? warehouseId,
+        CancellationToken cancellationToken)
+    {
+        if (categoryId.HasValue && categoryId.Value > 0)
+        {
+            return categoryId.Value;
+        }
+
+        var catName = !string.IsNullOrWhiteSpace(newCategoryName)
+            ? newCategoryName.Trim()
+            : categoryName?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(catName))
+        {
+            var existing = await _context.Categories
+                .FirstOrDefaultAsync(c => !c.IsDeleted &&
+                                          c.Name.ToLower() == catName.ToLower() &&
+                                          (c.WarehouseId == warehouseId || c.WarehouseId == null),
+                                     cancellationToken);
+            if (existing != null)
+            {
+                return existing.Id;
+            }
+
+            var newCat = new Category(catName, "Categoría creada automáticamente", warehouseId: warehouseId);
+            _context.Categories.Add(newCat);
+            await _context.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Categoría '{Name}' registrada automáticamente con ID {Id}", newCat.Name, newCat.Id);
+            return newCat.Id;
+        }
+
+        // Si no se proporcionó ninguna categoría, asignar o crear 'General'
+        var defaultCat = await _context.Categories
+            .FirstOrDefaultAsync(c => !c.IsDeleted && (c.WarehouseId == warehouseId || c.WarehouseId == null), cancellationToken);
+        if (defaultCat == null)
+        {
+            defaultCat = new Category("General", "Categoría general", warehouseId: warehouseId);
+            _context.Categories.Add(defaultCat);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return defaultCat.Id;
     }
 }

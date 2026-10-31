@@ -120,6 +120,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   onBulkImportSuccess(result: BulkImportResult): void {
+    this.loadFilterLookups();
     this.loadProducts();
     this.alertService?.checkUnreadStatus();
   }
@@ -260,6 +261,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
       next: () => {
         this.modalLoading.set(false);
         this.isModalOpen.set(false);
+        this.loadFilterLookups();
         this.loadProducts();
         this.alertService?.checkUnreadStatus();
       },

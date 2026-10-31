@@ -82,13 +82,40 @@
 
         <!-- Categoría -->
         <div>
-          <app-autocomplete
-            formControlName="categoryId"
-            label="Categoría"
-            [required]="true"
-            [options]="categoryOptions"
-            placeholder="Selecciona o busca una categoría..."
-          ></app-autocomplete>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-slate-700">
+              Categoría <span class="text-rose-500">*</span>
+            </label>
+            <button
+              type="button"
+              (click)="toggleNewCategory()"
+              class="text-[11px] font-semibold text-primary-600 hover:text-primary-800 transition-colors"
+            >
+              {{ isNewCategory() ? '← Seleccionar existente' : '+ Nueva categoría' }}
+            </button>
+          </div>
+
+          @if (!isNewCategory()) {
+            <app-autocomplete
+              formControlName="categoryId"
+              [options]="categoryOptions"
+              placeholder="Selecciona o busca una categoría..."
+            ></app-autocomplete>
+            @if (form.get('categoryId')?.invalid && form.get('categoryId')?.touched) {
+              <p class="text-[11px] text-rose-500 mt-1">Debes seleccionar una categoría.</p>
+            }
+          } @else {
+            <input
+              type="text"
+              formControlName="newCategoryName"
+              placeholder="Escribe el nombre de la nueva categoría (ej: Ferretería)"
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 transition-all"
+              [class.border-rose-400]="form.get('newCategoryName')?.invalid && form.get('newCategoryName')?.touched"
+            />
+            @if (form.get('newCategoryName')?.invalid && form.get('newCategoryName')?.touched) {
+              <p class="text-[11px] text-rose-500 mt-1">El nombre de la nueva categoría es obligatorio.</p>
+            }
+          }
         </div>
 
         <!-- Proveedor -->
