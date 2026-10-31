@@ -141,6 +141,7 @@ var forwardedOptions = new ForwardedHeadersOptions
 };
 forwardedOptions.KnownNetworks.Clear();
 forwardedOptions.KnownProxies.Clear();
+forwardedOptions.ForwardLimit = null;
 app.UseForwardedHeaders(forwardedOptions);
 
 // 2. Cabeceras HTTP de Seguridad (OWASP Hardening)

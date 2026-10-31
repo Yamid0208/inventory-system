@@ -44,22 +44,43 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             accessToken = result.Value.AccessToken,
+            refreshToken = result.Value.RefreshToken,
             user = result.Value.User,
             expiresAt = result.Value.ExpiresAt
         });
     }
 
+    public record RefreshTokenRequestDto(string? RefreshToken);
+
     [HttpPost("refresh")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto? request, CancellationToken cancellationToken)
     {
-        if (!Request.Cookies.TryGetValue(RefreshTokenCookieName, out var refreshToken) || string.IsNullOrWhiteSpace(refreshToken))
+        string? refreshToken = null;
+
+        // 1. Prioridad: Cookie HttpOnly
+        if (Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
+        {
+            refreshToken = cookieToken;
+        }
+        // 2. Fallback resiliente: Cabecera personalizada X-Refresh-Token (mitiga proxies que filtran cookies)
+        else if (Request.Headers.TryGetValue("X-Refresh-Token", out var headerToken) && !string.IsNullOrWhiteSpace(headerToken))
+        {
+            refreshToken = headerToken.ToString();
+        }
+        // 3. Fallback: Cuerpo de la petición JSON
+        else if (request != null && !string.IsNullOrWhiteSpace(request.RefreshToken))
+        {
+            refreshToken = request.RefreshToken;
+        }
+
+        if (string.IsNullOrWhiteSpace(refreshToken))
         {
             return Unauthorized(new ProblemDetails
             {
                 Title = "No autorizado",
-                Detail = "No se proporcionó un token de refresco válido en la cookie.",
+                Detail = "No se proporcionó un token de refresco válido en la cookie, cabecera ni cuerpo.",
                 Status = StatusCodes.Status401Unauthorized
             });
         }
@@ -83,6 +104,7 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             accessToken = result.Value.AccessToken,
+            refreshToken = result.Value.RefreshToken,
             user = result.Value.User,
             expiresAt = result.Value.ExpiresAt
         });
@@ -90,9 +112,24 @@ public class AuthController : ControllerBase
 
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto? request, CancellationToken cancellationToken)
     {
-        if (Request.Cookies.TryGetValue(RefreshTokenCookieName, out var refreshToken) && !string.IsNullOrWhiteSpace(refreshToken))
+        string? refreshToken = null;
+
+        if (Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
+        {
+            refreshToken = cookieToken;
+        }
+        else if (Request.Headers.TryGetValue("X-Refresh-Token", out var headerToken) && !string.IsNullOrWhiteSpace(headerToken))
+        {
+            refreshToken = headerToken.ToString();
+        }
+        else if (request != null && !string.IsNullOrWhiteSpace(request.RefreshToken))
+        {
+            refreshToken = request.RefreshToken;
+        }
+
+        if (!string.IsNullOrWhiteSpace(refreshToken))
         {
             var ipAddress = GetClientIp();
             await _authService.RevokeTokenAsync(refreshToken, ipAddress, cancellationToken);
@@ -126,10 +163,11 @@ public class AuthController : ControllerBase
 
     private void SetRefreshTokenCookie(string token, DateTimeOffset expiresAt)
     {
+        var isSecure = Request.IsHttps || !HttpContext.Request.Host.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = Request.IsHttps,
+            Secure = isSecure,
             SameSite = SameSiteMode.Lax,
             Expires = expiresAt.UtcDateTime,
             Path = "/"
@@ -140,10 +178,11 @@ public class AuthController : ControllerBase
 
     private void DeleteRefreshTokenCookie()
     {
+        var isSecure = Request.IsHttps || !HttpContext.Request.Host.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
         Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
         {
             HttpOnly = true,
-            Secure = Request.IsHttps,
+            Secure = isSecure,
             SameSite = SameSiteMode.Lax,
             Path = "/"
         });

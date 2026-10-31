@@ -94,12 +94,40 @@ public class AuthService : IAuthService
             return Result<AuthResponse>.Failure("Token de refresco inválido.");
         }
 
-        // Detección de Replay Attack: Si un token revocado intenta refrescarse, revocar todos los tokens del usuario
+        // Detección de Replay Attack con período de gracia de 30 segundos
+        // Permite mitigar condiciones de carrera por recargas de página (F5) o llamadas concurrentes legítimas
         if (tokenEntity.RevokedAt != null)
         {
-            tokenEntity.User.RevokeAllRefreshTokens(ipAddress);
-            await _context.SaveChangesAsync(cancellationToken);
-            return Result<AuthResponse>.Failure("Violación de seguridad detectada: Intento de reuso de token revocado. Todas las sesiones han sido cerradas.");
+            var gracePeriod = TimeSpan.FromSeconds(30);
+            if (DateTimeOffset.UtcNow - tokenEntity.RevokedAt > gracePeriod)
+            {
+                tokenEntity.User.RevokeAllRefreshTokens(ipAddress);
+                await _context.SaveChangesAsync(cancellationToken);
+                return Result<AuthResponse>.Failure("Violación de seguridad detectada: Intento de reuso de token revocado. Todas las sesiones han sido cerradas.");
+            }
+
+            // Dentro del período de gracia (<= 30s), retornar el token activo más reciente sin invalidar la sesión
+            var latestActiveToken = await _context.RefreshTokens
+                .Where(t => t.UserId == tokenEntity.UserId && t.RevokedAt == null && t.ExpiresAt > DateTimeOffset.UtcNow)
+                .OrderByDescending(t => t.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (latestActiveToken != null)
+            {
+                var graceAccessToken = _tokenGenerator.GenerateAccessToken(tokenEntity.User);
+                var hasAccepted = await CheckHasAcceptedTermsAsync(tokenEntity.User.Id, cancellationToken);
+                var graceUserDto = new UserDto(
+                    tokenEntity.User.Id,
+                    tokenEntity.User.FullName,
+                    tokenEntity.User.Email,
+                    tokenEntity.User.Role.ToString(),
+                    tokenEntity.User.IsActive,
+                    tokenEntity.User.WarehouseId,
+                    tokenEntity.User.Warehouse?.Name,
+                    hasAccepted
+                );
+                return Result<AuthResponse>.Success(new AuthResponse(graceAccessToken, graceUserDto, latestActiveToken.ExpiresAt, latestActiveToken.Token));
+            }
         }
 
         if (DateTimeOffset.UtcNow >= tokenEntity.ExpiresAt)

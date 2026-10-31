@@ -52,7 +52,21 @@ export class AuthService {
       return this.refreshInProgress$;
     }
 
-    this.refreshInProgress$ = this.http.post<AuthResponse>('/api/v1/auth/refresh', {}, { withCredentials: true }).pipe(
+    let storedRefreshToken: string | null = null;
+    try {
+      storedRefreshToken = localStorage.getItem('sgi_refresh_token');
+    } catch {}
+
+    const body = storedRefreshToken ? { refreshToken: storedRefreshToken } : {};
+    const headers: Record<string, string> = {};
+    if (storedRefreshToken) {
+      headers['X-Refresh-Token'] = storedRefreshToken;
+    }
+
+    this.refreshInProgress$ = this.http.post<AuthResponse>('/api/v1/auth/refresh', body, {
+      headers,
+      withCredentials: true
+    }).pipe(
       tap((res) => {
         this.setSession(res);
       }),
@@ -73,12 +87,23 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+    let storedRefreshToken: string | null = null;
+    try {
+      storedRefreshToken = localStorage.getItem('sgi_refresh_token');
+    } catch {}
+
     // Limpieza síncrona e inequívoca del estado local
     this.clearSession();
     this.router.navigate(['/login']);
 
+    const body = storedRefreshToken ? { refreshToken: storedRefreshToken } : {};
+    const headers: Record<string, string> = {};
+    if (storedRefreshToken) {
+      headers['X-Refresh-Token'] = storedRefreshToken;
+    }
+
     // Notificación en segundo plano al backend para revocar token en base de datos
-    return this.http.post('/api/v1/auth/logout', {}, { withCredentials: true }).pipe(
+    return this.http.post('/api/v1/auth/logout', body, { headers, withCredentials: true }).pipe(
       catchError(() => of(null)),
       shareReplay(1)
     );
@@ -142,6 +167,9 @@ export class AuthService {
     this.currentUserSignal.set(authResponse.user);
     try {
       localStorage.setItem('sgi_user', JSON.stringify(authResponse.user));
+      if (authResponse.refreshToken) {
+        localStorage.setItem('sgi_refresh_token', authResponse.refreshToken);
+      }
     } catch {
       // Ignorar fallo de almacenamiento en modo incógnito/privado
     }
@@ -152,6 +180,7 @@ export class AuthService {
     this.currentUserSignal.set(null);
     try {
       localStorage.removeItem('sgi_user');
+      localStorage.removeItem('sgi_refresh_token');
     } catch {
       // Ignorar
     }
