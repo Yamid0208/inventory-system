@@ -16,7 +16,8 @@ export const roleGuard: CanActivateFn = (route) => {
     return true;
   }
 
-  // Si el usuario no tiene los roles requeridos para la ruta, redirigir al dashboard por defecto
-  router.navigate(['/dashboard']);
+  // Si el usuario no tiene los roles requeridos para la ruta, redirigir a su ruta por defecto
+  const fallbackRoute = authService.getDefaultRouteForRole(user?.role);
+  router.navigate([fallbackRoute]);
   return false;
 };

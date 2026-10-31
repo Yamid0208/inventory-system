@@ -72,7 +72,11 @@ export class LoginComponent implements OnInit {
         }
 
         this.loading.set(false);
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+        const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
+        const defaultRoute = this.authService.getDefaultRouteForRole();
+        const returnUrl = (queryReturnUrl && queryReturnUrl !== '/dashboard')
+          ? queryReturnUrl
+          : (this.authService.isSuperAdmin() ? '/users' : (queryReturnUrl || defaultRoute));
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {

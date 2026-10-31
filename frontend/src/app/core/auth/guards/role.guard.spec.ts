@@ -19,7 +19,8 @@ describe('roleGuard (Unit Tests)', () => {
         email: 'test@sgi.local',
         role: 'Admin',
         isActive: true
-      })
+      }),
+      getDefaultRouteForRole: vi.fn((role?: string) => role === 'SuperAdmin' ? '/users' : '/dashboard')
     };
 
     routerMock = {
@@ -52,6 +53,25 @@ describe('roleGuard (Unit Tests)', () => {
     const result = injector.runInContext(() => roleGuard(route, state));
     expect(result).toBe(false);
     expect(routerMock.navigate).toHaveBeenCalledWith(['/dashboard']);
+  });
+
+  it('bloquea el acceso y redirige a /users si el rol SuperAdmin intenta acceder a una ruta restringida', () => {
+    authServiceMock.currentUser.set({
+      id: 2,
+      fullName: 'Super Administrador',
+      email: 'superadmin@sgi.local',
+      role: 'SuperAdmin',
+      isActive: true
+    });
+
+    const route = {
+      data: { roles: ['Admin', 'Seller'] }
+    } as unknown as ActivatedRouteSnapshot;
+    const state = {} as RouterStateSnapshot;
+
+    const result = injector.runInContext(() => roleGuard(route, state));
+    expect(result).toBe(false);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/users']);
   });
 
   it('permite el acceso libre si no se definen roles en route.data', () => {

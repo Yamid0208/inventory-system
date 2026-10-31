@@ -22,9 +22,15 @@ export class AuthService {
 
   readonly isAuthenticated = computed(() => !!this.currentUserSignal());
   readonly userRole = computed(() => this.currentUserSignal()?.role ?? null);
+  readonly isSuperAdmin = computed(() => this.currentUserSignal()?.role === 'SuperAdmin');
   readonly isAdmin = computed(() => this.currentUserSignal()?.role === 'Admin');
   readonly isWarehouse = computed(() => this.currentUserSignal()?.role === 'Warehouse' || this.isAdmin());
   readonly isSeller = computed(() => this.currentUserSignal()?.role === 'Seller' || this.isAdmin());
+
+  getDefaultRouteForRole(role?: UserRole | null): string {
+    const userRole = role ?? this.userRole();
+    return userRole === 'SuperAdmin' ? '/users' : '/dashboard';
+  }
 
   constructor() {
     this.restoreUserFromStorage();

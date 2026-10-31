@@ -15,53 +15,56 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
+        canActivate: [roleGuard],
         redirectTo: 'dashboard'
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+        loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'Warehouse', 'Seller'] }
       },
       {
         path: 'warehouses',
         loadComponent: () => import('./features/warehouses/warehouses.component').then(m => m.WarehousesComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin'] }
+        data: { roles: ['Admin'] }
       },
       {
         path: 'products',
         loadComponent: () => import('./features/products/products.component').then(m => m.ProductsComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin', 'Warehouse', 'Seller'] }
+        data: { roles: ['Admin', 'Warehouse', 'Seller'] }
       },
       {
         path: 'directory',
         loadComponent: () => import('./features/directory/directory.component').then(m => m.DirectoryComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin', 'Warehouse'] }
+        data: { roles: ['Admin', 'Warehouse'] }
       },
       {
         path: 'inventory',
         loadComponent: () => import('./features/inventory/inventory.component').then(m => m.InventoryComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin', 'Warehouse'] }
+        data: { roles: ['Admin', 'Warehouse'] }
       },
       {
         path: 'purchases',
         loadComponent: () => import('./features/purchases/purchases.component').then(m => m.PurchasesComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin', 'Warehouse'] }
+        data: { roles: ['Admin', 'Warehouse'] }
       },
       {
         path: 'sales',
         loadComponent: () => import('./features/sales/sales.component').then(m => m.SalesComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin', 'Seller'] }
+        data: { roles: ['Admin', 'Seller'] }
       },
       {
         path: 'customers',
         loadComponent: () => import('./features/customers/customers.component').then(m => m.CustomersComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin', 'Seller'] }
+        data: { roles: ['Admin', 'Seller'] }
       },
       {
         path: 'users',
@@ -73,25 +76,25 @@ export const routes: Routes = [
         path: 'alerts',
         loadComponent: () => import('./features/alerts/alerts.component').then(m => m.AlertsComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin', 'Warehouse'] }
+        data: { roles: ['Admin', 'Warehouse'] }
       },
       {
         path: 'audit',
         loadComponent: () => import('./features/audit/audit.component').then(m => m.AuditComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin'] }
+        data: { roles: ['SuperAdmin', 'Admin'] }
       },
       {
         path: 'reports',
         loadComponent: () => import('./features/reports/reports.component').then(m => m.ReportsComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin'] }
+        data: { roles: ['Admin'] }
       },
       {
         path: 'settings',
         loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent),
         canActivate: [roleGuard],
-        data: { roles: ['SuperAdmin', 'Admin'] }
+        data: { roles: ['Admin'] }
       }
     ]
   },
