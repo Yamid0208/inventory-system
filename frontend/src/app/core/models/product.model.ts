@@ -115,7 +115,11 @@ export interface BulkImportRequest {
 export interface BulkImportResult {
   totalProcessed: number;
   createdCount: number;
+  productsCreated?: number;
   updatedCount: number;
+  productsUpdated?: number;
   errorCount: number;
+  errorsCount?: number;
   details: string[];
+  messages?: string[];
 }

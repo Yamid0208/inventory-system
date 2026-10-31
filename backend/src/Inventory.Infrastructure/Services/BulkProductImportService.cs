@@ -323,153 +323,160 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
     {
         var result = new BulkImportResultDto();
 
-        if (request.Items == null || request.Items.Count == 0)
+        var items = (request.Products != null && request.Products.Count > 0) ? request.Products : request.Items;
+        if (items == null || items.Count == 0)
         {
             result.Messages.Add("No hay elementos para importar.");
             return result;
         }
 
-        using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-        try
+        var updateExisting = request.UpdateExisting || request.UpdateExistingProducts;
+
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            // Cachear o crear categorías al vuelo
-            var categoryNames = request.Items.Select(i => i.CategoryName.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            var existingCategories = await _context.Categories
-                .Where(c => !c.IsDeleted)
-                .ToListAsync(cancellationToken);
-
-            var categoryMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            foreach (var catName in categoryNames)
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+            try
             {
-                var found = existingCategories.FirstOrDefault(c => c.Name.Equals(catName, StringComparison.OrdinalIgnoreCase));
-                if (found != null)
+                // Cachear o crear categorías al vuelo
+                var categoryNames = items.Select(i => i.CategoryName.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                var existingCategories = await _context.Categories
+                    .Where(c => !c.IsDeleted)
+                    .ToListAsync(cancellationToken);
+
+                var categoryMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                foreach (var catName in categoryNames)
                 {
-                    categoryMap[catName] = found.Id;
-                }
-                else
-                {
-                    var newCat = new Category(catName, $"Categoría autogenerada en carga masiva", warehouseId: request.WarehouseId);
-                    _context.Categories.Add(newCat);
-                    await _context.SaveChangesAsync(cancellationToken);
-                    categoryMap[catName] = newCat.Id;
-                }
-            }
-
-            // Proveedor por defecto si no existe
-            var defaultSupplier = await _context.Suppliers.FirstOrDefaultAsync(s => !s.IsDeleted, cancellationToken);
-            if (defaultSupplier == null)
-            {
-                defaultSupplier = new Supplier("Proveedor General", "00000000-0", contactName: "General", email: "contacto@general.com", warehouseId: request.WarehouseId);
-                _context.Suppliers.Add(defaultSupplier);
-                await _context.SaveChangesAsync(cancellationToken);
-            }
-
-            foreach (var item in request.Items.Where(i => i.IsValid))
-            {
-                var catId = categoryMap.TryGetValue(item.CategoryName, out var cId) ? cId : categoryMap.Values.First();
-                var supplierId = defaultSupplier.Id;
-
-                var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Sku == item.Sku && !p.IsDeleted, cancellationToken);
-
-                if (existingProduct != null)
-                {
-                    if (request.UpdateExistingProducts)
+                    var found = existingCategories.FirstOrDefault(c => c.Name.Equals(catName, StringComparison.OrdinalIgnoreCase));
+                    if (found != null)
                     {
-                        existingProduct.Update(
-                            name: string.IsNullOrWhiteSpace(item.Name) ? existingProduct.Name : item.Name,
+                        categoryMap[catName] = found.Id;
+                    }
+                    else
+                    {
+                        var newCat = new Category(catName, $"Categoría autogenerada en carga masiva", warehouseId: request.WarehouseId);
+                        _context.Categories.Add(newCat);
+                        await _context.SaveChangesAsync(cancellationToken);
+                        categoryMap[catName] = newCat.Id;
+                    }
+                }
+
+                // Proveedor por defecto si no existe
+                var defaultSupplier = await _context.Suppliers.FirstOrDefaultAsync(s => !s.IsDeleted, cancellationToken);
+                if (defaultSupplier == null)
+                {
+                    defaultSupplier = new Supplier("Proveedor General", "00000000-0", contactName: "General", email: "contacto@general.com", warehouseId: request.WarehouseId);
+                    _context.Suppliers.Add(defaultSupplier);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
+                foreach (var item in items.Where(i => i.IsValid))
+                {
+                    var catId = categoryMap.TryGetValue(item.CategoryName, out var cId) ? cId : categoryMap.Values.First();
+                    var supplierId = defaultSupplier.Id;
+
+                    var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Sku == item.Sku && !p.IsDeleted, cancellationToken);
+
+                    if (existingProduct != null)
+                    {
+                        if (updateExisting)
+                        {
+                            existingProduct.Update(
+                                name: string.IsNullOrWhiteSpace(item.Name) ? existingProduct.Name : item.Name,
+                                categoryId: catId,
+                                supplierId: existingProduct.SupplierId,
+                                purchasePrice: item.PurchasePrice,
+                                salePrice: item.SalePrice,
+                                minimumStock: item.MinimumStock > 0 ? item.MinimumStock : existingProduct.MinimumStock,
+                                description: item.Description ?? existingProduct.Description,
+                                imageUrl: existingProduct.ImageUrl
+                            );
+
+                            if (item.InitialStock > 0)
+                            {
+                                var prevStock = existingProduct.CurrentStock;
+                                existingProduct.UpdateStock(item.InitialStock);
+                                
+                                // Movimiento en Kardex
+                                var movement = new InventoryMovement(
+                                    movementNumber: $"MOV-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}",
+                                    productId: existingProduct.Id,
+                                    type: Domain.Enums.MovementType.AdjustmentIn,
+                                    quantityDelta: item.InitialStock,
+                                    previousStock: prevStock,
+                                    newStock: existingProduct.CurrentStock,
+                                    unitPrice: item.PurchasePrice,
+                                    userId: userId,
+                                    reference: "CARGA-MASIVA",
+                                    notes: "Carga Masiva (Actualización de Stock)",
+                                    warehouseId: request.WarehouseId ?? existingProduct.WarehouseId
+                                );
+                                _context.InventoryMovements.Add(movement);
+                            }
+                            result.ProductsUpdated++;
+                        }
+                    }
+                    else
+                    {
+                        var newProduct = new Product(
+                            sku: item.Sku,
+                            name: item.Name,
                             categoryId: catId,
-                            supplierId: existingProduct.SupplierId,
+                            supplierId: supplierId,
                             purchasePrice: item.PurchasePrice,
                             salePrice: item.SalePrice,
-                            minimumStock: item.MinimumStock > 0 ? item.MinimumStock : existingProduct.MinimumStock,
-                            description: item.Description ?? existingProduct.Description,
-                            imageUrl: existingProduct.ImageUrl
+                            minimumStock: item.MinimumStock > 0 ? item.MinimumStock : 5,
+                            description: item.Description,
+                            warehouseId: request.WarehouseId
                         );
 
                         if (item.InitialStock > 0)
                         {
-                            var prevStock = existingProduct.CurrentStock;
-                            existingProduct.UpdateStock(item.InitialStock);
-                            
-                            // Movimiento en Kardex
+                            newProduct.UpdateStock(item.InitialStock);
+                        }
+
+                        _context.Products.Add(newProduct);
+                        await _context.SaveChangesAsync(cancellationToken);
+
+                        if (item.InitialStock > 0)
+                        {
                             var movement = new InventoryMovement(
                                 movementNumber: $"MOV-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}",
-                                productId: existingProduct.Id,
+                                productId: newProduct.Id,
                                 type: Domain.Enums.MovementType.AdjustmentIn,
                                 quantityDelta: item.InitialStock,
-                                previousStock: prevStock,
-                                newStock: existingProduct.CurrentStock,
+                                previousStock: 0,
+                                newStock: item.InitialStock,
                                 unitPrice: item.PurchasePrice,
                                 userId: userId,
                                 reference: "CARGA-MASIVA",
-                                notes: "Carga Masiva (Actualización de Stock)",
-                                warehouseId: request.WarehouseId ?? existingProduct.WarehouseId
+                                notes: "Carga Masiva (Inventario Inicial)",
+                                warehouseId: request.WarehouseId
                             );
                             _context.InventoryMovements.Add(movement);
                         }
-                        result.ProductsUpdated++;
-                    }
-                }
-                else
-                {
-                    var newProduct = new Product(
-                        sku: item.Sku,
-                        name: item.Name,
-                        categoryId: catId,
-                        supplierId: supplierId,
-                        purchasePrice: item.PurchasePrice,
-                        salePrice: item.SalePrice,
-                        minimumStock: item.MinimumStock > 0 ? item.MinimumStock : 5,
-                        description: item.Description,
-                        warehouseId: request.WarehouseId
-                    );
 
-                    if (item.InitialStock > 0)
-                    {
-                        newProduct.UpdateStock(item.InitialStock);
+                        result.ProductsCreated++;
                     }
 
-                    _context.Products.Add(newProduct);
-                    await _context.SaveChangesAsync(cancellationToken);
-
-                    if (item.InitialStock > 0)
-                    {
-                        var movement = new InventoryMovement(
-                            movementNumber: $"MOV-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString()[..6].ToUpper()}",
-                            productId: newProduct.Id,
-                            type: Domain.Enums.MovementType.AdjustmentIn,
-                            quantityDelta: item.InitialStock,
-                            previousStock: 0,
-                            newStock: item.InitialStock,
-                            unitPrice: item.PurchasePrice,
-                            userId: userId,
-                            reference: "CARGA-MASIVA",
-                            notes: "Carga Masiva (Inventario Inicial)",
-                            warehouseId: request.WarehouseId
-                        );
-                        _context.InventoryMovements.Add(movement);
-                    }
-
-                    result.ProductsCreated++;
+                    result.TotalProcessed++;
                 }
 
-                result.TotalProcessed++;
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                result.Messages.Add($"Carga masiva completada: {result.ProductsCreated} creados, {result.ProductsUpdated} actualizados.");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                _logger.LogError(ex, "Fallo en transacción de carga masiva");
+                result.ErrorsCount++;
+                result.Messages.Add($"Error crítico en la transacción: {ex.Message}");
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-
-            result.Messages.Add($"Carga masiva completada: {result.ProductsCreated} creados, {result.ProductsUpdated} actualizados.");
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            _logger.LogError(ex, "Fallo en transacción de carga masiva");
-            result.ErrorsCount++;
-            result.Messages.Add($"Error crítico en la transacción: {ex.Message}");
-        }
-
-        return result;
+            return result;
+        });
     }
 
     private static bool TryExtractDecimal(string? str, out decimal val)
