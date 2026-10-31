@@ -32,7 +32,8 @@ if grep -q "CAMBIE_ESTA_CLAVE" .env.production; then
 fi
 
 echo "📦 1. Descargando cambios más recientes del repositorio..."
-git fetch origin main || true
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git pull origin "$CURRENT_BRANCH" || true
 
 echo "🔨 2. Construyendo y arrancando contenedores de producción..."
 docker compose --env-file .env.production -f docker-compose.prod.yml down --remove-orphans || true
