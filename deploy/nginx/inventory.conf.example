@@ -7,7 +7,7 @@
 
 server {
     listen 80;
-    server_name su-dominio.com www.su-dominio.com;
+    server_name insincro.tech www.insincro.tech;
 
     # Redirección automática a HTTPS
     location /.well-known/acme-challenge/ {
@@ -21,11 +21,11 @@ server {
 
 server {
     listen 443 ssl http2;
-    server_name su-dominio.com www.su-dominio.com;
+    server_name insincro.tech www.insincro.tech;
 
-    # Certificados SSL (Generados automáticamente por Certbot)
-    ssl_certificate /etc/letsencrypt/live/su-dominio.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/su-dominio.com/privkey.pem;
+    # Certificados SSL (Generados automáticamente por Certbot para insincro.tech)
+    ssl_certificate /etc/letsencrypt/live/insincro.tech/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/insincro.tech/privkey.pem;
 
     # Parámetros SSL recomendados por Mozilla
     ssl_protocols TLSv1.2 TLSv1.3;
