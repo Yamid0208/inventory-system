@@ -13,6 +13,7 @@ import { AppPaginationComponent } from '../../shared/components/app-pagination/a
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
+import { BulkImportModalComponent } from '../products/components/bulk-import-modal/bulk-import-modal.component';
 
 @Component({
   selector: 'app-inventory',
@@ -21,6 +22,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
     CommonModule,
     StockAdjustmentModalComponent,
     ReturnModalComponent,
+    BulkImportModalComponent,
     AppButtonComponent,
     AppPaginationComponent,
     AppAutocompleteComponent,
@@ -65,8 +67,19 @@ export class InventoryComponent implements OnInit {
   // Modal de Ajuste Manual
   isAdjustmentModalOpen = signal<boolean>(false);
   isReturnModalOpen = signal<boolean>(false);
+  isBulkImportOpen = signal<boolean>(false);
   modalLoading = signal<boolean>(false);
   modalError = signal<string | null>(null);
+
+  openBulkImportModal(): void {
+    this.isBulkImportOpen.set(true);
+  }
+
+  onBulkImportSuccess(): void {
+    this.loadKardex();
+    this.loadProductsCatalog();
+    this.alertService?.checkUnreadStatus();
+  }
 
   ngOnInit(): void {
     this.loadKardex();
