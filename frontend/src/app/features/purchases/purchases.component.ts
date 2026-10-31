@@ -15,6 +15,7 @@ import { PurchaseDetailModalComponent } from './components/purchase-detail-modal
 import { PurchaseReturnModalComponent } from './components/purchase-return-modal/purchase-return-modal.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
+import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 
@@ -28,6 +29,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
     PurchaseReturnModalComponent,
     AppButtonComponent,
     AppPaginationComponent,
+    AppSkeletonComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './purchases.component.html'

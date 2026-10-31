@@ -16,6 +16,9 @@ public class User : BaseEntity
     private readonly List<RefreshToken> _refreshTokens = new();
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
 
+    private readonly List<TermsAcceptance> _termsAcceptances = new();
+    public IReadOnlyCollection<TermsAcceptance> TermsAcceptances => _termsAcceptances.AsReadOnly();
+
     protected User() { } // Requerido por EF Core
 
     public User(string fullName, string email, string passwordHash, UserRole role, int? warehouseId = null)

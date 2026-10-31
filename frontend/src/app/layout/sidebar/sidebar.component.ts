@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { SidebarService } from '../../core/services/sidebar.service';
 import { AlertService } from '../../core/services/alert.service';
+import { LegalService } from '../../core/legal/services/legal.service';
 import { UserRole } from '../../core/auth/models/auth.models';
 
 interface NavItem {
@@ -25,6 +26,12 @@ export class SidebarComponent {
   authService = inject(AuthService);
   sidebarService = inject(SidebarService);
   alertService = inject(AlertService, { optional: true });
+  legalService = inject(LegalService);
+
+  openLegalModal(): void {
+    this.sidebarService.close();
+    this.legalService.openLegalViewer();
+  }
 
   get navItems(): NavItem[] {
     const role: UserRole = this.authService.currentUser()?.role || 'Seller';

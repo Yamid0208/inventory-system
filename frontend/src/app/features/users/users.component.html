@@ -136,13 +136,11 @@
   </div>
 
   <!-- TABLA DE USUARIOS -->
+  @if (loading()) {
+    <app-skeleton type="table" [rows]="6" [columns]="5"></app-skeleton>
+  } @else {
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-    @if (loading()) {
-    <div class="py-20 flex flex-col items-center justify-center space-y-3">
-      <div class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-      <p class="text-xs text-slate-400">Cargando directorio de usuarios...</p>
-    </div>
-    } @else if (users().length === 0) {
+    @if (users().length === 0) {
     <div class="py-16 text-center space-y-2">
       <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,6 +268,7 @@
     </div>
     }
   </div>
+  }
   }
 
   <!-- PESTAÑA 2: MATRIZ DE ROLES Y PERMISOS GRANULARES -->

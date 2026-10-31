@@ -11,6 +11,7 @@ import { ReturnModalComponent } from './components/return-modal/return-modal.com
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
+import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { BulkImportModalComponent } from '../products/components/bulk-import-modal/bulk-import-modal.component';
@@ -26,6 +27,7 @@ import { BulkImportModalComponent } from '../products/components/bulk-import-mod
     AppButtonComponent,
     AppPaginationComponent,
     AppAutocompleteComponent,
+    AppSkeletonComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './inventory.component.html'

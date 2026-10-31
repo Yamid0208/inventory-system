@@ -63,6 +63,7 @@ public class AuthService : IAuthService
         ));
         await _context.SaveChangesAsync(cancellationToken);
 
+        var hasAcceptedTerms = await CheckHasAcceptedTermsAsync(user.Id, cancellationToken);
         var userDto = new UserDto(
             user.Id,
             user.FullName,
@@ -70,7 +71,8 @@ public class AuthService : IAuthService
             user.Role.ToString(),
             user.IsActive,
             user.WarehouseId,
-            user.Warehouse?.Name
+            user.Warehouse?.Name,
+            hasAcceptedTerms
         );
         return Result<AuthResponse>.Success(new AuthResponse(accessToken, userDto, expiresAt, rawRefreshToken));
     }
@@ -121,6 +123,7 @@ public class AuthService : IAuthService
 
         await _context.SaveChangesAsync(cancellationToken);
 
+        var hasAcceptedTerms = await CheckHasAcceptedTermsAsync(tokenEntity.User.Id, cancellationToken);
         var userDto = new UserDto(
             tokenEntity.User.Id,
             tokenEntity.User.FullName,
@@ -128,7 +131,8 @@ public class AuthService : IAuthService
             tokenEntity.User.Role.ToString(),
             tokenEntity.User.IsActive,
             tokenEntity.User.WarehouseId,
-            tokenEntity.User.Warehouse?.Name
+            tokenEntity.User.Warehouse?.Name,
+            hasAcceptedTerms
         );
         return Result<AuthResponse>.Success(new AuthResponse(newAccessToken, userDto, expiresAt, newRawRefreshToken));
     }
@@ -164,6 +168,13 @@ public class AuthService : IAuthService
             return Result<UserDto>.Failure("Usuario no encontrado.");
         }
 
-        return Result<UserDto>.Success(new UserDto(user.Id, user.FullName, user.Email, user.Role.ToString(), user.IsActive));
+        var hasAcceptedTerms = await CheckHasAcceptedTermsAsync(user.Id, cancellationToken);
+        return Result<UserDto>.Success(new UserDto(user.Id, user.FullName, user.Email, user.Role.ToString(), user.IsActive, user.WarehouseId, null, hasAcceptedTerms));
+    }
+
+    private async Task<bool> CheckHasAcceptedTermsAsync(int userId, CancellationToken cancellationToken)
+    {
+        return await _context.TermsAcceptances
+            .AnyAsync(t => t.UserId == userId && t.TermsVersion == "1.0", cancellationToken);
     }
 }

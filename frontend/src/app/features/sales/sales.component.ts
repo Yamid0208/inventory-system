@@ -16,6 +16,7 @@ import { SaleDetailModalComponent } from './components/sale-detail-modal/sale-de
 import { InvoiceViewerComponent } from './components/invoice-viewer/invoice-viewer.component';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
+import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 
@@ -29,6 +30,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
     InvoiceViewerComponent,
     AppButtonComponent,
     AppPaginationComponent,
+    AppSkeletonComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './sales.component.html'

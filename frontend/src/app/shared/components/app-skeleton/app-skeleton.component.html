@@ -1,0 +1,144 @@
+<div [class]="containerClass()" role="status" aria-label="Cargando contenido..." aria-live="polite">
+  <!-- MODO 1: TABLA CON FILAS Y COLUMNAS ESQUELETIZADAS -->
+  @if (type() === 'table') {
+    <div class="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden shadow-sm">
+      <!-- Toolbar / Cabecera de búsqueda simulada -->
+      <div class="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between gap-4">
+        <div class="h-9 w-64 rounded-xl skeleton-shimmer"></div>
+        <div class="flex items-center gap-2">
+          <div class="h-9 w-24 rounded-xl skeleton-shimmer"></div>
+          <div class="h-9 w-28 rounded-xl skeleton-shimmer"></div>
+        </div>
+      </div>
+
+      <!-- Cabecera de la tabla -->
+      <div class="bg-[var(--surface-subtle)] border-b border-[var(--border-subtle)] px-6 py-3.5 flex items-center gap-4">
+        @for (col of columnsArray; track $index) {
+          <div
+            class="h-3.5 rounded-md skeleton-shimmer"
+            [class.w-12]="$index === 0"
+            [class.w-28]="$index === 1"
+            [class.w-48]="$index === 2"
+            [class.w-24]="$index === 3"
+            [class.w-20]="$index >= 4"
+            [class.ml-auto]="$index === columnsArray.length - 1">
+          </div>
+        }
+      </div>
+
+      <!-- Filas de datos con shimmer -->
+      <div class="divide-y divide-[var(--border-subtle)]">
+        @for (row of rowsArray; track $index) {
+          <div class="px-6 py-4 flex items-center gap-4 hover:bg-slate-50/50 transition-colors">
+            <!-- Columna 0: Código / ID / Checkbox -->
+            <div class="h-4 w-12 rounded skeleton-shimmer shrink-0"></div>
+
+            <!-- Columna 1: Código o Avatar -->
+            <div class="flex items-center gap-3 shrink-0">
+              <div class="w-8 h-8 rounded-lg skeleton-shimmer"></div>
+              <div class="h-4 w-24 rounded skeleton-shimmer"></div>
+            </div>
+
+            <!-- Columna 2: Nombre / Descripción principal -->
+            <div class="flex-1 space-y-1.5">
+              <div class="h-4 rounded skeleton-shimmer" [style.width.%]="($index % 3 === 0 ? 75 : ($index % 2 === 0 ? 55 : 85))"></div>
+              <div class="h-3 w-32 rounded skeleton-shimmer opacity-70"></div>
+            </div>
+
+            <!-- Columna 3: Categoría o Badge -->
+            <div class="h-6 w-20 rounded-full skeleton-shimmer shrink-0"></div>
+
+            <!-- Columna 4: Valor / Precio / Stock -->
+            <div class="h-4 w-16 rounded skeleton-shimmer shrink-0"></div>
+
+            <!-- Columna Acciones -->
+            <div class="flex items-center gap-2 ml-auto shrink-0">
+              <div class="w-7 h-7 rounded-lg skeleton-shimmer"></div>
+              <div class="w-7 h-7 rounded-lg skeleton-shimmer"></div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Paginador simulado al pie -->
+      <div class="p-4 border-t border-[var(--border-subtle)] bg-[var(--surface-subtle)]/40 flex items-center justify-between">
+        <div class="h-4 w-36 rounded skeleton-shimmer"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg skeleton-shimmer"></div>
+          <div class="w-8 h-8 rounded-lg skeleton-shimmer"></div>
+          <div class="w-8 h-8 rounded-lg skeleton-shimmer"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODO 2: KPI GRID / TARJETAS DE MÉTRICAS -->
+  @if (type() === 'kpi-grid') {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (item of countArray; track $index) {
+        <div class="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="h-3.5 w-24 rounded skeleton-shimmer"></div>
+            <div class="w-9 h-9 rounded-xl skeleton-shimmer"></div>
+          </div>
+          <div class="h-7 w-32 rounded skeleton-shimmer"></div>
+          <div class="flex items-center gap-2 pt-1">
+            <div class="h-4 w-16 rounded-full skeleton-shimmer"></div>
+            <div class="h-3 w-28 rounded skeleton-shimmer opacity-60"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- MODO 3: CARDS GRID (TARJETAS INDIVIDUALES) -->
+  @if (type() === 'cards') {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (card of countArray; track $index) {
+        <div class="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="h-36 w-full rounded-xl skeleton-shimmer"></div>
+          <div class="space-y-2">
+            <div class="h-5 w-3/4 rounded skeleton-shimmer"></div>
+            <div class="h-3.5 w-full rounded skeleton-shimmer opacity-80"></div>
+            <div class="h-3.5 w-2/3 rounded skeleton-shimmer opacity-80"></div>
+          </div>
+          <div class="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between">
+            <div class="h-6 w-20 rounded-full skeleton-shimmer"></div>
+            <div class="h-8 w-24 rounded-xl skeleton-shimmer"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- MODO 4: GRÁFICO / ANALÍTICA -->
+  @if (type() === 'chart') {
+    <div class="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm space-y-6">
+      <div class="flex items-center justify-between">
+        <div class="space-y-1.5">
+          <div class="h-4 w-40 rounded skeleton-shimmer"></div>
+          <div class="h-3 w-56 rounded skeleton-shimmer opacity-60"></div>
+        </div>
+        <div class="h-8 w-32 rounded-lg skeleton-shimmer"></div>
+      </div>
+      <!-- Simulación de barras del gráfico -->
+      <div class="h-56 flex items-end justify-between gap-3 pt-6 pb-2 px-2 border-b border-[var(--border-subtle)]">
+        @for (bar of [40, 65, 30, 85, 50, 70, 95, 45, 60, 75, 55, 90]; track $index) {
+          <div class="w-full rounded-t-md skeleton-shimmer" [style.height.%]="bar"></div>
+        }
+      </div>
+      <div class="flex justify-between text-xs">
+        <div class="h-3 w-10 rounded skeleton-shimmer opacity-50"></div>
+        <div class="h-3 w-10 rounded skeleton-shimmer opacity-50"></div>
+        <div class="h-3 w-10 rounded skeleton-shimmer opacity-50"></div>
+        <div class="h-3 w-10 rounded skeleton-shimmer opacity-50"></div>
+      </div>
+    </div>
+  }
+
+  <!-- MODO 5: CUSTOM (BLOQUE GENÉRICO PULSANTE) -->
+  @if (type() === 'custom') {
+    <div class="w-full h-32 rounded-2xl skeleton-shimmer"></div>
+  }
+</div>
+

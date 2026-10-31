@@ -48,9 +48,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Sistema de Gestión de Inventario API",
+        Title = "Insincro API",
         Version = "v1",
-        Description = "API RESTful con Clean Architecture, EF Core 8 y Autenticación JWT"
+        Description = "API RESTful Insincro - Clean Architecture, EF Core 8, Autenticación JWT y Auditoría Legal"
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -215,6 +215,27 @@ using (var scope = app.Services.CreateScope())
                         CREATE INDEX IF NOT EXISTS ""IX_SalePayments_SaleId"" ON ""SalePayments"" (""SaleId"");
                         ALTER TABLE ""SalePayments"" ADD COLUMN IF NOT EXISTS ""DeletedAt"" TIMESTAMP WITH TIME ZONE NULL;
 
+                        CREATE TABLE IF NOT EXISTS ""TermsAcceptances"" (
+                            ""Id"" SERIAL PRIMARY KEY,
+                            ""UserId"" INTEGER NOT NULL,
+                            ""UserEmail"" VARCHAR(256) NOT NULL,
+                            ""UserName"" VARCHAR(150) NOT NULL,
+                            ""UserRole"" VARCHAR(50) NOT NULL,
+                            ""TermsVersion"" VARCHAR(20) NOT NULL,
+                            ""PrivacyPolicyVersion"" VARCHAR(20) NOT NULL,
+                            ""AcceptedAt"" TIMESTAMP WITH TIME ZONE NOT NULL,
+                            ""IpAddress"" VARCHAR(64) NOT NULL,
+                            ""UserAgent"" VARCHAR(512) NULL,
+                            ""CreatedAt"" TIMESTAMP WITH TIME ZONE NOT NULL,
+                            ""UpdatedAt"" TIMESTAMP WITH TIME ZONE NULL,
+                            ""IsDeleted"" BOOLEAN NOT NULL DEFAULT FALSE,
+                            ""DeletedAt"" TIMESTAMP WITH TIME ZONE NULL,
+                            CONSTRAINT ""FK_TermsAcceptances_Users_UserId"" FOREIGN KEY (""UserId"") REFERENCES ""Users"" (""Id"") ON DELETE CASCADE
+                        );
+                        CREATE INDEX IF NOT EXISTS ""IX_TermsAcceptances_UserId"" ON ""TermsAcceptances"" (""UserId"");
+                        CREATE INDEX IF NOT EXISTS ""IX_TermsAcceptances_AcceptedAt"" ON ""TermsAcceptances"" (""AcceptedAt"");
+                        CREATE INDEX IF NOT EXISTS ""IX_TermsAcceptances_UserId_TermsVersion"" ON ""TermsAcceptances"" (""UserId"", ""TermsVersion"");
+
                         DO $$
                         BEGIN
                             BEGIN
@@ -251,6 +272,31 @@ using (var scope = app.Services.CreateScope())
                             BEGIN
                                 ALTER TABLE [dbo].[SalePayments] ADD [DeletedAt] datetimeoffset NULL;
                             END
+                        END
+
+                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TermsAcceptances]') AND type in (N'U'))
+                        BEGIN
+                            CREATE TABLE [dbo].[TermsAcceptances] (
+                                [Id] int IDENTITY(1,1) NOT NULL,
+                                [UserId] int NOT NULL,
+                                [UserEmail] nvarchar(256) NOT NULL,
+                                [UserName] nvarchar(150) NOT NULL,
+                                [UserRole] nvarchar(50) NOT NULL,
+                                [TermsVersion] nvarchar(20) NOT NULL,
+                                [PrivacyPolicyVersion] nvarchar(20) NOT NULL,
+                                [AcceptedAt] datetimeoffset NOT NULL,
+                                [IpAddress] nvarchar(64) NOT NULL,
+                                [UserAgent] nvarchar(512) NULL,
+                                [CreatedAt] datetimeoffset NOT NULL,
+                                [UpdatedAt] datetimeoffset NULL,
+                                [IsDeleted] bit NOT NULL DEFAULT 0,
+                                [DeletedAt] datetimeoffset NULL,
+                                CONSTRAINT [PK_TermsAcceptances] PRIMARY KEY ([Id]),
+                                CONSTRAINT [FK_TermsAcceptances_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([Id]) ON DELETE CASCADE
+                            );
+                            CREATE NONCLUSTERED INDEX [IX_TermsAcceptances_UserId] ON [dbo].[TermsAcceptances]([UserId]);
+                            CREATE NONCLUSTERED INDEX [IX_TermsAcceptances_AcceptedAt] ON [dbo].[TermsAcceptances]([AcceptedAt]);
+                            CREATE NONCLUSTERED INDEX [IX_TermsAcceptances_UserId_TermsVersion] ON [dbo].[TermsAcceptances]([UserId], [TermsVersion]);
                         END
                     ");
                 }

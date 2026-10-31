@@ -7,12 +7,13 @@ import { AuthService } from '../../core/auth/services/auth.service';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
+import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
 import { CountUpDirective } from '../../shared/directives/count-up.directive';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CurrencyFormatPipe, AppButtonComponent, CountUpDirective],
+  imports: [CommonModule, RouterModule, CurrencyFormatPipe, AppButtonComponent, AppSkeletonComponent, CountUpDirective],
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
