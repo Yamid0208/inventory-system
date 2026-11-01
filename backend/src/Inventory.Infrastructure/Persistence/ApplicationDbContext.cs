@@ -29,6 +29,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<ProductBatch> ProductBatches => Set<ProductBatch>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<TermsAcceptance> TermsAcceptances => Set<TermsAcceptance>();
+    public DbSet<CashRegisterSession> CashRegisterSessions => Set<CashRegisterSession>();
+    public DbSet<CashRegisterMovement> CashRegisterMovements => Set<CashRegisterMovement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

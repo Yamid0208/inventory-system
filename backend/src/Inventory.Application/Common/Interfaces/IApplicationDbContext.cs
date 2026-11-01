@@ -21,6 +21,8 @@ public interface IApplicationDbContext
     DbSet<ProductBatch> ProductBatches { get; }
     DbSet<Warehouse> Warehouses { get; }
     DbSet<TermsAcceptance> TermsAcceptances { get; }
+    DbSet<CashRegisterSession> CashRegisterSessions { get; }
+    DbSet<CashRegisterMovement> CashRegisterMovements { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
