@@ -135,6 +135,14 @@ public class ProductsImportController : BaseApiController
             {
                 request.WarehouseId = userWh.Value;
             }
+            else
+            {
+                var allowed = await GetAuthorizedWarehouseIdsAsync(cancellationToken);
+                if (allowed.Count > 0)
+                {
+                    request.WarehouseId = allowed[0];
+                }
+            }
         }
 
         if (!IsSuperAdmin() && request.WarehouseId.HasValue)

@@ -320,7 +320,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h3 class="font-bold text-slate-800">Productos a Facturar</h3>
-            <p class="text-[11px] text-slate-400">Cada nuevo producto se inserta en la parte superior.</p>
+            <p class="text-[11px] text-slate-400">Agrega los productos que componen la factura o comprobante de venta.</p>
           </div>
           <button type="button" (click)="addItem()"
             class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
@@ -332,13 +332,13 @@
         </div>
 
         <div formArrayName="items" class="space-y-2.5 max-h-72 sm:max-h-80  pr-1">
-          @for (item of itemsArray.controls; track $index; let i = $index) {
+          @for (item of itemsArray.controls; track item; let i = $index) {
           <div [formGroupName]="i"
             class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">
             <!-- Selector de Producto -->
             <div class="flex-1 w-full">
               <app-autocomplete formControlName="productId" label="Producto / SKU" [options]="productOptions"
-                placeholder="Buscar producto por SKU o nombre..." (valueChange)="onProductSelect(i)"></app-autocomplete>
+                placeholder="Buscar producto por SKU o nombre..." (valueChange)="onProductSelect(i, $event)"></app-autocomplete>
             </div>
 
             <!-- Cantidad -->

@@ -146,5 +146,50 @@ describe('SaleModalComponent (Customer Lookup & Registration Tests)', () => {
     expect(component.totalPaid()).toBe(100000);
     expect(component.canAddPaymentRow()).toBe(false);
   });
+
+  it('al agregar un segundo producto, la nueva fila inicia con selector de producto vacío (null)', () => {
+    expect(component.itemsArray.length).toBe(1);
+    expect(component.itemsArray.at(0).get('productId')?.value).toBeNull();
+
+    // Agregar segundo producto
+    component.addItem();
+    expect(component.itemsArray.length).toBe(2);
+
+    // La nueva fila al final debe tener productId null y unitPrice 0
+    const secondItem = component.itemsArray.at(1);
+    expect(secondItem.get('productId')?.value).toBeNull();
+    expect(secondItem.getRawValue().unitPrice).toBe(0);
+    expect(component.getLineTotal(1)).toBe(0);
+  });
+
+  it('al seleccionar un producto en una nueva fila, unitPrice y total de línea se calculan sin quedar en 0', () => {
+    component.products = [
+      { id: 10, sku: 'PROD-004', name: 'Pulidora', salePrice: 95000, currentStock: 20 } as any,
+      { id: 20, sku: 'PROD-006', name: 'Alambre', salePrice: 45000, currentStock: 30 } as any
+    ];
+    component.taxRatePercent.set(19);
+    component.taxRateDecimal.set(0.19);
+
+    // Fila 1
+    component.onProductSelect(0, 10);
+    expect(component.itemsArray.at(0).get('productId')?.value).toBe(10);
+    expect(component.itemsArray.at(0).getRawValue().unitPrice).toBe(95000);
+    expect(component.getLineTotal(0)).toBeCloseTo(95000 * 1.19, 2);
+
+    // Agregar Fila 2
+    component.addItem();
+    expect(component.itemsArray.length).toBe(2);
+    expect(component.itemsArray.at(1).get('productId')?.value).toBeNull();
+
+    // Seleccionar producto en Fila 2
+    component.onProductSelect(1, 20);
+    expect(component.itemsArray.at(1).get('productId')?.value).toBe(20);
+    expect(component.itemsArray.at(1).getRawValue().unitPrice).toBe(45000);
+    expect(component.getLineTotal(1)).toBeCloseTo(45000 * 1.19, 2);
+
+    // El subtotal y total global deben sumar ambos productos
+    expect(component.calculatedSubtotal()).toBe(95000 + 45000);
+    expect(component.calculatedTotal()).toBeCloseTo((95000 + 45000) * 1.19, 2);
+  });
 });
 

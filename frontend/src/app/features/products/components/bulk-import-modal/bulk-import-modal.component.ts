@@ -229,7 +229,9 @@ export class BulkImportModalComponent {
 
     this.isCommitting.set(true);
 
-    const wid = this.branchContextService.selectedWarehouseId() ?? this.authService.currentUser()?.warehouseId ?? null;
+    const wid = this.branchContextService.selectedWarehouseId() 
+      ?? this.authService.currentUser()?.warehouseId 
+      ?? (this.branchContextService.warehouses().length > 0 ? this.branchContextService.warehouses()[0].id : null);
 
     const request: BulkImportRequest = {
       warehouseId: wid,

@@ -454,6 +454,19 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
 
         var updateExisting = request.UpdateExisting || request.UpdateExistingProducts;
 
+        if (!request.WarehouseId.HasValue || request.WarehouseId.Value <= 0)
+        {
+            var firstWh = await _context.Warehouses
+                .Where(w => !w.IsDeleted)
+                .OrderBy(w => w.Id)
+                .Select(w => (int?)w.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (firstWh.HasValue && firstWh.Value > 0)
+            {
+                request.WarehouseId = firstWh.Value;
+            }
+        }
+
         var strategy = _context.Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
         {
@@ -663,10 +676,8 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                         _context.Products.Add(newProduct);
                         productMap[normalizedSku] = newProduct;
 
-                        if (item.InitialStock > 0)
-                        {
-                            newProductsWithStock.Add((newProduct, item.InitialStock, item.PurchasePrice));
-                        }
+                        var initialStockQty = Math.Max(0, item.InitialStock);
+                        newProductsWithStock.Add((newProduct, initialStockQty, item.PurchasePrice));
 
                         result.ProductsCreated++;
                     }

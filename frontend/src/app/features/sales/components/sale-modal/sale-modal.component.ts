@@ -282,8 +282,17 @@ export class SaleModalComponent implements OnInit {
       unitPrice: [{ value: 0, disabled: true }, [Validators.required, Validators.min(0)]],
       taxRate: [this.taxRateDecimal()]
     });
-    // Inserción al inicio para que el nuevo producto aparezca arriba
-    this.itemsArray.insert(0, itemGroup);
+
+    itemGroup.get('productId')?.valueChanges.subscribe(prodId => {
+      const prod = this.products.find(p => p.id === Number(prodId));
+      if (prod) {
+        itemGroup.patchValue({ unitPrice: prod.salePrice }, { emitEvent: false });
+      } else if (!prodId) {
+        itemGroup.patchValue({ unitPrice: 0 }, { emitEvent: false });
+      }
+    });
+
+    this.itemsArray.push(itemGroup);
   }
 
   removeItem(index: number): void {
@@ -370,17 +379,31 @@ export class SaleModalComponent implements OnInit {
     return Math.abs(this.calculatedTotal() - this.totalPaid()) < 0.05 && this.paymentsArray.length > 0;
   }
 
-  onProductSelect(index: number): void {
+  onProductSelect(index: number, selectedProductId?: any): void {
     const group = this.itemsArray.at(index);
-    const prodId = Number(group.get('productId')?.value);
+    if (!group) return;
+
+    const prodId = (selectedProductId !== undefined && selectedProductId !== null)
+      ? Number(selectedProductId)
+      : Number(group.get('productId')?.value);
+
     const prod = this.products.find(p => p.id === prodId);
     if (prod) {
-      group.patchValue({ unitPrice: prod.salePrice });
+      group.patchValue({
+        productId: prod.id,
+        unitPrice: prod.salePrice
+      });
+    } else if (!prodId) {
+      group.patchValue({
+        productId: null,
+        unitPrice: 0
+      });
     }
   }
 
   getSelectedProduct(index: number): Product | undefined {
     const group = this.itemsArray.at(index);
+    if (!group) return undefined;
     const prodId = Number(group.get('productId')?.value);
     return this.products.find(p => p.id === prodId);
   }
@@ -388,7 +411,8 @@ export class SaleModalComponent implements OnInit {
   isLineStockExceeded(index: number): boolean {
     const prod = this.getSelectedProduct(index);
     if (!prod) return false;
-    const qty = Number(this.itemsArray.at(index).get('quantity')?.value) || 0;
+    const group = this.itemsArray.at(index);
+    const qty = Number(group?.get('quantity')?.value) || 0;
     return qty > prod.currentStock;
   }
 
@@ -398,16 +422,19 @@ export class SaleModalComponent implements OnInit {
 
   getLineTotal(index: number): number {
     const group = this.itemsArray.at(index);
-    const qty = Number(group.get('quantity')?.value) || 0;
-    const price = Number(group.get('unitPrice')?.value) || 0;
+    if (!group) return 0;
+    const raw = group.getRawValue();
+    const qty = Number(raw.quantity) || 0;
+    const price = Number(raw.unitPrice) || 0;
     const subtotal = qty * price;
     return subtotal * (1 + this.taxRateDecimal());
   }
 
   calculatedSubtotal(): number {
     return this.itemsArray.controls.reduce((acc, curr) => {
-      const qty = Number(curr.get('quantity')?.value) || 0;
-      const price = Number(curr.get('unitPrice')?.value) || 0;
+      const raw = curr.getRawValue();
+      const qty = Number(raw.quantity) || 0;
+      const price = Number(raw.unitPrice) || 0;
       return acc + (qty * price);
     }, 0);
   }

@@ -40,7 +40,8 @@ public class InventoryService : IInventoryService
         else if (request.AllowedWarehouseIds != null)
         {
             query = query.Where(m => (m.WarehouseId.HasValue && request.AllowedWarehouseIds.Contains(m.WarehouseId.Value)) ||
-                                     (m.WarehouseId == null && m.Product.WarehouseId.HasValue && request.AllowedWarehouseIds.Contains(m.Product.WarehouseId.Value)));
+                                     (m.WarehouseId == null && m.Product.WarehouseId.HasValue && request.AllowedWarehouseIds.Contains(m.Product.WarehouseId.Value)) ||
+                                     (m.WarehouseId == null && m.Product.WarehouseId == null));
         }
 
         if (!string.IsNullOrWhiteSpace(request.MovementType) && request.MovementType != "all")
