@@ -57,3 +57,4 @@ export class CashMovementModalComponent implements OnInit {
     this.cancel.emit();
   }
 }
+

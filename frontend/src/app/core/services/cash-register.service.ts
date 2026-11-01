@@ -104,3 +104,4 @@ export class CashRegisterService {
     return this.http.get<CashRegisterDashboard>(`${this.baseUrl}/dashboard`, { params });
   }
 }
+

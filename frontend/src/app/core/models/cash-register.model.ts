@@ -109,3 +109,4 @@ export interface CashRegisterFilterRequest {
   status?: string;
   warehouseId?: number;
 }
+

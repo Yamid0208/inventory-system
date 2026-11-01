@@ -237,6 +237,60 @@ using (var scope = app.Services.CreateScope())
                         CREATE INDEX IF NOT EXISTS ""IX_TermsAcceptances_AcceptedAt"" ON ""TermsAcceptances"" (""AcceptedAt"");
                         CREATE INDEX IF NOT EXISTS ""IX_TermsAcceptances_UserId_TermsVersion"" ON ""TermsAcceptances"" (""UserId"", ""TermsVersion"");
 
+                        CREATE TABLE IF NOT EXISTS ""CashRegisterSessions"" (
+                            ""Id"" SERIAL PRIMARY KEY,
+                            ""SessionNumber"" VARCHAR(50) NOT NULL,
+                            ""UserId"" INTEGER NOT NULL,
+                            ""WarehouseId"" INTEGER NULL,
+                            ""OpenedAt"" TIMESTAMP WITH TIME ZONE NOT NULL,
+                            ""ClosedAt"" TIMESTAMP WITH TIME ZONE NULL,
+                            ""Status"" SMALLINT NOT NULL,
+                            ""InitialCash"" NUMERIC(18,2) NOT NULL,
+                            ""OpeningNotes"" VARCHAR(500) NULL,
+                            ""ClosingNotes"" VARCHAR(500) NULL,
+                            ""ExpectedCash"" NUMERIC(18,2) NOT NULL,
+                            ""ActualCash"" NUMERIC(18,2) NULL,
+                            ""CashDifference"" NUMERIC(18,2) NULL,
+                            ""DifferenceStatus"" SMALLINT NULL,
+                            ""TotalCashInflow"" NUMERIC(18,2) NOT NULL,
+                            ""TotalCashOutflow"" NUMERIC(18,2) NOT NULL,
+                            ""TotalTransferInflow"" NUMERIC(18,2) NOT NULL,
+                            ""TotalCardInflow"" NUMERIC(18,2) NOT NULL,
+                            ""TotalOtherInflow"" NUMERIC(18,2) NOT NULL,
+                            ""TotalSales"" NUMERIC(18,2) NOT NULL,
+                            ""CreatedAt"" TIMESTAMP WITH TIME ZONE NOT NULL,
+                            ""UpdatedAt"" TIMESTAMP WITH TIME ZONE NULL,
+                            ""IsDeleted"" BOOLEAN NOT NULL DEFAULT FALSE,
+                            ""DeletedAt"" TIMESTAMP WITH TIME ZONE NULL,
+                            CONSTRAINT ""FK_CashRegisterSessions_Users_UserId"" FOREIGN KEY (""UserId"") REFERENCES ""Users"" (""Id"") ON DELETE RESTRICT
+                        );
+                        CREATE UNIQUE INDEX IF NOT EXISTS ""UX_CashRegisterSessions_SessionNumber"" ON ""CashRegisterSessions"" (""SessionNumber"");
+                        CREATE INDEX IF NOT EXISTS ""IX_CashRegisterSessions_UserId_Status"" ON ""CashRegisterSessions"" (""UserId"", ""Status"");
+
+                        CREATE TABLE IF NOT EXISTS ""CashRegisterMovements"" (
+                            ""Id"" SERIAL PRIMARY KEY,
+                            ""CashRegisterSessionId"" INTEGER NOT NULL,
+                            ""MovementNumber"" VARCHAR(50) NOT NULL,
+                            ""MovementType"" SMALLINT NOT NULL,
+                            ""Category"" SMALLINT NOT NULL,
+                            ""PaymentMethod"" SMALLINT NOT NULL,
+                            ""Amount"" NUMERIC(18,2) NOT NULL,
+                            ""Concept"" VARCHAR(250) NOT NULL,
+                            ""Notes"" VARCHAR(500) NULL,
+                            ""MovementDate"" TIMESTAMP WITH TIME ZONE NOT NULL,
+                            ""UserId"" INTEGER NOT NULL,
+                            ""SaleId"" INTEGER NULL,
+                            ""IsCashEffect"" BOOLEAN NOT NULL,
+                            ""CreatedAt"" TIMESTAMP WITH TIME ZONE NOT NULL,
+                            ""UpdatedAt"" TIMESTAMP WITH TIME ZONE NULL,
+                            ""IsDeleted"" BOOLEAN NOT NULL DEFAULT FALSE,
+                            ""DeletedAt"" TIMESTAMP WITH TIME ZONE NULL,
+                            CONSTRAINT ""FK_CashRegisterMovements_CashRegisterSessions_SessionId"" FOREIGN KEY (""CashRegisterSessionId"") REFERENCES ""CashRegisterSessions"" (""Id"") ON DELETE RESTRICT,
+                            CONSTRAINT ""FK_CashRegisterMovements_Users_UserId"" FOREIGN KEY (""UserId"") REFERENCES ""Users"" (""Id"") ON DELETE RESTRICT
+                        );
+                        CREATE UNIQUE INDEX IF NOT EXISTS ""UX_CashRegisterMovements_MovementNumber"" ON ""CashRegisterMovements"" (""MovementNumber"");
+                        CREATE INDEX IF NOT EXISTS ""IX_CashRegisterMovements_Session_Date"" ON ""CashRegisterMovements"" (""CashRegisterSessionId"", ""MovementDate"");
+
                         DO $$
                         BEGIN
                             BEGIN
@@ -298,6 +352,68 @@ using (var scope = app.Services.CreateScope())
                             CREATE NONCLUSTERED INDEX [IX_TermsAcceptances_UserId] ON [dbo].[TermsAcceptances]([UserId]);
                             CREATE NONCLUSTERED INDEX [IX_TermsAcceptances_AcceptedAt] ON [dbo].[TermsAcceptances]([AcceptedAt]);
                             CREATE NONCLUSTERED INDEX [IX_TermsAcceptances_UserId_TermsVersion] ON [dbo].[TermsAcceptances]([UserId], [TermsVersion]);
+                        END
+
+                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CashRegisterSessions]') AND type in (N'U'))
+                        BEGIN
+                            CREATE TABLE [dbo].[CashRegisterSessions] (
+                                [Id] int IDENTITY(1,1) NOT NULL,
+                                [SessionNumber] nvarchar(50) NOT NULL,
+                                [UserId] int NOT NULL,
+                                [WarehouseId] int NULL,
+                                [OpenedAt] datetimeoffset NOT NULL,
+                                [ClosedAt] datetimeoffset NULL,
+                                [Status] tinyint NOT NULL,
+                                [InitialCash] decimal(18,2) NOT NULL,
+                                [OpeningNotes] nvarchar(500) NULL,
+                                [ClosingNotes] nvarchar(500) NULL,
+                                [ExpectedCash] decimal(18,2) NOT NULL,
+                                [ActualCash] decimal(18,2) NULL,
+                                [CashDifference] decimal(18,2) NULL,
+                                [DifferenceStatus] tinyint NULL,
+                                [TotalCashInflow] decimal(18,2) NOT NULL,
+                                [TotalCashOutflow] decimal(18,2) NOT NULL,
+                                [TotalTransferInflow] decimal(18,2) NOT NULL,
+                                [TotalCardInflow] decimal(18,2) NOT NULL,
+                                [TotalOtherInflow] decimal(18,2) NOT NULL,
+                                [TotalSales] decimal(18,2) NOT NULL,
+                                [CreatedAt] datetimeoffset NOT NULL,
+                                [UpdatedAt] datetimeoffset NULL,
+                                [IsDeleted] bit NOT NULL DEFAULT 0,
+                                [DeletedAt] datetimeoffset NULL,
+                                CONSTRAINT [PK_CashRegisterSessions] PRIMARY KEY ([Id]),
+                                CONSTRAINT [FK_CashRegisterSessions_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([Id])
+                            );
+                            CREATE UNIQUE NONCLUSTERED INDEX [UX_CashRegisterSessions_SessionNumber] ON [dbo].[CashRegisterSessions]([SessionNumber]);
+                            CREATE NONCLUSTERED INDEX [IX_CashRegisterSessions_UserId_Status] ON [dbo].[CashRegisterSessions]([UserId], [Status]);
+                        END
+
+                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CashRegisterMovements]') AND type in (N'U'))
+                        BEGIN
+                            CREATE TABLE [dbo].[CashRegisterMovements] (
+                                [Id] int IDENTITY(1,1) NOT NULL,
+                                [CashRegisterSessionId] int NOT NULL,
+                                [MovementNumber] nvarchar(50) NOT NULL,
+                                [MovementType] tinyint NOT NULL,
+                                [Category] tinyint NOT NULL,
+                                [PaymentMethod] tinyint NOT NULL,
+                                [Amount] decimal(18,2) NOT NULL,
+                                [Concept] nvarchar(250) NOT NULL,
+                                [Notes] nvarchar(500) NULL,
+                                [MovementDate] datetimeoffset NOT NULL,
+                                [UserId] int NOT NULL,
+                                [SaleId] int NULL,
+                                [IsCashEffect] bit NOT NULL,
+                                [CreatedAt] datetimeoffset NOT NULL,
+                                [UpdatedAt] datetimeoffset NULL,
+                                [IsDeleted] bit NOT NULL DEFAULT 0,
+                                [DeletedAt] datetimeoffset NULL,
+                                CONSTRAINT [PK_CashRegisterMovements] PRIMARY KEY ([Id]),
+                                CONSTRAINT [FK_CashRegisterMovements_CashRegisterSessions] FOREIGN KEY ([CashRegisterSessionId]) REFERENCES [dbo].[CashRegisterSessions] ([Id]),
+                                CONSTRAINT [FK_CashRegisterMovements_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([Id])
+                            );
+                            CREATE UNIQUE NONCLUSTERED INDEX [UX_CashRegisterMovements_MovementNumber] ON [dbo].[CashRegisterMovements]([MovementNumber]);
+                            CREATE NONCLUSTERED INDEX [IX_CashRegisterMovements_Session_Date] ON [dbo].[CashRegisterMovements]([CashRegisterSessionId], [MovementDate]);
                         END
                     ");
                 }

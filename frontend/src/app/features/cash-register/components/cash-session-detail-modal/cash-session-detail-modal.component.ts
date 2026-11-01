@@ -37,3 +37,4 @@ export class CashSessionDetailModalComponent implements OnInit {
     this.close.emit();
   }
 }
+

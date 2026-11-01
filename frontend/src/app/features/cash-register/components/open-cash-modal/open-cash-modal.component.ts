@@ -51,3 +51,4 @@ export class OpenCashModalComponent implements OnInit {
     this.cancel.emit();
   }
 }
+
