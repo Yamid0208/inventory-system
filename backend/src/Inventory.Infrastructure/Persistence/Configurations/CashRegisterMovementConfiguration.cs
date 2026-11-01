@@ -70,3 +70,4 @@ public class CashRegisterMovementConfiguration : IEntityTypeConfiguration<CashRe
         builder.HasQueryFilter(m => !m.IsDeleted);
     }
 }
+

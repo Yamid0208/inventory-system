@@ -94,3 +94,4 @@ public class CashRegisterSessionConfiguration : IEntityTypeConfiguration<CashReg
         builder.HasQueryFilter(s => !s.IsDeleted);
     }
 }
+

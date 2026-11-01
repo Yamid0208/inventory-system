@@ -8,3 +8,4 @@ public enum CashMovementType : byte
     CashWithdrawal = 4,
     SaleReturnOutflow = 5
 }
+

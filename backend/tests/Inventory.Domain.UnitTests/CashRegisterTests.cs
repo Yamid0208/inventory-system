@@ -149,6 +149,37 @@ public class CashRegisterTests
     }
 
     [Fact]
+    public void CashRegisterSession_Close_AlreadyClosed_ThrowsException()
+    {
+        var session = new CashRegisterSession("CAJA-004", 1, 100000m);
+        session.Close(100000m, "Primer cierre");
+
+        Assert.Throws<InvalidOperationException>(() =>
+            session.Close(100000m, "Segundo cierre duplicado"));
+    }
+
+    [Fact]
+    public void CashRegisterSession_CompensatoryReturnMovement_DiscountsExpectedCashAccurately()
+    {
+        var session = new CashRegisterSession("CAJA-005", 1, 200000m);
+
+        // Venta inicial en efectivo: +50,000
+        session.AddMovement(new CashRegisterMovement(
+            session.Id, "MOV-01", CashMovementType.SaleInflow, PaymentMethod.Cash, 50000m, "Venta VEN-001", 1));
+
+        // Anulación compensatoria de la venta: -50,000 (afecta efectivo)
+        session.AddMovement(new CashRegisterMovement(
+            session.Id, "MOV-02", CashMovementType.SaleReturnOutflow, PaymentMethod.Cash, 50000m, "Compensatorio Anulación", 1));
+
+        session.Close(200000m, "Cierre después de anulación");
+
+        Assert.Equal(200000m, session.ExpectedCash);
+        Assert.Equal(CashDifferenceStatus.Balanced, session.DifferenceStatus);
+        Assert.Equal(50000m, session.TotalCashInflow);
+        Assert.Equal(50000m, session.TotalCashOutflow);
+    }
+
+    [Fact]
     public void CashRegisterMovement_Validation_RejectsInvalidValues()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>

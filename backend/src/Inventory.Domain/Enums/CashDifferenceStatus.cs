@@ -6,3 +6,4 @@ public enum CashDifferenceStatus : byte
     Surplus = 2,
     Shortage = 3
 }
+

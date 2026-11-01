@@ -164,3 +164,4 @@ public class CashRegisterSession : BaseEntity
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 }
+

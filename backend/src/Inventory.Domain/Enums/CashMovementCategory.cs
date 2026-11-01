@@ -5,3 +5,4 @@ public enum CashMovementCategory : byte
     Inflow = 1,
     Outflow = 2
 }
+
