@@ -662,3 +662,4 @@ public class CashRegisterService : ICashRegisterService
         return user != null && (user.Role == UserRole.SuperAdmin || user.Role == UserRole.Admin);
     }
 }
+

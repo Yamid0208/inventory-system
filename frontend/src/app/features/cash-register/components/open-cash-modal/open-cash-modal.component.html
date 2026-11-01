@@ -1,0 +1,114 @@
+<div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    
+    <!-- Modal Header -->
+    <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Apertura de Caja</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Inicia tu turno registrando el saldo inicial en efectivo</p>
+        </div>
+      </div>
+      <button type="button" (click)="onCancel()" class="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Error Alert -->
+    @if (errorMessage) {
+      <div class="mx-6 mt-4 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-3">
+        <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-xs text-rose-700 dark:text-rose-300 font-medium">{{ errorMessage }}</span>
+      </div>
+    }
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
+      
+      <!-- Initial Cash Input -->
+      <div>
+        <label for="initialCash" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+          Efectivo Inicial en Caja <span class="text-rose-500">*</span>
+        </label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-bold">$</span>
+          <input
+            id="initialCash"
+            type="text"
+            formControlName="initialCash"
+            appThousandsSeparator
+            class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold text-base focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
+            placeholder="0"
+          />
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">Representa exclusivamente el dinero físico disponible en gaveta para dar cambio.</p>
+        @if (form.get('initialCash')?.invalid && form.get('initialCash')?.touched) {
+          <p class="text-xs text-rose-500 mt-1">El monto inicial es obligatorio y debe ser mayor o igual a cero.</p>
+        }
+      </div>
+
+      <!-- Warehouse Selection (Optional if multiple) -->
+      @if (warehouses && warehouses.length > 0) {
+        <div>
+          <label for="warehouseId" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            Sede / Almacén
+          </label>
+          <select
+            id="warehouseId"
+            formControlName="warehouseId"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+          >
+            <option [ngValue]="null">Seleccionar sede (opcional)...</option>
+            @for (wh of warehouses; track wh.id) {
+              <option [ngValue]="wh.id">{{ wh.name }} ({{ wh.code }})</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Observations Notes -->
+      <div>
+        <label for="notes" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+          Observaciones de Apertura (Opcional)
+        </label>
+        <textarea
+          id="notes"
+          formControlName="notes"
+          rows="2"
+          class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none placeholder:text-slate-400"
+          placeholder="Ej. Billetes de baja denominación para cambio..."
+        ></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-end gap-2.5">
+        <app-button
+          type="button"
+          variant="outline"
+          (clicked)="onCancel()"
+          [disabled]="loading"
+        >
+          Cancelar
+        </app-button>
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="loading"
+          [disabled]="loading || form.invalid"
+        >
+          Confirmar y Abrir Caja
+        </app-button>
+      </div>
+
+    </form>
+  </div>
+</div>

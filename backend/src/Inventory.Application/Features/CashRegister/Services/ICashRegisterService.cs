@@ -69,3 +69,4 @@ public interface ICashRegisterService
         int userId,
         CancellationToken cancellationToken = default);
 }
+

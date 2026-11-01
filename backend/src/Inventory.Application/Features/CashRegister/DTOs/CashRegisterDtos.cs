@@ -108,3 +108,4 @@ public record CashRegisterDashboardDto(
     decimal TodayExpectedCash,
     int TodayMovementCount
 );
+

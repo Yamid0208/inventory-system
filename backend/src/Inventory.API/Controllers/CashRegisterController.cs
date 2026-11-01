@@ -211,3 +211,4 @@ public class CashRegisterController : BaseApiController
         return Ok(dashboard);
     }
 }
+

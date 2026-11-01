@@ -1,0 +1,215 @@
+<div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
+    
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-950/60 text-primary-600 dark:text-primary-400 flex items-center justify-center shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Arqueo y Cierre de Caja</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">{{ summary.sessionNumber }} &bull; Empleado: {{ summary.userName }}</p>
+        </div>
+      </div>
+      <button type="button" (click)="onCancel()" class="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Error Alert -->
+    @if (errorMessage) {
+      <div class="mx-6 mt-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-start gap-3">
+        <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-xs text-rose-700 dark:text-rose-300 font-medium">{{ errorMessage }}</span>
+      </div>
+    }
+
+    <!-- Scrollable Content -->
+    <div class="p-6 space-y-6 overflow-y-auto">
+      
+      <!-- Financial Breakdown Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Left: Physical Cash Breakdown -->
+        <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/60 space-y-2.5">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Flujo de Efectivo Físico
+          </h4>
+
+          <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+            <span>Saldo Inicial (Apertura):</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-200">{{ summary.initialCash | currencyFormat }}</span>
+          </div>
+
+          <div class="flex justify-between text-xs text-emerald-600 dark:text-emerald-400">
+            <span>(+) Ventas en Efectivo:</span>
+            <span class="font-semibold">+{{ summary.totalCashSales | currencyFormat }}</span>
+          </div>
+
+          <div class="flex justify-between text-xs text-emerald-600 dark:text-emerald-400">
+            <span>(+) Otros Ingresos Efectivo:</span>
+            <span class="font-semibold">+{{ (summary.totalCashInflows - summary.totalCashSales) | currencyFormat }}</span>
+          </div>
+
+          <div class="flex justify-between text-xs text-rose-600 dark:text-rose-400">
+            <span>(-) Gastos en Efectivo:</span>
+            <span class="font-semibold">-{{ summary.totalCashOutflows | currencyFormat }}</span>
+          </div>
+
+          <div class="flex justify-between text-xs text-amber-600 dark:text-amber-400">
+            <span>(-) Retiros de Efectivo:</span>
+            <span class="font-semibold">-{{ summary.totalCashWithdrawals | currencyFormat }}</span>
+          </div>
+
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-sm font-bold text-slate-900 dark:text-white">
+            <span>Efectivo Esperado:</span>
+            <span class="text-primary-600 dark:text-primary-400">{{ summary.expectedCash | currencyFormat }}</span>
+          </div>
+        </div>
+
+        <!-- Right: Digital Payment Methods & General Sales -->
+        <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/60 space-y-2.5">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Medios Digitales & Totales
+          </h4>
+
+          <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+            <span>Transferencias (Nequi / Bancos):</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-200">{{ summary.totalTransferSales | currencyFormat }}</span>
+          </div>
+
+          <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+            <span>Tarjetas Débito y Crédito:</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-200">{{ summary.totalCardSales | currencyFormat }}</span>
+          </div>
+
+          <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+            <span>Otros Medios de Pago:</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-200">{{ summary.totalOtherSales | currencyFormat }}</span>
+          </div>
+
+          <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+            <span>Movimientos Totales Registrados:</span>
+            <span class="font-semibold text-slate-800 dark:text-slate-200">{{ summary.movementCount }} operaciones</span>
+          </div>
+
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-sm font-bold text-slate-900 dark:text-white">
+            <span>Total Ventas Turno:</span>
+            <span class="text-slate-900 dark:text-white">{{ summary.totalSales | currencyFormat }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Physical Cash Counting Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        
+        <div class="p-4 rounded-xl border-2 transition-all"
+          [ngClass]="{
+            'border-emerald-300 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-950/30': differenceStatus() === 'Balanced',
+            'border-amber-300 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/30': differenceStatus() === 'Surplus',
+            'border-rose-300 bg-rose-50/50 dark:border-rose-800 dark:bg-rose-950/30': differenceStatus() === 'Shortage'
+          }"
+        >
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex-1">
+              <label for="actualCash" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                Efectivo Físico Contado en Gaveta <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-bold">$</span>
+                <input
+                  id="actualCash"
+                  type="text"
+                  formControlName="actualCash"
+                  appThousandsSeparator
+                  class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-extrabold text-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            <!-- Difference & Status Badge -->
+            <div class="flex flex-col items-start sm:items-end justify-center">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Resultado de Arqueo</span>
+              <div class="flex items-center gap-2 mt-1">
+                @if (differenceStatus() === 'Balanced') {
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-300">
+                    ✓ CUADRADO ($0)
+                  </span>
+                } @else if (differenceStatus() === 'Surplus') {
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border border-amber-300">
+                    ▲ SOBRANTE (+{{ difference() | currencyFormat }})
+                  </span>
+                } @else {
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300 border border-rose-300">
+                    ▼ FALTANTE ({{ difference() | currencyFormat }})
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes (Mandatory if Difference != 0) -->
+        <div>
+          <label for="closeNotes" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            Observaciones de Cierre
+            @if (differenceStatus() !== 'Balanced') {
+              <span class="text-rose-500 font-bold">* (Obligatorio justificar diferencia)</span>
+            } @else {
+              <span class="text-slate-400 font-normal">(Opcional)</span>
+            }
+          </label>
+          <textarea
+            id="closeNotes"
+            formControlName="notes"
+            rows="2"
+            class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none placeholder:text-slate-400"
+            placeholder="Ingrese cualquier observación o justificación del cuadre de caja..."
+          ></textarea>
+          @if (form.get('notes')?.invalid && form.get('notes')?.touched) {
+            <p class="text-xs text-rose-500 mt-1">Debe registrar una justificación para la diferencia detectada (mínimo 5 caracteres).</p>
+          }
+        </div>
+
+        <!-- Warning Disclaimer -->
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
+          <svg class="w-4 h-4 shrink-0 mt-0.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span><strong>Importante:</strong> El cierre de caja es definitivo e inmutable. Una vez cerrada, no se podrán registrar nuevos movimientos ni alterar este turno.</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-end gap-2.5">
+          <app-button
+            type="button"
+            variant="outline"
+            (clicked)="onCancel()"
+            [disabled]="loading"
+          >
+            Volver a Operación
+          </app-button>
+          <app-button
+            type="submit"
+            variant="danger"
+            [loading]="loading"
+            [disabled]="loading || form.invalid"
+          >
+            Confirmar Cierre Definitivo
+          </app-button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

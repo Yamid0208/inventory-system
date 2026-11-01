@@ -59,6 +59,12 @@ export const routes: Routes = [
         data: { roles: ['Admin', 'Warehouse'] }
       },
       {
+        path: 'cash-register',
+        loadComponent: () => import('./features/cash-register/cash-register.component').then(m => m.CashRegisterComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'Seller'] }
+      },
+      {
         path: 'sales',
         loadComponent: () => import('./features/sales/sales.component').then(m => m.SalesComponent),
         canActivate: [roleGuard],
