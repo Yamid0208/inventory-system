@@ -1,5 +1,6 @@
 using Inventory.Application.Common.Exceptions;
 using Inventory.Application.Common.Models;
+using Inventory.Application.Features.CashRegister.Services;
 using Inventory.Application.Features.Sales.DTOs;
 using Inventory.Application.Features.Sales.Services;
 using Inventory.Domain.Entities;
@@ -12,10 +13,12 @@ namespace Inventory.Infrastructure.Services;
 public class SaleService : ISaleService
 {
     private readonly ApplicationDbContext _context;
+    private readonly ICashRegisterService _cashRegisterService;
 
-    public SaleService(ApplicationDbContext context)
+    public SaleService(ApplicationDbContext context, ICashRegisterService cashRegisterService)
     {
         _context = context;
+        _cashRegisterService = cashRegisterService;
     }
 
     public async Task<PagedResult<SaleDto>> GetSalesAsync(
@@ -244,6 +247,11 @@ public class SaleService : ISaleService
 
                 _context.Sales.Add(sale);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                // 4. Registro automático de movimientos de caja discriminados por medio de pago (RN-CAJA-002)
+                await _cashRegisterService.RecordSaleMovementsAsync(sale, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+
                 await transaction.CommitAsync(cancellationToken);
 
                 return sale.Id;
@@ -305,6 +313,9 @@ public class SaleService : ISaleService
 
                     _context.InventoryMovements.Add(movement);
                 }
+
+                // Registro compensatorio de caja por anulación (si existe sesión activa)
+                await _cashRegisterService.RecordSaleCancellationMovementsAsync(sale, userId, cancellationToken);
 
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);

@@ -1,0 +1,159 @@
+<div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
+    
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Auditoría de Sesión: {{ session.sessionNumber }}</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Responsable: {{ session.userName }} &bull; Sede: {{ session.warehouseName || 'Principal' }}</p>
+        </div>
+      </div>
+      <button type="button" (click)="onClose()" class="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="p-6 space-y-6 overflow-y-auto">
+      
+      <!-- Session Summary KPIs -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Saldo Inicial</span>
+          <span class="text-base font-bold text-slate-900 dark:text-white">{{ session.initialCash | currencyFormat }}</span>
+        </div>
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Efectivo Esperado</span>
+          <span class="text-base font-bold text-slate-900 dark:text-white">{{ session.expectedCash | currencyFormat }}</span>
+        </div>
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Efectivo Contado</span>
+          <span class="text-base font-bold text-slate-900 dark:text-white">
+            {{ session.actualCash !== null && session.actualCash !== undefined ? (session.actualCash | currencyFormat) : 'En curso' }}
+          </span>
+        </div>
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Diferencia</span>
+          @if (session.cashDifference === 0) {
+            <span class="text-base font-bold text-emerald-600 dark:text-emerald-400">Cuadrado ($0)</span>
+          } @else if (session.cashDifference && session.cashDifference > 0) {
+            <span class="text-base font-bold text-amber-600 dark:text-amber-400">+{{ session.cashDifference | currencyFormat }} (Sobrante)</span>
+          } @else if (session.cashDifference && session.cashDifference < 0) {
+            <span class="text-base font-bold text-rose-600 dark:text-rose-400">{{ session.cashDifference | currencyFormat }} (Faltante)</span>
+          } @else {
+            <span class="text-base font-bold text-slate-400">Pendiente</span>
+          }
+        </div>
+      </div>
+
+      <!-- Notes Information -->
+      @if (session.openingNotes || session.closingNotes) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-50/60 dark:bg-slate-900/30 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700/40">
+          @if (session.openingNotes) {
+            <div>
+              <span class="font-bold text-slate-700 dark:text-slate-300 block mb-0.5">Nota de Apertura:</span>
+              <p class="text-slate-600 dark:text-slate-400 italic">"{{ session.openingNotes }}"</p>
+            </div>
+          }
+          @if (session.closingNotes) {
+            <div>
+              <span class="font-bold text-slate-700 dark:text-slate-300 block mb-0.5">Nota de Cierre:</span>
+              <p class="text-slate-600 dark:text-slate-400 italic">"{{ session.closingNotes }}"</p>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Movements Table -->
+      <div>
+        <div class="flex items-center justify-between mb-2.5">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            Detalle de Movimientos Financieros ({{ movements().length }})
+          </h4>
+          <span class="text-xs text-slate-500">Apertura: {{ session.openedAt | dateFormat }}</span>
+        </div>
+
+        @if (loadingMovements()) {
+          <div class="py-12 flex justify-center text-slate-400 text-xs">Cargando movimientos...</div>
+        } @else if (movements().length === 0) {
+          <div class="py-8 text-center text-slate-400 text-xs bg-slate-50 dark:bg-slate-900/20 rounded-xl">
+            No se registraron movimientos en esta sesión.
+          </div>
+        } @else {
+          <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 font-semibold uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th class="px-4 py-3">Fecha/Hora</th>
+                  <th class="px-4 py-3">Tipo</th>
+                  <th class="px-4 py-3">Concepto</th>
+                  <th class="px-4 py-3">Medio de Pago</th>
+                  <th class="px-4 py-3">Ref. Venta</th>
+                  <th class="px-4 py-3 text-right">Monto</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                @for (mov of movements(); track mov.id) {
+                  <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750 transition-colors">
+                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                      {{ mov.movementDate | dateFormat }}
+                    </td>
+                    <td class="px-4 py-2.5 whitespace-nowrap">
+                      @if (mov.movementType === 'SaleInflow') {
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">Venta POS</span>
+                      } @else if (mov.movementType === 'ManualInflow') {
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">Ingreso Manual</span>
+                      } @else if (mov.movementType === 'CashWithdrawal') {
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">Retiro Efectivo</span>
+                      } @else if (mov.movementType === 'SaleReturnOutflow') {
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300">Anulación Venta</span>
+                      } @else {
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">Egreso/Gasto</span>
+                      }
+                    </td>
+                    <td class="px-4 py-2.5 text-slate-900 dark:text-slate-200 font-medium">
+                      {{ mov.concept }}
+                      @if (mov.notes) {
+                        <span class="block text-[11px] text-slate-400 font-normal">{{ mov.notes }}</span>
+                      }
+                    </td>
+                    <td class="px-4 py-2.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                      {{ mov.paymentMethod }}
+                      @if (!mov.isCashEffect) {
+                        <span class="text-[10px] text-blue-500 font-medium">(Digital)</span>
+                      }
+                    </td>
+                    <td class="px-4 py-2.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                      {{ mov.saleNumber || '—' }}
+                    </td>
+                    <td class="px-4 py-2.5 text-right font-bold whitespace-nowrap"
+                      [class.text-emerald-600]="mov.category === 'Inflow'"
+                      [class.text-rose-600]="mov.category === 'Outflow'"
+                    >
+                      {{ mov.category === 'Inflow' ? '+' : '-' }}{{ mov.amount | currencyFormat }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex justify-end shrink-0">
+      <app-button variant="outline" (clicked)="onClose()">Cerrar</app-button>
+    </div>
+
+  </div>
+</div>

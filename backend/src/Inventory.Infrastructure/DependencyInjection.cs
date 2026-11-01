@@ -94,6 +94,9 @@ public static class DependencyInjection
         // Servicios de Ventas y Facturación
         services.AddScoped<Inventory.Application.Features.Sales.Services.ISaleService, SaleService>();
 
+        // Servicios de Control de Caja POS
+        services.AddScoped<Inventory.Application.Features.CashRegister.Services.ICashRegisterService, CashRegisterService>();
+
         // Servicios de Dashboard y Analítica
         services.AddScoped<Inventory.Application.Features.Dashboard.Services.IDashboardService, DashboardService>();
 

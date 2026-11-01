@@ -1,0 +1,483 @@
+<div class="space-y-6">
+
+  <!-- Page Header & Tab Navigation -->
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+    <div>
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center shadow-md shadow-primary-500/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+            </path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Módulo de Caja
+            POS</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Control de apertura, arqueos, ingresos, egresos y cierre
+            financiero</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div
+      class="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+      <button type="button" (click)="switchTab('operation')" [class.bg-white]="activeTab() === 'operation'"
+        [class.text-slate-900]="activeTab() === 'operation'" [class.shadow-sm]="activeTab() === 'operation'"
+        [class.dark:bg-slate-700]="activeTab() === 'operation'" [class.dark:text-white]="activeTab() === 'operation'"
+        class="px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+        Operación en Vivo
+      </button>
+
+      <button type="button" (click)="switchTab('history')" [class.bg-white]="activeTab() === 'history'"
+        [class.text-slate-900]="activeTab() === 'history'" [class.shadow-sm]="activeTab() === 'history'"
+        [class.dark:bg-slate-700]="activeTab() === 'history'" [class.dark:text-white]="activeTab() === 'history'"
+        class="px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Historial de Cajas
+      </button>
+    </div>
+  </div>
+
+  <!-- TAB 1: OPERACIÓN EN VIVO -->
+  @if (activeTab() === 'operation') {
+
+  @if (loading()) {
+  <div class="py-20 flex flex-col items-center justify-center gap-3">
+    <div class="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+    <span class="text-xs text-slate-500 font-medium">Consultando estado de caja...</span>
+  </div>
+  } @else if (!activeSession()) {
+
+  <!-- No Active Session Prompt Card -->
+  <div
+    class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-8 sm:p-12 text-center max-w-2xl mx-auto my-6">
+    <div
+      class="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center mb-4 shadow-inner">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+        </path>
+      </svg>
+    </div>
+    <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">No tienes una caja abierta en este momento</h2>
+    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
+      Para comenzar a registrar ventas en el sistema POS, recibir pagos y gestionar ingresos o egresos, debes realizar
+      la apertura formal de tu turno registrando el saldo inicial en efectivo.
+    </p>
+    <app-button variant="primary" size="lg" (clicked)="openOpenModal()">
+      <div class="flex items-center gap-2.5 px-3 py-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span class="tracking-wide">Realizar Apertura de Caja</span>
+      </div>
+    </app-button>
+  </div>
+
+  } @else {
+
+  <!-- Active Session View -->
+  <div class="space-y-6">
+
+    <!-- Active Session Status Bar -->
+    <div
+      class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl p-5 shadow-lg flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
+          <span class="text-xl">🏪</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold bg-white/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              {{ activeSession()?.sessionNumber }}
+            </span>
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-400 text-emerald-950">
+              <span class="w-2 h-2 rounded-full bg-emerald-950 animate-pulse"></span> ABIERTA
+            </span>
+          </div>
+          <h2 class="text-lg font-bold mt-1 text-white">
+            Responsable: {{ activeSession()?.userName }}
+            @if (activeSession()?.warehouseName) {
+            <span class="text-xs font-normal opacity-90">&bull; Sede: {{ activeSession()?.warehouseName }}</span>
+            }
+          </h2>
+          <p class="text-xs text-emerald-100">
+            Apertura: {{ activeSession()?.openedAt | dateFormat }}
+            @if (activeSession()?.openingNotes) {
+            &bull; <span class="italic">"{{ activeSession()?.openingNotes }}"</span>
+            }
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" (click)="openMovementModal('ManualInflow')"
+          class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all flex items-center gap-1.5 backdrop-blur-sm">
+          <span>+</span> Ingreso Manual
+        </button>
+        <button type="button" (click)="openMovementModal('ManualOutflow')"
+          class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all flex items-center gap-1.5 backdrop-blur-sm">
+          <span>-</span> Gasto Operativo
+        </button>
+        <button type="button" (click)="openMovementModal('CashWithdrawal')"
+          class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all flex items-center gap-1.5 backdrop-blur-sm">
+          <span>↓</span> Retiro Efectivo
+        </button>
+        <button type="button" (click)="openReconciliationModal()"
+          class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-extrabold shadow-md shadow-rose-900/30 transition-all flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+            </path>
+          </svg>
+          Arqueo y Cerrar Caja
+        </button>
+      </div>
+    </div>
+
+    <!-- Financial KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+
+      <div
+        class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Efectivo
+          Inicial</span>
+        <span class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          {{ activeSession()?.initialCash | currencyFormat }}
+        </span>
+      </div>
+
+      <div
+        class="bg-emerald-50/60 dark:bg-emerald-950/20 p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-800/40 shadow-sm">
+        <span
+          class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block mb-1">Efectivo
+          Esperado</span>
+        <span class="text-base sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-300">
+          {{ activeSession()?.expectedCash | currencyFormat }}
+        </span>
+      </div>
+
+      <div
+        class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Ventas
+          Efectivo</span>
+        <span class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          {{ activeSession()?.totalCashInflow | currencyFormat }}
+        </span>
+      </div>
+
+      <div
+        class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Transferencias</span>
+        <span class="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400">
+          {{ activeSession()?.totalTransferInflow | currencyFormat }}
+        </span>
+      </div>
+
+      <div
+        class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Tarjetas
+          Déb/Créd</span>
+        <span class="text-base sm:text-lg font-bold text-purple-600 dark:text-purple-400">
+          {{ activeSession()?.totalCardInflow | currencyFormat }}
+        </span>
+      </div>
+
+      <div
+        class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Egresos /
+          Retiros</span>
+        <span class="text-base sm:text-lg font-bold text-rose-600 dark:text-rose-400">
+          {{ activeSession()?.totalCashOutflow | currencyFormat }}
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Live Movements Section -->
+    <div
+      class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+            Movimientos del Turno Actual
+          </h3>
+          <span
+            class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+            {{ liveMovements().length }}
+          </span>
+        </div>
+        <button type="button" (click)="loadCurrentSession()"
+          class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+            </path>
+          </svg>
+          Actualizar
+        </button>
+      </div>
+
+      @if (liveMovements().length === 0) {
+      <div class="p-12 text-center text-slate-400 text-xs">
+        Aún no hay movimientos registrados en este turno. Las ventas realizadas en el POS se reflejarán automáticamente
+        aquí.
+      </div>
+      } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead
+            class="bg-slate-50 dark:bg-slate-900/40 text-slate-600 dark:text-slate-300 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-700">
+            <tr>
+              <th class="px-5 py-3">Fecha/Hora</th>
+              <th class="px-5 py-3">Tipo</th>
+              <th class="px-5 py-3">Concepto</th>
+              <th class="px-5 py-3">Medio de Pago</th>
+              <th class="px-5 py-3">Comprobante POS</th>
+              <th class="px-5 py-3 text-right">Valor</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
+            @for (mov of liveMovements(); track mov.id) {
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750 transition-colors">
+              <td class="px-5 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                {{ mov.movementDate | dateFormat }}
+              </td>
+              <td class="px-5 py-3 whitespace-nowrap">
+                @if (mov.movementType === 'SaleInflow') {
+                <span
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">Venta
+                  POS</span>
+                } @else if (mov.movementType === 'ManualInflow') {
+                <span
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">Ingreso
+                  Manual</span>
+                } @else if (mov.movementType === 'CashWithdrawal') {
+                <span
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">Retiro
+                  Efectivo</span>
+                } @else if (mov.movementType === 'SaleReturnOutflow') {
+                <span
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300">Anulación
+                  Venta</span>
+                } @else {
+                <span
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">Egreso/Gasto</span>
+                }
+              </td>
+              <td class="px-5 py-3 font-medium text-slate-900 dark:text-white">
+                {{ mov.concept }}
+                @if (mov.notes) {
+                <span class="block text-[11px] text-slate-400 font-normal">{{ mov.notes }}</span>
+                }
+              </td>
+              <td class="px-5 py-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                {{ mov.paymentMethod }}
+                @if (!mov.isCashEffect) {
+                <span class="text-[10px] text-blue-500 font-semibold">(No afecta gaveta)</span>
+                }
+              </td>
+              <td class="px-5 py-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                {{ mov.saleNumber || '—' }}
+              </td>
+              <td class="px-5 py-3 text-right font-bold whitespace-nowrap"
+                [class.text-emerald-600]="mov.category === 'Inflow'" [class.text-rose-600]="mov.category === 'Outflow'">
+                {{ mov.category === 'Inflow' ? '+' : '-' }}{{ mov.amount | currencyFormat }}
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+    </div>
+
+  </div>
+
+  }
+
+  }
+
+  <!-- TAB 2: HISTORIAL DE CAJAS -->
+  @if (activeTab() === 'history') {
+  <div class="space-y-4">
+
+    <!-- Filters Bar -->
+    <div
+      class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Estado</label>
+          <select [(ngModel)]="filterStatus" (change)="loadHistory()"
+            class="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+            <option value="all">Todos los Estados</option>
+            <option value="Open">Abiertas</option>
+            <option value="Closed">Cerradas</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha Desde</label>
+          <input type="date" [(ngModel)]="filterStartDate" (change)="loadHistory()"
+            class="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha Hasta</label>
+          <input type="date" [(ngModel)]="filterEndDate" (change)="loadHistory()"
+            class="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
+        </div>
+      </div>
+
+      <button type="button" (click)="loadHistory()"
+        class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white transition-all flex items-center gap-1.5 self-start md:self-end">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+          </path>
+        </svg>
+        Filtrar
+      </button>
+    </div>
+
+    <!-- History Table -->
+    <div
+      class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
+      @if (historyLoading()) {
+      <div class="p-12 text-center text-xs text-slate-500">Cargando sesiones...</div>
+      } @else if (historySessions().length === 0) {
+      <div class="p-12 text-center text-xs text-slate-400">
+        No se encontraron sesiones de caja en el rango seleccionado.
+      </div>
+      } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead
+            class="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-700">
+            <tr>
+              <th class="px-4 py-3">Sesión</th>
+              <th class="px-4 py-3">Empleado</th>
+              <th class="px-4 py-3">Apertura</th>
+              <th class="px-4 py-3">Cierre</th>
+              <th class="px-4 py-3 text-right">Saldo Inicial</th>
+              <th class="px-4 py-3 text-right">Esperado</th>
+              <th class="px-4 py-3 text-right">Contado</th>
+              <th class="px-4 py-3 text-center">Diferencia</th>
+              <th class="px-4 py-3 text-center">Estado</th>
+              <th class="px-4 py-3 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
+            @for (sess of historySessions(); track sess.id) {
+            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750 transition-colors">
+              <td class="px-4 py-3 font-mono font-bold text-slate-900 dark:text-white">
+                {{ sess.sessionNumber }}
+              </td>
+              <td class="px-4 py-3 text-slate-700 dark:text-slate-300">
+                {{ sess.userName }}
+              </td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                {{ sess.openedAt | dateFormat }}
+              </td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                {{ sess.closedAt ? (sess.closedAt | dateFormat) : 'En curso' }}
+              </td>
+              <td class="px-4 py-3 text-right font-medium text-slate-700 dark:text-slate-300">
+                {{ sess.initialCash | currencyFormat }}
+              </td>
+              <td class="px-4 py-3 text-right font-bold text-slate-900 dark:text-white">
+                {{ sess.expectedCash | currencyFormat }}
+              </td>
+              <td class="px-4 py-3 text-right font-bold text-slate-900 dark:text-white">
+                {{ sess.actualCash !== null && sess.actualCash !== undefined ? (sess.actualCash | currencyFormat) : '—'
+                }}
+              </td>
+              <td class="px-4 py-3 text-center whitespace-nowrap">
+                @if (sess.status === 'Open') {
+                <span class="text-slate-400 text-[11px]">En curso</span>
+                } @else if (sess.cashDifference === 0) {
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                  CUADRADO
+                </span>
+                } @else if (sess.cashDifference && sess.cashDifference > 0) {
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                  SOBRANTE (+{{ sess.cashDifference | currencyFormat }})
+                </span>
+                } @else {
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
+                  FALTANTE ({{ sess.cashDifference | currencyFormat }})
+                </span>
+                }
+              </td>
+              <td class="px-4 py-3 text-center whitespace-nowrap">
+                @if (sess.status === 'Open') {
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">ABIERTA</span>
+                } @else {
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300">CERRADA</span>
+                }
+              </td>
+              <td class="px-4 py-3 text-center whitespace-nowrap">
+                <button type="button" (click)="viewSessionDetail(sess)"
+                  class="px-2.5 py-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/40 rounded-lg transition-colors">
+                  Ver Detalle
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="p-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center text-xs">
+        <span class="text-slate-500">Total: {{ totalHistoryCount() }} sesiones registradas</span>
+        <app-pagination [pageNumber]="currentPage()" [pageSize]="pageSize()" [totalCount]="totalHistoryCount()"
+          (pageChange)="onPageChange($event)"></app-pagination>
+      </div>
+      }
+    </div>
+
+  </div>
+  }
+
+</div>
+
+<!-- MODALS -->
+@if (showOpenModal()) {
+<app-open-cash-modal [warehouses]="warehouses()" [loading]="modalLoading()" [errorMessage]="modalError()"
+  (submitOpen)="handleOpenCash($event)" (cancel)="showOpenModal.set(false)"></app-open-cash-modal>
+}
+
+@if (showMovementModal()) {
+<app-cash-movement-modal [initialMovementType]="movementModalInitialType()" [loading]="modalLoading()"
+  [errorMessage]="modalError()" (submitMovement)="handleCreateMovement($event)"
+  (cancel)="showMovementModal.set(false)"></app-cash-movement-modal>
+}
+
+@if (showReconciliationModal() && auditSummary()) {
+<app-cash-reconciliation-modal [summary]="auditSummary()!" [loading]="modalLoading()" [errorMessage]="modalError()"
+  (confirmClose)="handleCloseCash($event)"
+  (cancel)="showReconciliationModal.set(false)"></app-cash-reconciliation-modal>
+}
+
+@if (showDetailModal() && selectedHistorySession()) {
+<app-cash-session-detail-modal [session]="selectedHistorySession()!"
+  (close)="showDetailModal.set(false)"></app-cash-session-detail-modal>
+}

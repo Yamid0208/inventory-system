@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SaleService } from '../../core/services/sale.service';
+import { CashRegisterService } from '../../core/services/cash-register.service';
 import { ProductService } from '../../core/services/product.service';
 import { WarehouseService } from '../../core/services/warehouse.service';
 import { BranchContextService } from '../../core/services/branch-context.service';
@@ -25,6 +26,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     SaleModalComponent,
     SaleDetailModalComponent,
     InvoiceViewerComponent,
@@ -37,6 +39,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 })
 export class SalesComponent implements OnInit {
   private saleService = inject(SaleService);
+  public cashRegisterService = inject(CashRegisterService);
   private productService = inject(ProductService);
   private warehouseService = inject(WarehouseService);
   branchContextService = inject(BranchContextService);
@@ -44,6 +47,7 @@ export class SalesComponent implements OnInit {
   private confirmationService = inject(ConfirmationService);
   private alertService = inject(AlertService, { optional: true });
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   sales = signal<Sale[]>([]);
   products = signal<Product[]>([]);
@@ -83,6 +87,8 @@ export class SalesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.cashRegisterService.getCurrentSession().subscribe();
+
     if (this.canFilterByWarehouse()) {
       this.loadWarehouses();
     }
@@ -166,6 +172,21 @@ export class SalesComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    if (!this.cashRegisterService.activeSession()) {
+      this.confirmationService.confirm({
+        title: 'Apertura de Caja Requerida',
+        message: 'Para registrar ventas en el POS, debes tener una sesión de caja abierta activa. ¿Deseas ir al módulo de caja para abrirla ahora?',
+        confirmText: 'Ir a Abrir Caja',
+        cancelText: 'Cancelar',
+        variant: 'warning'
+      }).then(confirmed => {
+        if (confirmed) {
+          this.router.navigate(['/cash-register']);
+        }
+      });
+      return;
+    }
+
     this.modalError.set(null);
     this.loadProducts(); // Asegurar existencias más recientes
     this.isCreateModalOpen.set(true);

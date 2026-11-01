@@ -49,6 +49,7 @@ export class SidebarComponent {
       { label: role === 'Admin' ? 'Sedes / Almacenes' : 'Clientes & Almacenes', route: '/warehouses', icon: 'building', allowedRoles: ['Admin'] },
       { label: 'Productos', route: '/products', icon: 'tag', allowedRoles: ['Admin', 'Warehouse', 'Seller'] },
       { label: 'Inventario / Kardex', route: '/inventory', icon: 'box', allowedRoles: ['Admin', 'Warehouse'] },
+      { label: 'Caja POS', route: '/cash-register', icon: 'cash', allowedRoles: ['Admin', 'Seller'] },
       { label: 'Ventas', route: '/sales', icon: 'shopping-bag', allowedRoles: ['Admin', 'Seller'] },
       { label: 'Compras', route: '/purchases', icon: 'truck', allowedRoles: ['Admin', 'Warehouse'] },
       { label: 'Clientes', route: '/customers', icon: 'user', allowedRoles: ['Admin', 'Seller'] },
