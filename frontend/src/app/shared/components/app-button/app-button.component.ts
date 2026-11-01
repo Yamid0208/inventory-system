@@ -42,7 +42,7 @@ export class AppButtonComponent {
     
     const sizeClasses = {
       sm: 'text-xs px-3.5 py-2 gap-1.5',
-      md: 'text-xs px-4.5 py-2.5 gap-2',
+      md: 'text-xs px-5 py-2.5 gap-2',
       lg: 'text-sm px-6 py-3.5 gap-2.5'
     }[this.size()];
 
