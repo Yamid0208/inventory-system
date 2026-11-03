@@ -1113,6 +1113,472 @@ public class ReportExportService : IReportExportService
         );
     }
 
+    // =========================================================================
+    // 5. SUITE DE ANÁLISIS EMPRESARIAL E INTELIGENCIA DE VENTAS (INSINCRO POS)
+    // =========================================================================
+
+    public async Task<SalesAnalyticsSummaryDto> GetSalesAnalyticsSummaryAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var curEnd = AdjustEndDate(endDate) ?? DateTimeOffset.UtcNow;
+        var curStart = startDate ?? curEnd.Date.AddDays(-30);
+        var duration = curEnd - curStart;
+        if (duration <= TimeSpan.Zero) duration = TimeSpan.FromDays(1);
+
+        var prevEnd = curStart;
+        var prevStart = curStart - duration;
+
+        // 1. Ventas del período actual
+        var curSalesQuery = _context.Sales
+            .AsNoTracking()
+            .Where(s => s.Status != SaleStatus.Cancelled);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            curSalesQuery = curSalesQuery.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            curSalesQuery = curSalesQuery.Where(s => s.SaleDate >= curStart);
+        }
+
+        if (endDate.HasValue)
+        {
+            curSalesQuery = curSalesQuery.Where(s => s.SaleDate <= curEnd);
+        }
+
+        var curTransactions = await curSalesQuery.CountAsync(cancellationToken);
+        decimal curTotalSales = 0m;
+        decimal curSubtotal = 0m;
+        decimal curTax = 0m;
+        var paymentMethods = new List<PaymentMethodBreakdownDto>();
+
+        if (curTransactions > 0)
+        {
+            curTotalSales = await curSalesQuery.SumAsync(s => s.Total, cancellationToken);
+            curSubtotal = await curSalesQuery.SumAsync(s => s.Subtotal, cancellationToken);
+            curTax = await curSalesQuery.SumAsync(s => s.Tax, cancellationToken);
+
+            var methodGroups = await curSalesQuery
+                .GroupBy(s => s.PaymentMethod)
+                .Select(g => new
+                {
+                    Method = g.Key.ToString(),
+                    TotalAmount = g.Sum(s => s.Total),
+                    Count = g.Count()
+                })
+                .ToListAsync(cancellationToken);
+
+            paymentMethods = methodGroups.Select(m => new PaymentMethodBreakdownDto(
+                m.Method,
+                m.TotalAmount,
+                m.Count,
+                curTotalSales > 0 ? decimal.Round((m.TotalAmount / curTotalSales) * 100m, 1) : 0m
+            )).ToList();
+        }
+
+        var curAverageTicket = curTransactions > 0 ? decimal.Round(curTotalSales / curTransactions, 2) : 0m;
+
+        // Unidades vendidas en el período actual
+        var curItemsQuery = _context.SaleItems
+            .AsNoTracking()
+            .Where(i => i.Sale.Status != SaleStatus.Cancelled);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            curItemsQuery = curItemsQuery.Where(i => i.Sale.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            curItemsQuery = curItemsQuery.Where(i => i.Sale.SaleDate >= curStart);
+        }
+
+        if (endDate.HasValue)
+        {
+            curItemsQuery = curItemsQuery.Where(i => i.Sale.SaleDate <= curEnd);
+        }
+
+        var curUnitsSold = await curItemsQuery.SumAsync(i => (int?)i.Quantity, cancellationToken) ?? 0;
+
+        // 2. Ventas del período anterior (comparativa de igual duración)
+        var prevSalesQuery = _context.Sales
+            .AsNoTracking()
+            .Where(s => s.Status != SaleStatus.Cancelled && s.SaleDate >= prevStart && s.SaleDate < prevEnd);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            prevSalesQuery = prevSalesQuery.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+
+        var prevTransactions = await prevSalesQuery.CountAsync(cancellationToken);
+        decimal prevTotalSales = prevTransactions > 0
+            ? await prevSalesQuery.SumAsync(s => s.Total, cancellationToken)
+            : 0m;
+        var prevAverageTicket = prevTransactions > 0
+            ? decimal.Round(prevTotalSales / prevTransactions, 2)
+            : 0m;
+
+        // 3. Deltas de crecimiento porcentual
+        decimal revenueGrowthPct = prevTotalSales > 0
+            ? decimal.Round(((curTotalSales - prevTotalSales) / prevTotalSales) * 100m, 1)
+            : (curTotalSales > 0 ? 100m : 0m);
+
+        decimal transactionsGrowthPct = prevTransactions > 0
+            ? decimal.Round(((decimal)(curTransactions - prevTransactions) / prevTransactions) * 100m, 1)
+            : (curTransactions > 0 ? 100m : 0m);
+
+        decimal ticketGrowthPct = prevAverageTicket > 0
+            ? decimal.Round(((curAverageTicket - prevAverageTicket) / prevAverageTicket) * 100m, 1)
+            : (curAverageTicket > 0 ? 100m : 0m);
+
+        return new SalesAnalyticsSummaryDto(
+            curTotalSales,
+            curSubtotal,
+            curTax,
+            curTransactions,
+            curAverageTicket,
+            curUnitsSold,
+            prevTotalSales,
+            prevTransactions,
+            prevAverageTicket,
+            revenueGrowthPct,
+            transactionsGrowthPct,
+            ticketGrowthPct,
+            paymentMethods
+        );
+    }
+
+    public async Task<IReadOnlyList<SalesByCategoryDto>> GetSalesByCategoryAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        string? searchTerm = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.SaleItems
+            .AsNoTracking()
+            .Include(i => i.Sale)
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Category)
+            .Where(i => i.Sale.Status != SaleStatus.Cancelled);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(i => i.Sale.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(i => i.Sale.SaleDate >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(i => i.Sale.SaleDate <= adjustedEnd.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(i => (i.Product.Category != null && i.Product.Category.Name.ToLower().Contains(term)) ||
+                                     i.Product.Name.ToLower().Contains(term) ||
+                                     i.Product.Sku.ToLower().Contains(term));
+        }
+
+        var groups = await query
+            .GroupBy(i => new
+            {
+                CategoryId = i.Product.CategoryId,
+                CategoryName = i.Product.Category != null ? i.Product.Category.Name : "Sin Categoría"
+            })
+            .Select(g => new
+            {
+                g.Key.CategoryId,
+                g.Key.CategoryName,
+                UnitsSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.Total),
+                TransactionCount = g.Select(x => x.SaleId).Distinct().Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        var grandTotalRevenue = groups.Sum(g => g.TotalRevenue);
+
+        return groups
+            .OrderByDescending(g => g.TotalRevenue)
+            .Select(g => new SalesByCategoryDto(
+                g.CategoryId,
+                g.CategoryName,
+                g.UnitsSold,
+                g.TotalRevenue,
+                grandTotalRevenue > 0 ? decimal.Round((g.TotalRevenue / grandTotalRevenue) * 100m, 1) : 0m,
+                g.TransactionCount
+            ))
+            .ToList();
+    }
+
+    public async Task<byte[]> ExportSalesByCategoryCsvAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await GetSalesByCategoryAsync(startDate, endDate, warehouseId, null, cancellationToken);
+        var sb = new StringBuilder();
+        sb.AppendLine("ID Categoria,Categoria,Unidades Vendidas,Total Facturado (COP),Participacion (%),Transacciones");
+
+        foreach (var item in data)
+        {
+            sb.AppendLine(string.Join(",",
+                item.CategoryId,
+                EscapeCsv(item.CategoryName),
+                item.UnitsSold,
+                item.TotalRevenue.ToString("F2", CultureInfo.InvariantCulture),
+                item.SharePercentage.ToString("F1", CultureInfo.InvariantCulture),
+                item.TransactionCount
+            ));
+        }
+
+        return ToUtf8BomBytes(sb.ToString());
+    }
+
+    public async Task<IReadOnlyList<HourlyActivityDto>> GetSalesHourlyActivityAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Sales
+            .AsNoTracking()
+            .Where(s => s.Status != SaleStatus.Cancelled);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(s => s.SaleDate >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(s => s.SaleDate <= adjustedEnd.Value);
+        }
+
+        var rawHourly = await query
+            .GroupBy(s => s.SaleDate.Hour)
+            .Select(g => new
+            {
+                Hour = g.Key,
+                TransactionCount = g.Count(),
+                TotalRevenue = g.Sum(s => s.Total)
+            })
+            .ToListAsync(cancellationToken);
+
+        var lookup = rawHourly.ToDictionary(x => x.Hour);
+        var maxRevenue = rawHourly.Any() ? rawHourly.Max(x => x.TotalRevenue) : 0m;
+        var maxTransactions = rawHourly.Any() ? rawHourly.Max(x => x.TransactionCount) : 0;
+
+        var result = new List<HourlyActivityDto>();
+        for (int h = 0; h < 24; h++)
+        {
+            lookup.TryGetValue(h, out var entry);
+            var count = entry?.TransactionCount ?? 0;
+            var rev = entry?.TotalRevenue ?? 0m;
+            bool isPeak = (count > 0 && count == maxTransactions && maxTransactions > 0) ||
+                          (rev > 0 && rev == maxRevenue && maxRevenue > 0);
+
+            result.Add(new HourlyActivityDto(
+                h,
+                $"{h:D2}:00 - {h:D2}:59",
+                count,
+                rev,
+                isPeak
+            ));
+        }
+
+        return result;
+    }
+
+    public async Task<byte[]> ExportSalesHourlyActivityCsvAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await GetSalesHourlyActivityAsync(startDate, endDate, warehouseId, cancellationToken);
+        var sb = new StringBuilder();
+        sb.AppendLine("Hora,Franja Horaria,Transacciones,Total Facturado (COP),Hora Pico");
+
+        foreach (var item in data)
+        {
+            sb.AppendLine(string.Join(",",
+                item.Hour,
+                EscapeCsv(item.HourLabel),
+                item.TransactionCount,
+                item.TotalRevenue.ToString("F2", CultureInfo.InvariantCulture),
+                item.IsPeakHour ? "SI" : "NO"
+            ));
+        }
+
+        return ToUtf8BomBytes(sb.ToString());
+    }
+
+    public async Task<IReadOnlyList<SalesByEmployeeDto>> GetSalesByEmployeeAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        string? searchTerm = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Sales
+            .AsNoTracking()
+            .Include(s => s.User)
+            .Where(s => s.Status != SaleStatus.Cancelled);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(s => s.SaleDate >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(s => s.SaleDate <= adjustedEnd.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(s => s.User != null && (s.User.FullName.ToLower().Contains(term) || s.User.Email.ToLower().Contains(term)));
+        }
+
+        var groups = await query
+            .GroupBy(s => new
+            {
+                s.UserId,
+                FullName = s.User != null ? s.User.FullName : "Sin Asignar",
+                Role = s.User != null ? (UserRole?)s.User.Role : null
+            })
+            .Select(g => new
+            {
+                g.Key.UserId,
+                g.Key.FullName,
+                Role = g.Key.Role,
+                TransactionCount = g.Count(),
+                TotalRevenue = g.Sum(s => s.Total)
+            })
+            .ToListAsync(cancellationToken);
+
+        var grandTotalRevenue = groups.Sum(g => g.TotalRevenue);
+
+        return groups
+            .OrderByDescending(g => g.TotalRevenue)
+            .Select(g =>
+            {
+                var avgTicket = g.TransactionCount > 0 ? decimal.Round(g.TotalRevenue / g.TransactionCount, 2) : 0m;
+                var share = grandTotalRevenue > 0 ? decimal.Round((g.TotalRevenue / grandTotalRevenue) * 100m, 1) : 0m;
+                var roleName = g.Role.HasValue ? g.Role.Value.ToString() : "N/A";
+                return new SalesByEmployeeDto(
+                    g.UserId,
+                    g.FullName,
+                    roleName,
+                    g.TransactionCount,
+                    g.TotalRevenue,
+                    avgTicket,
+                    share
+                );
+            })
+            .ToList();
+    }
+
+    public async Task<byte[]> ExportSalesByEmployeeCsvAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await GetSalesByEmployeeAsync(startDate, endDate, warehouseId, null, cancellationToken);
+        var sb = new StringBuilder();
+        sb.AppendLine("ID Usuario,Empleado,Rol,Transacciones,Total Facturado (COP),Ticket Promedio (COP),Aporte (%)");
+
+        foreach (var item in data)
+        {
+            sb.AppendLine(string.Join(",",
+                item.UserId,
+                EscapeCsv(item.EmployeeName),
+                EscapeCsv(item.Role),
+                item.TransactionCount,
+                item.TotalRevenue.ToString("F2", CultureInfo.InvariantCulture),
+                item.AverageTicket.ToString("F2", CultureInfo.InvariantCulture),
+                item.SharePercentage.ToString("F1", CultureInfo.InvariantCulture)
+            ));
+        }
+
+        return ToUtf8BomBytes(sb.ToString());
+    }
+
+    public async Task<IReadOnlyList<SalesTrendDto>> GetSalesTrendsAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Sales
+            .AsNoTracking()
+            .Where(s => s.Status != SaleStatus.Cancelled);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(s => s.SaleDate >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(s => s.SaleDate <= adjustedEnd.Value);
+        }
+
+        var groups = await query
+            .GroupBy(s => s.SaleDate.Date)
+            .Select(g => new
+            {
+                Date = g.Key,
+                TransactionCount = g.Count(),
+                TotalRevenue = g.Sum(s => s.Total)
+            })
+            .OrderBy(x => x.Date)
+            .ToListAsync(cancellationToken);
+
+        return groups
+            .Select(g => new SalesTrendDto(
+                g.Date.ToString("yyyy-MM-dd"),
+                g.Date.ToString("dd/MM/yyyy"),
+                g.TransactionCount,
+                g.TotalRevenue
+            ))
+            .ToList();
+    }
+
+
     private static DateTimeOffset? AdjustEndDate(DateTimeOffset? endDate)
     {
         if (!endDate.HasValue) return null;

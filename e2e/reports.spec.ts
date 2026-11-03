@@ -153,6 +153,89 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
       });
     });
 
+    // Mock de Resumen Analítico con Comparativa vs Período Anterior
+    await page.route('**/api/v1/reports/sales/analytics-summary*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          totalRevenue: 28441000,
+          netRevenue: 23900000,
+          tax: 4541000,
+          transactionCount: 9,
+          averageTicket: 3160111.11,
+          unitsSold: 13,
+          prevTotalRevenue: 27370000,
+          prevTransactionCount: 3,
+          prevAverageTicket: 9123333.33,
+          revenueGrowthPct: 3.9,
+          transactionsGrowthPct: 200,
+          ticketGrowthPct: -65.4,
+          paymentMethods: [
+            { method: 'Cash', totalAmount: 27370000, transactionCount: 3, percentage: 96.2 },
+            { method: 'Mixed', totalAmount: 1071000, transactionCount: 6, percentage: 3.8 }
+          ]
+        })
+      });
+    });
+
+    // Mock de Ventas por Categoría
+    await page.route('**/api/v1/reports/sales/by-category*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            categoryId: 9,
+            categoryName: 'Electrónica',
+            unitsSold: 7,
+            totalRevenue: 27370000,
+            sharePercentage: 96.2,
+            transactionCount: 3
+          },
+          {
+            categoryId: 1,
+            categoryName: 'Tecnología',
+            unitsSold: 6,
+            totalRevenue: 1071000,
+            sharePercentage: 3.8,
+            transactionCount: 6
+          }
+        ])
+      });
+    });
+
+    // Mock de Horarios de Mayor Actividad
+    await page.route('**/api/v1/reports/sales/hourly-activity*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { hour: 14, hourLabel: '14:00 - 14:59', transactionCount: 15, totalRevenue: 12000000, isPeakHour: true },
+          { hour: 15, hourLabel: '15:00 - 15:59', transactionCount: 8, totalRevenue: 5000000, isPeakHour: false }
+        ])
+      });
+    });
+
+    // Mock de Rendimiento por Empleado
+    await page.route('**/api/v1/reports/sales/by-employee*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            userId: 1,
+            employeeName: 'Administrador del Sistema',
+            role: 'Admin',
+            transactionCount: 9,
+            totalRevenue: 28441000,
+            averageTicket: 3160111.11,
+            sharePercentage: 100
+          }
+        ])
+      });
+    });
+
     // Mock de Finanzas y Rentabilidad (CMV Histórico)
     await page.route('**/api/v1/reports/finance/profitability*', async (route) => {
       await route.fulfill({
@@ -473,11 +556,11 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
     // 4. Tarjetas Analíticas de Ventas presentes
     const metricTotal = page.locator('[data-testid="metric-sales-total"]');
     await expect(metricTotal).toBeVisible();
-    await expect(metricTotal).toContainText('119');
+    await expect(metricTotal).toContainText('28.441.000');
 
     const metricCount = page.locator('[data-testid="metric-sales-count"]');
     await expect(metricCount).toBeVisible();
-    await expect(metricCount).toHaveText('1');
+    await expect(metricCount).toHaveText('9');
 
     // 5. Verificar título de la tabla y estado activo de la sub-pestaña
     const tabSales = page.locator('[data-testid="tab-sales"]');
@@ -609,5 +692,40 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
 
     const filename = download.suggestedFilename();
     expect(filename).toMatch(/reporte_.*\.csv/);
+  });
+
+  test('TC-REP-06: Suite de Análisis Empresarial - Ventas por Categoría, Horarios Pico y Rendimiento por Empleado', async ({ page }) => {
+    await page.goto('/reports');
+    await page.waitForURL('**/reports', { timeout: 10000 });
+
+    // 1. Verificar sub-pestaña Por Categoría
+    const tabCategories = page.locator('[data-testid="tab-sales-categories"]');
+    await expect(tabCategories).toBeVisible({ timeout: 5000 });
+    await tabCategories.click();
+
+    const tableCategories = page.locator('[data-testid="table-sales-categories"]');
+    await expect(tableCategories).toBeVisible({ timeout: 5000 });
+    await expect(tableCategories.locator('text=Electrónica')).toBeVisible();
+    await expect(tableCategories.locator('text=96.2%')).toBeVisible();
+
+    // 2. Verificar sub-pestaña Horarios Pico (Heatmap)
+    const tabHourly = page.locator('[data-testid="tab-sales-hourly"]');
+    await expect(tabHourly).toBeVisible({ timeout: 5000 });
+    await tabHourly.click();
+
+    const tableHourly = page.locator('[data-testid="table-sales-hourly"]');
+    await expect(tableHourly).toBeVisible({ timeout: 5000 });
+    await expect(tableHourly.locator('text=14:00 - 14:59')).toBeVisible();
+    await expect(tableHourly.locator('text=HORA PICO')).toBeVisible();
+
+    // 3. Verificar sub-pestaña Por Vendedor / Empleado
+    const tabEmployees = page.locator('[data-testid="tab-sales-employees"]');
+    await expect(tabEmployees).toBeVisible({ timeout: 5000 });
+    await tabEmployees.click();
+
+    const tableEmployees = page.locator('[data-testid="table-sales-employees"]');
+    await expect(tableEmployees).toBeVisible({ timeout: 5000 });
+    await expect(tableEmployees.locator('text=Administrador del Sistema')).toBeVisible();
+    await expect(tableEmployees.getByText('Admin', { exact: true })).toBeVisible();
   });
 });

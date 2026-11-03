@@ -224,6 +224,139 @@ public class ReportsController : BaseApiController
     }
 
     /// <summary>
+    /// Resumen de analítica de ventas con comparativa porcentual vs período anterior.
+    /// </summary>
+    [HttpGet("sales/analytics-summary")]
+    [ProducesResponseType(typeof(SalesAnalyticsSummaryDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<SalesAnalyticsSummaryDto>> GetSalesAnalyticsSummary(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetSalesAnalyticsSummaryAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Análisis de ventas agrupadas por categoría de producto.
+    /// </summary>
+    [HttpGet("sales/by-category")]
+    [ProducesResponseType(typeof(IReadOnlyList<SalesByCategoryDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<SalesByCategoryDto>>> GetSalesByCategory(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetSalesByCategoryAsync(startDate, endDate, targetWarehouseId, searchTerm, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Exportación CSV de ventas por categoría.
+    /// </summary>
+    [HttpGet("sales/by-category/csv")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportSalesByCategoryCsv(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var fileBytes = await _reportService.ExportSalesByCategoryCsvAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        var filename = $"ventas_por_categoria_{DateTime.UtcNow:yyyyMMdd_HHmm}.csv";
+        return File(fileBytes, "text/csv; charset=utf-8", filename);
+    }
+
+    /// <summary>
+    /// Distribución de actividad comercial y transacciones por franja horaria (00:00 - 23:59).
+    /// </summary>
+    [HttpGet("sales/hourly-activity")]
+    [ProducesResponseType(typeof(IReadOnlyList<HourlyActivityDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<HourlyActivityDto>>> GetSalesHourlyActivity(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetSalesHourlyActivityAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Exportación CSV de actividad horaria de ventas.
+    /// </summary>
+    [HttpGet("sales/hourly-activity/csv")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportSalesHourlyActivityCsv(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var fileBytes = await _reportService.ExportSalesHourlyActivityCsvAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        var filename = $"actividad_horaria_ventas_{DateTime.UtcNow:yyyyMMdd_HHmm}.csv";
+        return File(fileBytes, "text/csv; charset=utf-8", filename);
+    }
+
+    /// <summary>
+    /// Productividad, transacciones y ventas por empleado / vendedor.
+    /// </summary>
+    [HttpGet("sales/by-employee")]
+    [ProducesResponseType(typeof(IReadOnlyList<SalesByEmployeeDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<SalesByEmployeeDto>>> GetSalesByEmployee(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetSalesByEmployeeAsync(startDate, endDate, targetWarehouseId, searchTerm, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Exportación CSV de rendimiento por empleado.
+    /// </summary>
+    [HttpGet("sales/by-employee/csv")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportSalesByEmployeeCsv(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var fileBytes = await _reportService.ExportSalesByEmployeeCsvAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        var filename = $"ventas_por_empleado_{DateTime.UtcNow:yyyyMMdd_HHmm}.csv";
+        return File(fileBytes, "text/csv; charset=utf-8", filename);
+    }
+
+    /// <summary>
+    /// Serie cronológica de ventas para análisis de tendencias comerciales.
+    /// </summary>
+    [HttpGet("sales/trends")]
+    [ProducesResponseType(typeof(IReadOnlyList<SalesTrendDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<SalesTrendDto>>> GetSalesTrends(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetSalesTrendsAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Reporte de Rentabilidad y Utilidad Bruta calculada a partir del Costo de Mercancía Vendida (CMV) histórico.
     /// </summary>
     [HttpGet("finance/profitability")]

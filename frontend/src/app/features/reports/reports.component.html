@@ -150,12 +150,12 @@
 
   <!-- SUBSECCIONES SEGÚN LA CATEGORÍA ACTIVA -->
   @if (selectedCategory() === 'sales') {
-  <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
+  <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
     <button type="button" (click)="selectReport('sales')" data-testid="tab-sales"
       [ngClass]="selectedReport() === 'sales'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-sm">💳</span>
       <span>Historial y Facturación</span>
       @if (selectedReport() === 'sales') {
@@ -166,10 +166,43 @@
       [ngClass]="selectedReport() === 'sales-top'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-sm">⭐</span>
-      <span>Top Productos Vendidos</span>
+      <span>Top Productos</span>
       @if (selectedReport() === 'sales-top') {
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      }
+    </button>
+    <button type="button" (click)="selectReport('sales-categories')" data-testid="tab-sales-categories"
+      [ngClass]="selectedReport() === 'sales-categories'
+        ? 'bg-primary-600 text-white shadow-sm font-bold'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
+      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-sm">🏷️</span>
+      <span>Por Categoría</span>
+      @if (selectedReport() === 'sales-categories') {
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      }
+    </button>
+    <button type="button" (click)="selectReport('sales-hourly')" data-testid="tab-sales-hourly"
+      [ngClass]="selectedReport() === 'sales-hourly'
+        ? 'bg-primary-600 text-white shadow-sm font-bold'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
+      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-sm">⏰</span>
+      <span>Horarios Pico</span>
+      @if (selectedReport() === 'sales-hourly') {
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      }
+    </button>
+    <button type="button" (click)="selectReport('sales-employees')" data-testid="tab-sales-employees"
+      [ngClass]="selectedReport() === 'sales-employees'
+        ? 'bg-primary-600 text-white shadow-sm font-bold'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
+      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-sm">👥</span>
+      <span>Por Vendedor</span>
+      @if (selectedReport() === 'sales-employees') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
@@ -398,44 +431,82 @@
   </div>
 
   <!-- TARJETAS ANALÍTICAS Y BLOQUE VISUAL ESPECIALIZADO -->
-  @if (selectedCategory() === 'sales' && salesMetrics(); as m) {
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Total Facturado</span>
-      <div class="text-2xl font-black text-primary-600 mt-1" data-testid="metric-sales-total">
-        {{ m.totalSalesAmount | currencyFormat }}
-      </div>
-      <p class="text-[11px] text-slate-400 mt-1">IVA (19%): {{ m.totalTax | currencyFormat }}</p>
-    </div>
-
-    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Transacciones Realizadas</span>
-      <div class="text-2xl font-black text-slate-900 mt-1" data-testid="metric-sales-count">
-        {{ m.totalTransactions }}
-      </div>
-      <p class="text-[11px] text-slate-400 mt-1">Comprobantes emitidos en el período</p>
-    </div>
-
-    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Ticket Promedio</span>
-      <div class="text-2xl font-black text-slate-900 mt-1">
-        {{ m.averageTicket | currencyFormat }}
-      </div>
-      <p class="text-[11px] text-slate-400 mt-1">Gasto medio por cliente</p>
-    </div>
-
-    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Distribución de Pagos</span>
-      <div class="mt-2 space-y-1">
-        @for (pm of m.paymentMethods; track pm.method) {
-        <div class="flex items-center justify-between text-[11px]">
-          <span class="font-medium text-slate-600">{{ pm.method }}</span>
-          <span class="font-mono font-bold text-slate-800">{{ pm.percentage }}%</span>
+  @if (selectedCategory() === 'sales') {
+    @let sa = salesAnalytics();
+    @let sm = salesMetrics();
+    @if (sa || sm) {
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-400">Total Facturado</span>
+          @if (sa) {
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+              [ngClass]="sa.revenueGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.revenueGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
+              {{ sa.revenueGrowthPct > 0 ? '+' : '' }}{{ sa.revenueGrowthPct }}%
+            </span>
+          }
         </div>
-        }
+        <div class="text-2xl font-black text-primary-600 mt-1" data-testid="metric-sales-total">
+          {{ (sa?.totalRevenue ?? sm?.totalSalesAmount ?? 0) | currencyFormat }}
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">
+          IVA (19%): {{ (sa?.tax ?? sm?.totalTax ?? 0) | currencyFormat }}
+          @if (sa) {
+            &bull; {{ sa.unitsSold }} unidades
+          }
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-400">Transacciones Realizadas</span>
+          @if (sa) {
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+              [ngClass]="sa.transactionsGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.transactionsGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
+              {{ sa.transactionsGrowthPct > 0 ? '+' : '' }}{{ sa.transactionsGrowthPct }}%
+            </span>
+          }
+        </div>
+        <div class="text-2xl font-black text-slate-900 mt-1" data-testid="metric-sales-count">
+          {{ sa?.transactionCount ?? sm?.totalTransactions ?? 0 }}
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Comprobantes emitidos en el período</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-400">Ticket Promedio</span>
+          @if (sa) {
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+              [ngClass]="sa.ticketGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.ticketGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
+              {{ sa.ticketGrowthPct > 0 ? '+' : '' }}{{ sa.ticketGrowthPct }}%
+            </span>
+          }
+        </div>
+        <div class="text-2xl font-black text-slate-900 mt-1">
+          {{ (sa?.averageTicket ?? sm?.averageTicket ?? 0) | currencyFormat }}
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Gasto medio por cliente</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+        <span class="text-xs font-semibold text-slate-400">Distribución de Pagos</span>
+        <div class="mt-2 space-y-1.5">
+          @for (pm of (sa?.paymentMethods ?? sm?.paymentMethods ?? []); track pm.method) {
+          <div class="space-y-0.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-medium text-slate-600">{{ pm.method }}</span>
+              <span class="font-mono font-bold text-slate-800">{{ pm.percentage }}%</span>
+            </div>
+            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-primary-500 h-full rounded-full transition-all duration-300" [style.width.%]="pm.percentage"></div>
+            </div>
+          </div>
+          }
+        </div>
       </div>
     </div>
-  </div>
+    }
   }
 
   @if (selectedCategory() === 'finance' && profitabilityData(); as prof) {
@@ -638,6 +709,198 @@
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">⭐</div>
             <h4 class="text-sm font-bold text-slate-900">No hay ventas registradas en el período para generar el ranking</h4>
+          </div>
+        }
+      }
+
+      <!-- 2.1 VISTA DE VENTAS POR CATEGORÍA -->
+      @else if (selectedReport() === 'sales-categories') {
+        @if (salesCategories().length) {
+        <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
+          <span class="text-xs font-bold text-slate-700 block mb-2">Participación de Facturación por Categoría</span>
+          <div class="w-full h-3 rounded-full flex overflow-hidden bg-slate-200 gap-0.5 shadow-inner">
+            @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
+              <div [style.width.%]="cat.sharePercentage"
+                [ngClass]="idx % 4 === 0 ? 'bg-primary-500' : idx % 4 === 1 ? 'bg-indigo-500' : idx % 4 === 2 ? 'bg-amber-500' : 'bg-emerald-500'"
+                [title]="cat.categoryName + ': ' + cat.sharePercentage + '%'"
+                class="h-full transition-all duration-300"></div>
+            }
+          </div>
+          <div class="flex flex-wrap items-center gap-4 mt-3 text-[11px] text-slate-600">
+            @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full"
+                  [ngClass]="idx % 4 === 0 ? 'bg-primary-500' : idx % 4 === 1 ? 'bg-indigo-500' : idx % 4 === 2 ? 'bg-amber-500' : 'bg-emerald-500'"></span>
+                <span class="font-medium text-slate-800">{{ cat.categoryName }}</span>
+                <span class="font-mono font-bold text-slate-500">({{ cat.sharePercentage }}%)</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse" data-testid="table-sales-categories">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3 px-4">#</th>
+                <th class="py-3 px-4">Categoría</th>
+                <th class="py-3 px-4 text-right">Unidades Vendidas</th>
+                <th class="py-3 px-4 text-right">Facturación Total</th>
+                <th class="py-3 px-4 text-center">Participación (% Share)</th>
+                <th class="py-3 px-4 text-center">Transacciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-3 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
+                <td class="py-3 px-4 font-bold text-slate-900">{{ cat.categoryName }}</td>
+                <td class="py-3 px-4 text-right font-mono font-bold text-primary-600">{{ cat.unitsSold }}</td>
+                <td class="py-3 px-4 text-right font-mono font-black text-slate-900">{{ cat.totalRevenue | currencyFormat }}</td>
+                <td class="py-3 px-4 text-center">
+                  <div class="inline-flex items-center gap-2">
+                    <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div class="bg-primary-500 h-full rounded-full" [style.width.%]="cat.sharePercentage"></div>
+                    </div>
+                    <span class="font-mono font-bold text-slate-700 text-xs">{{ cat.sharePercentage }}%</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4 text-center font-mono text-slate-600">{{ cat.transactionCount }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        } @else {
+          <div class="p-12 text-center space-y-3" data-testid="empty-state">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">🏷️</div>
+            <h4 class="text-sm font-bold text-slate-900">No se encontraron ventas por categoría en el período</h4>
+          </div>
+        }
+      }
+
+      <!-- 2.2 VISTA DE HORARIOS DE MAYOR ACTIVIDAD COMERCIAL (HEATMAP / HORAS PICO) -->
+      @else if (selectedReport() === 'sales-hourly') {
+        @let activeHours = hourlyActivity();
+        @if (activeHours.length) {
+        <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
+          <span class="text-xs font-bold text-slate-700 block mb-3">Distribución de Transacciones por Hora del Día (00:00 a 23:59)</span>
+          <div class="grid grid-cols-12 sm:grid-cols-24 gap-1 items-end h-24 pt-4 px-2">
+            @for (h of activeHours; track h.hour) {
+              <div class="flex flex-col items-center gap-1 h-full justify-end group relative cursor-pointer" [title]="h.hourLabel + ': ' + h.transactionCount + ' transacciones ($' + h.totalRevenue + ')'">
+                <div class="w-full rounded-t transition-all duration-200"
+                  [ngClass]="h.isPeakHour ? 'bg-amber-500 ring-2 ring-amber-300' : h.transactionCount > 0 ? 'bg-primary-500' : 'bg-slate-200'"
+                  [style.height.%]="h.transactionCount > 0 ? Math.max((h.transactionCount * 15), 20) : 8">
+                </div>
+                <span class="text-[9px] font-mono text-slate-400 group-hover:text-slate-900">{{ h.hour }}h</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse" data-testid="table-sales-hourly">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3 px-4">Franja Horaria</th>
+                <th class="py-3 px-4 text-center">Transacciones Realizadas</th>
+                <th class="py-3 px-4 text-right">Facturación en Franja</th>
+                <th class="py-3 px-4 text-center">Estado Operativo</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              @for (h of filteredHourlyActivity(); track h.hour) {
+              <tr class="hover:bg-slate-50/60 transition-colors" [ngClass]="h.isPeakHour ? 'bg-amber-50/40' : ''">
+                <td class="py-3 px-4 font-mono font-bold text-slate-800 flex items-center gap-2">
+                  <span class="text-slate-400">⏰</span>
+                  <span>{{ h.hourLabel }}</span>
+                </td>
+                <td class="py-3 px-4 text-center font-mono font-bold"
+                  [ngClass]="h.isPeakHour ? 'text-amber-700' : 'text-slate-700'">
+                  {{ h.transactionCount }}
+                </td>
+                <td class="py-3 px-4 text-right font-mono font-black"
+                  [ngClass]="h.isPeakHour ? 'text-amber-800' : 'text-slate-900'">
+                  {{ h.totalRevenue | currencyFormat }}
+                </td>
+                <td class="py-3 px-4 text-center">
+                  @if (h.isPeakHour) {
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs inline-flex items-center gap-1">
+                      <span>⭐</span>
+                      <span>HORA PICO</span>
+                    </span>
+                  } @else if (h.transactionCount > 0) {
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Activa
+                    </span>
+                  } @else {
+                    <span class="text-slate-300 font-mono text-[11px]">&mdash;</span>
+                  }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        } @else {
+          <div class="p-12 text-center space-y-3" data-testid="empty-state">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">⏰</div>
+            <h4 class="text-sm font-bold text-slate-900">No hay actividad transaccional registrada para este período</h4>
+          </div>
+        }
+      }
+
+      <!-- 2.3 VISTA DE RENDIMIENTO POR EMPLEADO / VENDEDOR -->
+      @else if (selectedReport() === 'sales-employees') {
+        @if (salesEmployees().length) {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse" data-testid="table-sales-employees">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3 px-4">Ranking</th>
+                <th class="py-3 px-4">Empleado / Vendedor</th>
+                <th class="py-3 px-4">Rol en Sistema</th>
+                <th class="py-3 px-4 text-center">Transacciones Emitidas</th>
+                <th class="py-3 px-4 text-right">Ticket Promedio</th>
+                <th class="py-3 px-4 text-right">Total Facturado</th>
+                <th class="py-3 px-4 text-center">Aporte a la Sede (%)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs">
+              @for (emp of salesEmployees(); track emp.userId; let idx = $index) {
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-3 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
+                <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-[10px] font-black">
+                    {{ emp.employeeName.charAt(0) }}
+                  </div>
+                  <span>{{ emp.employeeName }}</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    {{ emp.role }}
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-center font-mono font-bold text-slate-700">{{ emp.transactionCount }}</td>
+                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ emp.averageTicket | currencyFormat }}</td>
+                <td class="py-3 px-4 text-right font-mono font-black text-slate-900">{{ emp.totalRevenue | currencyFormat }}</td>
+                <td class="py-3 px-4 text-center">
+                  <div class="inline-flex items-center gap-2">
+                    <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div class="bg-primary-500 h-full rounded-full" [style.width.%]="emp.sharePercentage"></div>
+                    </div>
+                    <span class="font-mono font-bold text-slate-700 text-xs">{{ emp.sharePercentage }}%</span>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        } @else {
+          <div class="p-12 text-center space-y-3" data-testid="empty-state">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">👥</div>
+            <h4 class="text-sm font-bold text-slate-900">No se encontraron ventas asociadas a empleados en este período</h4>
           </div>
         }
       }

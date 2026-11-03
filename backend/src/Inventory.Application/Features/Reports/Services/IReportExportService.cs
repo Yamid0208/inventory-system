@@ -111,4 +111,55 @@ public interface IReportExportService
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
+
+    // 5. Suite de Análisis Empresarial e Inteligencia de Ventas
+    Task<SalesAnalyticsSummaryDto> GetSalesAnalyticsSummaryAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<SalesByCategoryDto>> GetSalesByCategoryAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        string? searchTerm = null,
+        CancellationToken cancellationToken = default);
+
+    Task<byte[]> ExportSalesByCategoryCsvAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<HourlyActivityDto>> GetSalesHourlyActivityAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<byte[]> ExportSalesHourlyActivityCsvAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<SalesByEmployeeDto>> GetSalesByEmployeeAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        string? searchTerm = null,
+        CancellationToken cancellationToken = default);
+
+    Task<byte[]> ExportSalesByEmployeeCsvAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<SalesTrendDto>> GetSalesTrendsAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default);
 }

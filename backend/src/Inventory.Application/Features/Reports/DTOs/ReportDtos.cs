@@ -187,3 +187,55 @@ public record AuditActivityReportItemDto(
     string UserName,
     string? IpAddress
 );
+
+// DTOs para INSINCRO: Suite de Análisis Empresarial e Inteligencia Comercial
+public record SalesAnalyticsSummaryDto(
+    decimal TotalRevenue,
+    decimal NetRevenue,
+    decimal Tax,
+    int TransactionCount,
+    decimal AverageTicket,
+    int UnitsSold,
+    decimal PrevTotalRevenue,
+    int PrevTransactionCount,
+    decimal PrevAverageTicket,
+    decimal RevenueGrowthPct,
+    decimal TransactionsGrowthPct,
+    decimal TicketGrowthPct,
+    IReadOnlyList<PaymentMethodBreakdownDto> PaymentMethods
+);
+
+public record SalesByCategoryDto(
+    int CategoryId,
+    string CategoryName,
+    int UnitsSold,
+    decimal TotalRevenue,
+    decimal SharePercentage,
+    int TransactionCount
+);
+
+public record HourlyActivityDto(
+    int Hour,
+    string HourLabel,
+    int TransactionCount,
+    decimal TotalRevenue,
+    bool IsPeakHour
+);
+
+public record SalesByEmployeeDto(
+    int UserId,
+    string EmployeeName,
+    string Role,
+    int TransactionCount,
+    decimal TotalRevenue,
+    decimal AverageTicket,
+    decimal SharePercentage
+);
+
+public record SalesTrendDto(
+    string Date,
+    string Label,
+    int TransactionCount,
+    decimal TotalRevenue
+);
+

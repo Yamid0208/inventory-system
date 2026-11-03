@@ -22,7 +22,12 @@ import {
   TopProductReportItem,
   ProfitabilitySummary,
   CashRegisterReconciliationSummary,
-  AuditActivityReportItem
+  AuditActivityReportItem,
+  SalesAnalyticsSummary,
+  SalesByCategoryItem,
+  HourlyActivityItem,
+  SalesByEmployeeItem,
+  SalesTrendItem
 } from '../../core/models/report.model';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -36,6 +41,7 @@ import { CountUpDirective } from '../../shared/directives/count-up.directive';
   templateUrl: './reports.component.html'
 })
 export class ReportsComponent implements OnInit, OnDestroy {
+  protected readonly Math = Math;
   private reportService = inject(ReportService);
   private dashboardService = inject(DashboardService);
   branchContextService = inject(BranchContextService);
@@ -68,7 +74,17 @@ export class ReportsComponent implements OnInit, OnDestroy {
   // Datos tabulares por tipo de reporte
   salesData = signal<PagedReportResult<SalesReportItem> | null>(null);
   salesMetrics = signal<SalesSummaryMetrics | null>(null);
+  salesAnalytics = signal<SalesAnalyticsSummary | null>(null);
+  salesCategories = signal<SalesByCategoryItem[]>([]);
+  hourlyActivity = signal<HourlyActivityItem[]>([]);
+  salesEmployees = signal<SalesByEmployeeItem[]>([]);
+  salesTrends = signal<SalesTrendItem[]>([]);
   topProductsData = signal<TopProductReportItem[]>([]);
+
+  filteredHourlyActivity = computed(() => {
+    const term = this.searchTerm();
+    return this.hourlyActivity().filter(h => h.transactionCount > 0 || !term);
+  });
   profitabilityData = signal<ProfitabilitySummary | null>(null);
   cashReconciliationData = signal<CashRegisterReconciliationSummary | null>(null);
   inventoryData = signal<PagedReportResult<InventoryKardexReportItem> | null>(null);
@@ -81,6 +97,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
     switch (this.selectedReport()) {
       case 'sales': return '💳 Historial y Facturación de Ventas';
       case 'sales-top': return '⭐ Ranking de Top Productos Más Vendidos';
+      case 'sales-categories': return '🏷️ Análisis de Ventas por Categoría de Producto';
+      case 'sales-hourly': return '⏰ Horarios de Mayor Actividad Comercial (Heatmap)';
+      case 'sales-employees': return '👥 Rendimiento y Productividad por Empleado';
       case 'finance': return '📈 Rentabilidad y Utilidad Bruta (CMV Histórico)';
       case 'cash-reconciliation': return '💵 Arqueos y Conciliación de Cajas POS';
       case 'inventory': return '📋 Kardex Transaccional de Inventario';
@@ -111,6 +130,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
     switch (this.selectedReport()) {
       case 'sales': return this.salesData()?.totalCount || 0;
       case 'sales-top': return this.topProductsData().length;
+      case 'sales-categories': return this.salesCategories().length;
+      case 'sales-hourly': return this.hourlyActivity().filter(h => h.transactionCount > 0).length;
+      case 'sales-employees': return this.salesEmployees().length;
       case 'finance': return this.profitabilityData()?.productDetails?.totalCount || 0;
       case 'cash-reconciliation': return this.cashReconciliationData()?.sessions?.totalCount || 0;
       case 'inventory': return this.inventoryData()?.totalCount || 0;
@@ -253,7 +275,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.selectedReport.set(type);
 
     // Ajustar categoría asociada si aplica
-    if (type === 'sales' || type === 'sales-top') {
+    if (type === 'sales' || type === 'sales-top' || type === 'sales-categories' || type === 'sales-hourly' || type === 'sales-employees') {
       this.selectedCategory.set('sales');
     } else if (type === 'finance') {
       this.selectedCategory.set('finance');
@@ -330,6 +352,14 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const page = this.pageNumber();
     const size = this.pageSize();
 
+    // En la categoría de ventas, actualizar siempre el resumen analítico ejecutivo y comparativa
+    if (this.selectedCategory() === 'sales') {
+      this.reportService.getSalesAnalyticsSummary(start, end, wid).subscribe({
+        next: (analytics) => this.salesAnalytics.set(analytics),
+        error: () => {}
+      });
+    }
+
     switch (this.selectedReport()) {
       case 'sales':
         this.reportService.getSalesData(start, end, wid, term, page, size).subscribe({
@@ -339,7 +369,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
           },
           error: () => this.tableLoading.set(false)
         });
-        // Cargar métricas ejecutivas de ventas en paralelo
         this.reportService.getSalesSummaryMetrics(start, end, wid).subscribe({
           next: (metrics) => this.salesMetrics.set(metrics),
           error: () => {}
@@ -350,6 +379,36 @@ export class ReportsComponent implements OnInit, OnDestroy {
         this.reportService.getTopProducts(start, end, wid, term, 15, false).subscribe({
           next: (items) => {
             this.topProductsData.set(items);
+            this.tableLoading.set(false);
+          },
+          error: () => this.tableLoading.set(false)
+        });
+        break;
+
+      case 'sales-categories':
+        this.reportService.getSalesByCategory(start, end, wid, term).subscribe({
+          next: (items) => {
+            this.salesCategories.set(items);
+            this.tableLoading.set(false);
+          },
+          error: () => this.tableLoading.set(false)
+        });
+        break;
+
+      case 'sales-hourly':
+        this.reportService.getSalesHourlyActivity(start, end, wid).subscribe({
+          next: (items) => {
+            this.hourlyActivity.set(items);
+            this.tableLoading.set(false);
+          },
+          error: () => this.tableLoading.set(false)
+        });
+        break;
+
+      case 'sales-employees':
+        this.reportService.getSalesByEmployee(start, end, wid, term).subscribe({
+          next: (items) => {
+            this.salesEmployees.set(items);
             this.tableLoading.set(false);
           },
           error: () => this.tableLoading.set(false)

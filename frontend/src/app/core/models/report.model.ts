@@ -188,11 +188,65 @@ export interface AuditActivityReportItem {
   ipAddress?: string | null;
 }
 
+// Modelos INSINCRO POS: Suite de Análisis Empresarial e Inteligencia Comercial
+export interface SalesAnalyticsSummary {
+  totalRevenue: number;
+  netRevenue: number;
+  tax: number;
+  transactionCount: number;
+  averageTicket: number;
+  unitsSold: number;
+  prevTotalRevenue: number;
+  prevTransactionCount: number;
+  prevAverageTicket: number;
+  revenueGrowthPct: number;
+  transactionsGrowthPct: number;
+  ticketGrowthPct: number;
+  paymentMethods: PaymentMethodBreakdown[];
+}
+
+export interface SalesByCategoryItem {
+  categoryId: number;
+  categoryName: string;
+  unitsSold: number;
+  totalRevenue: number;
+  sharePercentage: number;
+  transactionCount: number;
+}
+
+export interface HourlyActivityItem {
+  hour: number;
+  hourLabel: string;
+  transactionCount: number;
+  totalRevenue: number;
+  isPeakHour: boolean;
+}
+
+export interface SalesByEmployeeItem {
+  userId: number;
+  employeeName: string;
+  role: string;
+  transactionCount: number;
+  totalRevenue: number;
+  averageTicket: number;
+  sharePercentage: number;
+}
+
+export interface SalesTrendItem {
+  date: string;
+  label: string;
+  transactionCount: number;
+  totalRevenue: number;
+}
+
 export type ReportCategoryKey = 'sales' | 'finance' | 'inventory' | 'purchases' | 'cash' | 'audit';
 
 export type ReportTypeKey =
   | 'sales'
   | 'sales-top'
+  | 'sales-categories'
+  | 'sales-hourly'
+  | 'sales-employees'
   | 'inventory'
   | 'low-stock'
   | 'purchases'

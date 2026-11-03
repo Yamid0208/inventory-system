@@ -13,7 +13,12 @@ import {
   TopProductReportItem,
   ProfitabilitySummary,
   CashRegisterReconciliationSummary,
-  AuditActivityReportItem
+  AuditActivityReportItem,
+  SalesAnalyticsSummary,
+  SalesByCategoryItem,
+  HourlyActivityItem,
+  SalesByEmployeeItem,
+  SalesTrendItem
 } from '../models/report.model';
 
 @Injectable({
@@ -125,6 +130,80 @@ export class ReportService {
     }
     if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<TopProductReportItem[]>(`${this.baseUrl}/sales/top-products`, { params });
+  }
+
+  getSalesAnalyticsSummary(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null
+  ): Observable<SalesAnalyticsSummary> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<SalesAnalyticsSummary>(`${this.baseUrl}/sales/analytics-summary`, { params });
+  }
+
+  getSalesByCategory(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null,
+    searchTerm?: string
+  ): Observable<SalesByCategoryItem[]> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
+    return this.http.get<SalesByCategoryItem[]>(`${this.baseUrl}/sales/by-category`, { params });
+  }
+
+  getSalesHourlyActivity(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null
+  ): Observable<HourlyActivityItem[]> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<HourlyActivityItem[]>(`${this.baseUrl}/sales/hourly-activity`, { params });
+  }
+
+  getSalesByEmployee(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null,
+    searchTerm?: string
+  ): Observable<SalesByEmployeeItem[]> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
+    return this.http.get<SalesByEmployeeItem[]>(`${this.baseUrl}/sales/by-employee`, { params });
+  }
+
+  getSalesTrends(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null
+  ): Observable<SalesTrendItem[]> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<SalesTrendItem[]>(`${this.baseUrl}/sales/trends`, { params });
   }
 
   getProfitability(
@@ -239,6 +318,12 @@ export class ReportService {
       url = `${this.baseUrl}/finance/profitability/csv`;
     } else if (reportKey === 'cash-reconciliation') {
       url = `${this.baseUrl}/cash-register/reconciliation/csv`;
+    } else if (reportKey === 'sales-categories') {
+      url = `${this.baseUrl}/sales/by-category/csv`;
+    } else if (reportKey === 'sales-hourly') {
+      url = `${this.baseUrl}/sales/hourly-activity/csv`;
+    } else if (reportKey === 'sales-employees') {
+      url = `${this.baseUrl}/sales/by-employee/csv`;
     }
 
     return this.http.get(url, {

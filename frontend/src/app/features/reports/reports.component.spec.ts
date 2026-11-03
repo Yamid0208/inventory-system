@@ -52,7 +52,32 @@ describe('ReportsComponent (Unit Tests)', () => {
       },
       sessions: dummyPagedResult
     })),
-    getAuditActivity: vi.fn().mockReturnValue(of(dummyPagedResult))
+    getAuditActivity: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getSalesAnalyticsSummary: vi.fn().mockReturnValue(of({
+      totalRevenue: 5000,
+      netRevenue: 4200,
+      tax: 800,
+      transactionCount: 20,
+      averageTicket: 250,
+      unitsSold: 45,
+      prevTotalRevenue: 4000,
+      prevTransactionCount: 16,
+      prevAverageTicket: 250,
+      revenueGrowthPct: 25.0,
+      transactionsGrowthPct: 25.0,
+      ticketGrowthPct: 0.0,
+      paymentMethods: []
+    })),
+    getSalesByCategory: vi.fn().mockReturnValue(of([
+      { categoryId: 1, categoryName: 'Tecnología', unitsSold: 10, totalRevenue: 2500, sharePercentage: 50, transactionCount: 8 }
+    ])),
+    getSalesHourlyActivity: vi.fn().mockReturnValue(of([
+      { hour: 14, hourLabel: '14:00 - 14:59', transactionCount: 12, totalRevenue: 3000, isPeakHour: true }
+    ])),
+    getSalesByEmployee: vi.fn().mockReturnValue(of([
+      { userId: 1, employeeName: 'Juan Pérez', role: 'Vendedor', transactionCount: 15, totalRevenue: 3750, averageTicket: 250, sharePercentage: 75 }
+    ])),
+    getSalesTrends: vi.fn().mockReturnValue(of([]))
   };
 
   const dashboardServiceMock = {
@@ -175,5 +200,28 @@ describe('ReportsComponent (Unit Tests)', () => {
     component.selectReport('low-stock');
     expect(component.selectedReport()).toBe('low-stock');
     expect(reportServiceMock.getLowStockData).toHaveBeenCalled();
+  });
+
+  it('should switch to sales analytics sub-tabs and load specialized datasets', () => {
+    // Sub-pestaña Por Categoría
+    component.selectReport('sales-categories');
+    expect(component.selectedReport()).toBe('sales-categories');
+    expect(reportServiceMock.getSalesByCategory).toHaveBeenCalled();
+    expect(component.salesCategories().length).toBe(1);
+    expect(component.tableTitle()).toContain('Categoría');
+
+    // Sub-pestaña Horarios Pico
+    component.selectReport('sales-hourly');
+    expect(component.selectedReport()).toBe('sales-hourly');
+    expect(reportServiceMock.getSalesHourlyActivity).toHaveBeenCalled();
+    expect(component.hourlyActivity().length).toBe(1);
+    expect(component.tableTitle()).toContain('Horarios');
+
+    // Sub-pestaña Por Empleado
+    component.selectReport('sales-employees');
+    expect(component.selectedReport()).toBe('sales-employees');
+    expect(reportServiceMock.getSalesByEmployee).toHaveBeenCalled();
+    expect(component.salesEmployees().length).toBe(1);
+    expect(component.tableTitle()).toContain('Empleado');
   });
 });
