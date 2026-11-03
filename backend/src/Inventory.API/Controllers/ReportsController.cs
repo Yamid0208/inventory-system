@@ -184,6 +184,127 @@ public class ReportsController : BaseApiController
         return Ok(result);
     }
 
+    /// <summary>
+    /// Métricas ejecutivas y KPIs de ventas con distribución por método de pago.
+    /// </summary>
+    [HttpGet("sales/summary-metrics")]
+    [ProducesResponseType(typeof(SalesSummaryMetricsDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<SalesSummaryMetricsDto>> GetSalesSummaryMetrics(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetSalesSummaryMetricsAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Ranking de productos más y menos vendidos en el período.
+    /// </summary>
+    [HttpGet("sales/top-products")]
+    [ProducesResponseType(typeof(IReadOnlyList<TopProductReportDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<TopProductReportDto>>> GetTopProducts(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] int top = 10,
+        [FromQuery] bool ascending = false,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetTopProductsAsync(startDate, endDate, targetWarehouseId, top, ascending, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Reporte de Rentabilidad y Utilidad Bruta calculada a partir del Costo de Mercancía Vendida (CMV) histórico.
+    /// </summary>
+    [HttpGet("finance/profitability")]
+    [ProducesResponseType(typeof(ProfitabilitySummaryDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ProfitabilitySummaryDto>> GetProfitabilityReport(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetProfitabilityReportAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Exportación CSV del reporte de Rentabilidad y Utilidad Bruta.
+    /// </summary>
+    [HttpGet("finance/profitability/csv")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportProfitabilityCsv(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var fileBytes = await _reportService.ExportProfitabilityCsvAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        var filename = $"reporte_rentabilidad_{DateTime.UtcNow:yyyyMMdd_HHmm}.csv";
+        return File(fileBytes, "text/csv; charset=utf-8", filename);
+    }
+
+    /// <summary>
+    /// Reporte de Cierres de Caja POS y Conciliación (Efectivo físico esperado vs contado y pagos electrónicos).
+    /// </summary>
+    [HttpGet("cash-register/reconciliation")]
+    [ProducesResponseType(typeof(CashRegisterReconciliationSummaryDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<CashRegisterReconciliationSummaryDto>> GetCashRegisterReconciliation(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetCashRegisterReconciliationAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Exportación CSV de cierres y conciliación de caja POS.
+    /// </summary>
+    [HttpGet("cash-register/reconciliation/csv")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportCashReconciliationCsv(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var fileBytes = await _reportService.ExportCashReconciliationCsvAsync(startDate, endDate, targetWarehouseId, cancellationToken);
+        var filename = $"conciliacion_caja_{DateTime.UtcNow:yyyyMMdd_HHmm}.csv";
+        return File(fileBytes, "text/csv; charset=utf-8", filename);
+    }
+
+    /// <summary>
+    /// Reporte de Actividad y Auditoría cronológica de operaciones sensibles.
+    /// </summary>
+    [HttpGet("audit/activity")]
+    [ProducesResponseType(typeof(PagedReportResultDto<AuditActivityReportItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedReportResultDto<AuditActivityReportItemDto>>> GetAuditActivity(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] string? entityName,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _reportService.GetAuditActivityAsync(startDate, endDate, entityName, pageNumber, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
     private int? ResolveTargetWarehouseId(int? queryWarehouseId)
     {
         var role = GetCurrentUserRole();

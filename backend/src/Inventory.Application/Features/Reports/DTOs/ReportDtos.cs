@@ -98,3 +98,92 @@ public record LowStockReportItemDto(
     decimal EstimatedRestockCost,
     string Status
 );
+
+// DTOs para INSINCRO: Ventas Avanzadas & Métodos de Pago
+public record PaymentMethodBreakdownDto(
+    string Method,
+    decimal TotalAmount,
+    int TransactionCount,
+    decimal Percentage
+);
+
+public record SalesSummaryMetricsDto(
+    decimal TotalSalesAmount,
+    int TotalTransactions,
+    decimal AverageTicket,
+    decimal TotalSubtotal,
+    decimal TotalTax,
+    IReadOnlyList<PaymentMethodBreakdownDto> PaymentMethods
+);
+
+public record TopProductReportDto(
+    int ProductId,
+    string Sku,
+    string ProductName,
+    string CategoryName,
+    int UnitsSold,
+    decimal TotalRevenue,
+    decimal AverageUnitPrice
+);
+
+// DTOs para INSINCRO: Finanzas & Rentabilidad (Utilidad Bruta con CMV histórico)
+public record ProductProfitabilityItemDto(
+    int ProductId,
+    string Sku,
+    string ProductName,
+    string CategoryName,
+    int UnitsSold,
+    decimal TotalRevenue,
+    decimal CostOfGoodsSold,
+    decimal GrossProfit,
+    decimal GrossMarginPercentage
+);
+
+public record ProfitabilitySummaryDto(
+    decimal TotalRevenue,
+    decimal TotalCostOfGoodsSold,
+    decimal GrossProfit,
+    decimal GrossMarginPercentage,
+    int TotalItemsSold,
+    PagedReportResultDto<ProductProfitabilityItemDto> ProductDetails
+);
+
+// DTOs para INSINCRO: Caja POS & Conciliación
+public record CashRegisterSessionReportItemDto(
+    int SessionId,
+    string SessionNumber,
+    string CashierName,
+    DateTimeOffset OpenedAt,
+    DateTimeOffset? ClosedAt,
+    string Status,
+    decimal InitialCash,
+    decimal TotalSales,
+    decimal TotalCashInflow,
+    decimal TotalCashOutflow,
+    decimal TotalElectronicInflow,
+    decimal ExpectedCash,
+    decimal? ActualCash,
+    decimal? Difference,
+    string? DifferenceStatus
+);
+
+public record CashRegisterReconciliationSummaryDto(
+    decimal TotalOpeningBalance,
+    decimal TotalExpectedCash,
+    decimal TotalActualCash,
+    decimal TotalDifference,
+    decimal TotalElectronicInflow,
+    int TotalSessionsCount,
+    PagedReportResultDto<CashRegisterSessionReportItemDto> Sessions
+);
+
+// DTOs para INSINCRO: Actividad & Auditoría
+public record AuditActivityReportItemDto(
+    int Id,
+    DateTimeOffset CreatedAt,
+    string EntityName,
+    string Action,
+    string Details,
+    string UserName,
+    string? IpAddress
+);

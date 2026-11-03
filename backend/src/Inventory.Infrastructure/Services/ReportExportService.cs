@@ -585,6 +585,454 @@ public class ReportExportService : IReportExportService
         );
     }
 
+    public async Task<SalesSummaryMetricsDto> GetSalesSummaryMetricsAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Sales
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(s => s.CreatedAt >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(s => s.CreatedAt <= adjustedEnd.Value);
+        }
+
+        var totalTransactions = await query.CountAsync(cancellationToken);
+        if (totalTransactions == 0)
+        {
+            return new SalesSummaryMetricsDto(0, 0, 0, 0, 0, Array.Empty<PaymentMethodBreakdownDto>());
+        }
+
+        var totalSales = await query.SumAsync(s => s.Total, cancellationToken);
+        var totalSubtotal = await query.SumAsync(s => s.Subtotal, cancellationToken);
+        var totalTax = await query.SumAsync(s => s.Tax, cancellationToken);
+        var averageTicket = totalTransactions > 0 ? decimal.Round(totalSales / totalTransactions, 2) : 0;
+
+        var methodGroups = await query
+            .GroupBy(s => s.PaymentMethod)
+            .Select(g => new
+            {
+                Method = g.Key.ToString(),
+                TotalAmount = g.Sum(s => s.Total),
+                Count = g.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        var paymentMethods = methodGroups.Select(m => new PaymentMethodBreakdownDto(
+            m.Method,
+            m.TotalAmount,
+            m.Count,
+            totalSales > 0 ? decimal.Round((m.TotalAmount / totalSales) * 100, 1) : 0
+        )).ToList();
+
+        return new SalesSummaryMetricsDto(
+            totalSales,
+            totalTransactions,
+            averageTicket,
+            totalSubtotal,
+            totalTax,
+            paymentMethods
+        );
+    }
+
+    public async Task<IReadOnlyList<TopProductReportDto>> GetTopProductsAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        int top = 10,
+        bool ascending = false,
+        CancellationToken cancellationToken = default)
+    {
+        top = Math.Clamp(top, 1, 100);
+
+        var query = _context.SaleItems
+            .AsNoTracking()
+            .Include(i => i.Sale)
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Category)
+            .AsQueryable();
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(i => i.Sale.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(i => i.Sale.CreatedAt >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(i => i.Sale.CreatedAt <= adjustedEnd.Value);
+        }
+
+        var groupedQuery = query
+            .GroupBy(i => new
+            {
+                i.ProductId,
+                Sku = i.Product.Sku,
+                Name = i.Product.Name,
+                CategoryName = i.Product.Category != null ? i.Product.Category.Name : "General"
+            })
+            .Select(g => new
+            {
+                g.Key.ProductId,
+                g.Key.Sku,
+                g.Key.Name,
+                g.Key.CategoryName,
+                UnitsSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.Total)
+            });
+
+        groupedQuery = ascending
+            ? groupedQuery.OrderBy(x => x.TotalRevenue).ThenBy(x => x.UnitsSold)
+            : groupedQuery.OrderByDescending(x => x.TotalRevenue).ThenByDescending(x => x.UnitsSold);
+
+        var topResults = await groupedQuery.Take(top).ToListAsync(cancellationToken);
+
+        return topResults.Select(r => new TopProductReportDto(
+            r.ProductId,
+            r.Sku,
+            r.Name,
+            r.CategoryName,
+            r.UnitsSold,
+            r.TotalRevenue,
+            r.UnitsSold > 0 ? decimal.Round(r.TotalRevenue / r.UnitsSold, 2) : 0
+        )).ToList();
+    }
+
+    public async Task<ProfitabilitySummaryDto> GetProfitabilityReportAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.SaleItems
+            .AsNoTracking()
+            .Include(i => i.Sale)
+            .Include(i => i.Product)
+                .ThenInclude(p => p.Category)
+            .AsQueryable();
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(i => i.Sale.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(i => i.Sale.CreatedAt >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(i => i.Sale.CreatedAt <= adjustedEnd.Value);
+        }
+
+        var globalRevenue = await query.SumAsync(i => i.Total, cancellationToken);
+        var globalCogs = await query.SumAsync(i => i.Quantity * i.Product.PurchasePrice, cancellationToken);
+        var globalGrossProfit = globalRevenue - globalCogs;
+        var globalMargin = globalRevenue > 0 ? decimal.Round((globalGrossProfit / globalRevenue) * 100, 1) : 0;
+        var totalItemsCount = await query.SumAsync(i => i.Quantity, cancellationToken);
+
+        var grouped = query
+            .GroupBy(i => new
+            {
+                i.ProductId,
+                Sku = i.Product.Sku,
+                Name = i.Product.Name,
+                CategoryName = i.Product.Category != null ? i.Product.Category.Name : "General",
+                Cost = i.Product.PurchasePrice
+            })
+            .Select(g => new
+            {
+                g.Key.ProductId,
+                g.Key.Sku,
+                g.Key.Name,
+                g.Key.CategoryName,
+                UnitsSold = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.Total),
+                TotalCost = g.Sum(x => x.Quantity * g.Key.Cost)
+            });
+
+        var totalCount = await grouped.CountAsync(cancellationToken);
+
+        var pagedList = await grouped
+            .OrderByDescending(x => x.TotalRevenue)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = pagedList.Select(r =>
+        {
+            var profit = r.TotalRevenue - r.TotalCost;
+            var margin = r.TotalRevenue > 0 ? decimal.Round((profit / r.TotalRevenue) * 100, 1) : 0;
+            return new ProductProfitabilityItemDto(
+                r.ProductId,
+                r.Sku,
+                r.Name,
+                r.CategoryName,
+                r.UnitsSold,
+                r.TotalRevenue,
+                r.TotalCost,
+                profit,
+                margin
+            );
+        }).ToList();
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var pagedResult = new PagedReportResultDto<ProductProfitabilityItemDto>(
+            items,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages,
+            globalGrossProfit,
+            totalItemsCount
+        );
+
+        return new ProfitabilitySummaryDto(
+            globalRevenue,
+            globalCogs,
+            globalGrossProfit,
+            globalMargin,
+            totalItemsCount,
+            pagedResult
+        );
+    }
+
+    public async Task<byte[]> ExportProfitabilityCsvAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await GetProfitabilityReportAsync(startDate, endDate, warehouseId, 1, 10000, cancellationToken);
+
+        var sb = new StringBuilder();
+        sb.AppendLine("SKU,Producto,Categoría,Unidades Vendidas,Ingresos Totales,Costo Mercancía (CMV),Utilidad Bruta,Margen Bruto (%)");
+
+        foreach (var p in result.ProductDetails.Items)
+        {
+            sb.AppendLine(string.Join(",",
+                EscapeCsv(p.Sku),
+                EscapeCsv(p.ProductName),
+                EscapeCsv(p.CategoryName),
+                p.UnitsSold.ToString(),
+                p.TotalRevenue.ToString("F2", CultureInfo.InvariantCulture),
+                p.CostOfGoodsSold.ToString("F2", CultureInfo.InvariantCulture),
+                p.GrossProfit.ToString("F2", CultureInfo.InvariantCulture),
+                p.GrossMarginPercentage.ToString("F1", CultureInfo.InvariantCulture)
+            ));
+        }
+
+        return ToUtf8BomBytes(sb.ToString());
+    }
+
+    public async Task<CashRegisterReconciliationSummaryDto> GetCashRegisterReconciliationAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.CashRegisterSessions
+            .AsNoTracking()
+            .Include(s => s.User)
+            .AsQueryable();
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(s => s.OpenedAt >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(s => s.OpenedAt <= adjustedEnd.Value);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var totalOpening = await query.SumAsync(s => s.InitialCash, cancellationToken);
+        var totalExpected = await query.SumAsync(s => s.ExpectedCash, cancellationToken);
+        var totalActual = await query.SumAsync(s => s.ActualCash ?? 0, cancellationToken);
+        var totalDiff = await query.SumAsync(s => s.CashDifference ?? 0, cancellationToken);
+        var totalElectronic = await query.SumAsync(s => s.TotalTransferInflow + s.TotalCardInflow + s.TotalOtherInflow, cancellationToken);
+
+        var pagedSessions = await query
+            .OrderByDescending(s => s.OpenedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(s => new CashRegisterSessionReportItemDto(
+                s.Id,
+                s.SessionNumber,
+                s.User != null ? s.User.FullName : "Cajero",
+                s.OpenedAt,
+                s.ClosedAt,
+                s.Status.ToString(),
+                s.InitialCash,
+                s.TotalSales,
+                s.TotalCashInflow,
+                s.TotalCashOutflow,
+                s.TotalTransferInflow + s.TotalCardInflow + s.TotalOtherInflow,
+                s.ExpectedCash,
+                s.ActualCash,
+                s.CashDifference,
+                s.DifferenceStatus.HasValue ? s.DifferenceStatus.Value.ToString() : "Pendiente"
+            ))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var pagedResult = new PagedReportResultDto<CashRegisterSessionReportItemDto>(
+            pagedSessions,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages,
+            totalExpected,
+            totalCount
+        );
+
+        return new CashRegisterReconciliationSummaryDto(
+            totalOpening,
+            totalExpected,
+            totalActual,
+            totalDiff,
+            totalElectronic,
+            totalCount,
+            pagedResult
+        );
+    }
+
+    public async Task<byte[]> ExportCashReconciliationCsvAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await GetCashRegisterReconciliationAsync(startDate, endDate, warehouseId, 1, 10000, cancellationToken);
+
+        var sb = new StringBuilder();
+        sb.AppendLine("N° Sesión,Cajero,Apertura (UTC),Cierre (UTC),Estado,Fondo Inicial,Ventas Totales,Ingresos Efectivo,Egresos Efectivo,Pagos Electrónicos,Efectivo Esperado,Efectivo Real,Diferencia,Conciliación");
+
+        foreach (var s in result.Sessions.Items)
+        {
+            sb.AppendLine(string.Join(",",
+                EscapeCsv(s.SessionNumber),
+                EscapeCsv(s.CashierName),
+                s.OpenedAt.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                s.ClosedAt.HasValue ? s.ClosedAt.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) : "Abierta",
+                EscapeCsv(s.Status),
+                s.InitialCash.ToString("F2", CultureInfo.InvariantCulture),
+                s.TotalSales.ToString("F2", CultureInfo.InvariantCulture),
+                s.TotalCashInflow.ToString("F2", CultureInfo.InvariantCulture),
+                s.TotalCashOutflow.ToString("F2", CultureInfo.InvariantCulture),
+                s.TotalElectronicInflow.ToString("F2", CultureInfo.InvariantCulture),
+                s.ExpectedCash.ToString("F2", CultureInfo.InvariantCulture),
+                s.ActualCash.HasValue ? s.ActualCash.Value.ToString("F2", CultureInfo.InvariantCulture) : "-",
+                s.Difference.HasValue ? s.Difference.Value.ToString("F2", CultureInfo.InvariantCulture) : "0.00",
+                EscapeCsv(s.DifferenceStatus ?? "N/A")
+            ));
+        }
+
+        return ToUtf8BomBytes(sb.ToString());
+    }
+
+    public async Task<PagedReportResultDto<AuditActivityReportItemDto>> GetAuditActivityAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        string? entityName = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.AuditLogs
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(a => a.CreatedAt >= startDate.Value);
+        }
+
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
+        {
+            query = query.Where(a => a.CreatedAt <= adjustedEnd.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(entityName))
+        {
+            query = query.Where(a => a.EntityName.ToLower() == entityName.ToLower());
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(a => a.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(a => new AuditActivityReportItemDto(
+                a.Id,
+                a.CreatedAt,
+                a.EntityName,
+                a.Action,
+                a.Details,
+                a.UserName,
+                a.IpAddress
+            ))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedReportResultDto<AuditActivityReportItemDto>(
+            items,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages,
+            null,
+            totalCount
+        );
+    }
+
     private static DateTimeOffset? AdjustEndDate(DateTimeOffset? endDate)
     {
         if (!endDate.HasValue) return null;
