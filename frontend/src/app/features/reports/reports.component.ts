@@ -1,6 +1,8 @@
-import { Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ReportService } from '../../core/services/report.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { BranchContextService } from '../../core/services/branch-context.service';
@@ -33,10 +35,13 @@ import { CountUpDirective } from '../../shared/directives/count-up.directive';
   imports: [CommonModule, FormsModule, CurrencyFormatPipe, AppButtonComponent, CountUpDirective],
   templateUrl: './reports.component.html'
 })
-export class ReportsComponent implements OnInit {
+export class ReportsComponent implements OnInit, OnDestroy {
   private reportService = inject(ReportService);
   private dashboardService = inject(DashboardService);
   branchContextService = inject(BranchContextService);
+
+  private searchSubject = new Subject<string>();
+  private searchSub?: Subscription;
 
   summary = signal<ReportsCatalogSummary | null>(null);
   dashboardData = signal<DashboardSummary | null>(null);
@@ -71,6 +76,51 @@ export class ReportsComponent implements OnInit {
   productsData = signal<PagedReportResult<ProductReportItem> | null>(null);
   lowStockData = signal<PagedReportResult<LowStockReportItem> | null>(null);
   auditData = signal<PagedReportResult<AuditActivityReportItem> | null>(null);
+
+  tableTitle = computed(() => {
+    switch (this.selectedReport()) {
+      case 'sales': return '💳 Historial y Facturación de Ventas';
+      case 'sales-top': return '⭐ Ranking de Top Productos Más Vendidos';
+      case 'finance': return '📈 Rentabilidad y Utilidad Bruta (CMV Histórico)';
+      case 'cash-reconciliation': return '💵 Arqueos y Conciliación de Cajas POS';
+      case 'inventory': return '📋 Kardex Transaccional de Inventario';
+      case 'products': return '📦 Catálogo de Productos y Valuación';
+      case 'low-stock': return '⚠️ Alertas Críticas de Bajo Stock';
+      case 'purchases': return '🛍️ Historial de Compras y Abastecimiento';
+      case 'audit': return '🛡️ Registro de Auditoría de Operaciones Sensibles';
+      default: return 'Detalle de Reporte';
+    }
+  });
+
+  tableSubtitle = computed(() => {
+    const p = this.activePreset();
+    const presetLabels: Record<DatePreset, string> = {
+      today: 'Período: Hoy',
+      yesterday: 'Período: Ayer',
+      '7days': 'Período: Últimos 7 días',
+      '30days': 'Período: Últimos 30 días',
+      thisMonth: 'Período: Mes Actual',
+      lastMonth: 'Período: Mes Anterior',
+      all: 'Período: Todo el Histórico',
+      custom: `Período Personalizado: ${this.startDate() || 'Inicio'} al ${this.endDate() || 'Hoy'}`
+    };
+    return presetLabels[p] || 'Período activo';
+  });
+
+  currentRecordsCount = computed(() => {
+    switch (this.selectedReport()) {
+      case 'sales': return this.salesData()?.totalCount || 0;
+      case 'sales-top': return this.topProductsData().length;
+      case 'finance': return this.profitabilityData()?.productDetails?.totalCount || 0;
+      case 'cash-reconciliation': return this.cashReconciliationData()?.sessions?.totalCount || 0;
+      case 'inventory': return this.inventoryData()?.totalCount || 0;
+      case 'products': return this.productsData()?.totalCount || 0;
+      case 'low-stock': return this.lowStockData()?.totalCount || 0;
+      case 'purchases': return this.purchasesData()?.totalCount || 0;
+      case 'audit': return this.auditData()?.totalCount || 0;
+      default: return 0;
+    }
+  });
 
   profitMargin = computed(() => {
     if (this.profitabilityData()) {
@@ -124,9 +174,24 @@ export class ReportsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Pipeline de búsqueda con Debounce (350ms) para evitar llamadas en cada pulsación de tecla
+    this.searchSub = this.searchSubject.pipe(
+      debounceTime(350),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      this.searchTerm.set(term);
+      this.pageNumber.set(1);
+      this.loadTableData();
+    });
+
     this.loadSummary();
     this.loadAnalytics();
     this.loadTableData();
+  }
+
+  ngOnDestroy(): void {
+    this.searchSub?.unsubscribe();
+    this.searchSubject.complete();
   }
 
   private formatLocalDate(date: Date): string {
@@ -261,12 +326,13 @@ export class ReportsComponent implements OnInit {
     const wid = this.branchContextService.selectedWarehouseId();
     const start = this.startDate() || undefined;
     const end = this.endDate() || undefined;
+    const term = this.searchTerm()?.trim() || undefined;
     const page = this.pageNumber();
     const size = this.pageSize();
 
     switch (this.selectedReport()) {
       case 'sales':
-        this.reportService.getSalesData(start, end, wid, page, size).subscribe({
+        this.reportService.getSalesData(start, end, wid, term, page, size).subscribe({
           next: (res) => {
             this.salesData.set(res);
             this.tableLoading.set(false);
@@ -281,7 +347,7 @@ export class ReportsComponent implements OnInit {
         break;
 
       case 'sales-top':
-        this.reportService.getTopProducts(start, end, wid, 15, false).subscribe({
+        this.reportService.getTopProducts(start, end, wid, term, 15, false).subscribe({
           next: (items) => {
             this.topProductsData.set(items);
             this.tableLoading.set(false);
@@ -291,7 +357,7 @@ export class ReportsComponent implements OnInit {
         break;
 
       case 'finance':
-        this.reportService.getProfitability(start, end, wid, page, size).subscribe({
+        this.reportService.getProfitability(start, end, wid, term, page, size).subscribe({
           next: (res) => {
             this.profitabilityData.set(res);
             this.tableLoading.set(false);
@@ -301,7 +367,7 @@ export class ReportsComponent implements OnInit {
         break;
 
       case 'cash-reconciliation':
-        this.reportService.getCashRegisterReconciliation(start, end, wid, page, size).subscribe({
+        this.reportService.getCashRegisterReconciliation(start, end, wid, term, page, size).subscribe({
           next: (res) => {
             this.cashReconciliationData.set(res);
             this.tableLoading.set(false);
@@ -311,7 +377,7 @@ export class ReportsComponent implements OnInit {
         break;
 
       case 'inventory':
-        this.reportService.getInventoryKardexData(start, end, wid, page, size).subscribe({
+        this.reportService.getInventoryKardexData(start, end, wid, term, page, size).subscribe({
           next: (res) => {
             this.inventoryData.set(res);
             this.tableLoading.set(false);
@@ -321,7 +387,7 @@ export class ReportsComponent implements OnInit {
         break;
 
       case 'purchases':
-        this.reportService.getPurchasesData(start, end, wid, page, size).subscribe({
+        this.reportService.getPurchasesData(start, end, wid, term, page, size).subscribe({
           next: (res) => {
             this.purchasesData.set(res);
             this.tableLoading.set(false);
@@ -331,7 +397,7 @@ export class ReportsComponent implements OnInit {
         break;
 
       case 'products':
-        this.reportService.getProductsData(wid, this.searchTerm() || undefined, page, size).subscribe({
+        this.reportService.getProductsData(wid, term, page, size).subscribe({
           next: (res) => {
             this.productsData.set(res);
             this.tableLoading.set(false);
@@ -341,7 +407,7 @@ export class ReportsComponent implements OnInit {
         break;
 
       case 'low-stock':
-        this.reportService.getLowStockData(wid, page, size).subscribe({
+        this.reportService.getLowStockData(wid, term, page, size).subscribe({
           next: (res) => {
             this.lowStockData.set(res);
             this.tableLoading.set(false);
@@ -351,7 +417,7 @@ export class ReportsComponent implements OnInit {
         break;
 
       case 'audit':
-        this.reportService.getAuditActivity(start, end, this.searchTerm() || undefined, page, size).subscribe({
+        this.reportService.getAuditActivity(start, end, undefined, term, page, size).subscribe({
           next: (res) => {
             this.auditData.set(res);
             this.tableLoading.set(false);
@@ -363,7 +429,11 @@ export class ReportsComponent implements OnInit {
   }
 
   onSearchChange(term: string): void {
-    this.searchTerm.set(term);
+    this.searchSubject.next(term);
+  }
+
+  clearSearch(): void {
+    this.searchTerm.set('');
     this.pageNumber.set(1);
     this.loadTableData();
   }

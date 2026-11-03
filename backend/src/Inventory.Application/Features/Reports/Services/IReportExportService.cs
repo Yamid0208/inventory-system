@@ -23,6 +23,7 @@ public interface IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
@@ -31,6 +32,7 @@ public interface IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
@@ -39,12 +41,14 @@ public interface IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
 
     Task<PagedReportResultDto<LowStockReportItemDto>> GetLowStockDataAsync(
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
@@ -61,6 +65,7 @@ public interface IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int top = 10,
         bool ascending = false,
         CancellationToken cancellationToken = default);
@@ -70,6 +75,7 @@ public interface IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
@@ -85,6 +91,7 @@ public interface IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
@@ -100,6 +107,7 @@ public interface IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         string? entityName = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);

@@ -123,12 +123,13 @@ public class ReportsController : BaseApiController
         [FromQuery] DateTimeOffset? startDate,
         [FromQuery] DateTimeOffset? endDate,
         [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
         var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
-        var result = await _reportService.GetInventoryKardexDataAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        var result = await _reportService.GetInventoryKardexDataAsync(startDate, endDate, targetWarehouseId, searchTerm, pageNumber, pageSize, cancellationToken);
         return Ok(result);
     }
 
@@ -141,12 +142,13 @@ public class ReportsController : BaseApiController
         [FromQuery] DateTimeOffset? startDate,
         [FromQuery] DateTimeOffset? endDate,
         [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
         var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
-        var result = await _reportService.GetSalesDataAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        var result = await _reportService.GetSalesDataAsync(startDate, endDate, targetWarehouseId, searchTerm, pageNumber, pageSize, cancellationToken);
         return Ok(result);
     }
 
@@ -159,12 +161,13 @@ public class ReportsController : BaseApiController
         [FromQuery] DateTimeOffset? startDate,
         [FromQuery] DateTimeOffset? endDate,
         [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
         var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
-        var result = await _reportService.GetPurchasesDataAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        var result = await _reportService.GetPurchasesDataAsync(startDate, endDate, targetWarehouseId, searchTerm, pageNumber, pageSize, cancellationToken);
         return Ok(result);
     }
 
@@ -175,12 +178,13 @@ public class ReportsController : BaseApiController
     [ProducesResponseType(typeof(PagedReportResultDto<LowStockReportItemDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedReportResultDto<LowStockReportItemDto>>> GetLowStockData(
         [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
         var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
-        var result = await _reportService.GetLowStockDataAsync(targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        var result = await _reportService.GetLowStockDataAsync(targetWarehouseId, searchTerm, pageNumber, pageSize, cancellationToken);
         return Ok(result);
     }
 
@@ -209,12 +213,13 @@ public class ReportsController : BaseApiController
         [FromQuery] DateTimeOffset? startDate,
         [FromQuery] DateTimeOffset? endDate,
         [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
         [FromQuery] int top = 10,
         [FromQuery] bool ascending = false,
         CancellationToken cancellationToken = default)
     {
         var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
-        var result = await _reportService.GetTopProductsAsync(startDate, endDate, targetWarehouseId, top, ascending, cancellationToken);
+        var result = await _reportService.GetTopProductsAsync(startDate, endDate, targetWarehouseId, searchTerm, top, ascending, cancellationToken);
         return Ok(result);
     }
 
@@ -227,12 +232,13 @@ public class ReportsController : BaseApiController
         [FromQuery] DateTimeOffset? startDate,
         [FromQuery] DateTimeOffset? endDate,
         [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
         var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
-        var result = await _reportService.GetProfitabilityReportAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        var result = await _reportService.GetProfitabilityReportAsync(startDate, endDate, targetWarehouseId, searchTerm, pageNumber, pageSize, cancellationToken);
         return Ok(result);
     }
 
@@ -262,12 +268,13 @@ public class ReportsController : BaseApiController
         [FromQuery] DateTimeOffset? startDate,
         [FromQuery] DateTimeOffset? endDate,
         [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
         var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
-        var result = await _reportService.GetCashRegisterReconciliationAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        var result = await _reportService.GetCashRegisterReconciliationAsync(startDate, endDate, targetWarehouseId, searchTerm, pageNumber, pageSize, cancellationToken);
         return Ok(result);
     }
 
@@ -297,11 +304,12 @@ public class ReportsController : BaseApiController
         [FromQuery] DateTimeOffset? startDate,
         [FromQuery] DateTimeOffset? endDate,
         [FromQuery] string? entityName,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        var result = await _reportService.GetAuditActivityAsync(startDate, endDate, entityName, pageNumber, pageSize, cancellationToken);
+        var result = await _reportService.GetAuditActivityAsync(startDate, endDate, entityName, searchTerm, pageNumber, pageSize, cancellationToken);
         return Ok(result);
     }
 

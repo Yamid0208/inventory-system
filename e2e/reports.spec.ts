@@ -479,7 +479,12 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
     await expect(metricCount).toBeVisible();
     await expect(metricCount).toHaveText('1');
 
-    // 5. Tabla de ventas renderizada
+    // 5. Verificar título de la tabla y estado activo de la sub-pestaña
+    const tabSales = page.locator('[data-testid="tab-sales"]');
+    await expect(tabSales).toHaveClass(/bg-primary-600/);
+    await expect(page.locator('[data-testid="table-title"]')).toContainText(/Historial y Facturación de Ventas/i);
+
+    // 6. Tabla de ventas renderizada
     const tableSales = page.locator('[data-testid="table-sales"]');
     await expect(tableSales).toBeVisible({ timeout: 5000 });
     await expect(tableSales.locator('text=VTA-2026-0001')).toBeVisible();
@@ -507,8 +512,10 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
     const tabTop = page.locator('[data-testid="tab-sales-top"]');
     await expect(tabTop).toBeVisible();
     await tabTop.click();
+    await expect(tabTop).toHaveClass(/bg-primary-600/);
 
-    // 3. Verificar renderizado de tabla Top Productos
+    // 3. Verificar título contextual de tabla y renderizado
+    await expect(page.locator('[data-testid="table-title"]')).toContainText(/Top Productos Más Vendidos/i);
     const tableTop = page.locator('[data-testid="table-sales-top"]');
     await expect(tableTop).toBeVisible({ timeout: 5000 });
     await expect(tableTop.locator('text=SKU-TALADRO-01')).toBeVisible();

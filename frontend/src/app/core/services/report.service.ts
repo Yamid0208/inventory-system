@@ -54,6 +54,7 @@ export class ReportService {
     startDate?: string,
     endDate?: string,
     warehouseId?: number | null,
+    searchTerm?: string,
     pageNumber: number = 1,
     pageSize: number = 10
   ): Observable<PagedReportResult<InventoryKardexReportItem>> {
@@ -66,6 +67,7 @@ export class ReportService {
     if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
       params = params.set('warehouseId', warehouseId.toString());
     }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<PagedReportResult<InventoryKardexReportItem>>(`${this.baseUrl}/inventory/data`, { params });
   }
 
@@ -73,6 +75,7 @@ export class ReportService {
     startDate?: string,
     endDate?: string,
     warehouseId?: number | null,
+    searchTerm?: string,
     pageNumber: number = 1,
     pageSize: number = 10
   ): Observable<PagedReportResult<SalesReportItem>> {
@@ -85,6 +88,7 @@ export class ReportService {
     if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
       params = params.set('warehouseId', warehouseId.toString());
     }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<PagedReportResult<SalesReportItem>>(`${this.baseUrl}/sales/data`, { params });
   }
 
@@ -106,6 +110,7 @@ export class ReportService {
     startDate?: string,
     endDate?: string,
     warehouseId?: number | null,
+    searchTerm?: string,
     top: number = 10,
     ascending: boolean = false
   ): Observable<TopProductReportItem[]> {
@@ -118,6 +123,7 @@ export class ReportService {
     if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
       params = params.set('warehouseId', warehouseId.toString());
     }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<TopProductReportItem[]>(`${this.baseUrl}/sales/top-products`, { params });
   }
 
@@ -125,6 +131,7 @@ export class ReportService {
     startDate?: string,
     endDate?: string,
     warehouseId?: number | null,
+    searchTerm?: string,
     pageNumber: number = 1,
     pageSize: number = 10
   ): Observable<ProfitabilitySummary> {
@@ -137,6 +144,7 @@ export class ReportService {
     if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
       params = params.set('warehouseId', warehouseId.toString());
     }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<ProfitabilitySummary>(`${this.baseUrl}/finance/profitability`, { params });
   }
 
@@ -144,6 +152,7 @@ export class ReportService {
     startDate?: string,
     endDate?: string,
     warehouseId?: number | null,
+    searchTerm?: string,
     pageNumber: number = 1,
     pageSize: number = 10
   ): Observable<CashRegisterReconciliationSummary> {
@@ -156,6 +165,7 @@ export class ReportService {
     if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
       params = params.set('warehouseId', warehouseId.toString());
     }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<CashRegisterReconciliationSummary>(`${this.baseUrl}/cash-register/reconciliation`, { params });
   }
 
@@ -163,6 +173,7 @@ export class ReportService {
     startDate?: string,
     endDate?: string,
     warehouseId?: number | null,
+    searchTerm?: string,
     pageNumber: number = 1,
     pageSize: number = 10
   ): Observable<PagedReportResult<PurchasesReportItem>> {
@@ -175,11 +186,13 @@ export class ReportService {
     if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
       params = params.set('warehouseId', warehouseId.toString());
     }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<PagedReportResult<PurchasesReportItem>>(`${this.baseUrl}/purchases/data`, { params });
   }
 
   getLowStockData(
     warehouseId?: number | null,
+    searchTerm?: string,
     pageNumber: number = 1,
     pageSize: number = 10
   ): Observable<PagedReportResult<LowStockReportItem>> {
@@ -190,6 +203,7 @@ export class ReportService {
     if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
       params = params.set('warehouseId', warehouseId.toString());
     }
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<PagedReportResult<LowStockReportItem>>(`${this.baseUrl}/low-stock/data`, { params });
   }
 
@@ -197,6 +211,7 @@ export class ReportService {
     startDate?: string,
     endDate?: string,
     entityName?: string,
+    searchTerm?: string,
     pageNumber: number = 1,
     pageSize: number = 10
   ): Observable<PagedReportResult<AuditActivityReportItem>> {
@@ -207,6 +222,7 @@ export class ReportService {
     if (startDate) params = params.set('startDate', startDate);
     if (endDate) params = params.set('endDate', endDate);
     if (entityName) params = params.set('entityName', entityName);
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
     return this.http.get<PagedReportResult<AuditActivityReportItem>>(`${this.baseUrl}/audit/activity`, { params });
   }
 

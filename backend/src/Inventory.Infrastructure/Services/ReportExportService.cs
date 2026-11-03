@@ -327,6 +327,7 @@ public class ReportExportService : IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -357,6 +358,14 @@ public class ReportExportService : IReportExportService
                 ? endDate.Value.Date.AddDays(1).AddTicks(-1)
                 : endDate.Value;
             query = query.Where(m => m.CreatedAt <= adjustedEndDate);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(m => m.MovementNumber.ToLower().Contains(term) ||
+                                     (m.Product != null && (m.Product.Sku.ToLower().Contains(term) || m.Product.Name.ToLower().Contains(term))) ||
+                                     (m.Reference != null && m.Reference.ToLower().Contains(term)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -398,6 +407,7 @@ public class ReportExportService : IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -424,6 +434,14 @@ public class ReportExportService : IReportExportService
         if (adjustedEnd.HasValue)
         {
             query = query.Where(s => s.SaleDate <= adjustedEnd.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(s => s.SaleNumber.ToLower().Contains(term) ||
+                                     s.CustomerName.ToLower().Contains(term) ||
+                                     (s.CustomerTaxId != null && s.CustomerTaxId.ToLower().Contains(term)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -466,6 +484,7 @@ public class ReportExportService : IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -493,6 +512,14 @@ public class ReportExportService : IReportExportService
         if (adjustedEnd.HasValue)
         {
             query = query.Where(p => p.CreatedAt <= adjustedEnd.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(p => p.PurchaseNumber.ToLower().Contains(term) ||
+                                     p.Supplier.Name.ToLower().Contains(term) ||
+                                     (p.Supplier.TaxId != null && p.Supplier.TaxId.ToLower().Contains(term)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -531,6 +558,7 @@ public class ReportExportService : IReportExportService
 
     public async Task<PagedReportResultDto<LowStockReportItemDto>> GetLowStockDataAsync(
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -547,6 +575,14 @@ public class ReportExportService : IReportExportService
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
             query = query.Where(p => p.WarehouseId == warehouseId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(p => p.Sku.ToLower().Contains(term) ||
+                                     p.Name.ToLower().Contains(term) ||
+                                     (p.Category != null && p.Category.Name.ToLower().Contains(term)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -656,6 +692,7 @@ public class ReportExportService : IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int top = 10,
         bool ascending = false,
         CancellationToken cancellationToken = default)
@@ -685,6 +722,14 @@ public class ReportExportService : IReportExportService
         if (adjustedEnd.HasValue)
         {
             query = query.Where(i => i.Sale.SaleDate <= adjustedEnd.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(i => i.Product.Sku.ToLower().Contains(term) ||
+                                     i.Product.Name.ToLower().Contains(term) ||
+                                     (i.Product.Category != null && i.Product.Category.Name.ToLower().Contains(term)));
         }
 
         var groupedQuery = query
@@ -726,6 +771,7 @@ public class ReportExportService : IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -756,6 +802,14 @@ public class ReportExportService : IReportExportService
         if (adjustedEnd.HasValue)
         {
             query = query.Where(i => i.Sale.SaleDate <= adjustedEnd.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(i => i.Product.Sku.ToLower().Contains(term) ||
+                                     i.Product.Name.ToLower().Contains(term) ||
+                                     (i.Product.Category != null && i.Product.Category.Name.ToLower().Contains(term)));
         }
 
         var globalRevenue = await query.SumAsync(i => i.Total, cancellationToken);
@@ -837,7 +891,7 @@ public class ReportExportService : IReportExportService
         int? warehouseId = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await GetProfitabilityReportAsync(startDate, endDate, warehouseId, 1, 10000, cancellationToken);
+        var result = await GetProfitabilityReportAsync(startDate, endDate, warehouseId, null, 1, 10000, cancellationToken);
 
         var sb = new StringBuilder();
         sb.AppendLine("SKU,Producto,Categoría,Unidades Vendidas,Ingresos Totales,Costo Mercancía (CMV),Utilidad Bruta,Margen Bruto (%)");
@@ -863,6 +917,7 @@ public class ReportExportService : IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         int? warehouseId = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -889,6 +944,14 @@ public class ReportExportService : IReportExportService
         if (adjustedEnd.HasValue)
         {
             query = query.Where(s => s.OpenedAt <= adjustedEnd.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(s => s.SessionNumber.ToLower().Contains(term) ||
+                                     (s.User != null && s.User.FullName.ToLower().Contains(term)) ||
+                                     (s.Warehouse != null && s.Warehouse.Name.ToLower().Contains(term)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -951,7 +1014,7 @@ public class ReportExportService : IReportExportService
         int? warehouseId = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await GetCashRegisterReconciliationAsync(startDate, endDate, warehouseId, 1, 10000, cancellationToken);
+        var result = await GetCashRegisterReconciliationAsync(startDate, endDate, warehouseId, null, 1, 10000, cancellationToken);
 
         var sb = new StringBuilder();
         sb.AppendLine("N° Sesión,Cajero,Apertura (UTC),Cierre (UTC),Estado,Fondo Inicial,Ventas Totales,Ingresos Efectivo,Egresos Efectivo,Pagos Electrónicos,Efectivo Esperado,Efectivo Real,Diferencia,Conciliación");
@@ -983,6 +1046,7 @@ public class ReportExportService : IReportExportService
         DateTimeOffset? startDate,
         DateTimeOffset? endDate,
         string? entityName = null,
+        string? searchTerm = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -1008,6 +1072,15 @@ public class ReportExportService : IReportExportService
         if (!string.IsNullOrWhiteSpace(entityName))
         {
             query = query.Where(a => a.EntityName.ToLower() == entityName.ToLower());
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(a => a.EntityName.ToLower().Contains(term) ||
+                                     a.Action.ToLower().Contains(term) ||
+                                     a.Details.ToLower().Contains(term) ||
+                                     (a.User != null && a.User.FullName.ToLower().Contains(term)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
