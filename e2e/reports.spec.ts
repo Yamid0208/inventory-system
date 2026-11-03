@@ -21,6 +21,7 @@ test.describe('E2E Reports Module - Interactive Tables & Date Filters Suite', ()
     // Escuchar consola para depuración
     page.on('console', msg => console.log('BROWSER LOG:', msg.type(), msg.text()));
     page.on('pageerror', err => console.log('BROWSER ERROR:', err.message));
+    page.on('response', res => { if (res.status() >= 400) console.log('RES ERROR:', res.status(), res.url()); });
 
     // Mock de endpoint de login y refresh
     await page.route('**/api/v1/auth/login', async (route) => {
@@ -58,6 +59,14 @@ test.describe('E2E Reports Module - Interactive Tables & Date Filters Suite', ()
             hasAcceptedTerms: true
           }
         })
+      });
+    });
+
+    await page.route('**/api/v1/alerts/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([])
       });
     });
 

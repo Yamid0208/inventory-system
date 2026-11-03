@@ -54,8 +54,14 @@
         [class.bg-primary-50]="selectedReport() === 'sales'"
         [class.text-primary-700]="selectedReport() === 'sales'"
         [class.border-primary-300]="selectedReport() === 'sales'"
-        [class.shadow-sm]="selectedReport() === 'sales'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">
+        [class.shadow-xs]="selectedReport() === 'sales'"
+        [class.hover:bg-primary-100]="selectedReport() === 'sales'"
+        [class.hover:text-primary-800]="selectedReport() === 'sales'"
+        [class.text-slate-600]="selectedReport() !== 'sales'"
+        [class.hover:bg-slate-100]="selectedReport() !== 'sales'"
+        [class.hover:text-slate-900]="selectedReport() !== 'sales'"
+        [class.hover:border-slate-300]="selectedReport() !== 'sales'"
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">💳</span>
         <span>Ventas</span>
       </button>
@@ -64,8 +70,14 @@
         [class.bg-primary-50]="selectedReport() === 'inventory'"
         [class.text-primary-700]="selectedReport() === 'inventory'"
         [class.border-primary-300]="selectedReport() === 'inventory'"
-        [class.shadow-sm]="selectedReport() === 'inventory'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">
+        [class.shadow-xs]="selectedReport() === 'inventory'"
+        [class.hover:bg-primary-100]="selectedReport() === 'inventory'"
+        [class.hover:text-primary-800]="selectedReport() === 'inventory'"
+        [class.text-slate-600]="selectedReport() !== 'inventory'"
+        [class.hover:bg-slate-100]="selectedReport() !== 'inventory'"
+        [class.hover:text-slate-900]="selectedReport() !== 'inventory'"
+        [class.hover:border-slate-300]="selectedReport() !== 'inventory'"
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">📋</span>
         <span>Kardex</span>
       </button>
@@ -74,8 +86,14 @@
         [class.bg-primary-50]="selectedReport() === 'purchases'"
         [class.text-primary-700]="selectedReport() === 'purchases'"
         [class.border-primary-300]="selectedReport() === 'purchases'"
-        [class.shadow-sm]="selectedReport() === 'purchases'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">
+        [class.shadow-xs]="selectedReport() === 'purchases'"
+        [class.hover:bg-primary-100]="selectedReport() === 'purchases'"
+        [class.hover:text-primary-800]="selectedReport() === 'purchases'"
+        [class.text-slate-600]="selectedReport() !== 'purchases'"
+        [class.hover:bg-slate-100]="selectedReport() !== 'purchases'"
+        [class.hover:text-slate-900]="selectedReport() !== 'purchases'"
+        [class.hover:border-slate-300]="selectedReport() !== 'purchases'"
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">🛍️</span>
         <span>Compras</span>
       </button>
@@ -84,8 +102,14 @@
         [class.bg-primary-50]="selectedReport() === 'products'"
         [class.text-primary-700]="selectedReport() === 'products'"
         [class.border-primary-300]="selectedReport() === 'products'"
-        [class.shadow-sm]="selectedReport() === 'products'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">
+        [class.shadow-xs]="selectedReport() === 'products'"
+        [class.hover:bg-primary-100]="selectedReport() === 'products'"
+        [class.hover:text-primary-800]="selectedReport() === 'products'"
+        [class.text-slate-600]="selectedReport() !== 'products'"
+        [class.hover:bg-slate-100]="selectedReport() !== 'products'"
+        [class.hover:text-slate-900]="selectedReport() !== 'products'"
+        [class.hover:border-slate-300]="selectedReport() !== 'products'"
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">📦</span>
         <span>Catálogo</span>
       </button>
@@ -94,8 +118,14 @@
         [class.bg-primary-50]="selectedReport() === 'low-stock'"
         [class.text-primary-700]="selectedReport() === 'low-stock'"
         [class.border-primary-300]="selectedReport() === 'low-stock'"
-        [class.shadow-sm]="selectedReport() === 'low-stock'"
-        class="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">
+        [class.shadow-xs]="selectedReport() === 'low-stock'"
+        [class.hover:bg-primary-100]="selectedReport() === 'low-stock'"
+        [class.hover:text-primary-800]="selectedReport() === 'low-stock'"
+        [class.text-slate-600]="selectedReport() !== 'low-stock'"
+        [class.hover:bg-slate-100]="selectedReport() !== 'low-stock'"
+        [class.hover:text-slate-900]="selectedReport() !== 'low-stock'"
+        [class.hover:border-slate-300]="selectedReport() !== 'low-stock'"
+        class="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">⚠️</span>
         <span>Bajo Stock</span>
       </button>
@@ -130,7 +160,16 @@
           [class.text-white]="activePreset() === 'today'"
           [class.border-primary-600]="activePreset() === 'today'"
           [class.shadow-sm]="activePreset() === 'today'"
-          class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all">
+          [class.hover:bg-primary-700]="activePreset() === 'today'"
+          [class.hover:text-white]="activePreset() === 'today'"
+          [class.bg-white]="activePreset() !== 'today'"
+          [class.text-slate-600]="activePreset() !== 'today'"
+          [class.border-slate-200]="activePreset() !== 'today'"
+          [class.hover:bg-primary-50]="activePreset() !== 'today'"
+          [class.hover:text-primary-700]="activePreset() !== 'today'"
+          [class.hover:border-primary-300]="activePreset() !== 'today'"
+          [class.hover:shadow-xs]="activePreset() !== 'today'"
+          class="px-3.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Hoy
         </button>
 
@@ -139,7 +178,16 @@
           [class.text-white]="activePreset() === 'thisMonth'"
           [class.border-primary-600]="activePreset() === 'thisMonth'"
           [class.shadow-sm]="activePreset() === 'thisMonth'"
-          class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer transition-all">
+          [class.hover:bg-primary-700]="activePreset() === 'thisMonth'"
+          [class.hover:text-white]="activePreset() === 'thisMonth'"
+          [class.bg-white]="activePreset() !== 'thisMonth'"
+          [class.text-slate-600]="activePreset() !== 'thisMonth'"
+          [class.border-slate-200]="activePreset() !== 'thisMonth'"
+          [class.hover:bg-primary-50]="activePreset() !== 'thisMonth'"
+          [class.hover:text-primary-700]="activePreset() !== 'thisMonth'"
+          [class.hover:border-primary-300]="activePreset() !== 'thisMonth'"
+          [class.hover:shadow-xs]="activePreset() !== 'thisMonth'"
+          class="px-3.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Mes Actual
         </button>
 
@@ -147,7 +195,17 @@
           [class.bg-primary-600]="activePreset() === '7days'"
           [class.text-white]="activePreset() === '7days'"
           [class.border-primary-600]="activePreset() === '7days'"
-          class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-all">
+          [class.shadow-sm]="activePreset() === '7days'"
+          [class.hover:bg-primary-700]="activePreset() === '7days'"
+          [class.hover:text-white]="activePreset() === '7days'"
+          [class.bg-white]="activePreset() !== '7days'"
+          [class.text-slate-600]="activePreset() !== '7days'"
+          [class.border-slate-200]="activePreset() !== '7days'"
+          [class.hover:bg-primary-50]="activePreset() !== '7days'"
+          [class.hover:text-primary-700]="activePreset() !== '7days'"
+          [class.hover:border-primary-300]="activePreset() !== '7days'"
+          [class.hover:shadow-xs]="activePreset() !== '7days'"
+          class="px-3.5 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Últimos 7 días
         </button>
 
@@ -155,7 +213,17 @@
           [class.bg-primary-600]="activePreset() === '30days'"
           [class.text-white]="activePreset() === '30days'"
           [class.border-primary-600]="activePreset() === '30days'"
-          class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-all">
+          [class.shadow-sm]="activePreset() === '30days'"
+          [class.hover:bg-primary-700]="activePreset() === '30days'"
+          [class.hover:text-white]="activePreset() === '30days'"
+          [class.bg-white]="activePreset() !== '30days'"
+          [class.text-slate-600]="activePreset() !== '30days'"
+          [class.border-slate-200]="activePreset() !== '30days'"
+          [class.hover:bg-primary-50]="activePreset() !== '30days'"
+          [class.hover:text-primary-700]="activePreset() !== '30days'"
+          [class.hover:border-primary-300]="activePreset() !== '30days'"
+          [class.hover:shadow-xs]="activePreset() !== '30days'"
+          class="px-3.5 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Últimos 30 días
         </button>
 
@@ -163,7 +231,17 @@
           [class.bg-primary-600]="activePreset() === 'all'"
           [class.text-white]="activePreset() === 'all'"
           [class.border-primary-600]="activePreset() === 'all'"
-          class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-all">
+          [class.shadow-sm]="activePreset() === 'all'"
+          [class.hover:bg-primary-700]="activePreset() === 'all'"
+          [class.hover:text-white]="activePreset() === 'all'"
+          [class.bg-white]="activePreset() !== 'all'"
+          [class.text-slate-600]="activePreset() !== 'all'"
+          [class.border-slate-200]="activePreset() !== 'all'"
+          [class.hover:bg-primary-50]="activePreset() !== 'all'"
+          [class.hover:text-primary-700]="activePreset() !== 'all'"
+          [class.hover:border-primary-300]="activePreset() !== 'all'"
+          [class.hover:shadow-xs]="activePreset() !== 'all'"
+          class="px-3.5 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Todo el Histórico
         </button>
       </div>
@@ -175,14 +253,14 @@
         <label class="block text-xs font-semibold text-slate-500 mb-1">Fecha Inicio (Desde)</label>
         <input type="date" [value]="startDate()" data-testid="input-start-date"
           (change)="startDate.set($any($event.target).value); onCustomDateChange()"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
       </div>
 
       <div>
         <label class="block text-xs font-semibold text-slate-500 mb-1">Fecha Fin (Hasta)</label>
         <input type="date" [value]="endDate()" data-testid="input-end-date"
           (change)="endDate.set($any($event.target).value); onCustomDateChange()"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
       </div>
 
       <div>
@@ -192,7 +270,7 @@
         <div class="relative">
           <input type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
             placeholder="Filtrar por término..."
-            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
           <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
