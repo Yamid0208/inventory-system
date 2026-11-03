@@ -26,7 +26,33 @@ describe('ReportsComponent (Unit Tests)', () => {
     getInventoryKardexData: vi.fn().mockReturnValue(of(dummyPagedResult)),
     getPurchasesData: vi.fn().mockReturnValue(of(dummyPagedResult)),
     getProductsData: vi.fn().mockReturnValue(of(dummyPagedResult)),
-    getLowStockData: vi.fn().mockReturnValue(of(dummyPagedResult))
+    getLowStockData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getSalesSummaryMetrics: vi.fn().mockReturnValue(of({
+      totalSalesAmount: 5000,
+      totalOrdersCount: 20,
+      averageTicket: 250,
+      cashAmount: 3000,
+      electronicAmount: 2000,
+      paymentMethods: []
+    })),
+    getTopProducts: vi.fn().mockReturnValue(of([])),
+    getProfitability: vi.fn().mockReturnValue(of({
+      summary: { totalRevenue: 10000, totalCost: 6000, grossProfit: 4000, grossMarginPercentage: 40, totalUnitsSold: 100 },
+      items: dummyPagedResult
+    })),
+    getCashRegisterReconciliation: vi.fn().mockReturnValue(of({
+      summary: {
+        totalOpeningCash: 1000,
+        totalExpectedCash: 5000,
+        totalActualCash: 4950,
+        totalDifference: -50,
+        totalElectronicPayments: 2000,
+        closedSessionsCount: 5,
+        openSessionsCount: 1
+      },
+      sessions: dummyPagedResult
+    })),
+    getAuditActivity: vi.fn().mockReturnValue(of(dummyPagedResult))
   };
 
   const dashboardServiceMock = {
@@ -99,10 +125,38 @@ describe('ReportsComponent (Unit Tests)', () => {
     expect(component.startDate()).toBeTruthy();
     expect(component.endDate()).toBeTruthy();
 
+    // Preset Ayer
+    component.setDatePreset('yesterday');
+    expect(component.activePreset()).toBe('yesterday');
+    expect(component.startDate()).toBeTruthy();
+    expect(component.endDate()).toBeTruthy();
+
+    // Preset Mes Anterior
+    component.setDatePreset('lastMonth');
+    expect(component.activePreset()).toBe('lastMonth');
+    expect(component.startDate()).toMatch(/^\d{4}-\d{2}-01$/);
+
     // Preset Todo el histórico
     component.setDatePreset('all');
     expect(component.startDate()).toBe('');
     expect(component.endDate()).toBe('');
+  });
+
+  it('should switch categories and load corresponding INSINCRO datasets', () => {
+    // Categoría Finanzas
+    component.selectCategory('finance');
+    expect(component.selectedCategory()).toBe('finance');
+    expect(reportServiceMock.getProfitability).toHaveBeenCalled();
+
+    // Categoría Caja POS
+    component.selectCategory('cash');
+    expect(component.selectedCategory()).toBe('cash');
+    expect(reportServiceMock.getCashRegisterReconciliation).toHaveBeenCalled();
+
+    // Categoría Auditoría
+    component.selectCategory('audit');
+    expect(component.selectedCategory()).toBe('audit');
+    expect(reportServiceMock.getAuditActivity).toHaveBeenCalled();
   });
 
   it('should switch report tab and load tabular data', () => {

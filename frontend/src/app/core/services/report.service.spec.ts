@@ -36,4 +36,29 @@ describe('ReportService (Unit Tests)', () => {
     service.getProductsData(1, 'Taladro', 1, 25).subscribe();
     expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/reports/products/data', expect.any(Object));
   });
+
+  it('should query /api/v1/reports/sales/summary-metrics with parameters', () => {
+    service.getSalesSummaryMetrics('2026-11-01', '2026-11-03', 1).subscribe();
+    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/reports/sales/summary-metrics', expect.any(Object));
+  });
+
+  it('should query /api/v1/reports/sales/top-products with limit and warehouse', () => {
+    service.getTopProducts(10, '2026-11-01', '2026-11-03', 1).subscribe();
+    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/reports/sales/top-products', expect.any(Object));
+  });
+
+  it('should query /api/v1/reports/finance/profitability with pagination', () => {
+    service.getProfitability('2026-11-01', '2026-11-03', 1, 1, 10).subscribe();
+    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/reports/finance/profitability', expect.any(Object));
+  });
+
+  it('should query /api/v1/reports/cash-register/reconciliation', () => {
+    service.getCashRegisterReconciliation('2026-11-01', '2026-11-03', 1, 1, 10).subscribe();
+    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/reports/cash-register/reconciliation', expect.any(Object));
+  });
+
+  it('should query /api/v1/reports/audit/activity', () => {
+    service.getAuditActivity('2026-11-01', '2026-11-03', 1, 1, 10).subscribe();
+    expect(httpClientMock.get).toHaveBeenCalledWith('/api/v1/reports/audit/activity', expect.any(Object));
+  });
 });

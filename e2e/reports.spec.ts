@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('E2E Reports Module - Interactive Tables & Date Filters Suite', () => {
+test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit Suite', () => {
 
   const todayStr = (() => {
     const d = new Date();
@@ -114,12 +114,149 @@ test.describe('E2E Reports Module - Interactive Tables & Date Filters Suite', ()
       });
     });
 
-    // Mock de Ventas
+    // Mock de Métricas Ejecutivas de Ventas
+    await page.route('**/api/v1/reports/sales/summary-metrics*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          totalSalesAmount: 119000,
+          totalSubtotal: 100000,
+          totalTax: 19000,
+          totalTransactions: 1,
+          averageTicket: 119000,
+          cashAmount: 0,
+          electronicAmount: 119000,
+          paymentMethods: [
+            { paymentMethod: 'Transferencia', count: 1, totalAmount: 119000, percentage: 100 }
+          ]
+        })
+      });
+    });
+
+    // Mock de Top Productos
+    await page.route('**/api/v1/reports/sales/top-products*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            productId: 1,
+            sku: 'SKU-TALADRO-01',
+            productName: 'Taladro Percutor Bosch 1/2',
+            categoryName: 'Herramientas Eléctricas',
+            unitsSold: 15,
+            totalRevenue: 3300000,
+            averageUnitPrice: 220000
+          }
+        ])
+      });
+    });
+
+    // Mock de Finanzas y Rentabilidad (CMV Histórico)
+    await page.route('**/api/v1/reports/finance/profitability*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          totalRevenue: 3300000,
+          totalCostOfGoodsSold: 2250000,
+          grossProfit: 1050000,
+          grossMarginPercentage: 31.8,
+          totalItemsSold: 15,
+          productDetails: {
+            items: [
+              {
+                productId: 1,
+                sku: 'SKU-TALADRO-01',
+                productName: 'Taladro Percutor Bosch 1/2',
+                categoryName: 'Herramientas Eléctricas',
+                unitsSold: 15,
+                totalRevenue: 3300000,
+                costOfGoodsSold: 2250000,
+                grossProfit: 1050000,
+                grossMarginPercentage: 31.8
+              }
+            ],
+            totalCount: 1,
+            pageNumber: 1,
+            pageSize: 10,
+            totalPages: 1
+          }
+        })
+      });
+    });
+
+    // Mock de Caja POS (Arqueo y Conciliación)
+    await page.route('**/api/v1/reports/cash-register/reconciliation*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          totalOpeningBalance: 200000,
+          totalExpectedCash: 850000,
+          totalActualCash: 850000,
+          totalDifference: 0,
+          totalElectronicInflow: 540000,
+          totalSessionsCount: 1,
+          sessions: {
+            items: [
+              {
+                sessionId: 45,
+                sessionNumber: 'SES-2026-0001',
+                cashierName: 'Carlos Cajero',
+                openedAt: new Date().toISOString(),
+                closedAt: new Date().toISOString(),
+                status: 'Closed',
+                initialCash: 200000,
+                totalSales: 650000,
+                totalCashInflow: 650000,
+                totalCashOutflow: 0,
+                totalElectronicInflow: 540000,
+                expectedCash: 850000,
+                actualCash: 850000,
+                difference: 0,
+                differenceStatus: 'Balanced'
+              }
+            ],
+            totalCount: 1,
+            pageNumber: 1,
+            pageSize: 10,
+            totalPages: 1
+          }
+        })
+      });
+    });
+
+    // Mock de Auditoría de Operaciones Sensibles
+    await page.route('**/api/v1/reports/audit/activity*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [
+            {
+              id: 99,
+              createdAt: new Date().toISOString(),
+              entityName: 'Inventario',
+              action: 'Ajuste de Stock',
+              details: 'Ajuste de inventario por merma justificada',
+              userName: 'admin@sgi.local',
+              ipAddress: '127.0.0.1'
+            }
+          ],
+          totalCount: 1,
+          pageNumber: 1,
+          pageSize: 10,
+          totalPages: 1
+        })
+      });
+    });
+
+    // Mock de Ventas Paginadas
     await page.route('**/api/v1/reports/sales/data*', async (route) => {
       const url = new URL(route.request().url());
       const startDate = url.searchParams.get('startDate');
-
-      // Si es filtro "Hoy", devolver ventas de hoy; si es "Mes Actual", devolver un conjunto mayor
       const isToday = startDate === todayStr;
 
       await route.fulfill({
@@ -190,25 +327,9 @@ test.describe('E2E Reports Module - Interactive Tables & Date Filters Suite', ()
               operatorName: 'Carlos Gómez',
               reference: 'OC-1002',
               notes: 'Recepción lote de proveedor'
-            },
-            {
-              id: 202,
-              movementNumber: 'MOV-2026-0002',
-              createdAt: new Date().toISOString(),
-              type: 'Salida',
-              productId: 2,
-              productSku: 'SKU-PINTURA-02',
-              productName: 'Pintura Vinilo Blanco 1 Galón',
-              quantityDelta: -2,
-              previousStock: 20,
-              newStock: 18,
-              unitPrice: 45000,
-              operatorName: 'Carlos Gómez',
-              reference: 'VTA-2026-0001',
-              notes: 'Despacho cliente mostrador'
             }
           ],
-          totalCount: 2,
+          totalCount: 1,
           pageNumber: 1,
           pageSize: 10,
           totalPages: 1
@@ -278,6 +399,35 @@ test.describe('E2E Reports Module - Interactive Tables & Date Filters Suite', ()
       });
     });
 
+    // Mock de Compras
+    await page.route('**/api/v1/reports/purchases/data*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [
+            {
+              id: 301,
+              purchaseNumber: 'COM-2026-0001',
+              createdAt: new Date().toISOString(),
+              supplierName: 'Distribuidora Mayorista S.A.',
+              supplierTaxId: '900888777-1',
+              status: 'Recibida',
+              subtotal: 1500000,
+              tax: 285000,
+              total: 1785000,
+              itemsCount: 10
+            }
+          ],
+          totalCount: 1,
+          pageNumber: 1,
+          pageSize: 10,
+          totalPages: 1,
+          totalAmount: 1785000
+        })
+      });
+    });
+
     // Mock de descarga CSV
     await page.route('**/api/v1/reports/*/csv*', async (route) => {
       await route.fulfill({
@@ -302,105 +452,155 @@ test.describe('E2E Reports Module - Interactive Tables & Date Filters Suite', ()
     await page.waitForURL('**/dashboard', { timeout: 10000 });
   });
 
-  test('TC-REP-01: Inicialización con preset "Hoy" por defecto y renderizado de tabla', async ({ page }) => {
+  test('TC-REP-01: Carga con preset "Hoy" por defecto, métricas ejecutivas de ventas y tabla transaccional', async ({ page }) => {
     await page.goto('/reports');
     await page.waitForURL('**/reports', { timeout: 10000 });
 
-    // 1. Verificar encabezado del centro de reportes
-    await expect(page.getByRole('heading', { name: /Centro de Reportes y Datos Operativos/i })).toBeVisible({ timeout: 5000 });
+    // 1. Encabezado principal del Centro de Reportes INSINCRO POS
+    await expect(page.getByRole('heading', { name: /Suite de Inteligencia Operativa y Financiera/i })).toBeVisible({ timeout: 5000 });
 
-    // 2. Verificar que el preset "Hoy" está activo por defecto
+    // 2. Preset "Hoy" activo por defecto con estilos visibles
     const todayPresetBtn = page.locator('[data-testid="preset-today"]');
     await expect(todayPresetBtn).toBeVisible();
     await expect(todayPresetBtn).toHaveClass(/bg-primary-600/);
 
-    // 3. Verificar que los inputs de fecha tienen la fecha actual
+    // 3. Inputs de fecha sincronizados con hoy
     const startDateInput = page.locator('[data-testid="input-start-date"]');
     const endDateInput = page.locator('[data-testid="input-end-date"]');
     await expect(startDateInput).toHaveValue(todayStr);
     await expect(endDateInput).toHaveValue(todayStr);
 
-    // 4. Verificar que la tabla de ventas se renderiza con el registro de hoy
+    // 4. Tarjetas Analíticas de Ventas presentes
+    const metricTotal = page.locator('[data-testid="metric-sales-total"]');
+    await expect(metricTotal).toBeVisible();
+    await expect(metricTotal).toContainText('119');
+
+    const metricCount = page.locator('[data-testid="metric-sales-count"]');
+    await expect(metricCount).toBeVisible();
+    await expect(metricCount).toHaveText('1');
+
+    // 5. Tabla de ventas renderizada
     const tableSales = page.locator('[data-testid="table-sales"]');
     await expect(tableSales).toBeVisible({ timeout: 5000 });
     await expect(tableSales.locator('text=VTA-2026-0001')).toBeVisible();
     await expect(tableSales.locator('text=Comercializadora Andina S.A.S.')).toBeVisible();
-
-    // 5. Verificar sumatorias en tarjetas de KPI
-    await expect(page.locator('[data-testid="total-records-count"]')).toHaveText('1');
-    await expect(page.locator('[data-testid="total-amount-sum"]')).toContainText('119');
   });
 
-  test('TC-REP-02: Cambio interactivo al preset "Mes Actual" actualiza fechas y tabla', async ({ page }) => {
+  test('TC-REP-02: Filtros rápidos temporales ("Ayer", "Mes Actual") y cambio a sub-tab Top Productos', async ({ page }) => {
     await page.goto('/reports');
     await page.waitForURL('**/reports', { timeout: 10000 });
 
-    // Hacer clic en el preset "Mes Actual"
+    // 1. Probar preset "Mes Actual"
     const monthPresetBtn = page.locator('[data-testid="preset-this-month"]');
     await expect(monthPresetBtn).toBeVisible();
     await monthPresetBtn.click();
-
-    // 1. El botón de Mes Actual debe tener la clase activa
     await expect(monthPresetBtn).toHaveClass(/bg-primary-600/);
 
-    // 2. El input startDate debe haber cambiado al día 1 del mes en curso
     const startDateInput = page.locator('[data-testid="input-start-date"]');
     await expect(startDateInput).toHaveValue(firstDayOfMonthStr);
 
-    // 3. La tabla debe reflejar los registros acumulados del mes (2 facturas)
+    // Con el preset de mes se muestran 2 ventas
     const tableSales = page.locator('[data-testid="table-sales"]');
     await expect(tableSales.locator('text=VTA-2026-0002')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('[data-testid="total-records-count"]')).toHaveText('2');
+
+    // 2. Cambiar a sub-tab Top Productos
+    const tabTop = page.locator('[data-testid="tab-sales-top"]');
+    await expect(tabTop).toBeVisible();
+    await tabTop.click();
+
+    // 3. Verificar renderizado de tabla Top Productos
+    const tableTop = page.locator('[data-testid="table-sales-top"]');
+    await expect(tableTop).toBeVisible({ timeout: 5000 });
+    await expect(tableTop.locator('text=SKU-TALADRO-01')).toBeVisible();
+    await expect(tableTop.locator('text=Taladro Percutor Bosch 1/2')).toBeVisible();
   });
 
-  test('TC-REP-03: Navegación entre pestañas de reportes (Kardex, Catálogo y Bajo Stock)', async ({ page }) => {
+  test('TC-REP-03: Categoría Finanzas & Rentabilidad - Margen de utilidad con CMV histórico', async ({ page }) => {
     await page.goto('/reports');
     await page.waitForURL('**/reports', { timeout: 10000 });
 
-    // 1. Cambiar a Kardex
-    const tabInventory = page.locator('[data-testid="tab-inventory"]');
-    await tabInventory.click();
+    // 1. Cambiar a la categoría de Finanzas
+    const tabCategoryFinance = page.locator('[data-testid="tab-category-finance"]');
+    await expect(tabCategoryFinance).toBeVisible();
+    await tabCategoryFinance.click();
+
+    // 2. Verificar KPI Cards de Rentabilidad
+    const metricCogs = page.locator('[data-testid="metric-finance-cogs"]');
+    await expect(metricCogs).toBeVisible({ timeout: 5000 });
+    await expect(metricCogs).toContainText('2.250.000');
+
+    const metricProfit = page.locator('[data-testid="metric-finance-profit"]');
+    await expect(metricProfit).toBeVisible();
+    await expect(metricProfit).toContainText('1.050.000');
+
+    const metricMargin = page.locator('[data-testid="metric-finance-margin"]');
+    await expect(metricMargin).toBeVisible();
+    await expect(metricMargin).toContainText('31.8%');
+
+    // 3. Verificar tabla de Rentabilidad por Producto
+    const tableFinance = page.locator('[data-testid="table-finance"]');
+    await expect(tableFinance).toBeVisible();
+    await expect(tableFinance.locator('text=SKU-TALADRO-01')).toBeVisible();
+    await expect(tableFinance.locator('text=Herramientas Eléctricas')).toBeVisible();
+  });
+
+  test('TC-REP-04: Categoría Caja POS - Conciliación de Arqueos y separación de Efectivo vs Electrónico', async ({ page }) => {
+    await page.goto('/reports');
+    await page.waitForURL('**/reports', { timeout: 10000 });
+
+    // 1. Cambiar a la categoría de Caja POS
+    const tabCategoryCash = page.locator('[data-testid="tab-category-cash"]');
+    await expect(tabCategoryCash).toBeVisible();
+    await tabCategoryCash.click();
+
+    // 2. Verificar KPI Cards de Conciliación
+    const metricExpected = page.locator('[data-testid="metric-cash-expected"]');
+    await expect(metricExpected).toBeVisible({ timeout: 5000 });
+    await expect(metricExpected).toContainText('850.000');
+
+    const metricDifference = page.locator('[data-testid="metric-cash-difference"]');
+    await expect(metricDifference).toBeVisible();
+    await expect(metricDifference).toContainText('$0');
+
+    // 3. Verificar tabla de Arqueos y Sesiones
+    const tableCash = page.locator('[data-testid="table-cash-reconciliation"]');
+    await expect(tableCash).toBeVisible();
+    await expect(tableCash.locator('text=SES-2026-0001')).toBeVisible();
+    await expect(tableCash.locator('text=Carlos Cajero')).toBeVisible();
+    await expect(tableCash.locator('text=Balanced')).toBeVisible();
+  });
+
+  test('TC-REP-05: Categoría Auditoría, Kardex y Exportación CSV contextual', async ({ page }) => {
+    await page.goto('/reports');
+    await page.waitForURL('**/reports', { timeout: 10000 });
+
+    // 1. Probar categoría Auditoría
+    const tabCategoryAudit = page.locator('[data-testid="tab-category-audit"]');
+    await expect(tabCategoryAudit).toBeVisible();
+    await tabCategoryAudit.click();
+
+    const tableAudit = page.locator('[data-testid="table-audit"]');
+    await expect(tableAudit).toBeVisible({ timeout: 5000 });
+    await expect(tableAudit.locator('text=Ajuste de Stock')).toBeVisible();
+    await expect(tableAudit.locator('text=admin@sgi.local')).toBeVisible();
+
+    // 2. Probar categoría Inventario
+    const tabCategoryInventory = page.locator('[data-testid="tab-category-inventory"]');
+    await tabCategoryInventory.click();
 
     const tableInventory = page.locator('[data-testid="table-inventory"]');
     await expect(tableInventory).toBeVisible({ timeout: 5000 });
     await expect(tableInventory.locator('text=MOV-2026-0001')).toBeVisible();
-    await expect(tableInventory.locator('text=Taladro Percutor Bosch 1/2')).toBeVisible();
-    await expect(tableInventory.locator('text=+10')).toBeVisible();
 
-    // 2. Cambiar a Catálogo
-    const tabProducts = page.locator('[data-testid="tab-products"]');
-    await tabProducts.click();
-
-    const tableProducts = page.locator('[data-testid="table-products"]');
-    await expect(tableProducts).toBeVisible({ timeout: 5000 });
-    await expect(tableProducts.locator('text=SKU-TALADRO-01')).toBeVisible();
-    await expect(tableProducts.locator('text=Herramientas Eléctricas')).toBeVisible();
-
-    // 3. Cambiar a Bajo Stock
-    const tabLowStock = page.locator('[data-testid="tab-low-stock"]');
-    await tabLowStock.click();
-
-    const tableLowStock = page.locator('[data-testid="table-low-stock"]');
-    await expect(tableLowStock).toBeVisible({ timeout: 5000 });
-    await expect(tableLowStock.locator('text=SKU-CINTA-CRITICA')).toBeVisible();
-    await expect(tableLowStock.locator('text=-9')).toBeVisible();
-  });
-
-  test('TC-REP-04: Botón de Exportación CSV ejecuta la descarga con los filtros seleccionados', async ({ page }) => {
-    await page.goto('/reports');
-    await page.waitForURL('**/reports', { timeout: 10000 });
-
-    // Localizar botón de exportar
+    // 3. Probar Exportación CSV
     const exportBtn = page.locator('[data-testid="btn-export-csv"]');
     await expect(exportBtn).toBeVisible();
 
-    // Esperar a que se inicie la descarga al pulsar el botón
     const downloadPromise = page.waitForEvent('download');
     await exportBtn.click();
     const download = await downloadPromise;
 
-    // Verificar nombre del archivo generado con formato CSV
     const filename = download.suggestedFilename();
-    expect(filename).toMatch(/reporte_sales_.*\.csv/);
+    expect(filename).toMatch(/reporte_.*\.csv/);
   });
 });

@@ -99,4 +99,106 @@ export interface LowStockReportItem {
   status: string;
 }
 
-export type ReportTypeKey = 'sales' | 'inventory' | 'purchases' | 'products' | 'low-stock';
+// Modelos INSINCRO POS: Métodos de Pago y Top Productos
+export interface PaymentMethodBreakdown {
+  method: string;
+  totalAmount: number;
+  transactionCount: number;
+  percentage: number;
+}
+
+export interface SalesSummaryMetrics {
+  totalSalesAmount: number;
+  totalTransactions: number;
+  averageTicket: number;
+  totalSubtotal: number;
+  totalTax: number;
+  paymentMethods: PaymentMethodBreakdown[];
+}
+
+export interface TopProductReportItem {
+  productId: number;
+  sku: string;
+  productName: string;
+  categoryName: string;
+  unitsSold: number;
+  totalRevenue: number;
+  averageUnitPrice: number;
+}
+
+// Modelos INSINCRO POS: Finanzas & Rentabilidad (CMV Histórico)
+export interface ProductProfitabilityItem {
+  productId: number;
+  sku: string;
+  productName: string;
+  categoryName: string;
+  unitsSold: number;
+  totalRevenue: number;
+  costOfGoodsSold: number;
+  grossProfit: number;
+  grossMarginPercentage: number;
+}
+
+export interface ProfitabilitySummary {
+  totalRevenue: number;
+  totalCostOfGoodsSold: number;
+  grossProfit: number;
+  grossMarginPercentage: number;
+  totalItemsSold: number;
+  productDetails: PagedReportResult<ProductProfitabilityItem>;
+}
+
+// Modelos INSINCRO POS: Caja & Conciliación
+export interface CashRegisterSessionReportItem {
+  sessionId: number;
+  sessionNumber: string;
+  cashierName: string;
+  openedAt: string;
+  closedAt?: string | null;
+  status: string;
+  initialCash: number;
+  totalSales: number;
+  totalCashInflow: number;
+  totalCashOutflow: number;
+  totalElectronicInflow: number;
+  expectedCash: number;
+  actualCash?: number | null;
+  difference?: number | null;
+  differenceStatus?: string | null;
+}
+
+export interface CashRegisterReconciliationSummary {
+  totalOpeningBalance: number;
+  totalExpectedCash: number;
+  totalActualCash: number;
+  totalDifference: number;
+  totalElectronicInflow: number;
+  totalSessionsCount: number;
+  sessions: PagedReportResult<CashRegisterSessionReportItem>;
+}
+
+// Modelos INSINCRO POS: Auditoría
+export interface AuditActivityReportItem {
+  id: number;
+  createdAt: string;
+  entityName: string;
+  action: string;
+  details: string;
+  userName: string;
+  ipAddress?: string | null;
+}
+
+export type ReportCategoryKey = 'sales' | 'finance' | 'inventory' | 'purchases' | 'cash' | 'audit';
+
+export type ReportTypeKey =
+  | 'sales'
+  | 'sales-top'
+  | 'inventory'
+  | 'low-stock'
+  | 'purchases'
+  | 'products'
+  | 'finance'
+  | 'cash-reconciliation'
+  | 'audit';
+
+export type DatePreset = 'today' | 'yesterday' | '7days' | '30days' | 'thisMonth' | 'lastMonth' | 'all' | 'custom';

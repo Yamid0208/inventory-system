@@ -7,20 +7,25 @@ import { BranchContextService } from '../../core/services/branch-context.service
 import {
   ReportMetadata,
   ReportsCatalogSummary,
+  ReportCategoryKey,
   ReportTypeKey,
+  DatePreset,
   PagedReportResult,
   ProductReportItem,
   InventoryKardexReportItem,
   SalesReportItem,
   PurchasesReportItem,
-  LowStockReportItem
+  LowStockReportItem,
+  SalesSummaryMetrics,
+  TopProductReportItem,
+  ProfitabilitySummary,
+  CashRegisterReconciliationSummary,
+  AuditActivityReportItem
 } from '../../core/models/report.model';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { CountUpDirective } from '../../shared/directives/count-up.directive';
-
-export type DatePreset = 'today' | 'thisMonth' | '7days' | '30days' | 'all' | 'custom';
 
 @Component({
   selector: 'app-reports',
@@ -38,7 +43,10 @@ export class ReportsComponent implements OnInit {
   loading = signal<boolean>(false);
   downloadingKey = signal<string | null>(null);
 
-  // Selector de reporte activo
+  // Categoría Principal INSINCRO (Ventas, Finanzas, Inventario, Catálogo, Compras, Caja, Auditoría)
+  selectedCategory = signal<ReportCategoryKey>('sales');
+
+  // Tipo de reporte / subvista activa
   selectedReport = signal<ReportTypeKey>('sales');
 
   // Filtros de fecha (Por defecto: "Hoy" con la fecha actual)
@@ -54,12 +62,20 @@ export class ReportsComponent implements OnInit {
 
   // Datos tabulares por tipo de reporte
   salesData = signal<PagedReportResult<SalesReportItem> | null>(null);
+  salesMetrics = signal<SalesSummaryMetrics | null>(null);
+  topProductsData = signal<TopProductReportItem[]>([]);
+  profitabilityData = signal<ProfitabilitySummary | null>(null);
+  cashReconciliationData = signal<CashRegisterReconciliationSummary | null>(null);
   inventoryData = signal<PagedReportResult<InventoryKardexReportItem> | null>(null);
   purchasesData = signal<PagedReportResult<PurchasesReportItem> | null>(null);
   productsData = signal<PagedReportResult<ProductReportItem> | null>(null);
   lowStockData = signal<PagedReportResult<LowStockReportItem> | null>(null);
+  auditData = signal<PagedReportResult<AuditActivityReportItem> | null>(null);
 
   profitMargin = computed(() => {
+    if (this.profitabilityData()) {
+      return this.profitabilityData()!.grossMarginPercentage;
+    }
     const d = this.dashboardData();
     if (!d || d.kpis.totalSalesAmount <= 0) return 0;
     const margin = ((d.kpis.totalSalesAmount - d.kpis.totalPurchasesAmount) / d.kpis.totalSalesAmount) * 100;
@@ -78,6 +94,14 @@ export class ReportsComponent implements OnInit {
         return this.productsData();
       case 'low-stock':
         return this.lowStockData();
+      case 'finance':
+        return this.profitabilityData()?.productDetails ?? null;
+      case 'cash-reconciliation':
+        return this.cashReconciliationData()?.sessions ?? null;
+      case 'audit':
+        return this.auditData();
+      default:
+        return null;
     }
   });
 
@@ -132,9 +156,54 @@ export class ReportsComponent implements OnInit {
     });
   }
 
+  selectCategory(category: ReportCategoryKey): void {
+    this.selectedCategory.set(category);
+    this.pageNumber.set(1);
+
+    switch (category) {
+      case 'sales':
+        this.selectedReport.set('sales');
+        break;
+      case 'finance':
+        this.selectedReport.set('finance');
+        break;
+      case 'inventory':
+        this.selectedReport.set('inventory');
+        break;
+      case 'purchases':
+        this.selectedReport.set('purchases');
+        break;
+      case 'cash':
+        this.selectedReport.set('cash-reconciliation');
+        break;
+      case 'audit':
+        this.selectedReport.set('audit');
+        break;
+    }
+    this.loadTableData();
+  }
+
   selectReport(type: ReportTypeKey): void {
     if (this.selectedReport() === type) return;
     this.selectedReport.set(type);
+
+    // Ajustar categoría asociada si aplica
+    if (type === 'sales' || type === 'sales-top') {
+      this.selectedCategory.set('sales');
+    } else if (type === 'finance') {
+      this.selectedCategory.set('finance');
+    } else if (type === 'inventory' || type === 'low-stock') {
+      this.selectedCategory.set('inventory');
+    } else if (type === 'products') {
+      this.selectedCategory.set('inventory');
+    } else if (type === 'purchases') {
+      this.selectedCategory.set('purchases');
+    } else if (type === 'cash-reconciliation') {
+      this.selectedCategory.set('cash');
+    } else if (type === 'audit') {
+      this.selectedCategory.set('audit');
+    }
+
     this.pageNumber.set(1);
     this.loadTableData();
   }
@@ -147,10 +216,21 @@ export class ReportsComponent implements OnInit {
     if (preset === 'today') {
       this.startDate.set(todayStr);
       this.endDate.set(todayStr);
+    } else if (preset === 'yesterday') {
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+      const yStr = this.formatLocalDate(yesterday);
+      this.startDate.set(yStr);
+      this.endDate.set(yStr);
     } else if (preset === 'thisMonth') {
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       this.startDate.set(this.formatLocalDate(firstDayOfMonth));
       this.endDate.set(todayStr);
+    } else if (preset === 'lastMonth') {
+      const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDayLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      this.startDate.set(this.formatLocalDate(firstDayLastMonth));
+      this.endDate.set(this.formatLocalDate(lastDayLastMonth));
     } else if (preset === '7days') {
       const past = new Date();
       past.setDate(now.getDate() - 7);
@@ -193,6 +273,41 @@ export class ReportsComponent implements OnInit {
           },
           error: () => this.tableLoading.set(false)
         });
+        // Cargar métricas ejecutivas de ventas en paralelo
+        this.reportService.getSalesSummaryMetrics(start, end, wid).subscribe({
+          next: (metrics) => this.salesMetrics.set(metrics),
+          error: () => {}
+        });
+        break;
+
+      case 'sales-top':
+        this.reportService.getTopProducts(start, end, wid, 15, false).subscribe({
+          next: (items) => {
+            this.topProductsData.set(items);
+            this.tableLoading.set(false);
+          },
+          error: () => this.tableLoading.set(false)
+        });
+        break;
+
+      case 'finance':
+        this.reportService.getProfitability(start, end, wid, page, size).subscribe({
+          next: (res) => {
+            this.profitabilityData.set(res);
+            this.tableLoading.set(false);
+          },
+          error: () => this.tableLoading.set(false)
+        });
+        break;
+
+      case 'cash-reconciliation':
+        this.reportService.getCashRegisterReconciliation(start, end, wid, page, size).subscribe({
+          next: (res) => {
+            this.cashReconciliationData.set(res);
+            this.tableLoading.set(false);
+          },
+          error: () => this.tableLoading.set(false)
+        });
         break;
 
       case 'inventory':
@@ -229,6 +344,16 @@ export class ReportsComponent implements OnInit {
         this.reportService.getLowStockData(wid, page, size).subscribe({
           next: (res) => {
             this.lowStockData.set(res);
+            this.tableLoading.set(false);
+          },
+          error: () => this.tableLoading.set(false)
+        });
+        break;
+
+      case 'audit':
+        this.reportService.getAuditActivity(start, end, this.searchTerm() || undefined, page, size).subscribe({
+          next: (res) => {
+            this.auditData.set(res);
             this.tableLoading.set(false);
           },
           error: () => this.tableLoading.set(false)

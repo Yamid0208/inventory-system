@@ -8,7 +8,12 @@ import {
   InventoryKardexReportItem,
   SalesReportItem,
   PurchasesReportItem,
-  LowStockReportItem
+  LowStockReportItem,
+  SalesSummaryMetrics,
+  TopProductReportItem,
+  ProfitabilitySummary,
+  CashRegisterReconciliationSummary,
+  AuditActivityReportItem
 } from '../models/report.model';
 
 @Injectable({
@@ -83,6 +88,77 @@ export class ReportService {
     return this.http.get<PagedReportResult<SalesReportItem>>(`${this.baseUrl}/sales/data`, { params });
   }
 
+  getSalesSummaryMetrics(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null
+  ): Observable<SalesSummaryMetrics> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<SalesSummaryMetrics>(`${this.baseUrl}/sales/summary-metrics`, { params });
+  }
+
+  getTopProducts(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null,
+    top: number = 10,
+    ascending: boolean = false
+  ): Observable<TopProductReportItem[]> {
+    let params = new HttpParams()
+      .set('top', top.toString())
+      .set('ascending', ascending.toString());
+
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<TopProductReportItem[]>(`${this.baseUrl}/sales/top-products`, { params });
+  }
+
+  getProfitability(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<ProfitabilitySummary> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<ProfitabilitySummary>(`${this.baseUrl}/finance/profitability`, { params });
+  }
+
+  getCashRegisterReconciliation(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<CashRegisterReconciliationSummary> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<CashRegisterReconciliationSummary>(`${this.baseUrl}/cash-register/reconciliation`, { params });
+  }
+
   getPurchasesData(
     startDate?: string,
     endDate?: string,
@@ -117,6 +193,23 @@ export class ReportService {
     return this.http.get<PagedReportResult<LowStockReportItem>>(`${this.baseUrl}/low-stock/data`, { params });
   }
 
+  getAuditActivity(
+    startDate?: string,
+    endDate?: string,
+    entityName?: string,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedReportResult<AuditActivityReportItem>> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (entityName) params = params.set('entityName', entityName);
+    return this.http.get<PagedReportResult<AuditActivityReportItem>>(`${this.baseUrl}/audit/activity`, { params });
+  }
+
   downloadReport(reportKey: string, startDate?: string, endDate?: string, warehouseId?: number | null): Observable<Blob> {
     let params = new HttpParams();
     if (startDate) params = params.set('startDate', startDate);
@@ -125,7 +218,14 @@ export class ReportService {
       params = params.set('warehouseId', warehouseId.toString());
     }
 
-    return this.http.get(`${this.baseUrl}/${reportKey}/csv`, {
+    let url = `${this.baseUrl}/${reportKey}/csv`;
+    if (reportKey === 'finance') {
+      url = `${this.baseUrl}/finance/profitability/csv`;
+    } else if (reportKey === 'cash-reconciliation') {
+      url = `${this.baseUrl}/cash-register/reconciliation/csv`;
+    }
+
+    return this.http.get(url, {
       params,
       responseType: 'blob'
     });
