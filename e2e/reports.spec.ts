@@ -236,6 +236,18 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
       });
     });
 
+    // Mock de Tendencias de Ventas
+    await page.route('**/api/v1/reports/sales/trends*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { date: '2026-09-09', label: '09/09', transactionCount: 3, totalRevenue: 27370000 },
+          { date: '2026-11-01', label: '01/11', transactionCount: 6, totalRevenue: 1071000 }
+        ])
+      });
+    });
+
     // Mock de Finanzas y Rentabilidad (CMV Histórico)
     await page.route('**/api/v1/reports/finance/profitability*', async (route) => {
       await route.fulfill({

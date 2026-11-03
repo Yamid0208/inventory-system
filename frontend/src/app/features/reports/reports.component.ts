@@ -81,6 +81,160 @@ export class ReportsComponent implements OnInit, OnDestroy {
   salesTrends = signal<SalesTrendItem[]>([]);
   topProductsData = signal<TopProductReportItem[]>([]);
 
+  // Modo de visualización gráfica en ventas: 'trend' (Tendencia cronológica) o 'comparison' (Comparativa períodos)
+  salesGraphMode = signal<'trend' | 'comparison'>('trend');
+
+  // Cálculo geométrico de la gráfica SVG de tendencias en el tiempo
+  trendChartData = computed(() => {
+    const raw = this.salesTrends();
+    if (!raw || raw.length === 0) {
+      return {
+        hasData: false,
+        linePath: '',
+        areaPath: '',
+        points: [] as { x: number; y: number; label: string; amount: number; count: number }[],
+        maxRevenue: 0,
+        totalRevenue: 0,
+        averageRevenue: 0,
+        peakDay: null as SalesTrendItem | null
+      };
+    }
+
+    const totalRevenue = raw.reduce((acc, cur) => acc + cur.totalRevenue, 0);
+    const averageRevenue = totalRevenue / raw.length;
+    const maxRevenue = Math.max(...raw.map(r => r.totalRevenue), 1);
+    const peakDay = [...raw].sort((a, b) => b.totalRevenue - a.totalRevenue)[0];
+
+    const width = 640;
+    const height = 180;
+    const padX = 40;
+    const padTop = 25;
+    const padBottom = 35;
+    const usableW = width - padX * 2;
+    const usableH = height - padTop - padBottom;
+
+    const points = raw.map((item, idx) => {
+      const x = raw.length === 1
+        ? width / 2
+        : padX + (idx / (raw.length - 1)) * usableW;
+      const y = height - padBottom - (item.totalRevenue / maxRevenue) * usableH;
+      return {
+        x: Math.round(x * 10) / 10,
+        y: Math.round(y * 10) / 10,
+        label: item.label,
+        amount: item.totalRevenue,
+        count: item.transactionCount
+      };
+    });
+
+    let linePath = '';
+    let areaPath = '';
+
+    if (points.length === 1) {
+      linePath = `M ${points[0].x - 40} ${points[0].y} L ${points[0].x + 40} ${points[0].y}`;
+      areaPath = `M ${points[0].x - 40} ${points[0].y} L ${points[0].x + 40} ${points[0].y} L ${points[0].x + 40} ${height - padBottom} L ${points[0].x - 40} ${height - padBottom} Z`;
+    } else {
+      linePath = points.reduce((acc, pt, idx) => {
+        return idx === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`;
+      }, '');
+      const lastX = points[points.length - 1].x;
+      const firstX = points[0].x;
+      const baseY = height - padBottom;
+      areaPath = `${linePath} L ${lastX} ${baseY} L ${firstX} ${baseY} Z`;
+    }
+
+    return {
+      hasData: true,
+      linePath,
+      areaPath,
+      points,
+      maxRevenue,
+      totalRevenue,
+      averageRevenue,
+      peakDay
+    };
+  });
+
+  // Métricas comparativas (Período Actual vs Período Anterior)
+  comparativeAnalysis = computed(() => {
+    const sa = this.salesAnalytics();
+    if (!sa) return null;
+
+    const curRev = sa.totalRevenue;
+    const prevRev = sa.prevTotalRevenue;
+    const revDiff = curRev - prevRev;
+    const maxRev = Math.max(curRev, prevRev, 1);
+
+    const curTx = sa.transactionCount;
+    const prevTx = sa.prevTransactionCount;
+    const txDiff = curTx - prevTx;
+    const maxTx = Math.max(curTx, prevTx, 1);
+
+    const curTicket = sa.averageTicket;
+    const prevTicket = sa.prevAverageTicket;
+    const ticketDiff = curTicket - prevTicket;
+    const maxTicket = Math.max(curTicket, prevTicket, 1);
+
+    return {
+      curRev,
+      prevRev,
+      revDiff,
+      revPct: sa.revenueGrowthPct,
+      curRevBarWidth: Math.max(Math.round((curRev / maxRev) * 100), 2),
+      prevRevBarWidth: Math.max(Math.round((prevRev / maxRev) * 100), 2),
+
+      curTx,
+      prevTx,
+      txDiff,
+      txPct: sa.transactionsGrowthPct,
+      curTxBarWidth: Math.max(Math.round((curTx / maxTx) * 100), 2),
+      prevTxBarWidth: Math.max(Math.round((prevTx / maxTx) * 100), 2),
+
+      curTicket,
+      prevTicket,
+      ticketDiff,
+      ticketPct: sa.ticketGrowthPct,
+      curTicketBarWidth: Math.max(Math.round((curTicket / maxTicket) * 100), 2),
+      prevTicketBarWidth: Math.max(Math.round((prevTicket / maxTicket) * 100), 2)
+    };
+  });
+
+  // Segmentos SVG del Donut de Métodos de Pago
+  paymentDonutSegments = computed(() => {
+    const sa = this.salesAnalytics() || this.salesMetrics();
+    const methods = sa?.paymentMethods || [];
+    if (!methods.length) return [];
+
+    const colors: Record<string, string> = {
+      Cash: '#10b981',       // Verde Esmeralda
+      Efectivo: '#10b981',
+      Mixed: '#f59e0b',      // Ámbar
+      Mixto: '#f59e0b',
+      Card: '#0ea5e9',       // Azul Celeste
+      Tarjeta: '#0ea5e9',
+      Transfer: '#6366f1',   // Índigo
+      Transferencia: '#6366f1'
+    };
+
+    let accumulatedPct = 0;
+    return methods.map((m, idx) => {
+      const pct = m.percentage;
+      const strokeDash = `${pct} ${Math.max(100 - pct, 0)}`;
+      const strokeOffset = 100 - accumulatedPct + 25;
+      accumulatedPct += pct;
+      const color = colors[m.method] || (idx % 2 === 0 ? '#8b5cf6' : '#ec4899');
+      return {
+        method: m.method,
+        percentage: pct,
+        amount: m.totalAmount,
+        count: m.transactionCount,
+        color,
+        strokeDash,
+        strokeOffset
+      };
+    });
+  });
+
   filteredHourlyActivity = computed(() => {
     const term = this.searchTerm();
     return this.hourlyActivity().filter(h => h.transactionCount > 0 || !term);
@@ -352,10 +506,18 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const page = this.pageNumber();
     const size = this.pageSize();
 
-    // En la categoría de ventas, actualizar siempre el resumen analítico ejecutivo y comparativa
+    // En la categoría de ventas, actualizar siempre el resumen analítico ejecutivo, comparativas, tendencias y categorías
     if (this.selectedCategory() === 'sales') {
       this.reportService.getSalesAnalyticsSummary(start, end, wid).subscribe({
         next: (analytics) => this.salesAnalytics.set(analytics),
+        error: () => {}
+      });
+      this.reportService.getSalesTrends(start, end, wid).subscribe({
+        next: (trends) => this.salesTrends.set(trends),
+        error: () => {}
+      });
+      this.reportService.getSalesByCategory(start, end, wid).subscribe({
+        next: (cats) => this.salesCategories.set(cats),
         error: () => {}
       });
     }
