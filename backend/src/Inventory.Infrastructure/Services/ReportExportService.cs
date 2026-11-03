@@ -253,6 +253,328 @@ public class ReportExportService : IReportExportService
         return new ReportsCatalogSummaryDto(reports, totalRecords);
     }
 
+    public async Task<PagedReportResultDto<ProductReportItemDto>> GetProductsDataAsync(
+        int? warehouseId = null,
+        string? searchTerm = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.Products
+            .AsNoTracking()
+            .Include(p => p.Category)
+            .Include(p => p.Supplier)
+            .Where(p => !p.IsDeleted);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(p => p.WarehouseId == warehouseId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(p => p.Name.ToLower().Contains(term) || p.Sku.ToLower().Contains(term));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var totalValuation = await query.SumAsync(p => p.CurrentStock * p.PurchasePrice, cancellationToken);
+
+        var items = await query
+            .OrderBy(p => p.Name)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new ProductReportItemDto(
+                p.Id,
+                p.Sku,
+                p.Name,
+                p.Category != null ? p.Category.Name : "General",
+                p.Supplier != null ? p.Supplier.Name : "Sin Proveedor",
+                p.PurchasePrice,
+                p.SalePrice,
+                p.CurrentStock,
+                p.MinimumStock,
+                p.CurrentStock * p.PurchasePrice,
+                p.CurrentStock == 0 ? "Agotado" : (p.CurrentStock <= p.MinimumStock ? "Bajo Stock" : "Saludable"),
+                p.IsActive,
+                p.CreatedAt
+            ))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedReportResultDto<ProductReportItemDto>(
+            items,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages,
+            totalValuation,
+            null
+        );
+    }
+
+    public async Task<PagedReportResultDto<InventoryKardexReportItemDto>> GetInventoryKardexDataAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.InventoryMovements
+            .AsNoTracking()
+            .Include(m => m.Product)
+            .Include(m => m.User)
+            .AsQueryable();
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(m => m.WarehouseId == warehouseId.Value ||
+                                     (m.WarehouseId == null && m.Product.WarehouseId == warehouseId.Value));
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(m => m.CreatedAt >= startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            query = query.Where(m => m.CreatedAt <= endDate.Value);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(m => m.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(m => new InventoryKardexReportItemDto(
+                m.Id,
+                m.MovementNumber,
+                m.CreatedAt,
+                m.Type.ToString(),
+                m.ProductId,
+                m.Product != null ? m.Product.Sku : "N/A",
+                m.Product != null ? m.Product.Name : "N/A",
+                m.QuantityDelta,
+                m.PreviousStock,
+                m.NewStock,
+                m.UnitPrice,
+                m.User != null ? m.User.FullName : "Sistema",
+                m.Reference,
+                m.Notes
+            ))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedReportResultDto<InventoryKardexReportItemDto>(
+            items,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages
+        );
+    }
+
+    public async Task<PagedReportResultDto<SalesReportItemDto>> GetSalesDataAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.Sales
+            .AsNoTracking()
+            .Include(s => s.Items)
+            .AsQueryable();
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(s => s.CreatedAt >= startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            query = query.Where(s => s.CreatedAt <= endDate.Value);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var totalAmount = await query.SumAsync(s => s.Total, cancellationToken);
+
+        var items = await query
+            .OrderByDescending(s => s.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(s => new SalesReportItemDto(
+                s.Id,
+                s.SaleNumber,
+                s.SaleDate,
+                s.CreatedAt,
+                s.CustomerName,
+                s.CustomerTaxId,
+                s.PaymentMethod.ToString(),
+                s.Status.ToString(),
+                s.Subtotal,
+                s.Tax,
+                s.Total,
+                s.Items.Count
+            ))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedReportResultDto<SalesReportItemDto>(
+            items,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages,
+            totalAmount,
+            totalCount
+        );
+    }
+
+    public async Task<PagedReportResultDto<PurchasesReportItemDto>> GetPurchasesDataAsync(
+        DateTimeOffset? startDate,
+        DateTimeOffset? endDate,
+        int? warehouseId = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.Purchases
+            .AsNoTracking()
+            .Include(p => p.Supplier)
+            .Include(p => p.Items)
+            .AsQueryable();
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(p => p.WarehouseId == warehouseId.Value);
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(p => p.CreatedAt >= startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            query = query.Where(p => p.CreatedAt <= endDate.Value);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var totalAmount = await query.SumAsync(p => p.Total, cancellationToken);
+
+        var items = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new PurchasesReportItemDto(
+                p.Id,
+                p.PurchaseNumber,
+                p.PurchaseDate,
+                p.CreatedAt,
+                p.Supplier != null ? p.Supplier.Name : "N/A",
+                p.Status.ToString(),
+                p.Subtotal,
+                p.Tax,
+                p.Total,
+                p.Items.Count
+            ))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedReportResultDto<PurchasesReportItemDto>(
+            items,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages,
+            totalAmount,
+            totalCount
+        );
+    }
+
+    public async Task<PagedReportResultDto<LowStockReportItemDto>> GetLowStockDataAsync(
+        int? warehouseId = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.Products
+            .AsNoTracking()
+            .Include(p => p.Category)
+            .Include(p => p.Supplier)
+            .Where(p => !p.IsDeleted && p.CurrentStock <= p.MinimumStock);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(p => p.WarehouseId == warehouseId.Value);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var estimatedRestockCost = await query.SumAsync(
+            p => (p.MinimumStock > p.CurrentStock ? (p.MinimumStock - p.CurrentStock) : 1) * p.PurchasePrice,
+            cancellationToken);
+
+        var items = await query
+            .OrderBy(p => p.CurrentStock)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new LowStockReportItemDto(
+                p.Id,
+                p.Sku,
+                p.Name,
+                p.Category != null ? p.Category.Name : "General",
+                p.Supplier != null ? p.Supplier.Name : "Sin Proveedor",
+                p.CurrentStock,
+                p.MinimumStock,
+                Math.Max(0, p.MinimumStock - p.CurrentStock),
+                p.PurchasePrice,
+                (p.MinimumStock > p.CurrentStock ? (p.MinimumStock - p.CurrentStock) : 1) * p.PurchasePrice,
+                p.CurrentStock == 0 ? "Agotado" : "Bajo Stock"
+            ))
+            .ToListAsync(cancellationToken);
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedReportResultDto<LowStockReportItemDto>(
+            items,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages,
+            estimatedRestockCost,
+            totalCount
+        );
+    }
+
     private static string EscapeCsv(string? value)
     {
         if (string.IsNullOrEmpty(value)) return "";

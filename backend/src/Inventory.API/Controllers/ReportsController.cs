@@ -97,6 +97,93 @@ public class ReportsController : BaseApiController
         return File(fileBytes, "text/csv; charset=utf-8", filename);
     }
 
+    /// <summary>
+    /// Consulta tabular paginada de catálogo de productos y valuación de stock.
+    /// </summary>
+    [HttpGet("products/data")]
+    [ProducesResponseType(typeof(PagedReportResultDto<ProductReportItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedReportResultDto<ProductReportItemDto>>> GetProductsData(
+        [FromQuery] int? warehouseId,
+        [FromQuery] string? searchTerm,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetProductsDataAsync(targetWarehouseId, searchTerm, pageNumber, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Consulta tabular paginada del Kardex y movimientos de inventario por rango de fechas.
+    /// </summary>
+    [HttpGet("inventory/data")]
+    [ProducesResponseType(typeof(PagedReportResultDto<InventoryKardexReportItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedReportResultDto<InventoryKardexReportItemDto>>> GetInventoryKardexData(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetInventoryKardexDataAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Consulta tabular paginada de facturación y ventas por rango de fechas.
+    /// </summary>
+    [HttpGet("sales/data")]
+    [ProducesResponseType(typeof(PagedReportResultDto<SalesReportItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedReportResultDto<SalesReportItemDto>>> GetSalesData(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetSalesDataAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Consulta tabular paginada de compras a proveedores por rango de fechas.
+    /// </summary>
+    [HttpGet("purchases/data")]
+    [ProducesResponseType(typeof(PagedReportResultDto<PurchasesReportItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedReportResultDto<PurchasesReportItemDto>>> GetPurchasesData(
+        [FromQuery] DateTimeOffset? startDate,
+        [FromQuery] DateTimeOffset? endDate,
+        [FromQuery] int? warehouseId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetPurchasesDataAsync(startDate, endDate, targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Consulta tabular paginada de productos con stock bajo o agotado.
+    /// </summary>
+    [HttpGet("low-stock/data")]
+    [ProducesResponseType(typeof(PagedReportResultDto<LowStockReportItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedReportResultDto<LowStockReportItemDto>>> GetLowStockData(
+        [FromQuery] int? warehouseId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetLowStockDataAsync(targetWarehouseId, pageNumber, pageSize, cancellationToken);
+        return Ok(result);
+    }
+
     private int? ResolveTargetWarehouseId(int? queryWarehouseId)
     {
         var role = GetCurrentUserRole();
