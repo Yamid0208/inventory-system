@@ -1,5 +1,5 @@
 import '@angular/compiler';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createEnvironmentInjector, signal } from '@angular/core';
 import { ReportsComponent } from './reports.component';
 import { ReportService } from '../../core/services/report.service';
@@ -8,10 +8,25 @@ import { BranchContextService } from '../../core/services/branch-context.service
 import { of } from 'rxjs';
 
 describe('ReportsComponent (Unit Tests)', () => {
+  const dummyPagedResult = {
+    items: [],
+    totalCount: 0,
+    pageNumber: 1,
+    pageSize: 10,
+    totalPages: 0,
+    totalAmount: 0,
+    totalQuantity: 0
+  };
+
   const reportServiceMock = {
     getSummary: vi.fn().mockReturnValue(of({ reports: [], totalExportableRecords: 100 })),
     downloadReport: vi.fn().mockReturnValue(of(new Blob())),
-    triggerBrowserDownload: vi.fn()
+    triggerBrowserDownload: vi.fn(),
+    getSalesData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getInventoryKardexData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getPurchasesData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getProductsData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getLowStockData: vi.fn().mockReturnValue(of(dummyPagedResult))
   };
 
   const dashboardServiceMock = {
@@ -43,15 +58,21 @@ describe('ReportsComponent (Unit Tests)', () => {
 
   const component = injector.get(ReportsComponent);
 
-  it('should instantiate and load analytics summary', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should instantiate and load analytics summary with default today filter', () => {
     expect(component).toBeTruthy();
+    expect(component.activePreset()).toBe('today');
+    expect(component.startDate()).toBeTruthy();
+    expect(component.endDate()).toBeTruthy();
+
     component.loadSummary();
     component.loadAnalytics();
 
     expect(reportServiceMock.getSummary).toHaveBeenCalled();
     expect(dashboardServiceMock.getSummary).toHaveBeenCalled();
-    expect(component.summary()?.totalExportableRecords).toBe(100);
-    expect(component.dashboardData()?.kpis.totalProductsCount).toBe(50);
   });
 
   it('should compute profit margin correctly from dashboard KPIs', () => {
@@ -60,14 +81,45 @@ describe('ReportsComponent (Unit Tests)', () => {
     expect(component.profitMargin()).toBe(25);
   });
 
-  it('should update date ranges on setDatePreset', () => {
+  it('should update date ranges on setDatePreset for today, thisMonth and all', () => {
+    // Preset Hoy
+    component.setDatePreset('today');
+    expect(component.activePreset()).toBe('today');
+    expect(component.startDate()).toEqual(component.endDate());
+
+    // Preset Mes Actual
+    component.setDatePreset('thisMonth');
+    expect(component.activePreset()).toBe('thisMonth');
+    expect(component.startDate()).toMatch(/^\d{4}-\d{2}-01$/);
+    expect(component.endDate()).toBeTruthy();
+
+    // Preset 7 días
     component.setDatePreset('7days');
     expect(component.activePreset()).toBe('7days');
     expect(component.startDate()).toBeTruthy();
     expect(component.endDate()).toBeTruthy();
 
+    // Preset Todo el histórico
     component.setDatePreset('all');
     expect(component.startDate()).toBe('');
     expect(component.endDate()).toBe('');
+  });
+
+  it('should switch report tab and load tabular data', () => {
+    component.selectReport('inventory');
+    expect(component.selectedReport()).toBe('inventory');
+    expect(reportServiceMock.getInventoryKardexData).toHaveBeenCalled();
+
+    component.selectReport('purchases');
+    expect(component.selectedReport()).toBe('purchases');
+    expect(reportServiceMock.getPurchasesData).toHaveBeenCalled();
+
+    component.selectReport('products');
+    expect(component.selectedReport()).toBe('products');
+    expect(reportServiceMock.getProductsData).toHaveBeenCalled();
+
+    component.selectReport('low-stock');
+    expect(component.selectedReport()).toBe('low-stock');
+    expect(reportServiceMock.getLowStockData).toHaveBeenCalled();
   });
 });

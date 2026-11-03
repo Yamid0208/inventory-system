@@ -84,7 +84,10 @@ public class ReportExportService : IReportExportService
 
         if (endDate.HasValue)
         {
-            query = query.Where(m => m.CreatedAt <= endDate.Value);
+            var adjustedEndDate = endDate.Value.TimeOfDay == TimeSpan.Zero
+                ? endDate.Value.Date.AddDays(1).AddTicks(-1)
+                : endDate.Value;
+            query = query.Where(m => m.CreatedAt <= adjustedEndDate);
         }
 
         var movements = await query
@@ -134,9 +137,10 @@ public class ReportExportService : IReportExportService
             query = query.Where(s => s.CreatedAt >= startDate.Value);
         }
 
-        if (endDate.HasValue)
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
         {
-            query = query.Where(s => s.CreatedAt <= endDate.Value);
+            query = query.Where(s => s.CreatedAt <= adjustedEnd.Value);
         }
 
         var sales = await query
@@ -186,9 +190,10 @@ public class ReportExportService : IReportExportService
             query = query.Where(p => p.CreatedAt >= startDate.Value);
         }
 
-        if (endDate.HasValue)
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
         {
-            query = query.Where(p => p.CreatedAt <= endDate.Value);
+            query = query.Where(p => p.CreatedAt <= adjustedEnd.Value);
         }
 
         var purchases = await query
@@ -347,7 +352,10 @@ public class ReportExportService : IReportExportService
 
         if (endDate.HasValue)
         {
-            query = query.Where(m => m.CreatedAt <= endDate.Value);
+            var adjustedEndDate = endDate.Value.TimeOfDay == TimeSpan.Zero
+                ? endDate.Value.Date.AddDays(1).AddTicks(-1)
+                : endDate.Value;
+            query = query.Where(m => m.CreatedAt <= adjustedEndDate);
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -411,9 +419,10 @@ public class ReportExportService : IReportExportService
             query = query.Where(s => s.CreatedAt >= startDate.Value);
         }
 
-        if (endDate.HasValue)
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
         {
-            query = query.Where(s => s.CreatedAt <= endDate.Value);
+            query = query.Where(s => s.CreatedAt <= adjustedEnd.Value);
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -479,9 +488,10 @@ public class ReportExportService : IReportExportService
             query = query.Where(p => p.CreatedAt >= startDate.Value);
         }
 
-        if (endDate.HasValue)
+        var adjustedEnd = AdjustEndDate(endDate);
+        if (adjustedEnd.HasValue)
         {
-            query = query.Where(p => p.CreatedAt <= endDate.Value);
+            query = query.Where(p => p.CreatedAt <= adjustedEnd.Value);
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -573,6 +583,14 @@ public class ReportExportService : IReportExportService
             estimatedRestockCost,
             totalCount
         );
+    }
+
+    private static DateTimeOffset? AdjustEndDate(DateTimeOffset? endDate)
+    {
+        if (!endDate.HasValue) return null;
+        return endDate.Value.TimeOfDay == TimeSpan.Zero
+            ? endDate.Value.Date.AddDays(1).AddTicks(-1)
+            : endDate.Value;
     }
 
     private static string EscapeCsv(string? value)

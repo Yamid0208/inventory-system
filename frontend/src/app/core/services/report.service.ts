@@ -1,7 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ReportsCatalogSummary } from '../models/report.model';
+import {
+  ReportsCatalogSummary,
+  PagedReportResult,
+  ProductReportItem,
+  InventoryKardexReportItem,
+  SalesReportItem,
+  PurchasesReportItem,
+  LowStockReportItem
+} from '../models/report.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +24,97 @@ export class ReportService {
       params = params.set('warehouseId', warehouseId.toString());
     }
     return this.http.get<ReportsCatalogSummary>(`${this.baseUrl}/summary`, { params });
+  }
+
+  getProductsData(
+    warehouseId?: number | null,
+    searchTerm?: string,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedReportResult<ProductReportItem>> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+    return this.http.get<PagedReportResult<ProductReportItem>>(`${this.baseUrl}/products/data`, { params });
+  }
+
+  getInventoryKardexData(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedReportResult<InventoryKardexReportItem>> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<PagedReportResult<InventoryKardexReportItem>>(`${this.baseUrl}/inventory/data`, { params });
+  }
+
+  getSalesData(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedReportResult<SalesReportItem>> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<PagedReportResult<SalesReportItem>>(`${this.baseUrl}/sales/data`, { params });
+  }
+
+  getPurchasesData(
+    startDate?: string,
+    endDate?: string,
+    warehouseId?: number | null,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedReportResult<PurchasesReportItem>> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<PagedReportResult<PurchasesReportItem>>(`${this.baseUrl}/purchases/data`, { params });
+  }
+
+  getLowStockData(
+    warehouseId?: number | null,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedReportResult<LowStockReportItem>> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<PagedReportResult<LowStockReportItem>>(`${this.baseUrl}/low-stock/data`, { params });
   }
 
   downloadReport(reportKey: string, startDate?: string, endDate?: string, warehouseId?: number | null): Observable<Blob> {

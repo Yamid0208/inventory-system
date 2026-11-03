@@ -51,3 +51,4 @@ public class ReportDtoTests
         Assert.Equal("Bajo Stock", item.Status);
     }
 }
+
