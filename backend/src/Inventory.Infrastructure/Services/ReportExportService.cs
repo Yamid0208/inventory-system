@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Inventory.Application.Features.Reports.DTOs;
 using Inventory.Application.Features.Reports.Services;
+using Inventory.Domain.Enums;
 using Inventory.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -134,17 +135,17 @@ public class ReportExportService : IReportExportService
 
         if (startDate.HasValue)
         {
-            query = query.Where(s => s.CreatedAt >= startDate.Value);
+            query = query.Where(s => s.SaleDate >= startDate.Value);
         }
 
         var adjustedEnd = AdjustEndDate(endDate);
         if (adjustedEnd.HasValue)
         {
-            query = query.Where(s => s.CreatedAt <= adjustedEnd.Value);
+            query = query.Where(s => s.SaleDate <= adjustedEnd.Value);
         }
 
         var sales = await query
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderByDescending(s => s.SaleDate)
             .ToListAsync(cancellationToken);
 
         var sb = new StringBuilder();
@@ -416,20 +417,20 @@ public class ReportExportService : IReportExportService
 
         if (startDate.HasValue)
         {
-            query = query.Where(s => s.CreatedAt >= startDate.Value);
+            query = query.Where(s => s.SaleDate >= startDate.Value);
         }
 
         var adjustedEnd = AdjustEndDate(endDate);
         if (adjustedEnd.HasValue)
         {
-            query = query.Where(s => s.CreatedAt <= adjustedEnd.Value);
+            query = query.Where(s => s.SaleDate <= adjustedEnd.Value);
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
         var totalAmount = await query.SumAsync(s => s.Total, cancellationToken);
 
         var items = await query
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderByDescending(s => s.SaleDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(s => new SalesReportItemDto(
@@ -602,14 +603,16 @@ public class ReportExportService : IReportExportService
 
         if (startDate.HasValue)
         {
-            query = query.Where(s => s.CreatedAt >= startDate.Value);
+            query = query.Where(s => s.SaleDate >= startDate.Value);
         }
 
         var adjustedEnd = AdjustEndDate(endDate);
         if (adjustedEnd.HasValue)
         {
-            query = query.Where(s => s.CreatedAt <= adjustedEnd.Value);
+            query = query.Where(s => s.SaleDate <= adjustedEnd.Value);
         }
+
+        query = query.Where(s => s.Status != SaleStatus.Cancelled);
 
         var totalTransactions = await query.CountAsync(cancellationToken);
         if (totalTransactions == 0)
@@ -666,6 +669,8 @@ public class ReportExportService : IReportExportService
                 .ThenInclude(p => p.Category)
             .AsQueryable();
 
+        query = query.Where(i => i.Sale.Status != SaleStatus.Cancelled);
+
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
             query = query.Where(i => i.Sale.WarehouseId == warehouseId.Value);
@@ -673,13 +678,13 @@ public class ReportExportService : IReportExportService
 
         if (startDate.HasValue)
         {
-            query = query.Where(i => i.Sale.CreatedAt >= startDate.Value);
+            query = query.Where(i => i.Sale.SaleDate >= startDate.Value);
         }
 
         var adjustedEnd = AdjustEndDate(endDate);
         if (adjustedEnd.HasValue)
         {
-            query = query.Where(i => i.Sale.CreatedAt <= adjustedEnd.Value);
+            query = query.Where(i => i.Sale.SaleDate <= adjustedEnd.Value);
         }
 
         var groupedQuery = query
@@ -735,6 +740,8 @@ public class ReportExportService : IReportExportService
                 .ThenInclude(p => p.Category)
             .AsQueryable();
 
+        query = query.Where(i => i.Sale.Status != SaleStatus.Cancelled);
+
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
             query = query.Where(i => i.Sale.WarehouseId == warehouseId.Value);
@@ -742,13 +749,13 @@ public class ReportExportService : IReportExportService
 
         if (startDate.HasValue)
         {
-            query = query.Where(i => i.Sale.CreatedAt >= startDate.Value);
+            query = query.Where(i => i.Sale.SaleDate >= startDate.Value);
         }
 
         var adjustedEnd = AdjustEndDate(endDate);
         if (adjustedEnd.HasValue)
         {
-            query = query.Where(i => i.Sale.CreatedAt <= adjustedEnd.Value);
+            query = query.Where(i => i.Sale.SaleDate <= adjustedEnd.Value);
         }
 
         var globalRevenue = await query.SumAsync(i => i.Total, cancellationToken);
