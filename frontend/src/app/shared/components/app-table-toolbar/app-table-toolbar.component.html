@@ -1,0 +1,66 @@
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs mb-3">
+  <!-- Búsqueda Omni-Campo -->
+  <div class="relative flex-1 max-w-full sm:max-w-xs md:max-w-sm">
+    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+    
+    <input
+      type="text"
+      [value]="query"
+      (input)="onInput($event)"
+      (keydown.escape)="clearSearch()"
+      [placeholder]="searchPlaceholder()"
+      class="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-xs"
+      [attr.aria-label]="searchPlaceholder()"
+    />
+
+    @if (query) {
+      <button
+        type="button"
+        (click)="clearSearch()"
+        class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer"
+        aria-label="Limpiar búsqueda">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    }
+  </div>
+
+  <!-- Filtros adicionales inyectados + Contador y Botón Exportar CSV -->
+  <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2.5">
+    <ng-content select="[filters]"></ng-content>
+
+    <!-- Contador de Registros -->
+    <div class="flex items-center text-xs text-slate-500 dark:text-slate-400 font-medium px-2">
+      @if (isFiltered()) {
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300 font-semibold border border-primary-200/60 dark:border-primary-800/40">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+          Mostrando {{ filteredCount() }} de {{ totalCount() }}
+        </span>
+      } @else if (totalCount() > 0) {
+        <span>{{ totalCount() }} registros</span>
+      }
+    </div>
+
+    <!-- Botón Exportar CSV -->
+    @if (showExportCsv()) {
+      <button
+        type="button"
+        (click)="onExport()"
+        [disabled]="exportDisabled() || totalCount() === 0"
+        class="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer group"
+        title="Descargar datos en formato CSV (compatible con Excel)">
+        <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span>{{ exportLabel() }}</span>
+      </button>
+    }
+
+    <ng-content select="[actions]"></ng-content>
+  </div>
+</div>

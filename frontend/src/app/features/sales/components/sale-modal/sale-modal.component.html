@@ -392,11 +392,11 @@
       </div>
 
       <!-- Resumen de Totales Financieros -->
-      <div class="p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between">
+      <div class="p-4 bg-slate-900 text-white rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <span class="text-xs text-slate-400">
           Descuento automático de stock en tiempo real e incorporación a Kardex.
         </span>
-        <div class="flex items-center gap-6 text-right font-mono text-xs">
+        <div class="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-6 text-right font-mono text-xs w-full sm:w-auto">
           <div>
             <span class="block text-[10px] text-slate-400">Subtotal</span>
             <span>{{ calculatedSubtotal() | currencyFormat }}</span>

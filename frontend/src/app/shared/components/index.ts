@@ -7,6 +7,8 @@ export * from './app-error-state/app-error-state.component';
 export * from './app-search/app-search.component';
 export * from './app-pagination/app-pagination.component';
 export * from './app-data-table/app-data-table.component';
+export * from './app-sortable-header/app-sortable-header.component';
+export * from './app-table-toolbar/app-table-toolbar.component';
 export * from './app-confirm-dialog/app-confirm-dialog.component';
 export * from './app-toaster/app-toaster.component';
 export * from './app-form-field/app-form-field.component';

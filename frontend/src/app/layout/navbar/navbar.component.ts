@@ -61,6 +61,16 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/settings']);
   }
 
+  getRoleLabel(role?: string): string {
+    switch (role) {
+      case 'SuperAdmin': return 'Super Admin';
+      case 'Admin': return 'Administrador';
+      case 'Warehouse': return 'Bodega / Almacén';
+      case 'Seller': return 'Vendedor';
+      default: return role || 'Usuario';
+    }
+  }
+
   onGlobalSearch(): void {
     const query = this.searchQuery.trim();
     if (query) {

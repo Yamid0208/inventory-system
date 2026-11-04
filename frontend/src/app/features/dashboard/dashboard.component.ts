@@ -86,4 +86,15 @@ export class DashboardComponent implements OnInit {
     }
     return parts[0].slice(0, 2).toUpperCase();
   }
+
+  getMovementTypeLabel(type: string): string {
+    switch (type) {
+      case 'Purchase': return 'Entrada (Compra)';
+      case 'Sale': return 'Salida (Venta)';
+      case 'AdjustmentIn': return 'Entrada (+)';
+      case 'AdjustmentOut': return 'Salida (-)';
+      case 'Return': return 'Devolución';
+      default: return type;
+    }
+  }
 }

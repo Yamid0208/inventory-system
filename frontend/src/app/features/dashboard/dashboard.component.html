@@ -427,7 +427,7 @@
                   <strong class="text-slate-900 font-bold">{{ m.productSku }}</strong>
                   <span class="px-2 py-0.5 rounded-full text-[9px] font-bold"
                     [class]="m.quantityDelta > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'">
-                    {{ m.movementType }}
+                    {{ getMovementTypeLabel(m.movementType) }}
                   </span>
                 </div>
                 <span class="text-[11px] text-slate-400 font-medium truncate max-w-[180px] block mt-0.5">

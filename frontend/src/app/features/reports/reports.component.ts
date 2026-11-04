@@ -36,17 +36,30 @@ import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { CountUpDirective } from '../../shared/directives/count-up.directive';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyFormatPipe, AppButtonComponent, CountUpDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CurrencyFormatPipe,
+    AppButtonComponent,
+    CountUpDirective,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent
+  ],
   templateUrl: './reports.component.html'
 })
 export class ReportsComponent implements OnInit, OnDestroy {
   protected readonly Math = Math;
   private reportService = inject(ReportService);
   private dashboardService = inject(DashboardService);
+  private csvExportService = inject(CsvExportService);
   branchContextService = inject(BranchContextService);
 
   private searchSubject = new Subject<string>();
@@ -936,6 +949,170 @@ export class ReportsComponent implements OnInit, OnDestroy {
     }
   });
 
+  // Conjunto de datos crudos activos para la tabla seleccionada
+  activeTableRawItems = computed<any[]>(() => {
+    switch (this.selectedReport()) {
+      case 'sales': return this.salesData()?.items || [];
+      case 'sales-top': return this.topProductsData() || [];
+      case 'sales-categories': return this.salesCategories() || [];
+      case 'sales-hourly': return this.hourlyActivity() || [];
+      case 'sales-employees': return this.salesEmployees() || [];
+      case 'finance': return this.profitabilityData()?.productDetails?.items || [];
+      case 'cash-reconciliation': return this.cashReconciliationData()?.sessions?.items || [];
+      case 'inventory': return this.inventoryData()?.items || [];
+      case 'inventory-valuation': return this.inventoryValuationData()?.items || [];
+      case 'products': return this.productsData()?.items || [];
+      case 'low-stock': return this.lowStockData()?.items || [];
+      case 'purchases': return this.purchasesData()?.items || [];
+      case 'audit': return this.auditData()?.items || [];
+      default: return [];
+    }
+  });
+
+  // Gestor reactivo de ordenamiento por todas las columnas y búsqueda omni-campo
+  readonly tableState = new TableStateManager<any>({
+    data: () => this.activeTableRawItems()
+  });
+
+  exportActiveTableCsv(): void {
+    const rep = this.selectedReport();
+    const data = this.tableState.processedItems();
+    if (!data || data.length === 0) return;
+
+    const columnMap: Record<string, { key: string; header: string }[]> = {
+      sales: [
+        { key: 'saleNumber', header: 'Factura' },
+        { key: 'createdAt', header: 'Fecha' },
+        { key: 'customerName', header: 'Cliente' },
+        { key: 'paymentMethod', header: 'Método' },
+        { key: 'status', header: 'Estado' },
+        { key: 'subtotal', header: 'Subtotal' },
+        { key: 'tax', header: 'IVA' },
+        { key: 'total', header: 'Total' },
+        { key: 'itemsCount', header: 'Líneas' }
+      ],
+      'sales-top': [
+        { key: 'rank', header: 'Puesto' },
+        { key: 'productName', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'categoryName', header: 'Categoría' },
+        { key: 'unitsSold', header: 'Unidades Vendidas' },
+        { key: 'totalRevenue', header: 'Ingresos Totales' },
+        { key: 'profitMargin', header: 'Margen (%)' }
+      ],
+      'sales-categories': [
+        { key: 'categoryName', header: 'Categoría' },
+        { key: 'itemsSold', header: 'Unidades Vendidas' },
+        { key: 'totalRevenue', header: 'Ventas Totales' },
+        { key: 'sharePercentage', header: 'Participación (%)' }
+      ],
+      'sales-hourly': [
+        { key: 'timeSlot', header: 'Franja Horaria' },
+        { key: 'transactionCount', header: 'Transacciones' },
+        { key: 'totalSales', header: 'Ventas Totales' },
+        { key: 'averageTicket', header: 'Ticket Promedio' },
+        { key: 'sharePercentage', header: 'Participación (%)' }
+      ],
+      'sales-employees': [
+        { key: 'employeeName', header: 'Empleado' },
+        { key: 'role', header: 'Rol' },
+        { key: 'transactionCount', header: 'Ventas Concluidas' },
+        { key: 'totalSales', header: 'Ingresos Generados' },
+        { key: 'averageTicket', header: 'Ticket Medio' }
+      ],
+      finance: [
+        { key: 'productName', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'categoryName', header: 'Categoría' },
+        { key: 'unitsSold', header: 'Unidades' },
+        { key: 'revenue', header: 'Ventas Brutas' },
+        { key: 'cost', header: 'Costo de Ventas' },
+        { key: 'grossProfit', header: 'Utilidad Bruta' },
+        { key: 'marginPercentage', header: 'Margen Bruto (%)' }
+      ],
+      'cash-reconciliation': [
+        { key: 'sessionNumber', header: 'Sesión' },
+        { key: 'cashRegisterName', header: 'Caja' },
+        { key: 'userName', header: 'Cajero' },
+        { key: 'openedAt', header: 'Apertura' },
+        { key: 'closedAt', header: 'Cierre' },
+        { key: 'initialBalance', header: 'Saldo Inicial' },
+        { key: 'expectedBalance', header: 'Saldo Teórico' },
+        { key: 'actualBalance', header: 'Saldo Real' },
+        { key: 'difference', header: 'Diferencia' },
+        { key: 'status', header: 'Estado' }
+      ],
+      inventory: [
+        { key: 'createdAt', header: 'Fecha' },
+        { key: 'movementType', header: 'Tipo Movimiento' },
+        { key: 'productName', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'quantity', header: 'Cantidad' },
+        { key: 'warehouseName', header: 'Almacén' },
+        { key: 'userName', header: 'Responsable' },
+        { key: 'notes', header: 'Notas/Referencia' }
+      ],
+      'inventory-valuation': [
+        { key: 'productName', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'categoryName', header: 'Categoría' },
+        { key: 'currentStock', header: 'Stock Actual' },
+        { key: 'averageCost', header: 'Costo Unitario' },
+        { key: 'salePrice', header: 'Precio Venta' },
+        { key: 'totalValuation', header: 'Valuación Costo' },
+        { key: 'totalPotentialRevenue', header: 'Valuación Venta' },
+        { key: 'abcClassification', header: 'Clasificación ABC' }
+      ],
+      products: [
+        { key: 'name', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'categoryName', header: 'Categoría' },
+        { key: 'supplierName', header: 'Proveedor' },
+        { key: 'currentStock', header: 'Stock Actual' },
+        { key: 'minimumStock', header: 'Stock Mínimo' },
+        { key: 'purchasePrice', header: 'Precio Compra' },
+        { key: 'salePrice', header: 'Precio Venta' },
+        { key: 'stockStatus', header: 'Estado Stock' }
+      ],
+      'low-stock': [
+        { key: 'productName', header: 'Producto' },
+        { key: 'sku', header: 'SKU' },
+        { key: 'categoryName', header: 'Categoría' },
+        { key: 'warehouseName', header: 'Almacén' },
+        { key: 'currentStock', header: 'Stock Actual' },
+        { key: 'minimumStock', header: 'Stock Mínimo' },
+        { key: 'deficit', header: 'Déficit' },
+        { key: 'estimatedRestockCost', header: 'Costo Reposición' },
+        { key: 'status', header: 'Estado' }
+      ],
+      purchases: [
+        { key: 'purchaseNumber', header: 'Orden Compra' },
+        { key: 'purchaseDate', header: 'Fecha' },
+        { key: 'supplierName', header: 'Proveedor' },
+        { key: 'status', header: 'Estado' },
+        { key: 'subtotal', header: 'Subtotal' },
+        { key: 'tax', header: 'IVA' },
+        { key: 'total', header: 'Total' },
+        { key: 'itemsCount', header: 'Líneas' }
+      ],
+      audit: [
+        { key: 'createdAt', header: 'Fecha y Hora' },
+        { key: 'userName', header: 'Usuario' },
+        { key: 'action', header: 'Acción' },
+        { key: 'entityName', header: 'Entidad' },
+        { key: 'details', header: 'Detalles' },
+        { key: 'ipAddress', header: 'IP' }
+      ]
+    };
+
+    const columns = columnMap[rep] || Object.keys(data[0] || {}).map(k => ({ key: k, header: k }));
+    this.csvExportService.exportToCsv({
+      filename: `reporte_${rep}_${new Date().toISOString().slice(0, 10)}`,
+      columns,
+      data
+    });
+  }
+
   constructor() {
     // Inicializar fechas en "Hoy" por defecto
     const today = this.formatLocalDate(new Date());
@@ -1050,6 +1227,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
       this.selectedCategory.set('audit');
     }
 
+    this.tableState.resetSort();
+    this.tableState.setSearch('');
     this.pageNumber.set(1);
     this.loadTableData();
   }
@@ -1092,12 +1271,16 @@ export class ReportsComponent implements OnInit, OnDestroy {
       this.endDate.set('');
     }
 
+    this.tableState.resetSort();
+    this.tableState.setSearch('');
     this.pageNumber.set(1);
     this.loadTableData();
   }
 
   onCustomDateChange(): void {
     this.activePreset.set('custom');
+    this.tableState.resetSort();
+    this.tableState.setSearch('');
     this.pageNumber.set(1);
     this.loadTableData();
   }
@@ -1286,18 +1469,24 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   setAbcFilter(abc: string | null): void {
     this.selectedAbcClass.set(abc);
+    this.tableState.resetSort();
+    this.tableState.setSearch('');
     this.pageNumber.set(1);
     this.loadTableData();
   }
 
   toggleStagnantFilter(): void {
     this.stagnantOnlyFilter.update(v => !v);
+    this.tableState.resetSort();
+    this.tableState.setSearch('');
     this.pageNumber.set(1);
     this.loadTableData();
   }
 
   setValuationCategoryFilter(catId: number | null): void {
     this.selectedValuationCategoryId.set(catId);
+    this.tableState.resetSort();
+    this.tableState.setSearch('');
     this.pageNumber.set(1);
     this.loadTableData();
   }
@@ -1308,6 +1497,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   clearSearch(): void {
     this.searchTerm.set('');
+    this.tableState.resetSort();
+    this.tableState.setSearch('');
     this.pageNumber.set(1);
     this.loadTableData();
   }
@@ -1329,6 +1520,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
   setPageSize(size: number): void {
     this.pageSize.set(size);
+    this.tableState.resetSort();
+    this.tableState.setSearch('');
     this.pageNumber.set(1);
     this.loadTableData();
   }
