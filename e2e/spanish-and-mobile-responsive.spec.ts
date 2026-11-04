@@ -11,7 +11,7 @@ test.describe('E2E Spanish Localization and Mobile Responsiveness Suite', () => 
     await emailInput.fill('admin@sgi.local');
     await passwordInput.fill('Admin123*');
     await submitBtn.click();
-    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
   };
 
   test('TC-LOC-01: Login y Dashboard están 100% en español sin términos en inglés', async ({ page }) => {

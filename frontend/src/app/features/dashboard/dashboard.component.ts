@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, signal, effect, untracked } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { BranchContextService } from '../../core/services/branch-context.service';
 import { AuthService } from '../../core/auth/services/auth.service';
@@ -16,11 +17,12 @@ import { CountUpDirective } from '../../shared/directives/count-up.directive';
   imports: [CommonModule, RouterModule, CurrencyFormatPipe, AppButtonComponent, AppSkeletonComponent, CountUpDirective],
   templateUrl: './dashboard.component.html'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private dashboardService = inject(DashboardService);
   private router = inject(Router);
   branchContextService = inject(BranchContextService);
   authService = inject(AuthService);
+  private requestSub?: Subscription;
 
   summary = signal<DashboardSummary | null>(null);
   loading = signal<boolean>(false);
@@ -41,7 +43,10 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.updateGreeting();
-    this.loadDashboardData();
+  }
+
+  ngOnDestroy(): void {
+    this.requestSub?.unsubscribe();
   }
 
   updateGreeting(): void {
@@ -61,7 +66,8 @@ export class DashboardComponent implements OnInit {
 
     const wid = warehouseId !== undefined ? warehouseId : this.branchContextService.selectedWarehouseId();
 
-    this.dashboardService.getSummary(wid).subscribe({
+    this.requestSub?.unsubscribe();
+    this.requestSub = this.dashboardService.getSummary(wid).subscribe({
       next: (data) => {
         if (data) {
           data.criticalProducts = data.criticalProducts || [];

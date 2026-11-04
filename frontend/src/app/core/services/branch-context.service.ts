@@ -14,8 +14,24 @@ export class BranchContextService implements OnDestroy {
 
   private readonly STORAGE_KEY = 'inventory_active_branch_id';
 
+  private getInitialWarehouseId(): number | null {
+    try {
+      const savedIdStr = localStorage.getItem(this.STORAGE_KEY);
+      if (savedIdStr === 'all') {
+        return null;
+      }
+      if (savedIdStr) {
+        const savedId = Number(savedIdStr);
+        if (!isNaN(savedId) && savedId > 0) {
+          return savedId;
+        }
+      }
+    } catch {}
+    return null;
+  }
+
   warehouses = signal<Warehouse[]>([]);
-  selectedWarehouseId = signal<number | null>(null);
+  selectedWarehouseId = signal<number | null>(this.getInitialWarehouseId());
   loading = signal<boolean>(false);
 
   canChangeBranch = computed(() => {
