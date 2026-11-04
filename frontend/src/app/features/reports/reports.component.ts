@@ -92,11 +92,27 @@ export class ReportsComponent implements OnInit, OnDestroy {
         hasData: false,
         linePath: '',
         areaPath: '',
-        points: [] as { x: number; y: number; label: string; amount: number; count: number }[],
+        segments: [] as { x1: number; y1: number; x2: number; y2: number; color: string; type: 'up' | 'down' | 'flat'; diff: number }[],
+        points: [] as {
+          x: number;
+          y: number;
+          label: string;
+          shortDate: string;
+          amount: number;
+          formattedAmount: string;
+          count: number;
+          pointColor: string;
+          badgeX: number;
+          badgeY: number;
+          isAbove: boolean;
+        }[],
         maxRevenue: 0,
         totalRevenue: 0,
         averageRevenue: 0,
-        peakDay: null as SalesTrendItem | null
+        peakDay: null as SalesTrendItem | null,
+        upCount: 0,
+        downCount: 0,
+        flatCount: 0
       };
     }
 
@@ -105,13 +121,38 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const maxRevenue = Math.max(...raw.map(r => r.totalRevenue), 1);
     const peakDay = [...raw].sort((a, b) => b.totalRevenue - a.totalRevenue)[0];
 
-    const width = 640;
-    const height = 180;
-    const padX = 40;
-    const padTop = 25;
-    const padBottom = 35;
+    const width = 680;
+    const height = 220;
+    const padX = 45;
+    const padTop = 50;
+    const padBottom = 45;
     const usableW = width - padX * 2;
     const usableH = height - padTop - padBottom;
+
+    const formatCompact = (val: number): string => {
+      if (val >= 1000000) {
+        const m = val / 1000000;
+        return `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M`;
+      }
+      if (val >= 1000) {
+        const k = val / 1000;
+        return `$${k % 1 === 0 ? k.toFixed(0) : k.toFixed(0)}k`;
+      }
+      return `$${val}`;
+    };
+
+    const extractShort = (label: string): string => {
+      if (!label) return '';
+      if (label.includes('/')) {
+        const parts = label.split('/');
+        if (parts.length >= 2) return `${parts[0]}/${parts[1]}`;
+      }
+      if (label.includes('-')) {
+        const parts = label.split('-');
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}`;
+      }
+      return label;
+    };
 
     const points = raw.map((item, idx) => {
       const x = raw.length === 1
@@ -122,9 +163,84 @@ export class ReportsComponent implements OnInit, OnDestroy {
         x: Math.round(x * 10) / 10,
         y: Math.round(y * 10) / 10,
         label: item.label,
+        shortDate: extractShort(item.label),
         amount: item.totalRevenue,
-        count: item.transactionCount
+        formattedAmount: formatCompact(item.totalRevenue),
+        count: item.transactionCount,
+        pointColor: '#6366F1',
+        badgeX: 0,
+        badgeY: 0,
+        isAbove: true
       };
+    });
+
+    // Construcción de segmentos individuales con color según pendiente
+    const segments: {
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      color: string;
+      type: 'up' | 'down' | 'flat';
+      diff: number;
+    }[] = [];
+
+    for (let i = 1; i < points.length; i++) {
+      const p1 = points[i - 1];
+      const p2 = points[i];
+      const diff = p2.amount - p1.amount;
+      let color = '#F59E0B'; // Estable / sin variación (amarillo)
+      let type: 'up' | 'down' | 'flat' = 'flat';
+
+      if (diff > 0) {
+        color = '#10B981'; // Subida (verde)
+        type = 'up';
+      } else if (diff < 0) {
+        color = '#EF4444'; // Bajada (rojo)
+        type = 'down';
+      }
+
+      segments.push({
+        x1: p1.x,
+        y1: p1.y,
+        x2: p2.x,
+        y2: p2.y,
+        color,
+        type,
+        diff
+      });
+    }
+
+    // Asignar color a cada punto según el segmento que llega a él y calcular posición de badge
+    points.forEach((pt, idx) => {
+      if (idx === 0) {
+        pt.pointColor = segments.length > 0 ? segments[0].color : '#6366F1';
+      } else {
+        pt.pointColor = segments[idx - 1].color;
+      }
+
+      const isNearTop = pt.y < 55;
+      const isNearBottom = pt.y > 170;
+      let isAbove = true;
+      let badgeY: number;
+
+      if (isNearTop) {
+        isAbove = false;
+        badgeY = pt.y + 12;
+      } else if (isNearBottom) {
+        isAbove = true;
+        badgeY = pt.y - 34;
+      } else if (raw.length > 7 && idx % 2 === 0) {
+        isAbove = false;
+        badgeY = pt.y + 12;
+      } else {
+        isAbove = true;
+        badgeY = pt.y - 34;
+      }
+
+      pt.badgeX = Math.round((pt.x - 28) * 10) / 10;
+      pt.badgeY = Math.round(badgeY * 10) / 10;
+      pt.isAbove = isAbove;
     });
 
     let linePath = '';
@@ -147,11 +263,15 @@ export class ReportsComponent implements OnInit, OnDestroy {
       hasData: true,
       linePath,
       areaPath,
+      segments,
       points,
       maxRevenue,
       totalRevenue,
       averageRevenue,
-      peakDay
+      peakDay,
+      upCount: segments.filter(s => s.type === 'up').length,
+      downCount: segments.filter(s => s.type === 'down').length,
+      flatCount: segments.filter(s => s.type === 'flat').length
     };
   });
 
@@ -162,7 +282,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
     const curRev = sa.totalRevenue;
     const prevRev = sa.prevTotalRevenue;
-    const revDiff = curRev - prevRev;
+    const revDiff = Math.round((curRev - prevRev) * 100) / 100;
     const maxRev = Math.max(curRev, prevRev, 1);
 
     const curTx = sa.transactionCount;
@@ -172,7 +292,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
 
     const curTicket = sa.averageTicket;
     const prevTicket = sa.prevAverageTicket;
-    const ticketDiff = curTicket - prevTicket;
+    const ticketDiff = Math.round((curTicket - prevTicket) * 100) / 100;
     const maxTicket = Math.max(curTicket, prevTicket, 1);
 
     return {
