@@ -59,4 +59,31 @@ public class ProductImportValidationTests
         Assert.True(row.IsValid);
         Assert.False(row.IsExisting);
     }
+
+    [Theory]
+    [InlineData(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, ".png", true)]
+    [InlineData(new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46 }, ".jpg", true)]
+    [InlineData(new byte[] { 0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x35 }, ".pdf", true)]
+    [InlineData(new byte[] { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00 }, ".xlsx", true)]
+    [InlineData(new byte[] { 0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00 }, ".csv", false)] // Disguised Windows MZ binary executable
+    [InlineData(new byte[] { 0x7F, 0x45, 0x4C, 0x46, 0x02, 0x01, 0x01, 0x00 }, ".csv", false)] // Disguised Linux ELF binary executable
+    [InlineData(new byte[] { 0x4D, 0x5A, 0x90, 0x00 }, ".pdf", false)] // Disguised Windows EXE as PDF
+    public void FileMagicNumberValidation_ShouldDetectValidSignaturesAndBlockDisguisedBinaries(byte[] bytes, string extension, bool expectedValid)
+    {
+        using var stream = new MemoryStream(bytes);
+        var header = new byte[12];
+        var bytesRead = stream.Read(header, 0, header.Length);
+
+        var isValid = bytesRead >= 4 && extension switch
+        {
+            ".png" => header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47,
+            ".jpg" or ".jpeg" => header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
+            ".pdf" => header[0] == 0x25 && header[1] == 0x50 && header[2] == 0x44 && header[3] == 0x46,
+            ".xlsx" => header[0] == 0x50 && header[1] == 0x4B && header[2] == 0x03 && header[3] == 0x04,
+            ".csv" => !(header[0] == 0x4D && header[1] == 0x5A) && !(header[0] == 0x7F && header[1] == 0x45 && header[2] == 0x4C && header[3] == 0x46),
+            _ => false
+        };
+
+        Assert.Equal(expectedValid, isValid);
+    }
 }

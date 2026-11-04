@@ -7,7 +7,7 @@ namespace Inventory.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Authorize]
+[Authorize(Roles = "SuperAdmin,Admin")]
 public class ReportsController : BaseApiController
 {
     private readonly IReportExportService _reportService;

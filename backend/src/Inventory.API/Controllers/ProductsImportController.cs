@@ -64,6 +64,11 @@ public class ProductsImportController : BaseApiController
         }
 
         using var stream = file.OpenReadStream();
+        if (!IsValidFileSignature(stream, extension))
+        {
+            return BadRequest(new { detail = "La firma binaria del archivo no corresponde con un formato Excel o CSV válido y seguro." });
+        }
+
         var rows = await _importService.ParseExcelAsync(stream, cancellationToken);
         return Ok(rows);
     }
@@ -111,6 +116,11 @@ public class ProductsImportController : BaseApiController
         try
         {
             using var stream = file.OpenReadStream();
+            if (!IsValidFileSignature(stream, extension))
+            {
+                return BadRequest(new { detail = "La firma binaria del archivo no corresponde con una imagen o documento PDF válido y seguro." });
+            }
+
             var rows = await _importService.ParseImageWithGeminiAsync(stream, contentType, cancellationToken);
             return Ok(rows);
         }
@@ -167,5 +177,38 @@ public class ProductsImportController : BaseApiController
             return BadRequest(result);
         }
         return Ok(result);
+    }
+
+    private static bool IsValidFileSignature(Stream stream, string extension)
+    {
+        if (stream.CanSeek)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+        }
+
+        var header = new byte[12];
+        var bytesRead = stream.Read(header, 0, header.Length);
+
+        if (stream.CanSeek)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+        }
+
+        if (bytesRead < 4) return false;
+
+        return extension switch
+        {
+            ".png" => header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47,
+            ".jpg" or ".jpeg" => header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
+            ".pdf" => header[0] == 0x25 && header[1] == 0x50 && header[2] == 0x44 && header[3] == 0x46,
+            ".webp" => bytesRead >= 12 &&
+                       header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 && // RIFF
+                       header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50, // WEBP
+            ".xlsx" => header[0] == 0x50 && header[1] == 0x4B && header[2] == 0x03 && header[3] == 0x04, // PK..
+            ".xls" => header[0] == 0xD0 && header[1] == 0xCF && header[2] == 0x11 && header[3] == 0xE0,
+            ".csv" => !(header[0] == 0x4D && header[1] == 0x5A) && // Not Windows MZ binary
+                      !(header[0] == 0x7F && header[1] == 0x45 && header[2] == 0x4C && header[3] == 0x46), // Not Linux ELF binary
+            _ => false
+        };
     }
 }
