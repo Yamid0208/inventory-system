@@ -136,7 +136,7 @@ test.describe('E2E Spanish Localization and Mobile Responsiveness Suite', () => 
     await page.goto('/inventory');
     await page.waitForTimeout(1000);
 
-    const openAdjustBtn = page.locator('button:has-text("Ajuste Manual")').first();
+    const openAdjustBtn = page.locator('button:has-text("Cargue manual"), button:has-text("Ajuste Manual")').first();
     await openAdjustBtn.click();
     await page.waitForTimeout(500);
 

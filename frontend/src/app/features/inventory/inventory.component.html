@@ -7,7 +7,7 @@
   </div>
 
   <!-- Header & Botones de Acción -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-4">
     <div>
       <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Auditoría y Trazabilidad Kardex</h1>
       <p class="text-xs text-slate-500 mt-1">
@@ -15,10 +15,10 @@
       </p>
     </div>
 
-    <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+    <div class="flex items-center gap-2 sm:gap-2.5 flex-nowrap shrink-0 overflow-x-auto pb-1 xl:pb-0">
       <!-- Botón Export CSV -->
       <button type="button" (click)="exportCsv()" [disabled]="exporting()"
-        class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer select-none disabled:opacity-50">
+        class="inline-flex items-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer select-none disabled:opacity-50 shrink-0">
         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -28,43 +28,38 @@
 
       <!-- Botón + Devolución -->
       <button type="button" (click)="isReturnModalOpen.set(true)"
-        class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold shadow-md shadow-amber-500/20 transition-all cursor-pointer select-none">
+        class="inline-flex items-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold shadow-md shadow-amber-500/20 transition-all cursor-pointer select-none shrink-0">
         <span class="text-sm">🔄</span>
         <span>Devolución</span>
       </button>
 
       <!-- Botón + Carga Masiva (Excel / IA) -->
       <button type="button" (click)="openBulkImportModal()"
-        class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-xs transition-all cursor-pointer select-none">
+        class="inline-flex items-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-xs transition-all cursor-pointer select-none shrink-0">
         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
         </svg>
         <span>Carga Masiva</span>
       </button>
 
-      <!-- Botón + Ajuste Manual -->
+      <!-- Botón + Cargue manual -->
       <button type="button" (click)="openAdjustmentModal()"
-        class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer select-none">
+        class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer select-none shrink-0">
         <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
         </svg>
-        <span>Ajuste Manual</span>
+        <span>Cargue manual</span>
       </button>
     </div>
   </div>
 
   <!-- Barra Superior Estándar con Búsqueda Omni-Campo y Exportar CSV -->
-  <app-table-toolbar
-    searchPlaceholder="Buscar en Kardex..."
-    [searchValue]="tableState.searchQuery()"
-    [totalCount]="tableState.totalCount()"
-    [filteredCount]="tableState.filteredCount()"
-    [isFiltered]="tableState.isFiltered()"
-    [showExportCsv]="true"
-    [exportDisabled]="tableState.processedItems().length === 0"
-    (searchChange)="tableState.setSearch($event)"
-    (exportCsv)="exportKardexCsv()"
-  >
+  <app-table-toolbar searchPlaceholder="Buscar en Kardex..." [searchValue]="tableState.searchQuery()"
+    [totalCount]="tableState.totalCount()" [filteredCount]="tableState.filteredCount()"
+    [isFiltered]="tableState.isFiltered()" [showExportCsv]="true"
+    [exportDisabled]="tableState.processedItems().length === 0" (searchChange)="tableState.setSearch($event)"
+    (exportCsv)="exportKardexCsv()">
     <div class="flex flex-wrap items-center gap-2">
       <!-- Píldoras de Período -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
@@ -111,19 +106,15 @@
 
       <!-- Type Select Dropdown -->
       <div class="w-48">
-        <app-autocomplete
-          [value]="selectedType()"
-          (valueChange)="onTypeSelected($event)"
-          [options]="movementTypeOptions"
-          placeholder="Todos los Tipos"
-        ></app-autocomplete>
+        <app-autocomplete [value]="selectedType()" (valueChange)="onTypeSelected($event)"
+          [options]="movementTypeOptions" placeholder="Todos los Tipos"></app-autocomplete>
       </div>
     </div>
   </app-table-toolbar>
 
   <!-- Loading State con Esqueleto Visual -->
   @if (loading()) {
-    <app-skeleton type="table" [rows]="8" [columns]="6"></app-skeleton>
+  <app-skeleton type="table" [rows]="8" [columns]="6"></app-skeleton>
   }
 
   <!-- Data Table Card -->
@@ -154,22 +145,34 @@
           <tr
             class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
             <th class="py-3.5 pl-6 pr-4">
-              <app-sortable-header key="movementNumber" label="ID Movimiento" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              <app-sortable-header key="movementNumber" label="ID Movimiento" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
             </th>
             <th class="py-3.5 px-4">
-              <app-sortable-header key="createdAt" label="Fecha y Hora" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              <app-sortable-header key="createdAt" label="Fecha y Hora" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
             </th>
             <th class="py-3.5 px-4">
-              <app-sortable-header key="productName" label="SKU / Producto" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              <app-sortable-header key="productName" label="SKU / Producto" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
             </th>
             <th class="py-3.5 px-4">
-              <app-sortable-header key="movementType" label="Tipo" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              <app-sortable-header key="movementType" label="Tipo" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
             </th>
             <th class="py-3.5 px-4 text-right">
-              <app-sortable-header key="quantityDelta" label="Variación Stock" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              <app-sortable-header key="quantityDelta" label="Variación Stock" align="right"
+                [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
             </th>
             <th class="py-3.5 pr-6 pl-4">
-              <app-sortable-header key="userName" label="Responsable" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              <app-sortable-header key="userName" label="Responsable" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
             </th>
           </tr>
         </thead>
@@ -262,18 +265,19 @@
   }
 </div>
 
-  <!-- Modal de Ajuste Manual -->
-  @if (isAdjustmentModalOpen()) {
-  <app-stock-adjustment-modal [products]="products()" [loading]="modalLoading" [errorMessage]="modalError"
-    (save)="onSaveAdjustment($event)" (cancel)="isAdjustmentModalOpen.set(false)"></app-stock-adjustment-modal>
-  }
+<!-- Modal de Ajuste Manual -->
+@if (isAdjustmentModalOpen()) {
+<app-stock-adjustment-modal [products]="products()" [loading]="modalLoading" [errorMessage]="modalError"
+  (save)="onSaveAdjustment($event)" (cancel)="isAdjustmentModalOpen.set(false)"></app-stock-adjustment-modal>
+}
 
-  <!-- Modal de Devolución -->
-  @if (isReturnModalOpen()) {
-  <app-return-modal (closed)="isReturnModalOpen.set(false)" (saved)="onReturnSaved()"></app-return-modal>
-  }
+<!-- Modal de Devolución -->
+@if (isReturnModalOpen()) {
+<app-return-modal (closed)="isReturnModalOpen.set(false)" (saved)="onReturnSaved()"></app-return-modal>
+}
 
-  <!-- Modal de Carga Masiva (Excel / OCR IA) -->
-  @if (isBulkImportOpen()) {
-  <app-bulk-import-modal (closed)="isBulkImportOpen.set(false)" (imported)="onBulkImportSuccess()"></app-bulk-import-modal>
-  }
+<!-- Modal de Carga Masiva (Excel / OCR IA) -->
+@if (isBulkImportOpen()) {
+<app-bulk-import-modal (closed)="isBulkImportOpen.set(false)"
+  (imported)="onBulkImportSuccess()"></app-bulk-import-modal>
+}
