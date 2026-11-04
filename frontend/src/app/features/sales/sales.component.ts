@@ -206,24 +206,35 @@ export class SalesComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    if (!this.cashRegisterService.activeSession()) {
-      this.confirmationService.confirm({
-        title: 'Apertura de Caja Requerida',
-        message: 'Para registrar ventas en el POS, debes tener una sesión de caja abierta activa. ¿Deseas ir al módulo de caja para abrirla ahora?',
-        confirmText: 'Ir a Abrir Caja',
-        cancelText: 'Cancelar',
-        variant: 'warning'
-      }).then(confirmed => {
-        if (confirmed) {
-          this.router.navigate(['/cash-register']);
+    this.cashRegisterService.getCurrentSession().subscribe({
+      next: (session) => {
+        if (!session) {
+          this.promptOpenCashRegister();
+          return;
         }
-      });
-      return;
-    }
 
-    this.modalError.set(null);
-    this.loadProducts(); // Asegurar existencias más recientes
-    this.isCreateModalOpen.set(true);
+        this.modalError.set(null);
+        this.loadProducts(); // Asegurar existencias más recientes
+        this.isCreateModalOpen.set(true);
+      },
+      error: () => {
+        this.promptOpenCashRegister();
+      }
+    });
+  }
+
+  private promptOpenCashRegister(): void {
+    this.confirmationService.confirm({
+      title: 'Apertura de Caja Requerida',
+      message: 'Para registrar ventas en el POS, debes tener una sesión de caja abierta activa. ¿Deseas ir al módulo de caja para abrirla ahora?',
+      confirmText: 'Ir a Abrir Caja',
+      cancelText: 'Cancelar',
+      variant: 'warning'
+    }).then(confirmed => {
+      if (confirmed) {
+        this.router.navigate(['/cash-register']);
+      }
+    });
   }
 
   closeCreateModal(): void {

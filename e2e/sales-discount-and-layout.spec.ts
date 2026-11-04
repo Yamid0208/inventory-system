@@ -228,6 +228,15 @@ test.describe('E2E POS Sales Modal - Layout Ergonómico y Sistema de Descuentos'
     // Cerrar modal
     await cancelBtn.click();
     await expect(modal).not.toBeVisible({ timeout: 5000 });
+
+    // 8. Recargar la página (F5) estando en /sales?new=true
+    await page.goto('/sales?new=true');
+    await page.waitForLoadState('networkidle');
+
+    // Debe abrir directamente el modal de venta sin desplegar la alerta de "Apertura de Caja Requerida"
+    const alertWarning = page.locator('text=Apertura de Caja Requerida');
+    await expect(alertWarning).not.toBeVisible();
+    await expect(modal).toBeVisible({ timeout: 5000 });
   });
 
 });
