@@ -13,7 +13,7 @@ import { AlertService } from '../../core/services/alert.service';
 import { Product, ProductFilterParams, CreateProductRequest, UpdateProductRequest } from '../../core/models/product.model';
 import { Category } from '../../core/models/category.model';
 import { Supplier } from '../../core/models/supplier.model';
-import { ProductModalComponent } from './components/product-modal/product-modal.component';
+import { ProductModalComponent, ProductModalSaveEvent } from './components/product-modal/product-modal.component';
 import { ProductDetailModalComponent } from './components/product-detail-modal/product-detail-modal.component';
 import { BatchModalComponent } from './components/batch-modal/batch-modal.component';
 import { BulkImportModalComponent } from './components/bulk-import-modal/bulk-import-modal.component';
@@ -273,11 +273,12 @@ export class ProductsComponent implements OnInit {
     this.isDetailModalOpen.set(true);
   }
 
-  onSaveProduct(request: CreateProductRequest | UpdateProductRequest): void {
+  onSaveProduct(event: ProductModalSaveEvent): void {
     this.modalLoading.set(true);
     this.modalError.set(null);
 
     const current = this.selectedProduct();
+    const { request, imageFile, removeImage } = event;
     let action$;
 
     if (current) {
@@ -291,12 +292,26 @@ export class ProductsComponent implements OnInit {
     }
 
     action$.subscribe({
-      next: () => {
-        this.modalLoading.set(false);
-        this.isModalOpen.set(false);
-        this.loadFilterLookups();
-        this.loadProducts();
-        this.alertService?.checkUnreadStatus();
+      next: (savedProduct) => {
+        const productId = savedProduct.id;
+
+        // Gestión encadenada de imagen si aplica
+        if (imageFile) {
+          this.productService.uploadImage(productId, imageFile).subscribe({
+            next: () => this.finalizeProductSave(),
+            error: () => {
+              // Aunque falle la imagen, el producto se creó; se finaliza y se notifica
+              this.finalizeProductSave();
+            }
+          });
+        } else if (removeImage && current?.imageUrl) {
+          this.productService.deleteImage(productId).subscribe({
+            next: () => this.finalizeProductSave(),
+            error: () => this.finalizeProductSave()
+          });
+        } else {
+          this.finalizeProductSave();
+        }
       },
       error: (err) => {
         this.modalLoading.set(false);
@@ -310,6 +325,14 @@ export class ProductsComponent implements OnInit {
         this.modalError.set(detail);
       }
     });
+  }
+
+  private finalizeProductSave(): void {
+    this.modalLoading.set(false);
+    this.isModalOpen.set(false);
+    this.loadFilterLookups();
+    this.loadProducts();
+    this.alertService?.checkUnreadStatus();
   }
 
   promptDelete(product: Product): void {

@@ -72,4 +72,18 @@ public class ProductTests
         product.UpdateStock(1); // Stock = 6 (superior al mínimo)
         Assert.False(product.IsLowStock());
     }
+
+    [Fact]
+    public void UpdateImageUrl_SetsAndClearsImageUrlCorrectly()
+    {
+        var product = new Product("SKU-IMG-001", "Cámara Web", 1, 1, 50m, 80m);
+        Assert.Null(product.ImageUrl);
+
+        product.UpdateImageUrl("/uploads/webcam-test.webp");
+        Assert.Equal("/uploads/webcam-test.webp", product.ImageUrl);
+        Assert.NotNull(product.UpdatedAt);
+
+        product.UpdateImageUrl("   ");
+        Assert.Null(product.ImageUrl);
+    }
 }

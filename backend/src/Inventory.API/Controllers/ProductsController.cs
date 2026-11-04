@@ -148,4 +148,14 @@ public class ProductsController : BaseApiController
 
         return Ok(new { imageUrl = relativeUrl });
     }
+
+    [HttpDelete("{id:int}/image")]
+    [Authorize(Roles = "SuperAdmin,Admin,Warehouse")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteImage(int id, CancellationToken cancellationToken)
+    {
+        await _productService.DeleteProductImageAsync(id, cancellationToken);
+        return NoContent();
+    }
 }

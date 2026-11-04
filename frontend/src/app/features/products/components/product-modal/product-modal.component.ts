@@ -7,7 +7,14 @@ import { Supplier } from '../../../../core/models/supplier.model';
 import { Warehouse } from '../../../../core/models/warehouse.model';
 import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../../../shared/components/app-autocomplete/app-autocomplete.component';
+import { AppImageUploadComponent } from '../../../../shared/components/app-image-upload/app-image-upload.component';
 import { ThousandsSeparatorDirective } from '../../../../shared/directives/thousands-separator.directive';
+
+export interface ProductModalSaveEvent {
+  request: CreateProductRequest | UpdateProductRequest;
+  imageFile?: File | null;
+  removeImage?: boolean;
+}
 
 @Component({
   selector: 'app-product-modal',
@@ -17,6 +24,7 @@ import { ThousandsSeparatorDirective } from '../../../../shared/directives/thous
     ReactiveFormsModule,
     AppButtonComponent,
     AppAutocompleteComponent,
+    AppImageUploadComponent,
     ThousandsSeparatorDirective
   ],
   templateUrl: './product-modal.component.html'
@@ -30,11 +38,13 @@ export class ProductModalComponent implements OnInit {
   @Input() loading = signal<boolean>(false);
   @Input() errorMessage = signal<string | null>(null);
 
-  @Output() save = new EventEmitter<any>();
+  @Output() save = new EventEmitter<ProductModalSaveEvent>();
   @Output() cancel = new EventEmitter<void>();
 
   form!: FormGroup;
   isNewCategory = signal<boolean>(false);
+  selectedImageFile = signal<File | null>(null);
+  shouldRemoveImage = signal<boolean>(false);
 
   constructor(private fb: FormBuilder) {}
 
@@ -111,6 +121,18 @@ export class ProductModalComponent implements OnInit {
     return ((sale - purchase) / sale) * 100;
   }
 
+  onImageChange(file: File | null): void {
+    this.selectedImageFile.set(file);
+    if (file) {
+      this.shouldRemoveImage.set(false);
+    }
+  }
+
+  onRemoveImage(): void {
+    this.selectedImageFile.set(null);
+    this.shouldRemoveImage.set(true);
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -134,7 +156,11 @@ export class ProductModalComponent implements OnInit {
         minimumStock: Number(val.minimumStock),
         rowVersion: this.product.rowVersion
       };
-      this.save.emit(updateReq);
+      this.save.emit({
+        request: updateReq,
+        imageFile: this.selectedImageFile(),
+        removeImage: this.shouldRemoveImage()
+      });
     } else {
       const createReq: CreateProductRequest = {
         sku: val.sku.trim().toUpperCase(),
@@ -148,7 +174,11 @@ export class ProductModalComponent implements OnInit {
         minimumStock: Number(val.minimumStock),
         warehouseId: val.warehouseId ? Number(val.warehouseId) : (this.defaultWarehouseId ?? undefined)
       };
-      this.save.emit(createReq);
+      this.save.emit({
+        request: createReq,
+        imageFile: this.selectedImageFile(),
+        removeImage: false
+      });
     }
   }
 }

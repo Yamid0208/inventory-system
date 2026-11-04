@@ -66,9 +66,9 @@ describe('ProductModalComponent (Unit Tests)', () => {
     component.onSubmit();
 
     expect(emittedPayload).not.toBeNull();
-    expect(emittedPayload.sku).toBe('SKU-ALG-100');
-    expect(emittedPayload.name).toBe('Audífonos Bluetooth');
-    expect(emittedPayload.warehouseId).toBe(3);
+    expect(emittedPayload.request.sku).toBe('SKU-ALG-100');
+    expect(emittedPayload.request.name).toBe('Audífonos Bluetooth');
+    expect(emittedPayload.request.warehouseId).toBe(3);
   });
 
   it('debe emitir updateReq al editar un producto existente', () => {
@@ -109,8 +109,8 @@ describe('ProductModalComponent (Unit Tests)', () => {
     component.onSubmit();
 
     expect(emittedPayload).not.toBeNull();
-    expect(emittedPayload.name).toBe('Producto Actualizado');
-    expect(emittedPayload.rowVersion).toBe('QkNERUY=');
+    expect(emittedPayload.request.name).toBe('Producto Actualizado');
+    expect(emittedPayload.request.rowVersion).toBe('QkNERUY=');
   });
 
   it('debe permitir alternar a nueva categoría y emitir newCategoryName', () => {
@@ -139,7 +139,20 @@ describe('ProductModalComponent (Unit Tests)', () => {
     component.onSubmit();
 
     expect(emittedPayload).not.toBeNull();
-    expect(emittedPayload.newCategoryName).toBe('Maquinaria Pesada');
-    expect(emittedPayload.categoryId).toBeNull();
+    expect(emittedPayload.request.newCategoryName).toBe('Maquinaria Pesada');
+    expect(emittedPayload.request.categoryId).toBeNull();
+  });
+
+  it('debe registrar y emitir archivo de imagen seleccionado y flag de remover imagen', () => {
+    component.ngOnInit();
+    const testFile = new File(['image bytes'], 'preview.png', { type: 'image/png' });
+
+    component.onImageChange(testFile);
+    expect(component.selectedImageFile()).toBe(testFile);
+    expect(component.shouldRemoveImage()).toBe(false);
+
+    component.onRemoveImage();
+    expect(component.selectedImageFile()).toBeNull();
+    expect(component.shouldRemoveImage()).toBe(true);
   });
 });
