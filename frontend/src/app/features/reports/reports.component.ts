@@ -259,8 +259,14 @@ export class ReportsComponent implements OnInit, OnDestroy {
       areaPath = `${linePath} L ${lastX} ${baseY} L ${firstX} ${baseY} Z`;
     }
 
+    const isSingleDay = points.length === 1;
+
     return {
       hasData: true,
+      isSingleDay,
+      singleDayLabel: isSingleDay ? points[0].label : '',
+      singleDayAmount: isSingleDay ? points[0].amount : 0,
+      singleDayCount: isSingleDay ? points[0].count : 0,
       linePath,
       areaPath,
       segments,
@@ -1117,6 +1123,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
       });
       this.reportService.getSalesByCategory(start, end, wid).subscribe({
         next: (cats) => this.salesCategories.set(cats),
+        error: () => {}
+      });
+      this.reportService.getSalesHourlyActivity(start, end, wid).subscribe({
+        next: (hourly) => this.hourlyActivity.set(hourly),
         error: () => {}
       });
     }
