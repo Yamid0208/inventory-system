@@ -2,24 +2,16 @@ import { test, expect } from '@playwright/test';
 
 test.describe('E2E Bulk Import with Gemini Multimodal: Photos and PDF Support', () => {
 
-  const loginAsAdmin = async (page: any) => {
-    await page.goto('/login');
-    if (page.url().includes('/dashboard')) return;
-
-    const emailInput = page.locator('input[type="email"], input[formcontrolname="email"], #email').first();
-    if (await emailInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-      const passwordInput = page.locator('input[type="password"], input[formcontrolname="password"], #password').first();
-      const submitBtn = page.locator('button[type="submit"]').first();
-
-      await emailInput.fill('admin@sgi.local');
-      await passwordInput.fill('Admin123*');
-      await submitBtn.click();
-      await page.waitForURL('**/dashboard', { timeout: 15000 });
-    }
-  };
-
   test.beforeEach(async ({ page }) => {
-    await loginAsAdmin(page);
+    await page.goto('/login');
+    const emailInput = page.locator('input[type="email"], input[formcontrolname="email"], #email').first();
+    const passwordInput = page.locator('input[type="password"], input[formcontrolname="password"], #password').first();
+    const submitBtn = page.locator('button[type="submit"]').first();
+
+    await emailInput.fill('admin@sgi.local');
+    await passwordInput.fill('Admin123*');
+    await submitBtn.click();
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
   });
 
   test('TC-IMPORT-01: Verificación de soporte para PDF y Fotos en Carga Masiva desde Productos', async ({ page }) => {
@@ -115,8 +107,8 @@ test.describe('E2E Bulk Import with Gemini Multimodal: Photos and PDF Support', 
     await expect(page.getByText('Todos (2)')).toBeVisible();
     await expect(page.getByText('Nuevos Válidos (2)')).toBeVisible();
 
-    // 11. Cerrar el modal
-    const closeBtn = page.locator('button[type="button"]').filter({ has: page.locator('svg path[d*="M6 18L18 6"]') }).first();
+    // 11. Cerrar el modal mediante el botón cancelar o botón de cerrar del modal
+    const closeBtn = page.locator('app-bulk-import-modal button[aria-label="Cerrar modal"]').first();
     await closeBtn.click();
     await expect(page.getByText('Carga Masiva de Inventario')).not.toBeVisible();
   });
@@ -141,7 +133,7 @@ test.describe('E2E Bulk Import with Gemini Multimodal: Photos and PDF Support', 
     await expect(page.getByText(/\.pdf/i).first()).toBeVisible();
 
     // 5. Cerrar modal
-    const closeBtn = page.locator('button[type="button"]').filter({ has: page.locator('svg path[d*="M6 18L18 6"]') }).first();
+    const closeBtn = page.locator('app-bulk-import-modal button[aria-label="Cerrar modal"]').first();
     await closeBtn.click();
     await expect(page.getByText('Carga Masiva de Inventario')).not.toBeVisible();
   });

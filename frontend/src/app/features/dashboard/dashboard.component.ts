@@ -38,7 +38,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.loadDashboardData(warehouseId);
         });
       }, { allowSignalWrites: true });
-    } catch {}
+    } catch { }
   }
 
   ngOnInit(): void {

@@ -26,7 +26,7 @@ export class BranchContextService implements OnDestroy {
           return savedId;
         }
       }
-    } catch {}
+    } catch { }
     return null;
   }
 
@@ -72,7 +72,7 @@ export class BranchContextService implements OnDestroy {
           this.selectedWarehouseId.set(null);
         }
       }, { allowSignalWrites: true });
-    } catch {}
+    } catch { }
 
     // Escuchar mutaciones globales de sedes para refrescar en tiempo real
     this.changeSub = this.warehouseService.warehousesChanged$.subscribe((changed) => {
