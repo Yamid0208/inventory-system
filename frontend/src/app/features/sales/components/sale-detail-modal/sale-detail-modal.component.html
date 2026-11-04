@@ -124,9 +124,15 @@
       <div class="flex justify-end">
         <div class="w-full sm:w-64 space-y-1.5 text-xs font-mono">
           <div class="flex justify-between text-slate-500">
-            <span>Subtotal Gravable:</span>
+            <span>Subtotal Bruto:</span>
             <span>{{ sale.subtotal | currencyFormat }}</span>
           </div>
+          @if (sale.discount && sale.discount > 0) {
+          <div class="flex justify-between text-amber-600 font-semibold">
+            <span>Descuento Comercial:</span>
+            <span>-{{ sale.discount | currencyFormat }}</span>
+          </div>
+          }
           <div class="flex justify-between text-slate-500">
             <span>IVA Discriminado:</span>
             <span>{{ sale.tax | currencyFormat }}</span>

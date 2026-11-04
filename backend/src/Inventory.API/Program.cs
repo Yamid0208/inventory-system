@@ -42,7 +42,7 @@ builder.Services.AddRateLimiter(options =>
 
         return RateLimitPartition.GetFixedWindowLimiter(clientIp, _ => new FixedWindowRateLimiterOptions
         {
-            PermitLimit = 15,
+            PermitLimit = 120,
             Window = TimeSpan.FromMinutes(1),
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
             QueueLimit = 0
@@ -332,6 +332,11 @@ using (var scope = app.Services.CreateScope())
                 else if (db.Database.IsSqlServer())
                 {
                     await db.Database.ExecuteSqlRawAsync(@"
+                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Sales]') AND name = 'Discount')
+                        BEGIN
+                            ALTER TABLE [dbo].[Sales] ADD [Discount] decimal(18,2) NOT NULL DEFAULT 0;
+                        END
+
                         IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[SalePayments]') AND type in (N'U'))
                         BEGIN
                             CREATE TABLE [dbo].[SalePayments] (

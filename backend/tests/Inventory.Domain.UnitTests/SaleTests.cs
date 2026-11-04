@@ -94,6 +94,49 @@ public class SaleTests
     }
 
     [Fact]
+    public void Sale_ApplyDiscount_CalculatesNetTotalCorrectly()
+    {
+        var sale = new Sale(
+            saleNumber: "VEN-20261104-001",
+            customerName: "Carlos Alarcón",
+            userId: 1,
+            saleDate: DateTimeOffset.UtcNow,
+            paymentMethod: PaymentMethod.Cash
+        );
+
+        // Subtotal: 100.000, Tax (19%): 19.000, Total sin descuento: 119.000
+        var item = new SaleItem(1, 1, 100000m, 0.19m);
+        sale.AddItem(item);
+
+        Assert.Equal(100000m, sale.Subtotal);
+        Assert.Equal(19000m, sale.Tax);
+        Assert.Equal(119000m, sale.Total);
+
+        // Aplicar descuento comercial de $10.000
+        sale.ApplyDiscount(10000m);
+
+        Assert.Equal(10000m, sale.Discount);
+        Assert.Equal(100000m, sale.Subtotal);
+        Assert.Equal(19000m, sale.Tax);
+        // Base gravable: 90.000 + 19.000 IVA = 109.000 Total
+        Assert.Equal(109000m, sale.Total);
+    }
+
+    [Fact]
+    public void Sale_ApplyDiscount_NegativeDiscount_ThrowsException()
+    {
+        var sale = new Sale(
+            saleNumber: "VEN-20261104-002",
+            customerName: "Laura Gómez",
+            userId: 1,
+            saleDate: DateTimeOffset.UtcNow,
+            paymentMethod: PaymentMethod.Cash
+        );
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => sale.ApplyDiscount(-5000m));
+    }
+
+    [Fact]
     public void SalePayment_InvalidAmount_ThrowsException()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new SalePayment(PaymentMethod.Cash, 0m));

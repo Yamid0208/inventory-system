@@ -32,6 +32,7 @@ public record SaleDto(
     string PaymentMethod,
     string InvoiceType,
     decimal Subtotal,
+    decimal Discount,
     decimal Tax,
     decimal Total,
     string? Notes,

@@ -67,6 +67,15 @@ public class CreateSaleValidator : AbstractValidator<CreateSaleRequest>
                 .WithMessage("El monto asignado a cada método de pago debe ser mayor a cero.");
         }).When(x => x.Payments != null && x.Payments.Count > 0);
 
+        RuleFor(x => x.Discount)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("El descuento no puede ser negativo.");
+
+        RuleFor(x => x)
+            .Must(x => x.Discount <= x.Items.Sum(i => i.Quantity * i.UnitPrice))
+            .When(x => x.Items != null && x.Items.Count > 0 && x.Discount > 0)
+            .WithMessage("El descuento no puede superar el subtotal bruto de la venta.");
+
         RuleFor(x => x.Notes)
             .MaximumLength(500)
             .WithMessage("Las observaciones no pueden superar los 500 caracteres.");

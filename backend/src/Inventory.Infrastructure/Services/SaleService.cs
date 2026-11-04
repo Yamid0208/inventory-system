@@ -190,7 +190,7 @@ public class SaleService : ISaleService
                     var saleItem = new SaleItem(product.Id, itemReq.Quantity, itemReq.UnitPrice, itemReq.TaxRate);
                     sale.AddItem(saleItem);
 
-                    var movementNumber = $"MOV-{DateTimeOffset.UtcNow:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
+                    var movementNumber = $"MOV-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
                     var movement = new InventoryMovement(
                         movementNumber,
                         product.Id,
@@ -206,6 +206,12 @@ public class SaleService : ISaleService
                     );
 
                     _context.InventoryMovements.Add(movement);
+                }
+
+                // 2.1 Aplicación de Descuento Comercial
+                if (request.Discount > 0m)
+                {
+                    sale.ApplyDiscount(request.Discount);
                 }
 
                 // 3. Procesamiento de Medios de Pago (Pagos individuales o divididos)
@@ -296,7 +302,7 @@ public class SaleService : ISaleService
 
                     product.UpdateStock(item.Quantity);
 
-                    var movementNumber = $"MOV-{DateTimeOffset.UtcNow:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
+                    var movementNumber = $"MOV-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
                     var movement = new InventoryMovement(
                         movementNumber,
                         product.Id,
@@ -362,6 +368,7 @@ public class SaleService : ISaleService
             s.PaymentMethod.ToString(),
             s.InvoiceType.ToString(),
             s.Subtotal,
+            s.Discount,
             s.Tax,
             s.Total,
             s.Notes,

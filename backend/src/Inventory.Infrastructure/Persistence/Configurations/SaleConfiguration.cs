@@ -43,6 +43,11 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .HasPrecision(18, 2)
             .IsRequired();
 
+        builder.Property(s => s.Discount)
+            .HasPrecision(18, 2)
+            .HasDefaultValue(0m)
+            .IsRequired();
+
         builder.Property(s => s.Tax)
             .HasPrecision(18, 2)
             .IsRequired();

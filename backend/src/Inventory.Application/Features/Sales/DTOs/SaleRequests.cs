@@ -37,5 +37,6 @@ public record CreateSaleRequest(
     string? Notes,
     List<CreateSaleItemRequest> Items,
     List<SalePaymentRequest>? Payments = null,
-    int? WarehouseId = null
+    int? WarehouseId = null,
+    decimal Discount = 0m
 );

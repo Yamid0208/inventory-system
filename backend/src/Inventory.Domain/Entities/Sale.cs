@@ -19,6 +19,7 @@ public class Sale : BaseEntity
     public InvoiceType InvoiceType { get; private set; }
 
     public decimal Subtotal { get; private set; }
+    public decimal Discount { get; private set; }
     public decimal Tax { get; private set; }
     public decimal Total { get; private set; }
     public string? Notes { get; private set; }
@@ -72,6 +73,7 @@ public class Sale : BaseEntity
         Status = initialStatus;
         Notes = notes?.Trim();
         Subtotal = 0m;
+        Discount = 0m;
         Tax = 0m;
         Total = 0m;
         WarehouseId = warehouseId;
@@ -104,11 +106,23 @@ public class Sale : BaseEntity
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 
+    public void ApplyDiscount(decimal discount)
+    {
+        if (discount < 0m)
+        {
+            throw new ArgumentOutOfRangeException(nameof(discount), "El descuento no puede ser negativo.");
+        }
+
+        Discount = decimal.Round(discount, 2, MidpointRounding.AwayFromZero);
+        RecalculateTotals();
+    }
+
     public void RecalculateTotals()
     {
         Subtotal = decimal.Round(_items.Sum(i => i.Subtotal), 2, MidpointRounding.AwayFromZero);
         Tax = decimal.Round(_items.Sum(i => i.Tax), 2, MidpointRounding.AwayFromZero);
-        Total = decimal.Round(_items.Sum(i => i.Total), 2, MidpointRounding.AwayFromZero);
+        var taxableBase = Math.Max(0m, Subtotal - Discount);
+        Total = decimal.Round(taxableBase + Tax, 2, MidpointRounding.AwayFromZero);
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 
