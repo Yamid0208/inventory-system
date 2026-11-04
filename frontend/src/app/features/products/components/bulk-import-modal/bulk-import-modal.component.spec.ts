@@ -183,4 +183,54 @@ describe('BulkImportModalComponent (Unit Tests)', () => {
     expect(component.resultSummary()).toEqual(mockResult);
     expect(emittedResult).toEqual(mockResult);
   });
+
+  it('debe detectar archivos PDF correctamente y procesarlos con previewImageImport', () => {
+    component.setTab('image');
+
+    const pdfFile = new File(['%PDF-1.4 dummy content'], 'factura_proveedor.pdf', {
+      type: 'application/pdf'
+    });
+
+    const mockExtracted: ProductImportRow[] = [
+      {
+        rowNumber: 1,
+        sku: 'PDF-001',
+        name: 'Producto de Factura PDF',
+        categoryName: 'General',
+        purchasePrice: 100,
+        salePrice: 150,
+        initialStock: 20,
+        minimumStock: 5,
+        isValid: true,
+        isExisting: false,
+        validationErrors: []
+      }
+    ];
+
+    productServiceMock.previewImageImport.mockReturnValue(of(mockExtracted));
+
+    // Simular drop o selección de archivo PDF
+    const event = {
+      target: {
+        files: [pdfFile]
+      }
+    } as unknown as Event;
+
+    component.onFileInputChange(event);
+
+    expect(component.selectedFile()).toBe(pdfFile);
+    expect(component.isPdfFile()).toBe(true);
+    expect(component.previewImageUrl()).toBeNull();
+    expect(productServiceMock.previewImageImport).toHaveBeenCalledWith(pdfFile);
+    expect(component.step()).toBe('preview');
+    expect(component.rows().length).toBe(1);
+    expect(component.rows()[0].sku).toBe('PDF-001');
+  });
+
+  it('debe limpiar el estado de archivo PDF al reiniciar la carga', () => {
+    component.isPdfFile.set(true);
+    component.resetUpload();
+    expect(component.isPdfFile()).toBe(false);
+    expect(component.step()).toBe('upload');
+  });
 });

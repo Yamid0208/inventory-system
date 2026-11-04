@@ -34,6 +34,7 @@ export class BulkImportModalComponent {
   // Estado de archivo y análisis
   selectedFile = signal<File | null>(null);
   previewImageUrl = signal<string | null>(null);
+  isPdfFile = signal<boolean>(false);
   isDragging = signal<boolean>(false);
   isAnalyzing = signal<boolean>(false);
   isCommitting = signal<boolean>(false);
@@ -84,6 +85,7 @@ export class BulkImportModalComponent {
     this.parsingError.set(null);
     this.selectedFile.set(null);
     this.previewImageUrl.set(null);
+    this.isPdfFile.set(false);
   }
 
   downloadTemplate(): void {
@@ -139,10 +141,17 @@ export class BulkImportModalComponent {
     this.parsingError.set(null);
     this.selectedFile.set(file);
 
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    this.isPdfFile.set(isPdf);
+
     if (this.activeTab() === 'image') {
-      const reader = new FileReader();
-      reader.onload = (e) => this.previewImageUrl.set(e.target?.result as string);
-      reader.readAsDataURL(file);
+      if (isPdf) {
+        this.previewImageUrl.set(null);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => this.previewImageUrl.set(e.target?.result as string);
+        reader.readAsDataURL(file);
+      }
     } else {
       this.previewImageUrl.set(null);
     }
@@ -220,6 +229,7 @@ export class BulkImportModalComponent {
     this.rows.set([]);
     this.selectedFile.set(null);
     this.previewImageUrl.set(null);
+    this.isPdfFile.set(false);
     this.parsingError.set(null);
     this.resultSummary.set(null);
   }

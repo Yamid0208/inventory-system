@@ -14,11 +14,11 @@ public class ProductsImportController : BaseApiController
 {
     private readonly IBulkProductImportService _importService;
     private static readonly string[] AllowedExcelExtensions = [".xlsx", ".xls", ".csv"];
-    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] AllowedImageMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".pdf"];
+    private static readonly string[] AllowedImageMimeTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
     private const long MaxExcelSizeBytes = 10 * 1024 * 1024; // 10 MB
-    private const long MaxImageSizeBytes = 5 * 1024 * 1024;   // 5 MB
+    private const long MaxImageSizeBytes = 15 * 1024 * 1024; // 15 MB para imágenes y documentos PDF
 
     public ProductsImportController(IBulkProductImportService importService)
     {
@@ -69,9 +69,10 @@ public class ProductsImportController : BaseApiController
     }
 
     /// <summary>
-    /// Procesa una fotografía o escaneo de tabla de productos usando IA Multimodal (Google Gemini Vision).
+    /// Procesa una fotografía o documento PDF de productos usando IA Multimodal (Google Gemini Vision & Document Understanding).
     /// </summary>
     [HttpPost("preview-image")]
+    [HttpPost("preview-document")]
     [EnableRateLimiting("AiImportLimiter")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(List<ProductImportRowDto>), StatusCodes.Status200OK)]
@@ -82,29 +83,35 @@ public class ProductsImportController : BaseApiController
     {
         if (file == null || file.Length == 0)
         {
-            return BadRequest(new { detail = "Debe suministrar una imagen válida." });
+            return BadRequest(new { detail = "Debe suministrar un archivo de imagen o PDF válido." });
         }
 
         if (file.Length > MaxImageSizeBytes)
         {
-            return BadRequest(new { detail = $"La imagen supera el tamaño máximo permitido de {MaxImageSizeBytes / (1024 * 1024)} MB." });
+            return BadRequest(new { detail = $"El archivo supera el tamaño máximo permitido de {MaxImageSizeBytes / (1024 * 1024)} MB." });
         }
 
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!AllowedImageExtensions.Contains(extension))
         {
-            return BadRequest(new { detail = $"Formato de imagen no permitido. Solo se aceptan: {string.Join(", ", AllowedImageExtensions)}." });
+            return BadRequest(new { detail = $"Formato de archivo no permitido. Solo se aceptan: {string.Join(", ", AllowedImageExtensions)}." });
         }
 
-        if (!AllowedImageMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
+        var contentType = file.ContentType.ToLowerInvariant();
+        if (contentType == "application/octet-stream" && extension == ".pdf")
         {
-            return BadRequest(new { detail = "Tipo MIME de imagen no válido. Debe ser JPEG, PNG o WebP." });
+            contentType = "application/pdf";
+        }
+
+        if (!AllowedImageMimeTypes.Contains(contentType))
+        {
+            return BadRequest(new { detail = "Tipo MIME no válido. Debe ser JPEG, PNG, WebP o PDF (application/pdf)." });
         }
 
         try
         {
             using var stream = file.OpenReadStream();
-            var rows = await _importService.ParseImageWithGeminiAsync(stream, file.ContentType, cancellationToken);
+            var rows = await _importService.ParseImageWithGeminiAsync(stream, contentType, cancellationToken);
             return Ok(rows);
         }
         catch (InvalidOperationException ex)

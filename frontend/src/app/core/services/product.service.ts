@@ -100,6 +100,12 @@ export class ProductService {
     return this.http.post<ProductImportRow[]>(`${this.apiUrl}/import/preview-image`, formData);
   }
 
+  previewDocumentImport(file: File): Observable<ProductImportRow[]> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ProductImportRow[]>(`${this.apiUrl}/import/preview-image`, formData);
+  }
+
   commitBulkImport(request: BulkImportRequest): Observable<BulkImportResult> {
     return this.http.post<BulkImportResult>(`${this.apiUrl}/import/commit`, request);
   }
