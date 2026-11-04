@@ -530,126 +530,11 @@
       @if (salesGraphMode() === 'trend') {
       @let tc = trendChartData();
       @if (tc.hasData) {
-      @if (tc.isSingleDay) {
-      <!-- CASO A: CORTE DIARIO DE FACTURACIÓN (ALTA DENSIDAD UI/UX PRO MAX) -->
-      <div class="space-y-4">
-        <!-- Encabezado del Corte Diario -->
-        <div class="p-4 rounded-xl bg-gradient-to-r from-primary-50/70 via-indigo-50/40 to-slate-50 border border-primary-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-              📅
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold uppercase tracking-wider text-primary-700 bg-primary-100/80 px-2 py-0.5 rounded-md">Corte de Jornada</span>
-                <span class="text-xs text-slate-500 font-semibold">{{ tc.singleDayLabel }}</span>
-              </div>
-              <p class="text-sm font-semibold text-slate-800 mt-0.5">
-                Rendimiento consolidado del día seleccionado
-              </p>
-            </div>
-          </div>
-          <div class="sm:text-right">
-            <span class="text-xs text-slate-500 font-semibold block">Total Facturado</span>
-            <span class="text-xl sm:text-2xl font-black font-mono text-slate-900">{{ tc.singleDayAmount | currencyFormat }}</span>
-          </div>
-        </div>
-
-        <!-- 4 Tarjetas Operativas No Redundantes -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">
-            <span class="text-xs font-semibold text-slate-500 block">Venta Neta</span>
-            <span class="text-base sm:text-lg font-bold font-mono text-slate-900 block mt-0.5">{{ tc.singleDayAmount | currencyFormat }}</span>
-            <span class="text-[11px] text-slate-500">100% de la jornada</span>
-          </div>
-
-          <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">
-            <span class="text-xs font-semibold text-slate-500 block">Comprobantes</span>
-            <span class="text-base sm:text-lg font-bold font-mono text-primary-700 block mt-0.5">
-              {{ (tc.singleDayCount || (salesAnalytics()?.transactionCount ?? 0)) }} ops
-            </span>
-            <span class="text-[11px] text-slate-500">Tickets cerrados</span>
-          </div>
-
-          <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">
-            <span class="text-xs font-semibold text-slate-500 block">Ticket Promedio</span>
-            <span class="text-base sm:text-lg font-bold font-mono text-slate-900 block mt-0.5">
-              {{ (salesAnalytics()?.averageTicket ?? (tc.singleDayCount > 0 ? (tc.singleDayAmount / tc.singleDayCount) : tc.singleDayAmount)) | currencyFormat }}
-            </span>
-            <span class="text-[11px] text-slate-500">Por transacción</span>
-          </div>
-
-          <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70">
-            @if (hourlyHistogramData()?.peakHour; as peak) {
-            <span class="text-xs font-semibold text-slate-500 block">Hora con Más Ventas</span>
-            <span class="text-base sm:text-lg font-bold font-mono text-amber-700 block mt-0.5 truncate">
-              {{ peak.hourLabel || (peak.hour + ':00') }}
-            </span>
-            <span class="text-[11px] text-slate-500">{{ peak.transactionCount }} tickets ({{ peak.totalRevenue | currencyFormat }})</span>
-            } @else {
-            <span class="text-xs font-semibold text-slate-500 block">Unidades Vendidas</span>
-            <span class="text-base sm:text-lg font-bold font-mono text-emerald-700 block mt-0.5">
-              {{ (salesAnalytics()?.unitsSold ?? 0) }} und
-            </span>
-            <span class="text-[11px] text-slate-500">Total despachado</span>
-            }
-          </div>
-        </div>
-
-        <!-- Ritmo Comercial Intradía si hay horas registradas -->
-        @let hData = hourlyHistogramData();
-        @if (hData && hData.hours.length > 0) {
-        <div class="p-3.5 rounded-xl bg-slate-50/50 border border-slate-200/70 space-y-2">
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-slate-700 flex items-center gap-1.5">
-              <span>⏱️ Ritmo de Ventas por Hora en la Jornada</span>
-            </span>
-            <span class="text-slate-500 font-medium">Distribución horaria</span>
-          </div>
-          <div class="grid grid-cols-6 sm:grid-cols-12 gap-1.5 pt-1 items-end h-20">
-            @for (h of hData.hours; track h.hour) {
-            <div class="flex flex-col items-center gap-1 h-full justify-end group relative cursor-pointer">
-              <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-slate-900 text-white text-[10px] font-mono px-2 py-0.5 rounded shadow pointer-events-none whitespace-nowrap z-20">
-                {{ h.hourLabel || (h.hour + ':00') }}: {{ h.transactionCount }} tx ({{ h.totalRevenue | currencyFormat }})
-              </div>
-              <div class="w-full rounded-t transition-all"
-                [ngClass]="h.isPeakHour ? 'bg-amber-500' : 'bg-primary-500 hover:bg-primary-600'"
-                [style.height.%]="h.heightPct"></div>
-              <span class="text-[9px] font-mono font-medium text-slate-400 group-hover:text-slate-800">{{ h.hour }}h</span>
-            </div>
-            }
-          </div>
-        </div>
-        }
-
-        <!-- Asistente de Evolución Temporal / Tendencias -->
-        <div class="p-3 rounded-xl bg-slate-100/70 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-          <span class="text-slate-600 flex items-center gap-1.5 font-medium">
-            <span>💡</span>
-            <span>¿Deseas ver curvas evolutivas y tendencias históricas? Amplía el rango:</span>
-          </span>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" (click)="setDatePreset('7days')"
-              class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200/80 text-slate-700 font-semibold border border-slate-200 shadow-2xs transition-all cursor-pointer">
-              📅 7 Días
-            </button>
-            <button type="button" (click)="setDatePreset('thisMonth')"
-              class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200/80 text-slate-700 font-semibold border border-slate-200 shadow-2xs transition-all cursor-pointer">
-              📅 Mes Actual
-            </button>
-            <button type="button" (click)="setDatePreset('all')"
-              class="px-2.5 py-1 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow-2xs transition-all cursor-pointer">
-              📈 Todo
-            </button>
-          </div>
-        </div>
-      </div>
-      } @else {
-      <!-- CASO B: GRÁFICA MULTI-DÍA DE TENDENCIA SVG -->
       <div class="space-y-3">
+
         <!-- Gráfica SVG Responsive -->
         <div class="w-full overflow-hidden bg-slate-50/40 rounded-xl p-2 border border-slate-100">
-          <svg viewBox="0 0 680 220" class="w-full h-48 sm:h-56 overflow-visible">
+          <svg viewBox="0 0 680 220" class="w-full h-56 sm:h-64 overflow-visible">
             <defs>
               <linearGradient id="salesTrendGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#10b981" stop-opacity="0.18" />
@@ -729,7 +614,7 @@
           </svg>
         </div>
 
-        <!-- Resumen de Tendencias Multi-Día -->
+        <!-- Resumen de Tendencias -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-sm">
           <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
             <span class="text-slate-500 block text-xs font-semibold">Día Récord</span>
@@ -740,16 +625,15 @@
           <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
             <span class="text-slate-500 block text-xs font-semibold">Promedio Diario</span>
             <span class="font-bold text-slate-800 text-sm">{{ tc.averageRevenue | currencyFormat }}</span>
-            <span class="text-slate-500 text-xs block">en {{ tc.points.length }} días activos</span>
+            <span class="text-slate-500 text-xs block">por día activo</span>
           </div>
           <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
             <span class="text-slate-500 block text-xs font-semibold">Total en Serie</span>
             <span class="font-bold text-slate-900 text-sm">{{ tc.totalRevenue | currencyFormat }}</span>
-            <span class="text-slate-500 text-xs block">{{ tc.upCount }} alzas • {{ tc.downCount }} bajas</span>
+            <span class="text-slate-500 text-xs block">{{ tc.points.length }} fechas registradas</span>
           </div>
         </div>
       </div>
-      }
       } @else {
       <div class="p-10 text-center space-y-2">
         <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-lg">
