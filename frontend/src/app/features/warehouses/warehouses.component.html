@@ -90,20 +90,18 @@
     </div>
   </div>
 
-  <!-- Search and Actions Bar -->
-  <div
-    class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
-    <div class="relative w-full sm:w-80">
-      <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-      </span>
-      <input type="text" placeholder="Buscar por sede, código o ciudad..." (input)="onSearch($event)"
-        class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 transition-all" />
-    </div>
-
+  <!-- Barra Superior Estándar con Búsqueda Omni-Campo y Exportar CSV -->
+  <app-table-toolbar
+    searchPlaceholder="Buscar en sedes por código, nombre, ciudad, administrador..."
+    [searchValue]="tableState.searchQuery()"
+    [totalCount]="tableState.totalCount()"
+    [filteredCount]="tableState.filteredCount()"
+    [isFiltered]="tableState.isFiltered()"
+    [showExportCsv]="true"
+    [exportDisabled]="tableState.processedItems().length === 0"
+    (searchChange)="tableState.setSearch($event)"
+    (exportCsv)="exportWarehousesCsv()"
+  >
     <button type="button" (click)="loadWarehouses()"
       class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-colors cursor-pointer">
       <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +111,7 @@
       </svg>
       <span>Actualizar</span>
     </button>
-  </div>
+  </app-table-toolbar>
 
   <!-- Table Card -->
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -122,7 +120,7 @@
       <div class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
       <p class="text-xs text-slate-400">Cargando sedes y almacenes...</p>
     </div>
-    } @else if (filteredWarehouses().length === 0) {
+    } @else if (tableState.processedItems().length === 0) {
     <div class="py-16 text-center space-y-2">
       <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,19 +144,31 @@
         <thead>
           <tr
             class="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <th class="py-3.5 pl-6">Código / Sede</th>
+            <th class="py-3.5 pl-6">
+              <app-sortable-header key="name" label="Código / Sede" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
             @if (isSuperAdmin()) {
-              <th class="py-3.5 px-4">Cliente Titular (Admin)</th>
+              <th class="py-3.5 px-4">
+                <app-sortable-header key="adminUserName" label="Cliente Titular (Admin)" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
             }
-            <th class="py-3.5 px-4">Ubicación & Teléfono</th>
-            <th class="py-3.5 px-4 text-center">Empleados</th>
-            <th class="py-3.5 px-4 text-center">Estado</th>
-            <th class="py-3.5 px-4">Fecha Alta</th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="city" label="Ubicación & Teléfono" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-center">
+              <app-sortable-header key="employeeCount" label="Empleados" align="center" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-center">
+              <app-sortable-header key="isActive" label="Estado" align="center" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="createdAt" label="Fecha Alta" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
             <th class="py-3.5 pr-6 text-right">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          @for (w of filteredWarehouses(); track w.id) {
+          @for (w of tableState.processedItems(); track w.id) {
           <tr class="hover:bg-slate-50/70 transition-colors">
             <td class="py-3.5 pl-6">
               <div class="flex items-center gap-3">
@@ -260,7 +270,7 @@
             </p>
           </div>
         </div>
-        <button type="button" (click)="closeModal()"
+        <button type="button" (click)="closeModal()" aria-label="Cerrar modal"
           class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

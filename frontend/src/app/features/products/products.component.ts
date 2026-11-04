@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed, effect, untracked } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, untracked, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductService } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -20,6 +21,10 @@ import { AppButtonComponent } from '../../shared/components/app-button/app-butto
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { BulkImportResult } from '../../core/models/product.model';
@@ -38,22 +43,49 @@ import { BulkImportResult } from '../../core/models/product.model';
     AppPaginationComponent,
     AppAutocompleteComponent,
     AppSkeletonComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './products.component.html'
 })
-export class ProductsComponent implements OnInit, OnDestroy {
+export class ProductsComponent implements OnInit {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private supplierService = inject(SupplierService);
+  private csvExportService = inject(CsvExportService);
   branchContextService = inject(BranchContextService);
   authService = inject(AuthService);
   private alertService = inject(AlertService, { optional: true });
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
 
   private searchSubject = new Subject<string>();
-  private searchSub?: Subscription;
+
+  // Gestor reactivo para ordenamiento en todas las columnas y búsqueda omni-campo
+  readonly tableState = new TableStateManager<Product>({
+    data: () => this.products()
+  });
+
+  exportProductsCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `productos_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'sku', header: 'SKU' },
+        { key: 'name', header: 'Producto' },
+        { key: 'categoryName', header: 'Categoría' },
+        { key: 'purchasePrice', header: 'Precio Compra' },
+        { key: 'salePrice', header: 'Precio Venta' },
+        { key: 'currentStock', header: 'Stock Actual' },
+        { key: 'minimumStock', header: 'Stock Mínimo' },
+        { key: 'stockStatus', header: 'Estado' }
+      ],
+      data
+    });
+  }
 
   constructor() {
     effect(() => {
@@ -128,8 +160,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.searchSub = this.searchSubject
+    this.searchSubject
       .pipe(
+        takeUntilDestroyed(this.destroyRef),
         debounceTime(350),
         distinctUntilChanged()
       )
@@ -142,17 +175,15 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.loadFilterLookups();
     this.loadProducts();
 
-    this.route.queryParams.subscribe(params => {
-      if (params['search'] !== undefined) {
-        this.searchQuery.set(params['search']);
-        this.pageNumber.set(1);
-        this.loadProducts();
-      }
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.searchSub?.unsubscribe();
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        if (params['search'] !== undefined) {
+          this.searchQuery.set(params['search']);
+          this.pageNumber.set(1);
+          this.loadProducts();
+        }
+      });
   }
 
   loadFilterLookups(): void {
@@ -203,7 +234,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
-  onCategorySelect(categoryId: any): void {
+  onCategorySelect(categoryId: string | number | null): void {
     const val = categoryId ? Number(categoryId) : null;
     this.selectedCategoryId.set(val);
     this.pageNumber.set(1);

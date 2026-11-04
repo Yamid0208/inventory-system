@@ -6,7 +6,7 @@ export default defineConfig({
   fullyParallel: false,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:4200',
+    baseURL: process.env['PLAYWRIGHT_BASE_URL'] || 'http://localhost:4205',
     trace: 'on-first-retry',
     headless: true,
   },

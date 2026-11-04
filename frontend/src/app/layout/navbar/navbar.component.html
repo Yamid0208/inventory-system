@@ -12,7 +12,7 @@
     <!-- Título de Página / Dashboard Header -->
     <div class="hidden sm:block">
       <h2 class="text-sm font-bold text-[var(--text-main)] tracking-tight uppercase font-mono">
-        {{ authService.isSuperAdmin() ? 'Panel de Super Administrador' : 'Control Panel' }}
+        {{ authService.isSuperAdmin() ? 'Panel de Super Administrador' : 'Panel de Control' }}
       </h2>
     </div>
 
@@ -185,7 +185,7 @@
       </div>
       <div class="hidden md:flex flex-col text-left">
         <span class="text-xs font-bold text-[var(--text-main)] leading-tight">{{ user.fullName }}</span>
-        <span class="text-[9px] text-[var(--text-muted)] font-mono uppercase">{{ user.role }}</span>
+        <span class="text-[9px] text-[var(--text-muted)] font-mono uppercase">{{ getRoleLabel(user.role) }}</span>
       </div>
       <button type="button" (click)="logout()"
         class="p-1.5 text-[var(--text-muted)] hover:text-red-500 hover:bg-[var(--surface-subtle)] rounded-md transition-colors cursor-pointer ml-1"

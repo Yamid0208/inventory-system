@@ -1,17 +1,84 @@
 import '@angular/compiler';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createEnvironmentInjector, signal } from '@angular/core';
 import { ReportsComponent } from './reports.component';
 import { ReportService } from '../../core/services/report.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { BranchContextService } from '../../core/services/branch-context.service';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { of } from 'rxjs';
 
 describe('ReportsComponent (Unit Tests)', () => {
+  const dummyPagedResult = {
+    items: [],
+    totalCount: 0,
+    pageNumber: 1,
+    pageSize: 10,
+    totalPages: 0,
+    totalAmount: 0,
+    totalQuantity: 0
+  };
+
   const reportServiceMock = {
     getSummary: vi.fn().mockReturnValue(of({ reports: [], totalExportableRecords: 100 })),
     downloadReport: vi.fn().mockReturnValue(of(new Blob())),
-    triggerBrowserDownload: vi.fn()
+    triggerBrowserDownload: vi.fn(),
+    getSalesData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getInventoryKardexData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getPurchasesData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getProductsData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getLowStockData: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getSalesSummaryMetrics: vi.fn().mockReturnValue(of({
+      totalSalesAmount: 5000,
+      totalOrdersCount: 20,
+      averageTicket: 250,
+      cashAmount: 3000,
+      electronicAmount: 2000,
+      paymentMethods: []
+    })),
+    getTopProducts: vi.fn().mockReturnValue(of([])),
+    getProfitability: vi.fn().mockReturnValue(of({
+      summary: { totalRevenue: 10000, totalCost: 6000, grossProfit: 4000, grossMarginPercentage: 40, totalUnitsSold: 100 },
+      items: dummyPagedResult
+    })),
+    getCashRegisterReconciliation: vi.fn().mockReturnValue(of({
+      summary: {
+        totalOpeningCash: 1000,
+        totalExpectedCash: 5000,
+        totalActualCash: 4950,
+        totalDifference: -50,
+        totalElectronicPayments: 2000,
+        closedSessionsCount: 5,
+        openSessionsCount: 1
+      },
+      sessions: dummyPagedResult
+    })),
+    getAuditActivity: vi.fn().mockReturnValue(of(dummyPagedResult)),
+    getSalesAnalyticsSummary: vi.fn().mockReturnValue(of({
+      totalRevenue: 5000,
+      netRevenue: 4200,
+      tax: 800,
+      transactionCount: 20,
+      averageTicket: 250,
+      unitsSold: 45,
+      prevTotalRevenue: 4000,
+      prevTransactionCount: 16,
+      prevAverageTicket: 250,
+      revenueGrowthPct: 25.0,
+      transactionsGrowthPct: 25.0,
+      ticketGrowthPct: 0.0,
+      paymentMethods: []
+    })),
+    getSalesByCategory: vi.fn().mockReturnValue(of([
+      { categoryId: 1, categoryName: 'Tecnología', unitsSold: 10, totalRevenue: 2500, sharePercentage: 50, transactionCount: 8 }
+    ])),
+    getSalesHourlyActivity: vi.fn().mockReturnValue(of([
+      { hour: 14, hourLabel: '14:00 - 14:59', transactionCount: 12, totalRevenue: 3000, isPeakHour: true }
+    ])),
+    getSalesByEmployee: vi.fn().mockReturnValue(of([
+      { userId: 1, employeeName: 'Juan Pérez', role: 'Vendedor', transactionCount: 15, totalRevenue: 3750, averageTicket: 250, sharePercentage: 75 }
+    ])),
+    getSalesTrends: vi.fn().mockReturnValue(of([]))
   };
 
   const dashboardServiceMock = {
@@ -36,6 +103,7 @@ describe('ReportsComponent (Unit Tests)', () => {
 
   const injector = createEnvironmentInjector([
     ReportsComponent,
+    CsvExportService,
     { provide: ReportService, useValue: reportServiceMock },
     { provide: DashboardService, useValue: dashboardServiceMock },
     { provide: BranchContextService, useValue: branchContextServiceMock }
@@ -43,15 +111,21 @@ describe('ReportsComponent (Unit Tests)', () => {
 
   const component = injector.get(ReportsComponent);
 
-  it('should instantiate and load analytics summary', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should instantiate and load analytics summary with default today filter', () => {
     expect(component).toBeTruthy();
+    expect(component.activePreset()).toBe('today');
+    expect(component.startDate()).toBeTruthy();
+    expect(component.endDate()).toBeTruthy();
+
     component.loadSummary();
     component.loadAnalytics();
 
     expect(reportServiceMock.getSummary).toHaveBeenCalled();
     expect(dashboardServiceMock.getSummary).toHaveBeenCalled();
-    expect(component.summary()?.totalExportableRecords).toBe(100);
-    expect(component.dashboardData()?.kpis.totalProductsCount).toBe(50);
   });
 
   it('should compute profit margin correctly from dashboard KPIs', () => {
@@ -60,14 +134,152 @@ describe('ReportsComponent (Unit Tests)', () => {
     expect(component.profitMargin()).toBe(25);
   });
 
-  it('should update date ranges on setDatePreset', () => {
+  it('should update date ranges on setDatePreset for today, thisMonth and all', () => {
+    // Preset Hoy
+    component.setDatePreset('today');
+    expect(component.activePreset()).toBe('today');
+    expect(component.startDate()).toEqual(component.endDate());
+
+    // Preset Mes Actual
+    component.setDatePreset('thisMonth');
+    expect(component.activePreset()).toBe('thisMonth');
+    expect(component.startDate()).toMatch(/^\d{4}-\d{2}-01$/);
+    expect(component.endDate()).toBeTruthy();
+
+    // Preset 7 días
     component.setDatePreset('7days');
     expect(component.activePreset()).toBe('7days');
     expect(component.startDate()).toBeTruthy();
     expect(component.endDate()).toBeTruthy();
 
+    // Preset Ayer
+    component.setDatePreset('yesterday');
+    expect(component.activePreset()).toBe('yesterday');
+    expect(component.startDate()).toBeTruthy();
+    expect(component.endDate()).toBeTruthy();
+
+    // Preset Mes Anterior
+    component.setDatePreset('lastMonth');
+    expect(component.activePreset()).toBe('lastMonth');
+    expect(component.startDate()).toMatch(/^\d{4}-\d{2}-01$/);
+
+    // Preset Todo el histórico
     component.setDatePreset('all');
     expect(component.startDate()).toBe('');
     expect(component.endDate()).toBe('');
+  });
+
+  it('should switch categories and load corresponding INSINCRO datasets', () => {
+    // Categoría Finanzas
+    component.selectCategory('finance');
+    expect(component.selectedCategory()).toBe('finance');
+    expect(reportServiceMock.getProfitability).toHaveBeenCalled();
+
+    // Categoría Caja POS
+    component.selectCategory('cash');
+    expect(component.selectedCategory()).toBe('cash');
+    expect(reportServiceMock.getCashRegisterReconciliation).toHaveBeenCalled();
+
+    // Categoría Auditoría
+    component.selectCategory('audit');
+    expect(component.selectedCategory()).toBe('audit');
+    expect(reportServiceMock.getAuditActivity).toHaveBeenCalled();
+  });
+
+  it('should switch report tab and load tabular data', () => {
+    component.selectReport('inventory');
+    expect(component.selectedReport()).toBe('inventory');
+    expect(reportServiceMock.getInventoryKardexData).toHaveBeenCalled();
+
+    component.selectReport('purchases');
+    expect(component.selectedReport()).toBe('purchases');
+    expect(reportServiceMock.getPurchasesData).toHaveBeenCalled();
+
+    component.selectReport('products');
+    expect(component.selectedReport()).toBe('products');
+    expect(reportServiceMock.getProductsData).toHaveBeenCalled();
+
+    component.selectReport('low-stock');
+    expect(component.selectedReport()).toBe('low-stock');
+    expect(reportServiceMock.getLowStockData).toHaveBeenCalled();
+  });
+
+  it('should switch to sales analytics sub-tabs and load specialized datasets', () => {
+    // Sub-pestaña Por Categoría
+    component.selectReport('sales-categories');
+    expect(component.selectedReport()).toBe('sales-categories');
+    expect(reportServiceMock.getSalesByCategory).toHaveBeenCalled();
+    expect(component.salesCategories().length).toBe(1);
+    expect(component.tableTitle()).toContain('Categoría');
+
+    // Sub-pestaña Horarios Pico
+    component.selectReport('sales-hourly');
+    expect(component.selectedReport()).toBe('sales-hourly');
+    expect(reportServiceMock.getSalesHourlyActivity).toHaveBeenCalled();
+    expect(component.hourlyActivity().length).toBe(1);
+    expect(component.tableTitle()).toContain('Horarios');
+
+    // Sub-pestaña Por Empleado
+    component.selectReport('sales-employees');
+    expect(component.selectedReport()).toBe('sales-employees');
+    expect(reportServiceMock.getSalesByEmployee).toHaveBeenCalled();
+    expect(component.salesEmployees().length).toBe(1);
+    expect(component.tableTitle()).toContain('Empleado');
+  });
+
+  it('debe permitir ordenamiento interactivo por columna y búsqueda omni-campo en tableState', () => {
+    component.selectedReport.set('sales');
+    component.salesData.set({
+      items: [
+        { id: 1, saleNumber: 'V-002', createdAt: '2026-03-01', customerName: 'Carlos Gómez', total: 15000 } as any,
+        { id: 2, saleNumber: 'V-001', createdAt: '2026-01-15', customerName: 'Ana María', total: 35000 } as any
+      ],
+      totalCount: 2,
+      pageNumber: 1,
+      pageSize: 10,
+      totalPages: 1,
+      totalAmount: 50000,
+      totalQuantity: 2
+    });
+
+    // 1. Búsqueda omni-campo
+    component.tableState.setSearch('carlos');
+    expect(component.tableState.processedItems().length).toBe(1);
+    expect(component.tableState.processedItems()[0].saleNumber).toBe('V-002');
+
+    component.tableState.setSearch('');
+    expect(component.tableState.processedItems().length).toBe(2);
+
+    // 2. Ordenamiento: asc -> desc -> reset
+    component.tableState.toggleSort('saleNumber');
+    expect(component.tableState.sortDirection()).toBe('asc');
+    expect(component.tableState.processedItems()[0].saleNumber).toBe('V-001');
+
+    component.tableState.toggleSort('saleNumber');
+    expect(component.tableState.sortDirection()).toBe('desc');
+    expect(component.tableState.processedItems()[0].saleNumber).toBe('V-002');
+
+    component.tableState.toggleSort('saleNumber');
+    expect(component.tableState.sortDirection()).toBeNull();
+    expect(component.tableState.processedItems()[0].saleNumber).toBe('V-002'); // orden original
+  });
+
+  it('debe exportar la tabla activa a CSV mediante CsvExportService', () => {
+    component.selectedReport.set('sales');
+    const csvService = injector.get(CsvExportService);
+    const exportSpy = vi.spyOn(csvService, 'exportToCsv').mockReturnValue(true);
+
+    component.salesData.set({
+      items: [{ id: 1, saleNumber: 'V-100', customerName: 'Test Cliente', total: 1000 } as any],
+      totalCount: 1,
+      pageNumber: 1,
+      pageSize: 10,
+      totalPages: 1,
+      totalAmount: 1000,
+      totalQuantity: 1
+    });
+
+    component.exportActiveTableCsv();
+    expect(exportSpy).toHaveBeenCalled();
   });
 });

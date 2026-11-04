@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using Inventory.API.Middlewares;
 using Inventory.Application;
 using Inventory.Application.Common.Interfaces;
@@ -27,19 +28,46 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddFixedWindowLimiter("AuthLimiter", opt =>
+    options.AddPolicy("AuthLimiter", httpContext =>
     {
-        opt.PermitLimit = 15;
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 2;
+        string clientIp = "unknown";
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor) && !string.IsNullOrWhiteSpace(forwardedFor))
+        {
+            clientIp = forwardedFor.ToString().Split(',')[0].Trim();
+        }
+        else if (httpContext.Connection.RemoteIpAddress != null)
+        {
+            clientIp = httpContext.Connection.RemoteIpAddress.ToString();
+        }
+
+        return RateLimitPartition.GetFixedWindowLimiter(clientIp, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 15,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        });
     });
-    options.AddFixedWindowLimiter("AiImportLimiter", opt =>
+
+    options.AddPolicy("AiImportLimiter", httpContext =>
     {
-        opt.PermitLimit = 10;
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 2;
+        string clientIp = "unknown";
+        if (httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor) && !string.IsNullOrWhiteSpace(forwardedFor))
+        {
+            clientIp = forwardedFor.ToString().Split(',')[0].Trim();
+        }
+        else if (httpContext.Connection.RemoteIpAddress != null)
+        {
+            clientIp = httpContext.Connection.RemoteIpAddress.ToString();
+        }
+
+        return RateLimitPartition.GetFixedWindowLimiter(clientIp, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        });
     });
 });
 
@@ -148,7 +176,7 @@ app.UseForwardedHeaders(forwardedOptions);
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     context.Response.Headers.Append("X-XSS-Protection", "0");
     context.Response.Headers.Append("Content-Security-Policy", 
@@ -446,7 +474,18 @@ if (!Directory.Exists(uploadPath))
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadPath),
-    RequestPath = "/uploads"
+    RequestPath = "/uploads",
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+        var contentType = ctx.Context.Response.ContentType ?? "";
+        if (!contentType.StartsWith("image/jpeg", StringComparison.OrdinalIgnoreCase) &&
+            !contentType.StartsWith("image/png", StringComparison.OrdinalIgnoreCase) &&
+            !contentType.StartsWith("image/webp", StringComparison.OrdinalIgnoreCase))
+        {
+            ctx.Context.Response.Headers.Append("Content-Disposition", "attachment");
+        }
+    }
 });
 
 app.UseRouting();

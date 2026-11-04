@@ -97,41 +97,67 @@
 
   <!-- Data Table Card -->
   @if (!loading()) {
-  <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-    @if (products().length === 0) {
-    <div class="p-16 text-center">
-      <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-        </svg>
+  <div class="space-y-3">
+    <!-- Barra Superior Estándar -->
+    <app-table-toolbar
+      searchPlaceholder="Buscar en productos por nombre, SKU, categoría..."
+      [searchValue]="tableState.searchQuery()"
+      [totalCount]="tableState.totalCount()"
+      [filteredCount]="tableState.filteredCount()"
+      [isFiltered]="tableState.isFiltered()"
+      [showExportCsv]="true"
+      [exportDisabled]="tableState.processedItems().length === 0"
+      (searchChange)="tableState.setSearch($event)"
+      (exportCsv)="exportProductsCsv()">
+    </app-table-toolbar>
+
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      @if (products().length === 0) {
+      <div class="p-16 text-center">
+        <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+        </div>
+        <h3 class="text-sm font-bold text-slate-800">No se encontraron productos</h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+          No hay registros que coincidan con la búsqueda o filtros de stock seleccionados.
+        </p>
+        <button type="button" (click)="openCreateModal()"
+          class="mt-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all">
+          + Crear Producto
+        </button>
       </div>
-      <h3 class="text-sm font-bold text-slate-800">No se encontraron productos</h3>
-      <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-        No hay registros que coincidan con la búsqueda o filtros de stock seleccionados.
-      </p>
-      <button type="button" (click)="openCreateModal()"
-        class="mt-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all">
-        + Crear Producto
-      </button>
-    </div>
-    } @else {
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr
-            class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-            <th class="py-3.5 pl-6 pr-4">Producto</th>
-            <th class="py-3.5 px-4">SKU</th>
-            <th class="py-3.5 px-4">Categoría</th>
-            <th class="py-3.5 px-4 text-right">Precio Compra</th>
-            <th class="py-3.5 px-4 text-right">Precio Venta</th>
-            <th class="py-3.5 px-6 min-w-[200px]">Nivel de Stock</th>
-            <th class="py-3.5 pr-6 pl-4 text-center">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100 text-xs">
-          @for (product of products(); track product.id) {
+      } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr
+              class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
+              <th class="py-3.5 pl-6 pr-4">
+                <app-sortable-header key="name" label="Producto" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4">
+                <app-sortable-header key="sku" label="SKU" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4">
+                <app-sortable-header key="categoryName" label="Categoría" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4 text-right">
+                <app-sortable-header key="purchasePrice" label="Precio Compra" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4 text-right">
+                <app-sortable-header key="salePrice" label="Precio Venta" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-6 min-w-[200px]">
+                <app-sortable-header key="currentStock" label="Nivel de Stock" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 pr-6 pl-4 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs">
+            @for (product of tableState.processedItems(); track product.id) {
           <tr class="hover:bg-slate-50/80 transition-colors group">
             <!-- Producto (Thumbnail + Nombre) -->
             <td class="py-4 pl-6 pr-4">
@@ -276,6 +302,7 @@
         (pageChange)="onPaginationChange($event)"></app-pagination>
     </div>
     }
+  </div>
   </div>
   }
 </div>

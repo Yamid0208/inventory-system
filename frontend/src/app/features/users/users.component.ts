@@ -21,6 +21,10 @@ import { AppButtonComponent } from '../../shared/components/app-button/app-butto
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 
 @Component({
@@ -33,7 +37,9 @@ import { PageChangeEvent } from '../../shared/models/pagination.model';
     AppButtonComponent,
     AppPaginationComponent,
     AppAutocompleteComponent,
-    AppSkeletonComponent
+    AppSkeletonComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent
   ],
   templateUrl: './users.component.html'
 })
@@ -42,8 +48,31 @@ export class UsersComponent implements OnInit {
   private roleService = inject(RoleService);
   private warehouseService = inject(WarehouseService);
   private confirmationService = inject(ConfirmationService);
+  private csvExportService = inject(CsvExportService);
   authService = inject(AuthService);
   branchContextService = inject(BranchContextService);
+
+  // Gestor reactivo para ordenamiento y búsqueda omni-campo en usuarios
+  readonly tableState = new TableStateManager<UserDetail>({
+    data: () => this.users()
+  });
+
+  exportUsersCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `usuarios_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'fullName', header: 'Nombre Completo' },
+        { key: 'email', header: 'Correo Electrónico' },
+        { key: 'role', header: 'Rol' },
+        { key: 'warehouseName', header: 'Sede' },
+        { key: 'isActive', header: 'Estado' },
+        { key: 'createdAt', header: 'Fecha Creación' }
+      ],
+      data
+    });
+  }
 
   constructor() {
     try {

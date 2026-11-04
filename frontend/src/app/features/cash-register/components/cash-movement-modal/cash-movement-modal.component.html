@@ -1,22 +1,19 @@
-<div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-700 overflow-y-auto max-h-[92vh] my-auto animate-in fade-in zoom-in-95 duration-200">
     
     <!-- Header -->
     <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
       <div class="flex items-center gap-3">
         <div 
-          [class.bg-emerald-100]="form.get('movementType')?.value === 'ManualInflow'"
-          [class.text-emerald-600]="form.get('movementType')?.value === 'ManualInflow'"
-          [class.bg-rose-100]="form.get('movementType')?.value === 'ManualOutflow'"
-          [class.text-rose-600]="form.get('movementType')?.value === 'ManualOutflow'"
-          [class.bg-amber-100]="form.get('movementType')?.value === 'CashWithdrawal'"
-          [class.text-amber-600]="form.get('movementType')?.value === 'CashWithdrawal'"
+          [class]="currentMovementType === 'ManualInflow' ? 'bg-emerald-100 text-emerald-600' :
+                   currentMovementType === 'ManualOutflow' ? 'bg-rose-100 text-rose-600' :
+                   'bg-amber-100 text-amber-600'"
           class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm">
-          @if (form.get('movementType')?.value === 'ManualInflow') {
+          @if (currentMovementType === 'ManualInflow') {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
-          } @else if (form.get('movementType')?.value === 'ManualOutflow') {
+          } @else if (currentMovementType === 'ManualOutflow') {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
             </svg>
@@ -31,7 +28,7 @@
           <p class="text-xs text-slate-500 dark:text-slate-400">Entrada o salida manual de dinero en la sesión activa</p>
         </div>
       </div>
-      <button type="button" (click)="onCancel()" class="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+      <button type="button" (click)="onCancel()" aria-label="Cerrar modal" class="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -49,52 +46,25 @@
     }
 
     <!-- Form -->
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-4 sm:p-6 space-y-4">
       
       <!-- Movement Type Tabs -->
       <div>
         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
           Tipo de Movimiento <span class="text-rose-500">*</span>
         </label>
-        <div class="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            (click)="setMovementType('ManualInflow')"
-            [ngClass]="{
-              'bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300': form.get('movementType')?.value === 'ManualInflow',
-              'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300': form.get('movementType')?.value !== 'ManualInflow'
-            }"
-            class="px-3 py-2.5 rounded-xl border text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all text-center flex flex-col items-center gap-1"
-          >
-            <span>+ Ingreso</span>
-            <span class="text-[10px] font-normal text-slate-500">Inyección caja</span>
-          </button>
-          
-          <button
-            type="button"
-            (click)="setMovementType('ManualOutflow')"
-            [ngClass]="{
-              'bg-rose-50 border-rose-500 text-rose-700 dark:bg-rose-950 dark:text-rose-300': form.get('movementType')?.value === 'ManualOutflow',
-              'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300': form.get('movementType')?.value !== 'ManualOutflow'
-            }"
-            class="px-3 py-2.5 rounded-xl border text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all text-center flex flex-col items-center gap-1"
-          >
-            <span>- Egreso / Gasto</span>
-            <span class="text-[10px] font-normal text-slate-500">Compra menor</span>
-          </button>
-
-          <button
-            type="button"
-            (click)="setMovementType('CashWithdrawal')"
-            [ngClass]="{
-              'bg-amber-50 border-amber-500 text-amber-700 dark:bg-amber-950 dark:text-amber-300': form.get('movementType')?.value === 'CashWithdrawal',
-              'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300': form.get('movementType')?.value !== 'CashWithdrawal'
-            }"
-            class="px-3 py-2.5 rounded-xl border text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all text-center flex flex-col items-center gap-1"
-          >
-            <span>↓ Retiro</span>
-            <span class="text-[10px] font-normal text-slate-500">A caja fuerte</span>
-          </button>
+        <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+          @for (mType of movementTypes; track mType.id) {
+            <button
+              type="button"
+              (click)="setMovementType(mType.id)"
+              [class]="currentMovementType === mType.id ? mType.activeClass : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'"
+              class="px-3 py-2.5 rounded-xl border text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all text-center flex flex-col items-center gap-1 cursor-pointer"
+            >
+              <span>{{ mType.label }}</span>
+              <span class="text-[10px] font-normal text-slate-500">{{ mType.subtitle }}</span>
+            </button>
+          }
         </div>
       </div>
 
@@ -169,7 +139,7 @@
       </div>
 
       <!-- Actions -->
-      <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-end gap-2.5">
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
         <app-button
           type="button"
           variant="outline"

@@ -12,6 +12,10 @@ import { AppButtonComponent } from '../../shared/components/app-button/app-butto
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { BulkImportModalComponent } from '../products/components/bulk-import-modal/bulk-import-modal.component';
@@ -28,6 +32,8 @@ import { BulkImportModalComponent } from '../products/components/bulk-import-mod
     AppPaginationComponent,
     AppAutocompleteComponent,
     AppSkeletonComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './inventory.component.html'
@@ -37,6 +43,7 @@ export class InventoryComponent implements OnInit {
   private productService = inject(ProductService);
   branchContextService = inject(BranchContextService);
   private alertService = inject(AlertService, { optional: true });
+  private csvExportService = inject(CsvExportService);
 
   readonly Math = Math;
 
@@ -46,14 +53,41 @@ export class InventoryComponent implements OnInit {
   loading = signal<boolean>(false);
   exporting = signal<boolean>(false);
 
+  // Gestor reactivo para ordenamiento y búsqueda omni-campo en Kardex
+  readonly tableState = new TableStateManager<InventoryMovement>({
+    data: () => this.movements()
+  });
+
+  exportKardexCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `kardex_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'movementNumber', header: 'N° Movimiento' },
+        { key: 'createdAt', header: 'Fecha y Hora' },
+        { key: 'productSku', header: 'SKU' },
+        { key: 'productName', header: 'Producto' },
+        { key: 'movementType', header: 'Tipo Movimiento' },
+        { key: 'quantityDelta', header: 'Variación Stock' },
+        { key: 'previousStock', header: 'Stock Previo' },
+        { key: 'newStock', header: 'Nuevo Stock' },
+        { key: 'userName', header: 'Responsable' }
+      ],
+      data
+    });
+  }
+
   constructor() {
-    effect(() => {
-      // Trigger reload whenever branch context changes
-      const wid = this.branchContextService.selectedWarehouseId();
-      untracked(() => {
-        this.loadKardex();
-      });
-    }, { allowSignalWrites: true });
+    try {
+      effect(() => {
+        // Trigger reload whenever branch context changes
+        const wid = this.branchContextService.selectedWarehouseId();
+        untracked(() => {
+          this.loadKardex();
+        });
+      }, { allowSignalWrites: true });
+    } catch {}
   }
 
   // Paginación

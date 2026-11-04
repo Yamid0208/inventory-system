@@ -24,10 +24,18 @@
     </button>
   </div>
 
-  <!-- Barra de Filtros -->
-  <div
-    class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-    <!-- Píldoras de Estado -->
+  <!-- Barra Superior Estándar con Búsqueda Omni-Campo y Exportar CSV -->
+  <app-table-toolbar
+    searchPlaceholder="Buscar en compras por orden, proveedor, responsable, total..."
+    [searchValue]="tableState.searchQuery()"
+    [totalCount]="tableState.totalCount()"
+    [filteredCount]="tableState.filteredCount()"
+    [isFiltered]="tableState.isFiltered()"
+    [showExportCsv]="true"
+    [exportDisabled]="tableState.processedItems().length === 0"
+    (searchChange)="tableState.setSearch($event)"
+    (exportCsv)="exportPurchasesCsv()"
+  >
     <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
       <button type="button" (click)="setStatusFilter('all')"
         class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="statusFilter() === 'all'
@@ -57,19 +65,7 @@
         Canceladas
       </button>
     </div>
-
-    <!-- Buscador -->
-    <div class="relative w-full sm:w-72">
-      <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-      </div>
-      <input type="text" [value]="searchQuery()" (input)="onSearch($event)" placeholder="Buscar orden, proveedor..."
-        class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all" />
-    </div>
-  </div>
+  </app-table-toolbar>
 
   <!-- Loading State con Esqueleto Visual -->
   @if (loading()) {
@@ -79,7 +75,7 @@
   <!-- Data Table Card -->
   @if (!loading()) {
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-    @if (purchases().length === 0) {
+    @if (tableState.processedItems().length === 0) {
     <div class="p-16 text-center">
       <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,17 +98,29 @@
         <thead>
           <tr
             class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-            <th class="py-3.5 pl-6 pr-4">N° Orden</th>
-            <th class="py-3.5 px-4">Fecha</th>
-            <th class="py-3.5 px-4">Proveedor</th>
-            <th class="py-3.5 px-4">Responsable</th>
-            <th class="py-3.5 px-4">Estado</th>
-            <th class="py-3.5 px-4 text-right">Total</th>
+            <th class="py-3.5 pl-6 pr-4">
+              <app-sortable-header key="purchaseNumber" label="N° Orden" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="purchaseDate" label="Fecha" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="supplierName" label="Proveedor" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="userName" label="Responsable" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="status" label="Estado" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="total" label="Total" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
             <th class="py-3.5 pr-6 pl-4 text-right">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-xs">
-          @for (p of purchases(); track p.id) {
+          @for (p of tableState.processedItems(); track p.id) {
           <tr class="hover:bg-slate-50/80 transition-colors group">
             <!-- N° Orden -->
             <td class="py-4 pl-6 pr-4 whitespace-nowrap">
@@ -229,8 +237,8 @@
 
   <!-- Modales -->
   @if (isCreateModalOpen()) {
-  <app-purchase-modal [suppliers]="suppliers()" [products]="products()" [preloadedItem]="initialPreloadedItem()" [loading]="modalLoading"
-    [errorMessage]="modalError" (save)="onCreatePurchase($event)"
+  <app-purchase-modal [suppliers]="suppliers()" [products]="products()" [preloadedItem]="initialPreloadedItem()" [loading]="modalLoading()"
+    [errorMessage]="modalError()" (save)="onCreatePurchase($event)"
     (cancel)="closeCreateModal()"></app-purchase-modal>
   }
 

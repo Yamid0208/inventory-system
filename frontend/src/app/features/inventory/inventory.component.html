@@ -1,4 +1,4 @@
-<div class="p-8 max-w-7xl mx-auto space-y-6 animate-fade-in">
+<div class="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
   <!-- Breadcrumb -->
   <div class="flex items-center gap-2 text-xs font-medium text-slate-400">
     <span>Reportes</span>
@@ -7,135 +7,120 @@
   </div>
 
   <!-- Header & Botones de Acción -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-4">
     <div>
-      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kardex Audit & Traceability</h1>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Auditoría y Trazabilidad Kardex</h1>
       <p class="text-xs text-slate-500 mt-1">
-        Monitor real-time stock movements and audit trails.
+        Monitorea en tiempo real los movimientos de inventario y pistas de auditoría.
       </p>
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 sm:gap-2.5 flex-nowrap shrink-0 overflow-x-auto pb-1 xl:pb-0">
       <!-- Botón Export CSV -->
       <button type="button" (click)="exportCsv()" [disabled]="exporting()"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer select-none disabled:opacity-50">
+        class="inline-flex items-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer select-none disabled:opacity-50 shrink-0">
         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
         </svg>
-        <span>{{ exporting() ? 'Exportando...' : 'Export CSV' }}</span>
+        <span>{{ exporting() ? 'Exportando...' : 'Exportar CSV' }}</span>
       </button>
 
       <!-- Botón + Devolución -->
       <button type="button" (click)="isReturnModalOpen.set(true)"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold shadow-md shadow-amber-500/20 transition-all cursor-pointer select-none">
+        class="inline-flex items-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold shadow-md shadow-amber-500/20 transition-all cursor-pointer select-none shrink-0">
         <span class="text-sm">🔄</span>
         <span>Devolución</span>
       </button>
 
       <!-- Botón + Carga Masiva (Excel / IA) -->
       <button type="button" (click)="openBulkImportModal()"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-xs transition-all cursor-pointer select-none">
+        class="inline-flex items-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-xs transition-all cursor-pointer select-none shrink-0">
         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
         </svg>
-        <span>Carga Masiva (Excel / IA)</span>
+        <span>Carga Masiva</span>
       </button>
 
-      <!-- Botón + Manual Entry -->
+      <!-- Botón + Cargue manual -->
       <button type="button" (click)="openAdjustmentModal()"
-        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer select-none">
+        class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/25 transition-all cursor-pointer select-none shrink-0">
         <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
         </svg>
-        <span>Manual Entry</span>
+        <span>Cargue manual</span>
       </button>
     </div>
   </div>
 
-  <!-- Barra de Filtros: Rango de Fechas & Tipo de Movimiento (Stitch Style) -->
-  <div
-    class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
-    <!-- Píldoras de Período -->
-    <div class="flex items-center gap-1.5 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0">
-      <button type="button" (click)="setDateRange('today')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === 'today'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        Today
-      </button>
+  <!-- Barra Superior Estándar con Búsqueda Omni-Campo y Exportar CSV -->
+  <app-table-toolbar searchPlaceholder="Buscar en Kardex..." [searchValue]="tableState.searchQuery()"
+    [totalCount]="tableState.totalCount()" [filteredCount]="tableState.filteredCount()"
+    [isFiltered]="tableState.isFiltered()" [showExportCsv]="true"
+    [exportDisabled]="tableState.processedItems().length === 0" (searchChange)="tableState.setSearch($event)"
+    (exportCsv)="exportKardexCsv()">
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Píldoras de Período -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+        <button type="button" (click)="setDateRange('today')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === 'today'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          Hoy
+        </button>
 
-      <button type="button" (click)="setDateRange('7d')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '7d'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        7D
-      </button>
+        <button type="button" (click)="setDateRange('7d')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '7d'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          7 Días
+        </button>
 
-      <button type="button" (click)="setDateRange('1m')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1m'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        1M
-      </button>
+        <button type="button" (click)="setDateRange('1m')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1m'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          1 Mes
+        </button>
 
-      <button type="button" (click)="setDateRange('1y')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1y'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        1Y
-      </button>
+        <button type="button" (click)="setDateRange('1y')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1y'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          1 Año
+        </button>
 
-      <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
-
-      <button type="button" (click)="setDateRange('custom')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
-        [class]="dateRange() === 'custom'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        <span>Custom</span>
-      </button>
-    </div>
-
-    <!-- Buscador & Dropdown Tipo de Movimiento -->
-    <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-      <!-- Search Input -->
-      <div class="relative w-full sm:w-64">
-        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button type="button" (click)="setDateRange('custom')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
+          [class]="dateRange() === 'custom'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
-        </div>
-        <input type="text" [value]="searchQuery()" (input)="onSearch($event)" placeholder="Search Kardex..."
-          class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all" />
+          <span>Personalizado</span>
+        </button>
       </div>
 
       <!-- Type Select Dropdown -->
-      <div class="w-full sm:w-52">
-        <app-autocomplete
-          [value]="selectedType()"
-          (valueChange)="onTypeSelected($event)"
-          [options]="movementTypeOptions"
-          placeholder="Todos los Tipos"
-        ></app-autocomplete>
+      <div class="w-48">
+        <app-autocomplete [value]="selectedType()" (valueChange)="onTypeSelected($event)"
+          [options]="movementTypeOptions" placeholder="Todos los Tipos"></app-autocomplete>
       </div>
     </div>
-  </div>
+  </app-table-toolbar>
 
   <!-- Loading State con Esqueleto Visual -->
   @if (loading()) {
-    <app-skeleton type="table" [rows]="8" [columns]="6"></app-skeleton>
+  <app-skeleton type="table" [rows]="8" [columns]="6"></app-skeleton>
   }
 
   <!-- Data Table Card -->
   @if (!loading()) {
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-    @if (movements().length === 0) {
+    @if (tableState.processedItems().length === 0) {
     <div class="p-16 text-center">
       <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,16 +144,40 @@
         <thead>
           <tr
             class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-            <th class="py-3.5 pl-6 pr-4">Movement ID</th>
-            <th class="py-3.5 px-4">Date & Time</th>
-            <th class="py-3.5 px-4">SKU / Product</th>
-            <th class="py-3.5 px-4">Type</th>
-            <th class="py-3.5 px-4 text-right">Stock Delta</th>
-            <th class="py-3.5 pr-6 pl-4">Responsible</th>
+            <th class="py-3.5 pl-6 pr-4">
+              <app-sortable-header key="movementNumber" label="ID Movimiento" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="createdAt" label="Fecha y Hora" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="productName" label="SKU / Producto" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="movementType" label="Tipo" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="quantityDelta" label="Variación Stock" align="right"
+                [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 pr-6 pl-4">
+              <app-sortable-header key="userName" label="Responsable" [sortKey]="tableState.sortKey()"
+                [sortDirection]="tableState.sortDirection()"
+                (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-xs">
-          @for (m of movements(); track m.id) {
+          @for (m of tableState.processedItems(); track m.id) {
           <tr class="hover:bg-slate-50/80 transition-colors group">
             <!-- Movement ID (Purple Mono Link) -->
             <td class="py-4 pl-6 pr-4 whitespace-nowrap">
@@ -256,18 +265,19 @@
   }
 </div>
 
-  <!-- Modal de Ajuste Manual -->
-  @if (isAdjustmentModalOpen()) {
-  <app-stock-adjustment-modal [products]="products()" [loading]="modalLoading" [errorMessage]="modalError"
-    (save)="onSaveAdjustment($event)" (cancel)="isAdjustmentModalOpen.set(false)"></app-stock-adjustment-modal>
-  }
+<!-- Modal de Ajuste Manual -->
+@if (isAdjustmentModalOpen()) {
+<app-stock-adjustment-modal [products]="products()" [loading]="modalLoading()" [errorMessage]="modalError()"
+  (save)="onSaveAdjustment($event)" (cancel)="isAdjustmentModalOpen.set(false)"></app-stock-adjustment-modal>
+}
 
-  <!-- Modal de Devolución -->
-  @if (isReturnModalOpen()) {
-  <app-return-modal (closed)="isReturnModalOpen.set(false)" (saved)="onReturnSaved()"></app-return-modal>
-  }
+<!-- Modal de Devolución -->
+@if (isReturnModalOpen()) {
+<app-return-modal (closed)="isReturnModalOpen.set(false)" (saved)="onReturnSaved()"></app-return-modal>
+}
 
-  <!-- Modal de Carga Masiva (Excel / OCR IA) -->
-  @if (isBulkImportOpen()) {
-  <app-bulk-import-modal (closed)="isBulkImportOpen.set(false)" (imported)="onBulkImportSuccess()"></app-bulk-import-modal>
-  }
+<!-- Modal de Carga Masiva (Excel / OCR IA) -->
+@if (isBulkImportOpen()) {
+<app-bulk-import-modal (closed)="isBulkImportOpen.set(false)"
+  (imported)="onBulkImportSuccess()"></app-bulk-import-modal>
+}

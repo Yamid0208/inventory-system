@@ -4,16 +4,16 @@
   <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-accent-blue/10 rounded-full blur-3xl pointer-events-none">
   </div>
 
-  <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center mb-6">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center mb-6 flex flex-col items-center">
     <!-- Icono / Logo Isotipo Coral StockFlow-style -->
     <div
-      class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary-500 to-primary-400 items-center justify-center shadow-lg shadow-primary-500/30 mb-4 transform hover:scale-105 transition-transform">
-      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary-500 to-primary-400 items-center justify-center shadow-lg shadow-primary-500/30 mb-3 transform hover:scale-105 transition-transform">
+      <svg width="32" height="32" class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
           d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
       </svg>
     </div>
-    <span class="inline-block text-[11px] uppercase tracking-widest font-mono font-bold text-slate-500 mb-1">INSINCRO</span>
+    <span class="block text-[11px] uppercase tracking-widest font-mono font-bold text-slate-500 mb-1">INSINCRO</span>
     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
       Inicia sesión en tu cuenta
     </h2>
@@ -29,7 +29,7 @@
       @if (errorMessage()) {
       <div
         class="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-start space-x-2.5 text-rose-700 text-xs animate-shake">
-        <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg width="16" height="16" class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
@@ -90,7 +90,7 @@
           <button type="submit" [disabled]="loading()"
             class="w-full py-3.5 px-6 rounded-2xl bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white font-bold text-sm shadow-coral-glow hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
             @if (loading()) {
-            <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <svg width="16" height="16" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">

@@ -51,8 +51,8 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
     return this._preloadedItemSignal();
   }
 
-  @Input() loading: any = false;
-  @Input() errorMessage: any = null;
+  @Input() loading: boolean = false;
+  @Input() errorMessage: string | null = null;
 
   @Output() save = new EventEmitter<CreatePurchaseRequest>();
   @Output() cancel = new EventEmitter<void>();
@@ -181,7 +181,7 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
     return this.form.get('items') as FormArray;
   }
 
-  onSupplierChange(supplierId: any): void {
+  onSupplierChange(supplierId: string | number | null): void {
     const newId = supplierId ? Number(supplierId) : null;
     const prevId = this.selectedSupplierId();
 
@@ -218,7 +218,7 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
     }
   }
 
-  onProductSelect(index: number, productId: any): void {
+  onProductSelect(index: number, productId: string | number | null): void {
     const prodId = Number(productId);
     const group = this.itemsArray.at(index);
     group.patchValue({ productId: prodId });
@@ -254,11 +254,11 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
   }
 
   isLoading(): boolean {
-    return typeof this.loading === 'function' ? this.loading() : !!this.loading;
+    return !!this.loading;
   }
 
   getErrorMessage(): string | null {
-    return typeof this.errorMessage === 'function' ? this.errorMessage() : this.errorMessage;
+    return this.errorMessage;
   }
 
   onSubmit(): void {
@@ -270,7 +270,7 @@ export class PurchaseModalComponent implements OnInit, OnChanges {
       purchaseDate: new Date(val.purchaseDate).toISOString(),
       notes: val.notes?.trim() || undefined,
       autoReceive: !!val.autoReceive,
-      items: val.items.map((i: any) => ({
+      items: val.items.map((i: { productId: number | string; quantity: number | string; unitPrice: number | string }) => ({
         productId: Number(i.productId),
         quantity: Number(i.quantity),
         unitPrice: Number(i.unitPrice),

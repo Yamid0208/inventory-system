@@ -1,4 +1,11 @@
-<div class="space-y-6">
+<div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
+
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-xs font-medium text-slate-400">
+    <span class="text-xs font-semibold text-[var(--color-brand-primary)] uppercase tracking-wider font-mono">Finanzas & Operación</span>
+    <span class="text-xs text-[var(--text-muted)]">/</span>
+    <span class="text-xs text-slate-700 dark:text-slate-200 font-semibold">Caja POS</span>
+  </div>
 
   <!-- Page Header & Tab Navigation -->
   <div
@@ -25,20 +32,18 @@
     <!-- Navigation Tabs -->
     <div
       class="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
-      <button type="button" (click)="switchTab('operation')" [class.bg-white]="activeTab() === 'operation'"
-        [class.text-slate-900]="activeTab() === 'operation'" [class.shadow-sm]="activeTab() === 'operation'"
-        [class.dark:bg-slate-700]="activeTab() === 'operation'" [class.dark:text-white]="activeTab() === 'operation'"
-        class="px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2">
+      <button type="button" (click)="switchTab('operation')"
+        [class]="activeTab() === 'operation' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+        class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
         Operación en Vivo
       </button>
 
-      <button type="button" (click)="switchTab('history')" [class.bg-white]="activeTab() === 'history'"
-        [class.text-slate-900]="activeTab() === 'history'" [class.shadow-sm]="activeTab() === 'history'"
-        [class.dark:bg-slate-700]="activeTab() === 'history'" [class.dark:text-white]="activeTab() === 'history'"
-        class="px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2">
+      <button type="button" (click)="switchTab('history')"
+        [class]="activeTab() === 'history' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+        class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -208,15 +213,15 @@
 
     <!-- Live Movements Section -->
     <div
-      class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
-      <div class="p-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+      class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden p-4 space-y-4">
+      <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
             Movimientos del Turno Actual
           </h3>
           <span
             class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-            {{ liveMovements().length }}
+            {{ liveMovementsTableState.totalCount() }}
           </span>
         </div>
         <button type="button" (click)="loadCurrentSession()"
@@ -230,27 +235,50 @@
         </button>
       </div>
 
-      @if (liveMovements().length === 0) {
+      <app-table-toolbar
+        searchPlaceholder="Buscar en movimientos por concepto, notas, tipo, medio..."
+        [searchValue]="liveMovementsTableState.searchQuery()"
+        [totalCount]="liveMovementsTableState.totalCount()"
+        [filteredCount]="liveMovementsTableState.filteredCount()"
+        [isFiltered]="liveMovementsTableState.isFiltered()"
+        [showExportCsv]="true"
+        [exportDisabled]="liveMovementsTableState.processedItems().length === 0"
+        (searchChange)="liveMovementsTableState.setSearch($event)"
+        (exportCsv)="exportLiveMovementsCsv()"
+      ></app-table-toolbar>
+
+      @if (liveMovementsTableState.processedItems().length === 0) {
       <div class="p-12 text-center text-slate-400 text-xs">
-        Aún no hay movimientos registrados en este turno. Las ventas realizadas en el POS se reflejarán automáticamente
-        aquí.
+        No se encontraron movimientos registrados en este turno con el criterio especificado.
       </div>
       } @else {
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
         <table class="w-full text-left text-xs">
           <thead
             class="bg-slate-50 dark:bg-slate-900/40 text-slate-600 dark:text-slate-300 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-700">
             <tr>
-              <th class="px-5 py-3">Fecha/Hora</th>
-              <th class="px-5 py-3">Tipo</th>
-              <th class="px-5 py-3">Concepto</th>
-              <th class="px-5 py-3">Medio de Pago</th>
-              <th class="px-5 py-3">Comprobante POS</th>
-              <th class="px-5 py-3 text-right">Valor</th>
+              <th class="px-5 py-3">
+                <app-sortable-header key="movementDate" label="Fecha/Hora" [sortKey]="liveMovementsTableState.sortKey()" [sortDirection]="liveMovementsTableState.sortDirection()" (sortChange)="liveMovementsTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-5 py-3">
+                <app-sortable-header key="movementType" label="Tipo" [sortKey]="liveMovementsTableState.sortKey()" [sortDirection]="liveMovementsTableState.sortDirection()" (sortChange)="liveMovementsTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-5 py-3">
+                <app-sortable-header key="concept" label="Concepto" [sortKey]="liveMovementsTableState.sortKey()" [sortDirection]="liveMovementsTableState.sortDirection()" (sortChange)="liveMovementsTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-5 py-3">
+                <app-sortable-header key="paymentMethod" label="Medio de Pago" [sortKey]="liveMovementsTableState.sortKey()" [sortDirection]="liveMovementsTableState.sortDirection()" (sortChange)="liveMovementsTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-5 py-3">
+                <app-sortable-header key="saleNumber" label="Comprobante POS" [sortKey]="liveMovementsTableState.sortKey()" [sortDirection]="liveMovementsTableState.sortDirection()" (sortChange)="liveMovementsTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-5 py-3 text-right">
+                <app-sortable-header key="amount" label="Valor" align="right" [sortKey]="liveMovementsTableState.sortKey()" [sortDirection]="liveMovementsTableState.sortDirection()" (sortChange)="liveMovementsTableState.toggleSort($event)"></app-sortable-header>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
-            @for (mov of liveMovements(); track mov.id) {
+            @for (mov of liveMovementsTableState.processedItems(); track mov.id) {
             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750 transition-colors">
               <td class="px-5 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                 {{ mov.movementDate | dateFormat }}
@@ -314,50 +342,42 @@
   @if (activeTab() === 'history') {
   <div class="space-y-4">
 
-    <!-- Filters Bar -->
-    <div
-      class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-      <div class="flex flex-wrap items-center gap-3">
-        <div>
-          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Estado</label>
-          <select [(ngModel)]="filterStatus" (change)="loadHistory()"
-            class="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-            <option value="all">Todos los Estados</option>
-            <option value="Open">Abiertas</option>
-            <option value="Closed">Cerradas</option>
-          </select>
+    <!-- Toolbar Estándar con Búsqueda Omni-Campo y Exportar CSV -->
+    <app-table-toolbar
+      searchPlaceholder="Buscar en historial por sesión, empleado..."
+      [searchValue]="historyTableState.searchQuery()"
+      [totalCount]="historyTableState.totalCount()"
+      [filteredCount]="historyTableState.filteredCount()"
+      [isFiltered]="historyTableState.isFiltered()"
+      [showExportCsv]="true"
+      [exportDisabled]="historyTableState.processedItems().length === 0"
+      (searchChange)="historyTableState.setSearch($event)"
+      (exportCsv)="exportHistoryCsv()"
+    >
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-semibold">
+          <span>🏢</span>
+          <span>{{ branchContextService.assignedWarehouseName() }}</span>
         </div>
-
-        <div>
-          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha Desde</label>
-          <input type="date" [(ngModel)]="filterStartDate" (change)="loadHistory()"
-            class="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Fecha Hasta</label>
-          <input type="date" [(ngModel)]="filterEndDate" (change)="loadHistory()"
-            class="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
-        </div>
+        <select [(ngModel)]="filterStatus" (change)="loadHistory()"
+          class="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+          <option value="all">Todos los Estados</option>
+          <option value="Open">Abiertas</option>
+          <option value="Closed">Cerradas</option>
+        </select>
+        <input type="date" [(ngModel)]="filterStartDate" (change)="loadHistory()"
+          class="px-2.5 py-1 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
+        <input type="date" [(ngModel)]="filterEndDate" (change)="loadHistory()"
+          class="px-2.5 py-1 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
       </div>
-
-      <button type="button" (click)="loadHistory()"
-        class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white transition-all flex items-center gap-1.5 self-start md:self-end">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
-          </path>
-        </svg>
-        Filtrar
-      </button>
-    </div>
+    </app-table-toolbar>
 
     <!-- History Table -->
     <div
       class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
       @if (historyLoading()) {
       <div class="p-12 text-center text-xs text-slate-500">Cargando sesiones...</div>
-      } @else if (historySessions().length === 0) {
+      } @else if (historyTableState.processedItems().length === 0) {
       <div class="p-12 text-center text-xs text-slate-400">
         No se encontraron sesiones de caja en el rango seleccionado.
       </div>
@@ -367,20 +387,38 @@
           <thead
             class="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200 dark:border-slate-700">
             <tr>
-              <th class="px-4 py-3">Sesión</th>
-              <th class="px-4 py-3">Empleado</th>
-              <th class="px-4 py-3">Apertura</th>
-              <th class="px-4 py-3">Cierre</th>
-              <th class="px-4 py-3 text-right">Saldo Inicial</th>
-              <th class="px-4 py-3 text-right">Esperado</th>
-              <th class="px-4 py-3 text-right">Contado</th>
-              <th class="px-4 py-3 text-center">Diferencia</th>
-              <th class="px-4 py-3 text-center">Estado</th>
+              <th class="px-4 py-3">
+                <app-sortable-header key="sessionNumber" label="Sesión" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-4 py-3">
+                <app-sortable-header key="userName" label="Empleado" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-4 py-3">
+                <app-sortable-header key="openedAt" label="Apertura" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-4 py-3">
+                <app-sortable-header key="closedAt" label="Cierre" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-4 py-3 text-right">
+                <app-sortable-header key="initialCash" label="Saldo Inicial" align="right" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-4 py-3 text-right">
+                <app-sortable-header key="expectedCash" label="Esperado" align="right" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-4 py-3 text-right">
+                <app-sortable-header key="actualCash" label="Contado" align="right" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-4 py-3 text-center">
+                <app-sortable-header key="cashDifference" label="Diferencia" align="center" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="px-4 py-3 text-center">
+                <app-sortable-header key="status" label="Estado" align="center" [sortKey]="historyTableState.sortKey()" [sortDirection]="historyTableState.sortDirection()" (sortChange)="historyTableState.toggleSort($event)"></app-sortable-header>
+              </th>
               <th class="px-4 py-3 text-center">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60">
-            @for (sess of historySessions(); track sess.id) {
+            @for (sess of historyTableState.processedItems(); track sess.id) {
             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-750 transition-colors">
               <td class="px-4 py-3 font-mono font-bold text-slate-900 dark:text-white">
                 {{ sess.sessionNumber }}

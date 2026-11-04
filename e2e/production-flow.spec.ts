@@ -61,7 +61,7 @@ test.describe('E2E Pre-Production Verification Suite', () => {
 
     // El modal de importación masiva debe abrirse con su título
     await expect(page.getByText('Carga Masiva de Inventario')).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('Excel & IA Vision')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Excel, Fotos & PDF (IA)')).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-04: Protección contra accesos no autenticados (Guard)', async ({ page }) => {

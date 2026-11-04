@@ -249,17 +249,20 @@ public class BulkProductImportService : IBulkProductImportService
             throw new InvalidOperationException("Clave de API de Gemini no configurada. Agrega tu clave en Gemini:ApiKey en appsettings.Development.json o variable de entorno GEMINI_API_KEY.");
         }
 
+        var isPdf = string.Equals(mimeType, "application/pdf", StringComparison.OrdinalIgnoreCase);
+        var effectiveMime = string.IsNullOrWhiteSpace(mimeType) ? (isPdf ? "application/pdf" : "image/jpeg") : mimeType;
+
         var configuredModel = _configuration["Gemini:Model"] ?? "gemini-3.5-flash-lite";
-        var candidateModels = new[] { configuredModel, "gemini-3.5-flash-lite", "gemini-3.8-flash" }
+        var candidateModels = new[] { configuredModel, "gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash", "gemini-2.0-flash" }
             .Where(m => !string.IsNullOrWhiteSpace(m))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         using var memoryStream = new MemoryStream();
         await imageStream.CopyToAsync(memoryStream, cancellationToken);
-        var base64Image = Convert.ToBase64String(memoryStream.ToArray());
+        var base64Data = Convert.ToBase64String(memoryStream.ToArray());
 
-        var prompt = @"Analiza esta imagen que contiene una tabla de inventario o lista de productos.
+        var prompt = @"Analiza este documento o imagen (fotografía, archivo PDF, factura o catálogo) que contiene una lista de productos o tabla de inventario.
 Extrae los productos en un array JSON con los siguientes campos estrictos:
 - sku (string, si no tiene inventa uno consecutivo como PROD-001)
 - name (string, nombre del producto)
@@ -274,7 +277,7 @@ Extrae los productos en un array JSON con los siguientes campos estrictos:
 Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... ```";
 
         var client = _httpClientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(45);
+        client.Timeout = TimeSpan.FromSeconds(50);
 
         HttpResponseMessage? response = null;
         string? respString = null;
@@ -291,7 +294,7 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                     input = new object[]
                     {
                         new { type = "text", text = prompt },
-                        new { type = "image", data = base64Image, mime_type = string.IsNullOrWhiteSpace(mimeType) ? "image/jpeg" : mimeType }
+                        new { type = isPdf ? "document" : "image", data = base64Data, mime_type = effectiveMime }
                     }
                 };
 
@@ -314,48 +317,67 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
             }
         }
 
-        // Intento 2: Fallback a generateContent si interactions no fue exitoso
+        // Intento 2: Fallback a generateContent iterando modelos candidatos
         if (respString == null)
         {
-            var fallbackUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{configuredModel}:generateContent?key={apiKey}";
-            var requestBody = new
+            string? lastError = null;
+            foreach (var candidateModel in candidateModels)
             {
-                contents = new[]
+                try
                 {
-                    new
+                    var fallbackUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{candidateModel}:generateContent?key={apiKey}";
+                    var requestBody = new
                     {
-                        parts = new object[]
+                        contents = new[]
                         {
-                            new { text = prompt },
                             new
                             {
-                                inline_data = new
+                                parts = new object[]
                                 {
-                                    mime_type = string.IsNullOrWhiteSpace(mimeType) ? "image/jpeg" : mimeType,
-                                    data = base64Image
+                                    new { text = prompt },
+                                    new
+                                    {
+                                        inline_data = new
+                                        {
+                                            mime_type = effectiveMime,
+                                            data = base64Data
+                                        }
+                                    }
                                 }
                             }
+                        },
+                        generationConfig = new
+                        {
+                            temperature = 0.1,
+                            response_mime_type = "application/json"
                         }
+                    };
+
+                    var jsonContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+                    response = await client.PostAsync(fallbackUrl, jsonContent, cancellationToken);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        respString = await response.Content.ReadAsStringAsync(cancellationToken);
+                        break;
                     }
-                },
-                generationConfig = new
-                {
-                    temperature = 0.1,
-                    response_mime_type = "application/json"
+                    else
+                    {
+                        lastError = await response.Content.ReadAsStringAsync(cancellationToken);
+                        _logger.LogWarning("Modelo {Model} en generateContent retornó {Status}: {Err}", candidateModel, response.StatusCode, lastError);
+                    }
                 }
-            };
-
-            var jsonContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-            response = await client.PostAsync(fallbackUrl, jsonContent, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var err = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogError("Error al invocar Gemini API: {Err}", err);
-                throw new InvalidOperationException($"Error comunicándose con el servicio de Inteligencia Artificial: {response.StatusCode}");
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Excepción con modelo {Model} en generateContent", candidateModel);
+                }
             }
 
-            respString = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (respString == null)
+            {
+                _logger.LogError("Error al invocar Gemini API con todos los modelos: {Err}", lastError);
+                throw new InvalidOperationException($"Error comunicándose con el servicio de Inteligencia Artificial de Gemini: {response?.StatusCode.ToString() ?? "Sin respuesta"}");
+            }
         }
 
         string? candidateText = null;
@@ -630,6 +652,11 @@ Responde ÚNICAMENTE con el bloque JSON crudo sin bloques markdown ```json ... `
                                 description: item.Description ?? existingProduct.Description,
                                 imageUrl: existingProduct.ImageUrl
                             );
+
+                            if (!existingProduct.WarehouseId.HasValue && request.WarehouseId.HasValue)
+                            {
+                                existingProduct.AssignWarehouse(request.WarehouseId.Value);
+                            }
 
                             if (item.InitialStock > 0)
                             {

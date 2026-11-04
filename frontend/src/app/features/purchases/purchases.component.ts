@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, untracked, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PurchaseService } from '../../core/services/purchase.service';
@@ -16,6 +17,10 @@ import { PurchaseReturnModalComponent } from './components/purchase-return-modal
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 
@@ -30,6 +35,8 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
     AppButtonComponent,
     AppPaginationComponent,
     AppSkeletonComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './purchases.component.html'
@@ -41,21 +48,47 @@ export class PurchasesComponent implements OnInit {
   branchContextService = inject(BranchContextService);
   private confirmationService = inject(ConfirmationService);
   private alertService = inject(AlertService, { optional: true });
+  private csvExportService = inject(CsvExportService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   purchases = signal<Purchase[]>([]);
   suppliers = signal<Supplier[]>([]);
   products = signal<Product[]>([]);
   loading = signal<boolean>(false);
 
+  // Gestor reactivo para ordenamiento y búsqueda omni-campo en compras
+  readonly tableState = new TableStateManager<Purchase>({
+    data: () => this.purchases()
+  });
+
+  exportPurchasesCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `compras_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'purchaseNumber', header: 'N° Orden' },
+        { key: 'purchaseDate', header: 'Fecha' },
+        { key: 'supplierName', header: 'Proveedor' },
+        { key: 'userName', header: 'Responsable' },
+        { key: 'status', header: 'Estado' },
+        { key: 'total', header: 'Total' }
+      ],
+      data
+    });
+  }
+
   constructor() {
-    effect(() => {
-      const wid = this.branchContextService.selectedWarehouseId();
-      untracked(() => {
-        this.loadPurchases();
-      });
-    }, { allowSignalWrites: true });
+    try {
+      effect(() => {
+        const wid = this.branchContextService.selectedWarehouseId();
+        untracked(() => {
+          this.loadPurchases();
+        });
+      }, { allowSignalWrites: true });
+    } catch {}
   }
 
   // Paginación
@@ -82,7 +115,9 @@ export class PurchasesComponent implements OnInit {
     this.loadProducts();
     this.loadPurchases();
 
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
       if (params['new'] === 'true') {
         const productId = params['productId'] ? Number(params['productId']) : undefined;
         const quantity = params['quantity'] ? Number(params['quantity']) : undefined;

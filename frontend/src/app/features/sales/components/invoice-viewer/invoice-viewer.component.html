@@ -68,7 +68,7 @@
         </div>
 
         <!-- Información del Cliente y Pago -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div class="bg-slate-50 print:bg-white p-3.5 rounded-xl border border-slate-200">
             <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Datos del Cliente / Adquiriente</h3>
             <p class="font-bold text-slate-900 text-sm">{{ sale.customerName }}</p>
@@ -76,7 +76,7 @@
               <p class="text-slate-700 text-xs mt-0.5"><span class="font-semibold text-slate-500">NIT / C.C.:</span> {{ sale.customerTaxId }}</p>
             }
             @if (sale.customerEmail) {
-              <p class="text-slate-700 text-xs mt-0.5"><span class="font-semibold text-slate-500">Email:</span> {{ sale.customerEmail }}</p>
+              <p class="text-slate-700 text-xs mt-0.5"><span class="font-semibold text-slate-500">Correo:</span> {{ sale.customerEmail }}</p>
             }
           </div>
           <div class="bg-slate-50 print:bg-white p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between">
@@ -99,7 +99,7 @@
         </div>
 
         <!-- Tabla de Artículos -->
-        <div class="mb-6 rounded-xl border border-slate-200 overflow-hidden">
+        <div class="mb-6 rounded-xl border border-slate-200 overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-slate-100 print:bg-slate-50 text-slate-700 text-[10px] uppercase tracking-wider font-bold">
