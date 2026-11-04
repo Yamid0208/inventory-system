@@ -212,8 +212,16 @@ export class ReportsComponent implements OnInit, OnDestroy {
       Mixto: '#f59e0b',
       Card: '#0ea5e9',       // Azul Celeste
       Tarjeta: '#0ea5e9',
+      CreditCard: '#3b82f6',
+      'Tarjeta de Crédito': '#3b82f6',
+      DebitCard: '#06b6d4',
+      'Tarjeta de Débito': '#06b6d4',
       Transfer: '#6366f1',   // Índigo
-      Transferencia: '#6366f1'
+      Transferencia: '#6366f1',
+      Credit: '#8b5cf6',
+      'Crédito': '#8b5cf6',
+      Nequi: '#a855f7',
+      Daviplata: '#ef4444'
     };
 
     let accumulatedPct = 0;
@@ -224,7 +232,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
       accumulatedPct += pct;
       const color = colors[m.method] || (idx % 2 === 0 ? '#8b5cf6' : '#ec4899');
       return {
-        method: m.method,
+        rawMethod: m.method,
+        method: this.formatPaymentMethod(m.method),
         percentage: pct,
         amount: m.totalAmount,
         count: m.transactionCount,
@@ -710,5 +719,87 @@ export class ReportsComponent implements OnInit, OnDestroy {
         this.downloadingKey.set(null);
       }
     });
+  }
+
+  // Métodos de formato y traducción a español
+  formatPaymentMethod(method?: string | null): string {
+    if (!method) return '-';
+    const map: Record<string, string> = {
+      Cash: 'Efectivo',
+      Mixed: 'Mixto',
+      Card: 'Tarjeta',
+      CreditCard: 'Tarjeta de Crédito',
+      DebitCard: 'Tarjeta de Débito',
+      Transfer: 'Transferencia',
+      Credit: 'Crédito',
+      Nequi: 'Nequi',
+      Daviplata: 'Daviplata'
+    };
+    return map[method] || method;
+  }
+
+  formatSaleStatus(status?: string | null): string {
+    if (!status) return '-';
+    const map: Record<string, string> = {
+      Completed: 'Completada',
+      Cancelled: 'Anulada',
+      Draft: 'Borrador'
+    };
+    return map[status] || status;
+  }
+
+  formatUserRole(role?: string | null): string {
+    if (!role) return 'N/A';
+    const map: Record<string, string> = {
+      Admin: 'Administrador',
+      SuperAdmin: 'Super Administrador',
+      Seller: 'Vendedor',
+      Warehouse: 'Almacén'
+    };
+    return map[role] || role;
+  }
+
+  formatCashRegisterStatus(status?: string | null): string {
+    if (!status) return '-';
+    const map: Record<string, string> = {
+      Open: 'Abierta',
+      Closed: 'Cerrada'
+    };
+    return map[status] || status;
+  }
+
+  formatDifferenceStatus(status?: string | null): string {
+    if (!status) return 'Pendiente';
+    const map: Record<string, string> = {
+      Balanced: 'Cuadrada',
+      Surplus: 'Sobrante',
+      Shortage: 'Faltante'
+    };
+    return map[status] || status;
+  }
+
+  formatPurchaseStatus(status?: string | null): string {
+    if (!status) return '-';
+    const map: Record<string, string> = {
+      Pending: 'Pendiente',
+      Received: 'Recibida',
+      Cancelled: 'Anulada'
+    };
+    return map[status] || status;
+  }
+
+  formatMovementType(type?: string | null): string {
+    if (!type) return '-';
+    const map: Record<string, string> = {
+      Purchase: 'Compra',
+      Sale: 'Venta',
+      AdjustmentIn: 'Ajuste Entrada',
+      AdjustmentOut: 'Ajuste Salida',
+      Return: 'Devolución',
+      Entry: 'Entrada',
+      Exit: 'Salida',
+      Adjustment: 'Ajuste'
+    };
+    return map[type] || type;
   }
 }

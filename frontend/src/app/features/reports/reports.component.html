@@ -20,7 +20,7 @@
 
     <div class="flex items-center gap-3">
       <button type="button" (click)="loadTableData(); loadSummary()"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold shadow-sm transition-all cursor-pointer">
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold shadow-sm transition-all cursor-pointer">
         <svg class="w-4 h-4 text-slate-500" [class.animate-spin]="tableLoading() || loading()" fill="none"
           stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -32,7 +32,7 @@
 
       <button type="button" (click)="downloadCurrentReport()" [disabled]="downloadingKey() !== null"
         data-testid="btn-export-csv"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:scale-[0.98] text-white text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50">
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 active:scale-[0.98] text-white text-sm font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50">
         @if (downloadingKey() !== null) {
         <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
         <span>Exportando...</span>
@@ -61,7 +61,7 @@
         [class.hover:bg-primary-50]="selectedCategory() !== 'sales'"
         [class.hover:text-primary-700]="selectedCategory() !== 'sales'"
         [class.hover:border-primary-300]="selectedCategory() !== 'sales'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-sm font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">💳</span>
         <span>Ventas</span>
       </button>
@@ -77,7 +77,7 @@
         [class.hover:bg-primary-50]="selectedCategory() !== 'finance'"
         [class.hover:text-primary-700]="selectedCategory() !== 'finance'"
         [class.hover:border-primary-300]="selectedCategory() !== 'finance'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-sm font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">📈</span>
         <span>Finanzas & CMV</span>
       </button>
@@ -93,7 +93,7 @@
         [class.hover:bg-primary-50]="selectedCategory() !== 'inventory'"
         [class.hover:text-primary-700]="selectedCategory() !== 'inventory'"
         [class.hover:border-primary-300]="selectedCategory() !== 'inventory'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-sm font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">📋</span>
         <span>Inventario</span>
       </button>
@@ -109,7 +109,7 @@
         [class.hover:bg-primary-50]="selectedCategory() !== 'purchases'"
         [class.hover:text-primary-700]="selectedCategory() !== 'purchases'"
         [class.hover:border-primary-300]="selectedCategory() !== 'purchases'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-sm font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">🛍️</span>
         <span>Compras</span>
       </button>
@@ -125,7 +125,7 @@
         [class.hover:bg-primary-50]="selectedCategory() !== 'cash'"
         [class.hover:text-primary-700]="selectedCategory() !== 'cash'"
         [class.hover:border-primary-300]="selectedCategory() !== 'cash'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-sm font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">💵</span>
         <span>Caja POS</span>
       </button>
@@ -141,7 +141,7 @@
         [class.hover:bg-primary-50]="selectedCategory() !== 'audit'"
         [class.hover:text-primary-700]="selectedCategory() !== 'audit'"
         [class.hover:border-primary-300]="selectedCategory() !== 'audit'"
-        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
+        class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-sm font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">🛡️</span>
         <span>Auditoría</span>
       </button>
@@ -150,13 +150,13 @@
 
   <!-- SUBSECCIONES SEGÚN LA CATEGORÍA ACTIVA -->
   @if (selectedCategory() === 'sales') {
-  <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
+  <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
     <button type="button" (click)="selectReport('sales')" data-testid="tab-sales"
       [ngClass]="selectedReport() === 'sales'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
-      <span class="text-sm">💳</span>
+      class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">💳</span>
       <span>Historial y Facturación</span>
       @if (selectedReport() === 'sales') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -166,8 +166,8 @@
       [ngClass]="selectedReport() === 'sales-top'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
-      <span class="text-sm">⭐</span>
+      class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">⭐</span>
       <span>Top Productos</span>
       @if (selectedReport() === 'sales-top') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -177,8 +177,8 @@
       [ngClass]="selectedReport() === 'sales-categories'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
-      <span class="text-sm">🏷️</span>
+      class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">🏷️</span>
       <span>Por Categoría</span>
       @if (selectedReport() === 'sales-categories') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -188,8 +188,8 @@
       [ngClass]="selectedReport() === 'sales-hourly'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
-      <span class="text-sm">⏰</span>
+      class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">⏰</span>
       <span>Horarios Pico</span>
       @if (selectedReport() === 'sales-hourly') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -199,8 +199,8 @@
       [ngClass]="selectedReport() === 'sales-employees'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-3.5 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
-      <span class="text-sm">👥</span>
+      class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">👥</span>
       <span>Por Vendedor</span>
       @if (selectedReport() === 'sales-employees') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -208,13 +208,13 @@
     </button>
   </div>
   } @else if (selectedCategory() === 'inventory') {
-  <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
+  <div class="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
     <button type="button" (click)="selectReport('inventory')" data-testid="tab-inventory"
       [ngClass]="selectedReport() === 'inventory'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
-      <span class="text-sm">📋</span>
+      class="px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">📋</span>
       <span>Kardex y Movimientos</span>
       @if (selectedReport() === 'inventory') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -224,8 +224,8 @@
       [ngClass]="selectedReport() === 'products'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
-      <span class="text-sm">📦</span>
+      class="px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">📦</span>
       <span>Catálogo & Valuación</span>
       @if (selectedReport() === 'products') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -235,8 +235,8 @@
       [ngClass]="selectedReport() === 'low-stock'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
-      class="px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer">
-      <span class="text-sm">⚠️</span>
+      class="px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">⚠️</span>
       <span>Bajo Stock & Alertas</span>
       @if (selectedReport() === 'low-stock') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
@@ -249,13 +249,13 @@
   <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div>
-        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
           <span>Filtros Temporales</span>
-          <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
             Período Activo
           </span>
         </h3>
-        <p class="text-xs text-slate-400 mt-0.5">
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
           Configura el rango temporal. Por defecto se inicializa en el día actual (Hoy).
         </p>
       </div>
@@ -276,7 +276,7 @@
           [class.hover:text-primary-700]="activePreset() !== 'today'"
           [class.hover:border-primary-300]="activePreset() !== 'today'"
           [class.hover:shadow-xs]="activePreset() !== 'today'"
-          class="px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
+          class="px-3 py-1.5 rounded-lg border text-sm font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Hoy
         </button>
 
@@ -294,7 +294,7 @@
           [class.hover:text-primary-700]="activePreset() !== 'yesterday'"
           [class.hover:border-primary-300]="activePreset() !== 'yesterday'"
           [class.hover:shadow-xs]="activePreset() !== 'yesterday'"
-          class="px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
+          class="px-3 py-1.5 rounded-lg border text-sm font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Ayer
         </button>
 
@@ -312,7 +312,7 @@
           [class.hover:text-primary-700]="activePreset() !== 'thisMonth'"
           [class.hover:border-primary-300]="activePreset() !== 'thisMonth'"
           [class.hover:shadow-xs]="activePreset() !== 'thisMonth'"
-          class="px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
+          class="px-3 py-1.5 rounded-lg border text-sm font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Mes Actual
         </button>
 
@@ -330,7 +330,7 @@
           [class.hover:text-primary-700]="activePreset() !== 'lastMonth'"
           [class.hover:border-primary-300]="activePreset() !== 'lastMonth'"
           [class.hover:shadow-xs]="activePreset() !== 'lastMonth'"
-          class="px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
+          class="px-3 py-1.5 rounded-lg border text-sm font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Mes Anterior
         </button>
 
@@ -348,7 +348,7 @@
           [class.hover:text-primary-700]="activePreset() !== '7days'"
           [class.hover:border-primary-300]="activePreset() !== '7days'"
           [class.hover:shadow-xs]="activePreset() !== '7days'"
-          class="px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all duration-200 active:scale-[0.98]">
+          class="px-3 py-1.5 rounded-lg border text-sm font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Últimos 7 días
         </button>
 
@@ -366,7 +366,7 @@
           [class.hover:text-primary-700]="activePreset() !== '30days'"
           [class.hover:border-primary-300]="activePreset() !== '30days'"
           [class.hover:shadow-xs]="activePreset() !== '30days'"
-          class="px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all duration-200 active:scale-[0.98]">
+          class="px-3 py-1.5 rounded-lg border text-sm font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Últimos 30 días
         </button>
 
@@ -384,7 +384,7 @@
           [class.hover:text-primary-700]="activePreset() !== 'all'"
           [class.hover:border-primary-300]="activePreset() !== 'all'"
           [class.hover:shadow-xs]="activePreset() !== 'all'"
-          class="px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all duration-200 active:scale-[0.98]">
+          class="px-3 py-1.5 rounded-lg border text-sm font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Todo el Histórico
         </button>
       </div>
@@ -393,34 +393,34 @@
     <!-- Inputs de Rango Personalizado -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-slate-100">
       <div>
-        <label class="block text-xs font-semibold text-slate-500 mb-1">Fecha Inicio (Desde)</label>
+        <label class="block text-sm font-semibold text-slate-600 mb-1">Fecha Inicio (Desde)</label>
         <input type="date" [value]="startDate()" data-testid="input-start-date"
           (change)="startDate.set($any($event.target).value); onCustomDateChange()"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
+          class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-500 mb-1">Fecha Fin (Hasta)</label>
+        <label class="block text-sm font-semibold text-slate-600 mb-1">Fecha Fin (Hasta)</label>
         <input type="date" [value]="endDate()" data-testid="input-end-date"
           (change)="endDate.set($any($event.target).value); onCustomDateChange()"
-          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
+          class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-500 mb-1">Búsqueda rápida</label>
+        <label class="block text-sm font-semibold text-slate-600 mb-1">Búsqueda rápida</label>
         <div class="relative">
           <input type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
             data-testid="input-quick-search"
             placeholder="Filtrar por SKU, nombre, comprobante..."
-            class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
-          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
+          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
           @if (searchTerm()) {
           <button type="button" (click)="clearSearch()" title="Limpiar filtro"
-            class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
@@ -438,18 +438,18 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400">Total Facturado</span>
+          <span class="text-sm font-semibold text-slate-500">Total Facturado</span>
           @if (sa) {
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+            <span class="px-2 py-0.5 rounded-full text-xs font-black"
               [ngClass]="sa.revenueGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.revenueGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
               {{ sa.revenueGrowthPct > 0 ? '+' : '' }}{{ sa.revenueGrowthPct }}%
             </span>
           }
         </div>
-        <div class="text-2xl font-black text-primary-600 mt-1" data-testid="metric-sales-total">
+        <div class="text-2xl sm:text-3xl font-black text-primary-600 mt-1" data-testid="metric-sales-total">
           {{ (sa?.totalRevenue ?? sm?.totalSalesAmount ?? 0) | currencyFormat }}
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">
+        <p class="text-xs text-slate-500 mt-1">
           IVA (19%): {{ (sa?.tax ?? sm?.totalTax ?? 0) | currencyFormat }}
           @if (sa) {
             &bull; {{ sa.unitsSold }} unidades
@@ -459,42 +459,42 @@
 
       <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400">Transacciones Realizadas</span>
+          <span class="text-sm font-semibold text-slate-500">Transacciones Realizadas</span>
           @if (sa) {
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+            <span class="px-2 py-0.5 rounded-full text-xs font-black"
               [ngClass]="sa.transactionsGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.transactionsGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
               {{ sa.transactionsGrowthPct > 0 ? '+' : '' }}{{ sa.transactionsGrowthPct }}%
             </span>
           }
         </div>
-        <div class="text-2xl font-black text-slate-900 mt-1" data-testid="metric-sales-count">
+        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-testid="metric-sales-count">
           {{ sa?.transactionCount ?? sm?.totalTransactions ?? 0 }}
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">Comprobantes emitidos en el período</p>
+        <p class="text-xs text-slate-500 mt-1">Comprobantes emitidos en el período</p>
       </div>
 
       <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400">Ticket Promedio</span>
+          <span class="text-sm font-semibold text-slate-500">Ticket Promedio</span>
           @if (sa) {
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+            <span class="px-2 py-0.5 rounded-full text-xs font-black"
               [ngClass]="sa.ticketGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.ticketGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
               {{ sa.ticketGrowthPct > 0 ? '+' : '' }}{{ sa.ticketGrowthPct }}%
             </span>
           }
         </div>
-        <div class="text-2xl font-black text-slate-900 mt-1">
+        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
           {{ (sa?.averageTicket ?? sm?.averageTicket ?? 0) | currencyFormat }}
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">Gasto medio por cliente</p>
+        <p class="text-xs text-slate-500 mt-1">Gasto medio por cliente</p>
       </div>
 
       <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-        <span class="text-xs font-semibold text-slate-400">Volumen de Artículos</span>
-        <div class="text-2xl font-black text-slate-900 mt-1">
+        <span class="text-sm font-semibold text-slate-500">Volumen de Artículos</span>
+        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
           {{ (sa?.unitsSold ?? sm?.totalSalesAmount ?? 0) }} uds
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">
+        <p class="text-xs text-slate-500 mt-1">
           Impuestos (19%): {{ (sa?.tax ?? sm?.totalTax ?? 0) | currencyFormat }}
         </p>
       </div>
@@ -506,17 +506,17 @@
       <div class="flex items-start sm:items-center gap-3">
         <span class="text-xl">💡</span>
         <div>
-          <h4 class="text-xs font-bold text-slate-800">El filtro actual "Hoy" no tiene ventas registradas en esta sede</h4>
-          <p class="text-[11px] text-slate-500 mt-0.5">Explora las comparativas y gráficas seleccionando un período con movimientos:</p>
+          <h4 class="text-sm font-bold text-slate-800">El filtro actual "Hoy" no tiene ventas registradas en esta sede</h4>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Explora las comparativas y gráficas seleccionando un período con movimientos:</p>
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <button type="button" (click)="setDatePreset('thisMonth')"
-          class="px-3 py-1.5 rounded-xl bg-white border border-primary-300 text-primary-700 hover:bg-primary-50 text-xs font-bold transition-all shadow-xs cursor-pointer">
+          class="px-3 py-1.5 rounded-xl bg-white border border-primary-300 text-primary-700 hover:bg-primary-50 text-sm font-bold transition-all shadow-xs cursor-pointer">
           📅 Ver Mes Actual
         </button>
         <button type="button" (click)="setDatePreset('all')"
-          class="px-3 py-1.5 rounded-xl bg-primary-600 text-white hover:bg-primary-700 text-xs font-bold transition-all shadow-xs cursor-pointer">
+          class="px-3 py-1.5 rounded-xl bg-primary-600 text-white hover:bg-primary-700 text-sm font-bold transition-all shadow-xs cursor-pointer">
           📈 Ver Todo el Histórico
         </button>
       </div>
@@ -529,10 +529,10 @@
       <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
-            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
               <span>{{ salesGraphMode() === 'trend' ? '📈 Evolución y Tendencias en el Tiempo' : '⚖️ Comparativa de Período vs Ciclo Anterior' }}</span>
             </h3>
-            <p class="text-xs text-slate-400 mt-0.5">
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
               {{ salesGraphMode() === 'trend' ? 'Serie cronológica diaria de facturación y volumen de transacciones.' : 'Análisis comparativo de crecimiento relativo y absoluto.' }}
             </p>
           </div>
@@ -541,12 +541,12 @@
           <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/80 w-fit">
             <button type="button" (click)="salesGraphMode.set('trend')" data-testid="btn-graph-mode-trend"
               [ngClass]="salesGraphMode() === 'trend' ? 'bg-white text-primary-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-              class="px-2.5 py-1 text-xs rounded-lg transition-all cursor-pointer">
+              class="px-3 py-1.5 text-sm rounded-lg transition-all cursor-pointer">
               Tendencia
             </button>
             <button type="button" (click)="salesGraphMode.set('comparison')" data-testid="btn-graph-mode-comparison"
               [ngClass]="salesGraphMode() === 'comparison' ? 'bg-white text-primary-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-              class="px-2.5 py-1 text-xs rounded-lg transition-all cursor-pointer">
+              class="px-3 py-1.5 text-sm rounded-lg transition-all cursor-pointer">
               Comparativa
             </button>
           </div>
@@ -601,29 +601,29 @@
             </div>
 
             <!-- Resumen de Tendencias -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
-              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-slate-400 block text-[10px] font-semibold">Día Récord</span>
-                <span class="font-bold text-slate-800">{{ tc.peakDay?.label || 'N/A' }}</span>
-                <span class="text-primary-600 font-mono font-bold block text-[11px]">{{ tc.peakDay?.totalRevenue | currencyFormat }}</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-sm">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-slate-500 block text-xs font-semibold">Día Récord</span>
+                <span class="font-bold text-slate-800 text-sm">{{ tc.peakDay?.label || 'N/A' }}</span>
+                <span class="text-primary-600 font-mono font-bold block text-xs">{{ tc.peakDay?.totalRevenue | currencyFormat }}</span>
               </div>
-              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-slate-400 block text-[10px] font-semibold">Promedio Diario</span>
-                <span class="font-bold text-slate-800">{{ tc.averageRevenue | currencyFormat }}</span>
-                <span class="text-slate-400 text-[10px] block">por día activo</span>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-slate-500 block text-xs font-semibold">Promedio Diario</span>
+                <span class="font-bold text-slate-800 text-sm">{{ tc.averageRevenue | currencyFormat }}</span>
+                <span class="text-slate-500 text-xs block">por día activo</span>
               </div>
-              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-slate-400 block text-[10px] font-semibold">Total en Serie</span>
-                <span class="font-bold text-slate-900">{{ tc.totalRevenue | currencyFormat }}</span>
-                <span class="text-slate-400 text-[10px] block">{{ tc.points.length }} fechas registradas</span>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-slate-500 block text-xs font-semibold">Total en Serie</span>
+                <span class="font-bold text-slate-900 text-sm">{{ tc.totalRevenue | currencyFormat }}</span>
+                <span class="text-slate-500 text-xs block">{{ tc.points.length }} fechas registradas</span>
               </div>
             </div>
           </div>
           } @else {
             <div class="p-10 text-center space-y-2">
               <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-lg">📉</div>
-              <p class="text-xs font-bold text-slate-700">Sin datos de tendencia para el período seleccionado</p>
-              <p class="text-[11px] text-slate-400">Prueba cambiando el preset a "Mes Actual" o "Todo el Histórico".</p>
+              <p class="text-sm font-bold text-slate-700">Sin datos de tendencia para el período seleccionado</p>
+              <p class="text-xs text-slate-500">Prueba cambiando el preset a "Mes Actual" o "Todo el Histórico".</p>
             </div>
           }
         }
@@ -635,87 +635,87 @@
           <div class="pt-4 space-y-5">
             <!-- Barra 1: Facturación Bruta -->
             <div class="space-y-1.5">
-              <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center justify-between text-sm">
                 <span class="font-bold text-slate-700 flex items-center gap-1.5">
                   <span>💰 Facturación Total</span>
                 </span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+                <span class="px-2 py-0.5 rounded-full text-xs font-black"
                   [ngClass]="comp.revDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
                   {{ comp.revDiff >= 0 ? '+' : '' }}{{ comp.revDiff | currencyFormat }} ({{ comp.revPct >= 0 ? '+' : '' }}{{ comp.revPct }}%)
                 </span>
               </div>
               <div class="space-y-1">
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-semibold text-slate-400 w-16">Actual:</span>
+                  <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
                   <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
                     <div class="bg-primary-600 h-full rounded-full transition-all duration-300" [style.width.%]="comp.curRevBarWidth"></div>
                   </div>
-                  <span class="text-xs font-mono font-bold text-slate-900 w-28 text-right">{{ comp.curRev | currencyFormat }}</span>
+                  <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curRev | currencyFormat }}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-semibold text-slate-400 w-16">Anterior:</span>
+                  <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
                   <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
                     <div class="bg-slate-400 h-full rounded-full transition-all duration-300" [style.width.%]="comp.prevRevBarWidth"></div>
                   </div>
-                  <span class="text-xs font-mono font-medium text-slate-500 w-28 text-right">{{ comp.prevRev | currencyFormat }}</span>
+                  <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevRev | currencyFormat }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Barra 2: Transacciones Concretadas -->
             <div class="space-y-1.5">
-              <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center justify-between text-sm">
                 <span class="font-bold text-slate-700 flex items-center gap-1.5">
                   <span>🧾 Transacciones / Facturas</span>
                 </span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+                <span class="px-2 py-0.5 rounded-full text-xs font-black"
                   [ngClass]="comp.txDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
                   {{ comp.txDiff >= 0 ? '+' : '' }}{{ comp.txDiff }} transacciones ({{ comp.txPct >= 0 ? '+' : '' }}{{ comp.txPct }}%)
                 </span>
               </div>
               <div class="space-y-1">
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-semibold text-slate-400 w-16">Actual:</span>
+                  <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
                   <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
                     <div class="bg-primary-600 h-full rounded-full transition-all duration-300" [style.width.%]="comp.curTxBarWidth"></div>
                   </div>
-                  <span class="text-xs font-mono font-bold text-slate-900 w-28 text-right">{{ comp.curTx }} txs</span>
+                  <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curTx }} txs</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-semibold text-slate-400 w-16">Anterior:</span>
+                  <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
                   <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
                     <div class="bg-slate-400 h-full rounded-full transition-all duration-300" [style.width.%]="comp.prevTxBarWidth"></div>
                   </div>
-                  <span class="text-xs font-mono font-medium text-slate-500 w-28 text-right">{{ comp.prevTx }} txs</span>
+                  <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevTx }} txs</span>
                 </div>
               </div>
             </div>
 
             <!-- Barra 3: Ticket Promedio -->
             <div class="space-y-1.5">
-              <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center justify-between text-sm">
                 <span class="font-bold text-slate-700 flex items-center gap-1.5">
                   <span>🎯 Ticket Promedio</span>
                 </span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-black"
+                <span class="px-2 py-0.5 rounded-full text-xs font-black"
                   [ngClass]="comp.ticketDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
                   {{ comp.ticketDiff >= 0 ? '+' : '' }}{{ comp.ticketDiff | currencyFormat }} ({{ comp.ticketPct >= 0 ? '+' : '' }}{{ comp.ticketPct }}%)
                 </span>
               </div>
               <div class="space-y-1">
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-semibold text-slate-400 w-16">Actual:</span>
+                  <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
                   <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
                     <div class="bg-primary-600 h-full rounded-full transition-all duration-300" [style.width.%]="comp.curTicketBarWidth"></div>
                   </div>
-                  <span class="text-xs font-mono font-bold text-slate-900 w-28 text-right">{{ comp.curTicket | currencyFormat }}</span>
+                  <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curTicket | currencyFormat }}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-semibold text-slate-400 w-16">Anterior:</span>
+                  <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
                   <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
                     <div class="bg-slate-400 h-full rounded-full transition-all duration-300" [style.width.%]="comp.prevTicketBarWidth"></div>
                   </div>
-                  <span class="text-xs font-mono font-medium text-slate-500 w-28 text-right">{{ comp.prevTicket | currencyFormat }}</span>
+                  <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevTicket | currencyFormat }}</span>
                 </div>
               </div>
             </div>
@@ -727,18 +727,18 @@
       <!-- 2. GRÁFICA DE DISTRIBUCIÓN DE MEDIOS DE PAGO & CATEGORÍAS (4/12) -->
       <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between space-y-4">
         <div>
-          <h3 class="text-sm font-bold text-slate-900 flex items-center justify-between">
+          <h3 class="text-base font-bold text-slate-900 flex items-center justify-between">
             <span>💳 Medios de Pago</span>
-            <span class="text-[11px] font-semibold text-slate-400">Distribución</span>
+            <span class="text-xs font-semibold text-slate-500">Distribución</span>
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">Participación de efectivo vs electrónico.</p>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Participación de efectivo vs electrónico.</p>
         </div>
 
         <!-- Donut SVG -->
         @let donutSegments = paymentDonutSegments();
         @if (donutSegments.length) {
         <div class="flex flex-col items-center justify-center pt-2">
-          <div class="relative w-36 h-36">
+          <div class="relative w-40 h-40">
             <svg viewBox="0 0 42 42" class="w-full h-full -rotate-90">
               <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="4.5" />
               @for (seg of donutSegments; track seg.method) {
@@ -748,24 +748,24 @@
               }
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
-              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Recaudación</span>
-              <span class="text-xs font-black text-slate-800 font-mono mt-0.5 truncate max-w-[90px]">
+              <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Recaudación</span>
+              <span class="text-sm sm:text-base font-black text-slate-800 font-mono mt-0.5 truncate max-w-[105px]">
                 {{ (sa?.totalRevenue ?? sm?.totalSalesAmount ?? 0) | currencyFormat }}
               </span>
             </div>
           </div>
 
           <!-- Leyenda de Métodos de Pago -->
-          <div class="w-full space-y-2 mt-4 text-xs">
+          <div class="w-full space-y-2 mt-4 text-sm">
             @for (seg of donutSegments; track seg.method) {
-            <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full" [style.backgroundColor]="seg.color"></span>
-                <span class="font-bold text-slate-700">{{ seg.method }}</span>
+                <span class="w-3 h-3 rounded-full" [style.backgroundColor]="seg.color"></span>
+                <span class="font-bold text-slate-800 text-sm">{{ seg.method }}</span>
               </div>
               <div class="text-right">
-                <span class="font-mono font-bold text-slate-900 block">{{ seg.amount | currencyFormat }}</span>
-                <span class="text-[10px] text-slate-400 font-mono">{{ seg.percentage }}% &bull; {{ seg.count }} txs</span>
+                <span class="font-mono font-bold text-slate-900 block text-sm">{{ seg.amount | currencyFormat }}</span>
+                <span class="text-xs text-slate-500 font-mono">{{ seg.percentage }}% &bull; {{ seg.count }} txs</span>
               </div>
             </div>
             }
@@ -774,7 +774,7 @@
         } @else {
           <div class="p-8 text-center space-y-2">
             <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-lg">💳</div>
-            <p class="text-xs font-semibold text-slate-500">Sin pagos en el período</p>
+            <p class="text-sm font-semibold text-slate-600">Sin pagos en el período</p>
           </div>
         }
 
@@ -810,37 +810,37 @@
   @if (selectedCategory() === 'finance' && profitabilityData(); as prof) {
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Ingresos Totales (Ventas)</span>
-      <div class="text-2xl font-black text-slate-900 mt-1">
+      <span class="text-sm font-semibold text-slate-500">Ingresos Totales (Ventas)</span>
+      <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
         {{ prof.totalRevenue | currencyFormat }}
       </div>
-      <p class="text-[11px] text-slate-400 mt-1">{{ prof.totalItemsSold }} artículos vendidos</p>
+      <p class="text-xs text-slate-500 mt-1">{{ prof.totalItemsSold }} artículos vendidos</p>
     </div>
 
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Costo Mercancía Vendida (CMV)</span>
-      <div class="text-2xl font-black text-slate-700 mt-1" data-testid="metric-finance-cogs">
+      <span class="text-sm font-semibold text-slate-500">Costo Mercancía Vendida (CMV)</span>
+      <div class="text-2xl sm:text-3xl font-black text-slate-700 mt-1" data-testid="metric-finance-cogs">
         {{ prof.totalCostOfGoodsSold | currencyFormat }}
       </div>
-      <p class="text-[11px] text-slate-400 mt-1">Basado en costo histórico de compra</p>
+      <p class="text-xs text-slate-500 mt-1">Basado en costo histórico de compra</p>
     </div>
 
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Utilidad Bruta</span>
-      <div class="text-2xl font-black text-emerald-600 mt-1" data-testid="metric-finance-profit">
+      <span class="text-sm font-semibold text-slate-500">Utilidad Bruta</span>
+      <div class="text-2xl sm:text-3xl font-black text-emerald-600 mt-1" data-testid="metric-finance-profit">
         {{ prof.grossProfit | currencyFormat }}
       </div>
-      <p class="text-[11px] text-slate-400 mt-1">Ganancia neta sobre costo de producto</p>
+      <p class="text-xs text-slate-500 mt-1">Ganancia neta sobre costo de producto</p>
     </div>
 
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Margen Bruto (%)</span>
-      <div class="text-2xl font-black mt-1"
+      <span class="text-sm font-semibold text-slate-500">Margen Bruto (%)</span>
+      <div class="text-2xl sm:text-3xl font-black mt-1"
         [ngClass]="prof.grossMarginPercentage >= 0 ? 'text-emerald-600' : 'text-rose-600'"
         data-testid="metric-finance-margin">
         {{ prof.grossMarginPercentage }}%
       </div>
-      <p class="text-[11px] text-slate-400 mt-1">Rentabilidad comercial global</p>
+      <p class="text-xs text-slate-500 mt-1">Rentabilidad comercial global</p>
     </div>
   </div>
   }
@@ -848,37 +848,37 @@
   @if (selectedCategory() === 'cash' && cashReconciliationData(); as cash) {
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Efectivo Esperado en Gaveta</span>
-      <div class="text-2xl font-black text-slate-900 mt-1" data-testid="metric-cash-expected">
+      <span class="text-sm font-semibold text-slate-500">Efectivo Esperado en Gaveta</span>
+      <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-testid="metric-cash-expected">
         {{ cash.totalExpectedCash | currencyFormat }}
       </div>
-      <p class="text-[11px] text-slate-400 mt-1">Fondo inicial + Ventas efectivo - Egresos</p>
+      <p class="text-xs text-slate-500 mt-1">Fondo inicial + Ventas efectivo - Egresos</p>
     </div>
 
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Efectivo Real Contado</span>
-      <div class="text-2xl font-black text-slate-900 mt-1" data-testid="metric-cash-actual">
+      <span class="text-sm font-semibold text-slate-500">Efectivo Real Contado</span>
+      <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-testid="metric-cash-actual">
         {{ cash.totalActualCash | currencyFormat }}
       </div>
-      <p class="text-[11px] text-slate-400 mt-1">Conteo físico auditado al cierre</p>
+      <p class="text-xs text-slate-500 mt-1">Conteo físico auditado al cierre</p>
     </div>
 
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Diferencia Neta Acumulada</span>
-      <div class="text-2xl font-black mt-1"
+      <span class="text-sm font-semibold text-slate-500">Diferencia Neta Acumulada</span>
+      <div class="text-2xl sm:text-3xl font-black mt-1"
         [ngClass]="cash.totalDifference === 0 ? 'text-emerald-600' : (cash.totalDifference > 0 ? 'text-blue-600' : 'text-rose-600')"
         data-testid="metric-cash-difference">
         {{ cash.totalDifference | currencyFormat }}
       </div>
-      <p class="text-[11px] text-slate-400 mt-1">{{ cash.totalDifference === 0 ? 'Cajas Cuadradas' : (cash.totalDifference > 0 ? 'Sobrante' : 'Faltante') }}</p>
+      <p class="text-xs text-slate-500 mt-1">{{ cash.totalDifference === 0 ? 'Cajas Cuadradas' : (cash.totalDifference > 0 ? 'Sobrante' : 'Faltante') }}</p>
     </div>
 
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-      <span class="text-xs font-semibold text-slate-400">Recaudación Digital</span>
-      <div class="text-2xl font-black text-primary-600 mt-1">
+      <span class="text-sm font-semibold text-slate-500">Recaudación Digital</span>
+      <div class="text-2xl sm:text-3xl font-black text-primary-600 mt-1">
         {{ cash.totalElectronicInflow | currencyFormat }}
       </div>
-      <p class="text-[11px] text-slate-400 mt-1">Transferencias y tarjetas (banco)</p>
+      <p class="text-xs text-slate-500 mt-1">Transferencias y tarjetas (banco)</p>
     </div>
   </div>
   }
@@ -889,16 +889,16 @@
     <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <div class="flex items-center gap-2.5">
-          <h3 class="text-base font-black text-slate-900 tracking-tight" data-testid="table-title">
+          <h3 class="text-lg font-black text-slate-900 tracking-tight" data-testid="table-title">
             {{ tableTitle() }}
           </h3>
           @if (currentRecordsCount() > 0) {
-          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary-50 text-primary-700 border border-primary-200 shadow-2xs">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-50 text-primary-700 border border-primary-200 shadow-2xs">
             {{ currentRecordsCount() }} {{ currentRecordsCount() === 1 ? 'registro' : 'registros' }}
           </span>
           }
         </div>
-        <p class="text-xs text-slate-500 mt-0.5">
+        <p class="text-sm text-slate-500 mt-0.5">
           {{ tableSubtitle() }}
           @if (searchTerm()) {
             <span class="text-primary-600 font-semibold">&bull; Filtrando por: "{{ searchTerm() }}"</span>
@@ -907,8 +907,8 @@
       </div>
 
       @if (tableLoading()) {
-      <div class="inline-flex items-center gap-2 text-xs text-primary-600 font-medium animate-pulse">
-        <div class="w-3.5 h-3.5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      <div class="inline-flex items-center gap-2 text-sm text-primary-600 font-medium animate-pulse">
+        <div class="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
         <span>Actualizando registros...</span>
       </div>
       }
@@ -917,7 +917,7 @@
     @if (tableLoading()) {
     <div class="p-12 text-center space-y-4">
       <div class="inline-block w-8 h-8 border-3 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-xs font-semibold text-slate-500">Cargando registros del reporte...</p>
+      <p class="text-sm font-semibold text-slate-500">Cargando registros del reporte...</p>
     </div>
     } @else {
       <!-- 1. VISTA DE VENTAS -->
@@ -926,36 +926,37 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-sales">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">Factura</th>
-                <th class="py-3 px-4">Fecha (UTC/Local)</th>
-                <th class="py-3 px-4">Cliente</th>
-                <th class="py-3 px-4">Método</th>
-                <th class="py-3 px-4">Estado</th>
-                <th class="py-3 px-4 text-right">Subtotal</th>
-                <th class="py-3 px-4 text-right">IVA (19%)</th>
-                <th class="py-3 px-4 text-right">Total</th>
-                <th class="py-3 px-4 text-center">Líneas</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">Factura</th>
+                <th class="py-3.5 px-4">Fecha (UTC/Local)</th>
+                <th class="py-3.5 px-4">Cliente</th>
+                <th class="py-3.5 px-4">Método</th>
+                <th class="py-3.5 px-4">Estado</th>
+                <th class="py-3.5 px-4 text-right">Subtotal</th>
+                <th class="py-3.5 px-4 text-right">IVA (19%)</th>
+                <th class="py-3.5 px-4 text-right">Total</th>
+                <th class="py-3.5 px-4 text-center">Líneas</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of salesData()?.items; track row.id) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.saleNumber }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                <td class="py-3 px-4 font-semibold text-slate-800">{{ row.customerName }}</td>
-                <td class="py-3 px-4 text-slate-600">
-                  <span class="px-2 py-0.5 rounded-md bg-slate-100 font-mono text-[11px]">{{ row.paymentMethod }}</span>
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.saleNumber }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.customerName }}</td>
+                <td class="py-3.5 px-4 text-slate-600">
+                  <span class="px-2.5 py-1 rounded-md bg-slate-100 font-mono text-xs font-semibold">{{ formatPaymentMethod(row.paymentMethod) }}</span>
                 </td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    {{ row.status }}
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                    [ngClass]="row.status === 'Completed' || row.status === 'Completada' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.status === 'Cancelled' || row.status === 'Anulada' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-700')">
+                    {{ formatSaleStatus(row.status) }}
                   </span>
                 </td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.subtotal | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.tax | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black text-slate-900">{{ row.total | currencyFormat }}</td>
-                <td class="py-3 px-4 text-center font-mono text-slate-500">{{ row.itemsCount }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.subtotal | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.tax | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.total | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-center font-mono text-slate-500">{{ row.itemsCount }}</td>
               </tr>
               }
             </tbody>
@@ -964,8 +965,8 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">💳</div>
-            <h4 class="text-sm font-bold text-slate-900">No se encontraron ventas para este período</h4>
-            <p class="text-xs text-slate-400 max-w-md mx-auto">
+            <h4 class="text-base font-bold text-slate-900">No se encontraron ventas para este período</h4>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">
               Prueba seleccionando <button (click)="setDatePreset('thisMonth')" class="text-primary-600 font-bold hover:underline cursor-pointer">Mes Actual</button> o <button (click)="setDatePreset('all')" class="text-primary-600 font-bold hover:underline cursor-pointer">Todo el Histórico</button>.
             </p>
           </div>
@@ -978,26 +979,26 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-sales-top">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">Ranking</th>
-                <th class="py-3 px-4">SKU</th>
-                <th class="py-3 px-4">Producto</th>
-                <th class="py-3 px-4">Categoría</th>
-                <th class="py-3 px-4 text-right">Unidades Vendidas</th>
-                <th class="py-3 px-4 text-right">Precio Promedio</th>
-                <th class="py-3 px-4 text-right">Ingresos Totales</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">Ranking</th>
+                <th class="py-3.5 px-4">SKU</th>
+                <th class="py-3.5 px-4">Producto</th>
+                <th class="py-3.5 px-4">Categoría</th>
+                <th class="py-3.5 px-4 text-right">Unidades Vendidas</th>
+                <th class="py-3.5 px-4 text-right">Precio Promedio</th>
+                <th class="py-3.5 px-4 text-right">Ingresos Totales</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of topProductsData(); track row.productId; let idx = $index) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.categoryName }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-primary-600">{{ row.unitsSold }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.averageUnitPrice | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black text-slate-900">{{ row.totalRevenue | currencyFormat }}</td>
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-primary-600">{{ row.unitsSold }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.averageUnitPrice | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.totalRevenue | currencyFormat }}</td>
               </tr>
               }
             </tbody>
@@ -1024,7 +1025,7 @@
                 class="h-full transition-all duration-300"></div>
             }
           </div>
-          <div class="flex flex-wrap items-center gap-4 mt-3 text-[11px] text-slate-600">
+          <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-600">
             @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
               <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full"
@@ -1039,23 +1040,23 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-sales-categories">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">#</th>
-                <th class="py-3 px-4">Categoría</th>
-                <th class="py-3 px-4 text-right">Unidades Vendidas</th>
-                <th class="py-3 px-4 text-right">Facturación Total</th>
-                <th class="py-3 px-4 text-center">Participación (% Share)</th>
-                <th class="py-3 px-4 text-center">Transacciones</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">#</th>
+                <th class="py-3.5 px-4">Categoría</th>
+                <th class="py-3.5 px-4 text-right">Unidades Vendidas</th>
+                <th class="py-3.5 px-4 text-right">Facturación Total</th>
+                <th class="py-3.5 px-4 text-center">Participación (% Share)</th>
+                <th class="py-3.5 px-4 text-center">Transacciones</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
-                <td class="py-3 px-4 font-bold text-slate-900">{{ cat.categoryName }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-primary-600">{{ cat.unitsSold }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black text-slate-900">{{ cat.totalRevenue | currencyFormat }}</td>
-                <td class="py-3 px-4 text-center">
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
+                <td class="py-3.5 px-4 font-bold text-slate-900">{{ cat.categoryName }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-primary-600">{{ cat.unitsSold }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ cat.totalRevenue | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-center">
                   <div class="inline-flex items-center gap-2">
                     <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
                       <div class="bg-primary-500 h-full rounded-full" [style.width.%]="cat.sharePercentage"></div>
@@ -1063,7 +1064,7 @@
                     <span class="font-mono font-bold text-slate-700 text-xs">{{ cat.sharePercentage }}%</span>
                   </div>
                 </td>
-                <td class="py-3 px-4 text-center font-mono text-slate-600">{{ cat.transactionCount }}</td>
+                <td class="py-3.5 px-4 text-center font-mono text-slate-600">{{ cat.transactionCount }}</td>
               </tr>
               }
             </tbody>
@@ -1072,7 +1073,7 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">🏷️</div>
-            <h4 class="text-sm font-bold text-slate-900">No se encontraron ventas por categoría en el período</h4>
+            <h4 class="text-base font-bold text-slate-900">No se encontraron ventas por categoría en el período</h4>
           </div>
         }
       }
@@ -1082,7 +1083,7 @@
         @let activeHours = hourlyActivity();
         @if (activeHours.length) {
         <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
-          <span class="text-xs font-bold text-slate-700 block mb-3">Distribución de Transacciones por Hora del Día (00:00 a 23:59)</span>
+          <span class="text-sm font-bold text-slate-700 block mb-3">Distribución de Transacciones por Hora del Día (00:00 a 23:59)</span>
           <div class="grid grid-cols-12 sm:grid-cols-24 gap-1 items-end h-24 pt-4 px-2">
             @for (h of activeHours; track h.hour) {
               <div class="flex flex-col items-center gap-1 h-full justify-end group relative cursor-pointer" [title]="h.hourLabel + ': ' + h.transactionCount + ' transacciones ($' + h.totalRevenue + ')'">
@@ -1090,7 +1091,7 @@
                   [ngClass]="h.isPeakHour ? 'bg-amber-500 ring-2 ring-amber-300' : h.transactionCount > 0 ? 'bg-primary-500' : 'bg-slate-200'"
                   [style.height.%]="h.transactionCount > 0 ? Math.max((h.transactionCount * 15), 20) : 8">
                 </div>
-                <span class="text-[9px] font-mono text-slate-400 group-hover:text-slate-900">{{ h.hour }}h</span>
+                <span class="text-[10px] font-mono text-slate-500 group-hover:text-slate-900 font-semibold">{{ h.hour }}h</span>
               </div>
             }
           </div>
@@ -1099,40 +1100,40 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-sales-hourly">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">Franja Horaria</th>
-                <th class="py-3 px-4 text-center">Transacciones Realizadas</th>
-                <th class="py-3 px-4 text-right">Facturación en Franja</th>
-                <th class="py-3 px-4 text-center">Estado Operativo</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">Franja Horaria</th>
+                <th class="py-3.5 px-4 text-center">Transacciones Realizadas</th>
+                <th class="py-3.5 px-4 text-right">Facturación en Franja</th>
+                <th class="py-3.5 px-4 text-center">Estado Operativo</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (h of filteredHourlyActivity(); track h.hour) {
               <tr class="hover:bg-slate-50/60 transition-colors" [ngClass]="h.isPeakHour ? 'bg-amber-50/40' : ''">
-                <td class="py-3 px-4 font-mono font-bold text-slate-800 flex items-center gap-2">
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-800 flex items-center gap-2">
                   <span class="text-slate-400">⏰</span>
                   <span>{{ h.hourLabel }}</span>
                 </td>
-                <td class="py-3 px-4 text-center font-mono font-bold"
+                <td class="py-3.5 px-4 text-center font-mono font-bold"
                   [ngClass]="h.isPeakHour ? 'text-amber-700' : 'text-slate-700'">
                   {{ h.transactionCount }}
                 </td>
-                <td class="py-3 px-4 text-right font-mono font-black"
+                <td class="py-3.5 px-4 text-right font-mono font-black"
                   [ngClass]="h.isPeakHour ? 'text-amber-800' : 'text-slate-900'">
                   {{ h.totalRevenue | currencyFormat }}
                 </td>
-                <td class="py-3 px-4 text-center">
+                <td class="py-3.5 px-4 text-center">
                   @if (h.isPeakHour) {
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs inline-flex items-center gap-1">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs inline-flex items-center gap-1">
                       <span>⭐</span>
                       <span>HORA PICO</span>
                     </span>
                   } @else if (h.transactionCount > 0) {
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                       Activa
                     </span>
                   } @else {
-                    <span class="text-slate-300 font-mono text-[11px]">&mdash;</span>
+                    <span class="text-slate-400 font-mono text-xs">&mdash;</span>
                   }
                 </td>
               </tr>
@@ -1143,7 +1144,7 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">⏰</div>
-            <h4 class="text-sm font-bold text-slate-900">No hay actividad transaccional registrada para este período</h4>
+            <h4 class="text-base font-bold text-slate-900">No hay actividad transaccional registrada para este período</h4>
           </div>
         }
       }
@@ -1154,35 +1155,35 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-sales-employees">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">Ranking</th>
-                <th class="py-3 px-4">Empleado / Vendedor</th>
-                <th class="py-3 px-4">Rol en Sistema</th>
-                <th class="py-3 px-4 text-center">Transacciones Emitidas</th>
-                <th class="py-3 px-4 text-right">Ticket Promedio</th>
-                <th class="py-3 px-4 text-right">Total Facturado</th>
-                <th class="py-3 px-4 text-center">Aporte a la Sede (%)</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">Ranking</th>
+                <th class="py-3.5 px-4">Empleado / Vendedor</th>
+                <th class="py-3.5 px-4">Rol en Sistema</th>
+                <th class="py-3.5 px-4 text-center">Transacciones Emitidas</th>
+                <th class="py-3.5 px-4 text-right">Ticket Promedio</th>
+                <th class="py-3.5 px-4 text-right">Total Facturado</th>
+                <th class="py-3.5 px-4 text-center">Aporte a la Sede (%)</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (emp of salesEmployees(); track emp.userId; let idx = $index) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
-                <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-[10px] font-black">
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
+                <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-black">
                     {{ emp.employeeName.charAt(0) }}
                   </div>
                   <span>{{ emp.employeeName }}</span>
                 </td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                    {{ emp.role }}
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    {{ formatUserRole(emp.role) }}
                   </span>
                 </td>
-                <td class="py-3 px-4 text-center font-mono font-bold text-slate-700">{{ emp.transactionCount }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ emp.averageTicket | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black text-slate-900">{{ emp.totalRevenue | currencyFormat }}</td>
-                <td class="py-3 px-4 text-center">
+                <td class="py-3.5 px-4 text-center font-mono font-bold text-slate-700">{{ emp.transactionCount }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ emp.averageTicket | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ emp.totalRevenue | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-center">
                   <div class="inline-flex items-center gap-2">
                     <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
                       <div class="bg-primary-500 h-full rounded-full" [style.width.%]="emp.sharePercentage"></div>
@@ -1198,7 +1199,7 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">👥</div>
-            <h4 class="text-sm font-bold text-slate-900">No se encontraron ventas asociadas a empleados en este período</h4>
+            <h4 class="text-base font-bold text-slate-900">No se encontraron ventas asociadas a empleados en este período</h4>
           </div>
         }
       }
@@ -1209,32 +1210,32 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-finance">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">SKU</th>
-                <th class="py-3 px-4">Producto</th>
-                <th class="py-3 px-4">Categoría</th>
-                <th class="py-3 px-4 text-right">Uds Vendidas</th>
-                <th class="py-3 px-4 text-right">Ingresos</th>
-                <th class="py-3 px-4 text-right">Costo Histórico (CMV)</th>
-                <th class="py-3 px-4 text-right">Utilidad Bruta</th>
-                <th class="py-3 px-4 text-right">Margen Bruto</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">SKU</th>
+                <th class="py-3.5 px-4">Producto</th>
+                <th class="py-3.5 px-4">Categoría</th>
+                <th class="py-3.5 px-4 text-right">Uds Vendidas</th>
+                <th class="py-3.5 px-4 text-right">Ingresos</th>
+                <th class="py-3.5 px-4 text-right">Costo Histórico (CMV)</th>
+                <th class="py-3.5 px-4 text-right">Utilidad Bruta</th>
+                <th class="py-3.5 px-4 text-right">Margen Bruto</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of profitabilityData()?.productDetails?.items; track row.productId) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.categoryName }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-slate-700">{{ row.unitsSold }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-700">{{ row.totalRevenue | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-500">{{ row.costOfGoodsSold | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black"
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-700">{{ row.unitsSold }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-700">{{ row.totalRevenue | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.costOfGoodsSold | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black"
                   [ngClass]="row.grossProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'">
                   {{ row.grossProfit | currencyFormat }}
                 </td>
-                <td class="py-3 px-4 text-right">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
+                <td class="py-3.5 px-4 text-right">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
                     [ngClass]="row.grossMarginPercentage >= 30 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.grossMarginPercentage >= 15 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
                     {{ row.grossMarginPercentage }}%
                   </span>
@@ -1247,7 +1248,7 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📈</div>
-            <h4 class="text-sm font-bold text-slate-900">No hay datos de rentabilidad para este período</h4>
+            <h4 class="text-base font-bold text-slate-900">No hay datos de rentabilidad para este período</h4>
           </div>
         }
       }
@@ -1258,43 +1259,43 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-cash-reconciliation">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">N° Sesión</th>
-                <th class="py-3 px-4">Cajero</th>
-                <th class="py-3 px-4">Apertura</th>
-                <th class="py-3 px-4">Estado</th>
-                <th class="py-3 px-4 text-right">Fondo Inicial</th>
-                <th class="py-3 px-4 text-right">Ventas Efectivo</th>
-                <th class="py-3 px-4 text-right">Efectivo Esperado</th>
-                <th class="py-3 px-4 text-right">Efectivo Real</th>
-                <th class="py-3 px-4 text-right">Diferencia</th>
-                <th class="py-3 px-4">Conciliación</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">N° Sesión</th>
+                <th class="py-3.5 px-4">Cajero</th>
+                <th class="py-3.5 px-4">Apertura</th>
+                <th class="py-3.5 px-4">Estado</th>
+                <th class="py-3.5 px-4 text-right">Fondo Inicial</th>
+                <th class="py-3.5 px-4 text-right">Ventas Efectivo</th>
+                <th class="py-3.5 px-4 text-right">Efectivo Esperado</th>
+                <th class="py-3.5 px-4 text-right">Efectivo Real</th>
+                <th class="py-3.5 px-4 text-right">Diferencia</th>
+                <th class="py-3.5 px-4">Conciliación</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of cashReconciliationData()?.sessions?.items; track row.sessionId) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.sessionNumber }}</td>
-                <td class="py-3 px-4 font-semibold text-slate-800">{{ row.cashierName }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.openedAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
-                    [ngClass]="row.status === 'Closed' ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
-                    {{ row.status }}
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sessionNumber }}</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.cashierName }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.openedAt | date:'yyyy-MM-dd HH:mm' }}</td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                    [ngClass]="row.status === 'Closed' || row.status === 'Cerrada' ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
+                    {{ formatCashRegisterStatus(row.status) }}
                   </span>
                 </td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.initialCash | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.totalCashInflow | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-slate-900">{{ row.expectedCash | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-slate-900">{{ row.actualCash !== null && row.actualCash !== undefined ? (row.actualCash | currencyFormat) : '-' }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black"
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.initialCash | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.totalCashInflow | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.expectedCash | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.actualCash !== null && row.actualCash !== undefined ? (row.actualCash | currencyFormat) : '-' }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black"
                   [ngClass]="row.difference === 0 ? 'text-emerald-600' : (row.difference && row.difference > 0 ? 'text-blue-600' : 'text-rose-600')">
                   {{ row.difference !== null && row.difference !== undefined ? (row.difference | currencyFormat) : '0.00' }}
                 </td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
-                    [ngClass]="row.differenceStatus === 'Balanced' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.differenceStatus === 'Surplus' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
-                    {{ row.differenceStatus || 'Pendiente' }}
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                    [ngClass]="row.differenceStatus === 'Balanced' || row.differenceStatus === 'Cuadrada' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.differenceStatus === 'Surplus' || row.differenceStatus === 'Sobrante' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
+                    {{ formatDifferenceStatus(row.differenceStatus) }}
                   </span>
                 </td>
               </tr>
@@ -1316,40 +1317,40 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-inventory">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">N° Movimiento</th>
-                <th class="py-3 px-4">Fecha</th>
-                <th class="py-3 px-4">Tipo</th>
-                <th class="py-3 px-4">SKU</th>
-                <th class="py-3 px-4">Producto</th>
-                <th class="py-3 px-4 text-right">Cambio (Delta)</th>
-                <th class="py-3 px-4 text-right">Stock Previo</th>
-                <th class="py-3 px-4 text-right">Stock Final</th>
-                <th class="py-3 px-4">Operador</th>
-                <th class="py-3 px-4">Referencia</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">N° Movimiento</th>
+                <th class="py-3.5 px-4">Fecha</th>
+                <th class="py-3.5 px-4">Tipo</th>
+                <th class="py-3.5 px-4">SKU</th>
+                <th class="py-3.5 px-4">Producto</th>
+                <th class="py-3.5 px-4 text-right">Cambio (Delta)</th>
+                <th class="py-3.5 px-4 text-right">Stock Previo</th>
+                <th class="py-3.5 px-4 text-right">Stock Final</th>
+                <th class="py-3.5 px-4">Operador</th>
+                <th class="py-3.5 px-4">Referencia</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of inventoryData()?.items; track row.id) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.movementNumber }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.movementNumber }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
                     [ngClass]="row.quantityDelta > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
-                    {{ row.type }}
+                    {{ formatMovementType(row.type) }}
                   </span>
                 </td>
-                <td class="py-3 px-4 font-mono font-bold text-slate-700">{{ row.productSku }}</td>
-                <td class="py-3 px-4 font-medium text-slate-900">{{ row.productName }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold"
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-700">{{ row.productSku }}</td>
+                <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.productName }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold"
                   [ngClass]="row.quantityDelta > 0 ? 'text-emerald-600' : 'text-rose-600'">
                   {{ row.quantityDelta > 0 ? '+' : '' }}{{ row.quantityDelta }}
                 </td>
-                <td class="py-3 px-4 text-right font-mono text-slate-500">{{ row.previousStock }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-slate-900">{{ row.newStock }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.operatorName }}</td>
-                <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">{{ row.reference || '-' }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.previousStock }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.newStock }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.operatorName }}</td>
+                <td class="py-3.5 px-4 text-slate-500 font-mono text-xs">{{ row.reference || '-' }}</td>
               </tr>
               }
             </tbody>
@@ -1358,7 +1359,7 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📋</div>
-            <h4 class="text-sm font-bold text-slate-900">No hay movimientos en el Kardex para este período</h4>
+            <h4 class="text-base font-bold text-slate-900">No hay movimientos en el Kardex para este período</h4>
           </div>
         }
       }
@@ -1369,32 +1370,32 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-purchases">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">N° Orden Compra</th>
-                <th class="py-3 px-4">Fecha</th>
-                <th class="py-3 px-4">Proveedor</th>
-                <th class="py-3 px-4">Estado</th>
-                <th class="py-3 px-4 text-right">Subtotal</th>
-                <th class="py-3 px-4 text-right">IVA (19%)</th>
-                <th class="py-3 px-4 text-right">Total</th>
-                <th class="py-3 px-4 text-center">Items</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">N° Orden Compra</th>
+                <th class="py-3.5 px-4">Fecha</th>
+                <th class="py-3.5 px-4">Proveedor</th>
+                <th class="py-3.5 px-4">Estado</th>
+                <th class="py-3.5 px-4 text-right">Subtotal</th>
+                <th class="py-3.5 px-4 text-right">IVA (19%)</th>
+                <th class="py-3.5 px-4 text-right">Total</th>
+                <th class="py-3.5 px-4 text-center">Items</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of purchasesData()?.items; track row.id) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.purchaseNumber }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                <td class="py-3 px-4 font-semibold text-slate-800">{{ row.supplierName }}</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                    {{ row.status }}
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.purchaseNumber }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.supplierName }}</td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    {{ formatPurchaseStatus(row.status) }}
                   </span>
                 </td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.subtotal | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.tax | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black text-slate-900">{{ row.total | currencyFormat }}</td>
-                <td class="py-3 px-4 text-center font-mono text-slate-500">{{ row.itemsCount }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.subtotal | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.tax | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.total | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-center font-mono text-slate-500">{{ row.itemsCount }}</td>
               </tr>
               }
             </tbody>
@@ -1403,7 +1404,7 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">🛍️</div>
-            <h4 class="text-sm font-bold text-slate-900">No se encontraron compras para este período</h4>
+            <h4 class="text-base font-bold text-slate-900">No se encontraron compras para este período</h4>
           </div>
         }
       }
@@ -1414,31 +1415,31 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-products">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">SKU</th>
-                <th class="py-3 px-4">Producto</th>
-                <th class="py-3 px-4">Categoría</th>
-                <th class="py-3 px-4">Proveedor</th>
-                <th class="py-3 px-4 text-right">P. Compra</th>
-                <th class="py-3 px-4 text-right">P. Venta</th>
-                <th class="py-3 px-4 text-right">Stock</th>
-                <th class="py-3 px-4 text-right">Valuación</th>
-                <th class="py-3 px-4">Estado</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">SKU</th>
+                <th class="py-3.5 px-4">Producto</th>
+                <th class="py-3.5 px-4">Categoría</th>
+                <th class="py-3.5 px-4">Proveedor</th>
+                <th class="py-3.5 px-4 text-right">P. Compra</th>
+                <th class="py-3.5 px-4 text-right">P. Venta</th>
+                <th class="py-3.5 px-4 text-right">Stock</th>
+                <th class="py-3.5 px-4 text-right">Valuación</th>
+                <th class="py-3.5 px-4">Estado</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of productsData()?.items; track row.id) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3 px-4 font-medium text-slate-900">{{ row.name }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.categoryName }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.supplierName }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.purchasePrice | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono text-slate-600">{{ row.salePrice | currencyFormat }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-slate-900">{{ row.currentStock }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black text-primary-600">{{ row.valuation | currencyFormat }}</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+                <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.name }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.supplierName }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.purchasePrice | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.salePrice | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.currentStock }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-primary-600">{{ row.valuation | currencyFormat }}</td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
                     [ngClass]="row.currentStock === 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : (row.currentStock <= row.minimumStock ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200')">
                     {{ row.status }}
                   </span>
@@ -1451,7 +1452,7 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📦</div>
-            <h4 class="text-sm font-bold text-slate-900">No hay productos que coincidan con la búsqueda</h4>
+            <h4 class="text-base font-bold text-slate-900">No hay productos que coincidan con la búsqueda</h4>
           </div>
         }
       }
@@ -1462,34 +1463,34 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-low-stock">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">SKU</th>
-                <th class="py-3 px-4">Producto</th>
-                <th class="py-3 px-4">Categoría</th>
-                <th class="py-3 px-4">Proveedor</th>
-                <th class="py-3 px-4 text-right">Stock Actual</th>
-                <th class="py-3 px-4 text-right">Stock Mínimo</th>
-                <th class="py-3 px-4 text-right">Déficit</th>
-                <th class="py-3 px-4 text-right">Costo Estimado Reposición</th>
-                <th class="py-3 px-4">Estado</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">SKU</th>
+                <th class="py-3.5 px-4">Producto</th>
+                <th class="py-3.5 px-4">Categoría</th>
+                <th class="py-3.5 px-4">Proveedor</th>
+                <th class="py-3.5 px-4 text-right">Stock Actual</th>
+                <th class="py-3.5 px-4 text-right">Stock Mínimo</th>
+                <th class="py-3.5 px-4 text-right">Déficit</th>
+                <th class="py-3.5 px-4 text-right">Costo Estimado Reposición</th>
+                <th class="py-3.5 px-4">Estado</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of lowStockData()?.items; track row.id) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3 px-4 font-medium text-slate-900">{{ row.name }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.categoryName }}</td>
-                <td class="py-3 px-4 text-slate-600">{{ row.supplierName }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black"
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+                <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.name }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
+                <td class="py-3.5 px-4 text-slate-600">{{ row.supplierName }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black"
                   [ngClass]="row.currentStock === 0 ? 'text-rose-600' : 'text-amber-600'">
                   {{ row.currentStock }}
                 </td>
-                <td class="py-3 px-4 text-right font-mono text-slate-500">{{ row.minimumStock }}</td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-rose-600">-{{ row.deficit }}</td>
-                <td class="py-3 px-4 text-right font-mono font-black text-slate-900">{{ row.estimatedRestockCost | currencyFormat }}</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
+                <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.minimumStock }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-rose-600">-{{ row.deficit }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.estimatedRestockCost | currencyFormat }}</td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
                     [ngClass]="row.currentStock === 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'">
                     {{ row.status }}
                   </span>
@@ -1502,8 +1503,8 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-xl">✅</div>
-            <h4 class="text-sm font-bold text-slate-900">¡Inventario Saludable!</h4>
-            <p class="text-xs text-slate-400 max-w-md mx-auto">No hay productos con stock por debajo del límite mínimo configurado.</p>
+            <h4 class="text-base font-bold text-slate-900">¡Inventario Saludable!</h4>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">No hay productos con stock por debajo del límite mínimo configurado.</p>
           </div>
         }
       }
@@ -1514,28 +1515,28 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse" data-testid="table-audit">
             <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3 px-4">Fecha y Hora</th>
-                <th class="py-3 px-4">Entidad</th>
-                <th class="py-3 px-4">Acción</th>
-                <th class="py-3 px-4">Detalle de Operación</th>
-                <th class="py-3 px-4">Usuario Responsable</th>
-                <th class="py-3 px-4">IP</th>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4">Fecha y Hora</th>
+                <th class="py-3.5 px-4">Entidad</th>
+                <th class="py-3.5 px-4">Acción</th>
+                <th class="py-3.5 px-4">Detalle de Operación</th>
+                <th class="py-3.5 px-4">Usuario Responsable</th>
+                <th class="py-3.5 px-4">IP</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-xs">
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
               @for (row of auditData()?.items; track row.id) {
               <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3 px-4 text-slate-600 font-mono">{{ row.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</td>
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ row.entityName }}</td>
-                <td class="py-3 px-4">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
+                <td class="py-3.5 px-4 text-slate-600 font-mono">{{ row.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.entityName }}</td>
+                <td class="py-3.5 px-4">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
                     {{ row.action }}
                   </span>
                 </td>
-                <td class="py-3 px-4 text-slate-700">{{ row.details }}</td>
-                <td class="py-3 px-4 font-semibold text-slate-900">{{ row.userName }}</td>
-                <td class="py-3 px-4 font-mono text-slate-400 text-[11px]">{{ row.ipAddress || '-' }}</td>
+                <td class="py-3.5 px-4 text-slate-700">{{ row.details }}</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-900">{{ row.userName }}</td>
+                <td class="py-3.5 px-4 font-mono text-slate-400 text-xs">{{ row.ipAddress || '-' }}</td>
               </tr>
               }
             </tbody>
@@ -1544,7 +1545,7 @@
         } @else {
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">🛡️</div>
-            <h4 class="text-sm font-bold text-slate-900">No se encontraron eventos de auditoría para este período</h4>
+            <h4 class="text-base font-bold text-slate-900">No se encontraron eventos de auditoría para este período</h4>
           </div>
         }
       }
@@ -1552,11 +1553,11 @@
 
     <!-- PAGINADOR Y TAMAÑO DE PÁGINA -->
     @if (currentPagination(); as pag) {
-    <div class="bg-slate-50/80 px-4 py-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+    <div class="bg-slate-50/80 px-5 py-3.5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-600">
       <div class="flex items-center gap-2">
         <span>Mostrar</span>
         <select [ngModel]="pageSize()" (ngModelChange)="setPageSize($any($event))"
-          class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary-500">
+          class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary-500">
           <option [value]="10">10</option>
           <option [value]="25">25</option>
           <option [value]="50">50</option>
@@ -1569,12 +1570,12 @@
         <div class="flex items-center gap-1">
           <button type="button" (click)="prevPage()" [disabled]="pag.pageNumber <= 1"
             data-testid="btn-prev-page"
-            class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-bold transition-all">
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-bold transition-all text-sm">
             &larr; Anterior
           </button>
           <button type="button" (click)="nextPage()" [disabled]="pag.pageNumber >= pag.totalPages"
             data-testid="btn-next-page"
-            class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-bold transition-all">
+            class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-bold transition-all text-sm">
             Siguiente &rarr;
           </button>
         </div>
@@ -1586,8 +1587,8 @@
   <!-- CATÁLOGO DE EXPORTACIÓN DIRECTA -->
   <div class="pt-4 border-t border-slate-200">
     <div class="mb-4">
-      <h2 class="text-base font-bold text-slate-900">Catálogo de Exportación Directa</h2>
-      <p class="text-xs text-slate-500">Paquetes completos de datos estructurados CSV para análisis secundario en Excel / ERP.</p>
+      <h2 class="text-lg font-bold text-slate-900">Catálogo de Exportación Directa</h2>
+      <p class="text-sm text-slate-500">Paquetes completos de datos estructurados CSV para análisis secundario en Excel / ERP.</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1601,21 +1602,21 @@
               @else if (rep.key === 'sales') { 💳 }
               @else { 🛍️ }
             </span>
-            <span class="text-[11px] font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
+            <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2.5 py-0.5 rounded-full">
               {{ rep.recordCount }} reg.
             </span>
           </div>
-          <h3 class="text-xs font-bold text-slate-900">{{ rep.title }}</h3>
-          <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">{{ rep.description }}</p>
+          <h3 class="text-sm font-bold text-slate-900">{{ rep.title }}</h3>
+          <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ rep.description }}</p>
         </div>
 
         <button type="button" (click)="downloadCsvByKey(rep.key)" [disabled]="downloadingKey() === rep.key"
-          class="mt-4 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-primary-600 hover:text-white text-slate-700 text-xs font-bold transition-all cursor-pointer disabled:opacity-50">
+          class="mt-4 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-primary-600 hover:text-white text-slate-700 text-sm font-bold transition-all cursor-pointer disabled:opacity-50">
           @if (downloadingKey() === rep.key) {
-          <div class="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+          <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
           <span>Descargando...</span>
           } @else {
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
           </svg>

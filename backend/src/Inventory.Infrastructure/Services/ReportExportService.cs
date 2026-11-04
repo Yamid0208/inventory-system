@@ -103,7 +103,7 @@ public class ReportExportService : IReportExportService
             sb.AppendLine(string.Join(",",
                 EscapeCsv(m.MovementNumber),
                 m.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
-                EscapeCsv(m.Type.ToString()),
+                EscapeCsv(TranslateMovementType(m.Type)),
                 EscapeCsv(m.Product?.Sku ?? "N/A"),
                 EscapeCsv(m.Product?.Name ?? "N/A"),
                 m.QuantityDelta.ToString(),
@@ -157,8 +157,8 @@ public class ReportExportService : IReportExportService
                 EscapeCsv(s.SaleNumber),
                 s.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
                 EscapeCsv(s.CustomerName),
-                EscapeCsv(s.PaymentMethod.ToString()),
-                EscapeCsv(s.Status.ToString()),
+                EscapeCsv(TranslatePaymentMethod(s.PaymentMethod)),
+                EscapeCsv(TranslateSaleStatus(s.Status)),
                 s.Subtotal.ToString("F2", CultureInfo.InvariantCulture),
                 s.Tax.ToString("F2", CultureInfo.InvariantCulture),
                 s.Total.ToString("F2", CultureInfo.InvariantCulture),
@@ -214,7 +214,7 @@ public class ReportExportService : IReportExportService
                 EscapeCsv(p.PurchaseNumber),
                 p.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
                 EscapeCsv(p.Supplier?.Name ?? "N/A"),
-                EscapeCsv(p.Status.ToString()),
+                EscapeCsv(TranslatePurchaseStatus(p.Status)),
                 p.Subtotal.ToString("F2", CultureInfo.InvariantCulture),
                 p.Tax.ToString("F2", CultureInfo.InvariantCulture),
                 p.Total.ToString("F2", CultureInfo.InvariantCulture),
@@ -665,14 +665,14 @@ public class ReportExportService : IReportExportService
             .GroupBy(s => s.PaymentMethod)
             .Select(g => new
             {
-                Method = g.Key.ToString(),
+                Method = g.Key,
                 TotalAmount = g.Sum(s => s.Total),
                 Count = g.Count()
             })
             .ToListAsync(cancellationToken);
 
         var paymentMethods = methodGroups.Select(m => new PaymentMethodBreakdownDto(
-            m.Method,
+            TranslatePaymentMethod(m.Method),
             m.TotalAmount,
             m.Count,
             totalSales > 0 ? decimal.Round((m.TotalAmount / totalSales) * 100, 1) : 0
@@ -1167,14 +1167,14 @@ public class ReportExportService : IReportExportService
                 .GroupBy(s => s.PaymentMethod)
                 .Select(g => new
                 {
-                    Method = g.Key.ToString(),
+                    Method = g.Key,
                     TotalAmount = g.Sum(s => s.Total),
                     Count = g.Count()
                 })
                 .ToListAsync(cancellationToken);
 
             paymentMethods = methodGroups.Select(m => new PaymentMethodBreakdownDto(
-                m.Method,
+                TranslatePaymentMethod(m.Method),
                 m.TotalAmount,
                 m.Count,
                 curTotalSales > 0 ? decimal.Round((m.TotalAmount / curTotalSales) * 100m, 1) : 0m
@@ -1491,7 +1491,7 @@ public class ReportExportService : IReportExportService
             {
                 var avgTicket = g.TransactionCount > 0 ? decimal.Round(g.TotalRevenue / g.TransactionCount, 2) : 0m;
                 var share = grandTotalRevenue > 0 ? decimal.Round((g.TotalRevenue / grandTotalRevenue) * 100m, 1) : 0m;
-                var roleName = g.Role.HasValue ? g.Role.Value.ToString() : "N/A";
+                var roleName = g.Role.HasValue ? TranslateUserRole(g.Role.Value) : "N/A";
                 return new SalesByEmployeeDto(
                     g.UserId,
                     g.FullName,
@@ -1607,4 +1607,67 @@ public class ReportExportService : IReportExportService
         Array.Copy(bytes, 0, combined, preamble.Length, bytes.Length);
         return combined;
     }
+
+    private static string TranslatePaymentMethod(PaymentMethod method) => method switch
+    {
+        PaymentMethod.Cash => "Efectivo",
+        PaymentMethod.Mixed => "Mixto",
+        PaymentMethod.CreditCard => "Tarjeta de Crédito",
+        PaymentMethod.DebitCard => "Tarjeta de Débito",
+        PaymentMethod.Transfer => "Transferencia",
+        PaymentMethod.Credit => "Crédito",
+        PaymentMethod.Nequi => "Nequi",
+        PaymentMethod.Daviplata => "Daviplata",
+        _ => method.ToString()
+    };
+
+    private static string TranslateSaleStatus(SaleStatus status) => status switch
+    {
+        SaleStatus.Completed => "Completada",
+        SaleStatus.Cancelled => "Anulada",
+        SaleStatus.Draft => "Borrador",
+        _ => status.ToString()
+    };
+
+    private static string TranslatePurchaseStatus(PurchaseStatus status) => status switch
+    {
+        PurchaseStatus.Pending => "Pendiente",
+        PurchaseStatus.Received => "Recibida",
+        PurchaseStatus.Cancelled => "Anulada",
+        _ => status.ToString()
+    };
+
+    private static string TranslateUserRole(UserRole role) => role switch
+    {
+        UserRole.SuperAdmin => "Super Administrador",
+        UserRole.Admin => "Administrador",
+        UserRole.Seller => "Vendedor",
+        UserRole.Warehouse => "Almacén",
+        _ => role.ToString()
+    };
+
+    private static string TranslateCashRegisterStatus(CashRegisterStatus status) => status switch
+    {
+        CashRegisterStatus.Open => "Abierta",
+        CashRegisterStatus.Closed => "Cerrada",
+        _ => status.ToString()
+    };
+
+    private static string TranslateDifferenceStatus(CashDifferenceStatus? status) => status switch
+    {
+        CashDifferenceStatus.Balanced => "Cuadrada",
+        CashDifferenceStatus.Surplus => "Sobrante",
+        CashDifferenceStatus.Shortage => "Faltante",
+        _ => "Pendiente"
+    };
+
+    private static string TranslateMovementType(MovementType type) => type switch
+    {
+        MovementType.Purchase => "Compra",
+        MovementType.Sale => "Venta",
+        MovementType.AdjustmentIn => "Ajuste Entrada",
+        MovementType.AdjustmentOut => "Ajuste Salida",
+        MovementType.Return => "Devolución",
+        _ => type.ToString()
+    };
 }

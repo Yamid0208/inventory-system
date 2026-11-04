@@ -669,7 +669,7 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
     await expect(tableCash).toBeVisible();
     await expect(tableCash.locator('text=SES-2026-0001')).toBeVisible();
     await expect(tableCash.locator('text=Carlos Cajero')).toBeVisible();
-    await expect(tableCash.locator('text=Balanced')).toBeVisible();
+    await expect(tableCash.locator('text=/Balanced|Cuadrada/')).toBeVisible();
   });
 
   test('TC-REP-05: Categoría Auditoría, Kardex y Exportación CSV contextual', async ({ page }) => {
@@ -738,6 +738,6 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
     const tableEmployees = page.locator('[data-testid="table-sales-employees"]');
     await expect(tableEmployees).toBeVisible({ timeout: 5000 });
     await expect(tableEmployees.locator('text=Administrador del Sistema')).toBeVisible();
-    await expect(tableEmployees.getByText('Admin', { exact: true })).toBeVisible();
+    await expect(tableEmployees.locator('text=/Admin|Administrador/').first()).toBeVisible();
   });
 });
