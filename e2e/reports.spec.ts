@@ -1021,4 +1021,80 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
     await expect(tableValuation.locator('text=45d sin venta')).toBeVisible();
     await expect(tableValuation.locator('text=SKU-JBL-PARTY')).not.toBeVisible();
   });
+
+  test('TC-REP-09: Verificación de Gráficas y Diagramas Dinámicos en Todas las Subsecciones de Reportes', async ({ page }) => {
+    await page.goto('/reports');
+    await page.waitForURL('**/reports', { timeout: 10000 });
+
+    // 1. Subsección Top Productos (Ventas)
+    await page.locator('[data-testid="tab-sales-top"]').click();
+    const chartTop = page.locator('[data-testid="chart-sales-top"]');
+    await expect(chartTop).toBeVisible({ timeout: 5000 });
+    await expect(chartTop.locator('text=Producto Más Vendido')).toBeVisible();
+
+    // Toggle de modo (Facturación vs Unidades)
+    const btnVolume = page.locator('[data-testid="btn-top-mode-volume"]');
+    await expect(btnVolume).toBeVisible();
+    await btnVolume.click();
+    await expect(chartTop.locator('text=Por Volumen de Unidades')).toBeVisible();
+
+    // 2. Subsección Categorías (Ventas)
+    await page.locator('[data-testid="tab-sales-categories"]').click();
+    const chartCategories = page.locator('[data-testid="chart-sales-categories"]');
+    await expect(chartCategories).toBeVisible({ timeout: 5000 });
+    await expect(chartCategories.locator('text=Concentración de Ventas')).toBeVisible();
+
+    // 3. Subsección Horarios (Ventas)
+    await page.locator('[data-testid="tab-sales-hourly"]').click();
+    const chartHourly = page.locator('[data-testid="chart-sales-hourly"]');
+    await expect(chartHourly).toBeVisible({ timeout: 5000 });
+    await expect(chartHourly.locator('text=Histograma de Intensidad Transaccional')).toBeVisible();
+
+    // 4. Subsección Empleados (Ventas)
+    await page.locator('[data-testid="tab-sales-employees"]').click();
+    const chartEmployees = page.locator('[data-testid="chart-sales-employees"]');
+    await expect(chartEmployees).toBeVisible({ timeout: 5000 });
+    await expect(chartEmployees.locator('text=Leaderboard de Facturación')).toBeVisible();
+
+    // 5. Categoría Finanzas
+    await page.locator('[data-testid="tab-category-finance"]').click();
+    const chartFinance = page.locator('[data-testid="chart-finance"]');
+    await expect(chartFinance).toBeVisible({ timeout: 5000 });
+    await expect(chartFinance.locator('text=Cascada de Distribución Financiera de Ingresos')).toBeVisible();
+
+    // 6. Categoría Caja
+    await page.locator('[data-testid="tab-category-cash"]').click();
+    const chartCash = page.locator('[data-testid="chart-cash-reconciliation"]');
+    await expect(chartCash).toBeVisible({ timeout: 5000 });
+    await expect(chartCash.locator('text=Estado de Conformidad de Arqueos')).toBeVisible();
+
+    // 7. Categoría Inventario: Kardex, Catálogo y Bajo Stock
+    await page.locator('[data-testid="tab-category-inventory"]').click();
+    await page.locator('[data-testid="tab-inventory"]').click();
+    const chartKardex = page.locator('[data-testid="chart-inventory-kardex"]');
+    await expect(chartKardex).toBeVisible({ timeout: 5000 });
+    await expect(chartKardex.locator('text=Entradas de Inventario')).toBeVisible();
+
+    await page.locator('[data-testid="tab-products"]').click();
+    const chartProducts = page.locator('[data-testid="chart-products"]');
+    await expect(chartProducts).toBeVisible({ timeout: 5000 });
+    await expect(chartProducts.locator('text=Distribución de Salud Operativa de Stock')).toBeVisible();
+
+    await page.locator('[data-testid="tab-low-stock"]').click();
+    const chartLowStock = page.locator('[data-testid="chart-low-stock"]');
+    await expect(chartLowStock).toBeVisible({ timeout: 5000 });
+    await expect(chartLowStock.locator('text=Top Productos con Mayor Déficit de Reposición')).toBeVisible();
+
+    // 8. Categoría Compras
+    await page.locator('[data-testid="tab-category-purchases"]').click();
+    const chartPurchases = page.locator('[data-testid="chart-purchases"]');
+    await expect(chartPurchases).toBeVisible({ timeout: 5000 });
+    await expect(chartPurchases.locator('text=Concentración de Inversión por Proveedor')).toBeVisible();
+
+    // 9. Categoría Auditoría
+    await page.locator('[data-testid="tab-category-audit"]').click();
+    const chartAudit = page.locator('[data-testid="chart-audit"]');
+    await expect(chartAudit).toBeVisible({ timeout: 5000 });
+    await expect(chartAudit.locator('text=Distribución de Eventos por Módulo / Entidad')).toBeVisible();
+  });
 });
