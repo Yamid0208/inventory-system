@@ -15,11 +15,12 @@ test.describe('E2E POS Sales Modal - Layout Ergonómico y Sistema de Descuentos'
     });
 
     if (currentSessionRes.status() === 204 || currentSessionRes.status() === 404) {
-      // No hay sesión abierta, abrirla
+      // No hay sesión abierta, abrirla con warehouseId obligatorio
       await request.post('http://localhost:5001/api/v1/cash-register/open', {
         headers: authHeaders,
         data: {
           initialCash: 150000,
+          warehouseId: 1,
           notes: 'Apertura de turno automática para pruebas E2E'
         }
       });
@@ -30,6 +31,7 @@ test.describe('E2E POS Sales Modal - Layout Ergonómico y Sistema de Descuentos'
           headers: authHeaders,
           data: {
             initialCash: 150000,
+            warehouseId: 1,
             notes: 'Apertura de turno automática para pruebas E2E'
           }
         });

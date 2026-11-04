@@ -60,6 +60,11 @@ public class CashRegisterSession : BaseEntity
             throw new ArgumentOutOfRangeException(nameof(initialCash), "El saldo inicial de efectivo no puede ser negativo.");
         }
 
+        if (!warehouseId.HasValue || warehouseId.Value <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(warehouseId), "La sede o almacén es obligatoria para la apertura de caja.");
+        }
+
         SessionNumber = sessionNumber.Trim().ToUpperInvariant();
         UserId = userId;
         InitialCash = decimal.Round(initialCash, 2, MidpointRounding.AwayFromZero);

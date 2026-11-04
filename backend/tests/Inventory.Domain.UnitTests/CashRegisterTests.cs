@@ -33,23 +33,36 @@ public class CashRegisterTests
     public void CashRegisterSession_NegativeInitialCash_ThrowsException()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new CashRegisterSession("CAJA-001", 1, -500m));
+            new CashRegisterSession("CAJA-001", 1, -500m, 1));
     }
 
     [Fact]
     public void CashRegisterSession_InvalidSessionNumberOrUser_ThrowsException()
     {
         Assert.Throws<ArgumentException>(() =>
-            new CashRegisterSession("", 1, 100m));
+            new CashRegisterSession("", 1, 100m, 1));
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new CashRegisterSession("CAJA-001", 0, 100m));
+            new CashRegisterSession("CAJA-001", 0, 100m, 1));
+    }
+
+    [Fact]
+    public void CashRegisterSession_NullOrInvalidWarehouseId_ThrowsException()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new CashRegisterSession("CAJA-001", 1, 100m, warehouseId: null));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new CashRegisterSession("CAJA-001", 1, 100m, warehouseId: 0));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new CashRegisterSession("CAJA-001", 1, 100m, warehouseId: -5));
     }
 
     [Fact]
     public void CashRegisterSession_AddMovement_OnlyAllowedWhenOpen()
     {
-        var session = new CashRegisterSession("CAJA-001", 1, 100000m);
+        var session = new CashRegisterSession("CAJA-001", 1, 100000m, 1);
         var movement = new CashRegisterMovement(
             cashRegisterSessionId: session.Id,
             movementNumber: "MOV-001",
@@ -84,7 +97,7 @@ public class CashRegisterTests
     [Fact]
     public void CashRegisterSession_Close_CalculatesExpectedCashAndBalancedDifference()
     {
-        var session = new CashRegisterSession("CAJA-001", 1, 200000m);
+        var session = new CashRegisterSession("CAJA-001", 1, 200000m, 1);
 
         // Venta en efectivo: +50,000 (afecta efectivo físico)
         session.AddMovement(new CashRegisterMovement(
@@ -128,7 +141,7 @@ public class CashRegisterTests
     public void CashRegisterSession_Close_DetectsShortageAndSurplusCorrectly()
     {
         // Caso Faltante
-        var sessionShortage = new CashRegisterSession("CAJA-002", 1, 100000m);
+        var sessionShortage = new CashRegisterSession("CAJA-002", 1, 100000m, 1);
         sessionShortage.AddMovement(new CashRegisterMovement(
             sessionShortage.Id, "MOV-01", CashMovementType.SaleInflow, PaymentMethod.Cash, 20000m, "Venta", 1));
         // Esperado: 120,000. Contado: 110,000. Diferencia: -10,000
@@ -138,7 +151,7 @@ public class CashRegisterTests
         Assert.Equal(-10000m, sessionShortage.CashDifference);
 
         // Caso Sobrante
-        var sessionSurplus = new CashRegisterSession("CAJA-003", 1, 100000m);
+        var sessionSurplus = new CashRegisterSession("CAJA-003", 1, 100000m, 1);
         sessionSurplus.AddMovement(new CashRegisterMovement(
             sessionSurplus.Id, "MOV-02", CashMovementType.SaleInflow, PaymentMethod.Cash, 20000m, "Venta", 1));
         // Esperado: 120,000. Contado: 125,000. Diferencia: +5,000
@@ -151,7 +164,7 @@ public class CashRegisterTests
     [Fact]
     public void CashRegisterSession_Close_AlreadyClosed_ThrowsException()
     {
-        var session = new CashRegisterSession("CAJA-004", 1, 100000m);
+        var session = new CashRegisterSession("CAJA-004", 1, 100000m, 1);
         session.Close(100000m, "Primer cierre");
 
         Assert.Throws<InvalidOperationException>(() =>
@@ -161,7 +174,7 @@ public class CashRegisterTests
     [Fact]
     public void CashRegisterSession_CompensatoryReturnMovement_DiscountsExpectedCashAccurately()
     {
-        var session = new CashRegisterSession("CAJA-005", 1, 200000m);
+        var session = new CashRegisterSession("CAJA-005", 1, 200000m, 1);
 
         // Venta inicial en efectivo: +50,000
         session.AddMovement(new CashRegisterMovement(

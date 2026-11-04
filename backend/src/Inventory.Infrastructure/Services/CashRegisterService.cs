@@ -54,7 +54,24 @@ public class CashRegisterService : ICashRegisterService
             throw new NotFoundException($"El usuario con ID {userId} no existe.");
         }
 
-        var warehouseId = request.WarehouseId ?? user.WarehouseId;
+        if (!request.WarehouseId.HasValue || request.WarehouseId.Value <= 0)
+        {
+            throw new BusinessRuleViolationException(
+                "RN-CAJA-003",
+                "La sede o almacén es obligatoria para realizar la apertura de caja.");
+        }
+
+        var warehouseExists = await _context.Warehouses
+            .AnyAsync(w => w.Id == request.WarehouseId.Value && w.IsActive, cancellationToken);
+
+        if (!warehouseExists)
+        {
+            throw new BusinessRuleViolationException(
+                "RN-CAJA-004",
+                $"La sede o almacén seleccionada (ID {request.WarehouseId.Value}) no existe o se encuentra inactiva.");
+        }
+
+        var warehouseId = request.WarehouseId.Value;
 
         var sessionNumber = $"CAJA-{DateTimeOffset.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}";
         var session = new CashRegisterSession(
