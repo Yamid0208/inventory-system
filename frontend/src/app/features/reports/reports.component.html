@@ -14,7 +14,8 @@
         Suite de Inteligencia Operativa y Financiera
       </h1>
       <p class="text-xs sm:text-sm text-slate-500 mt-1">
-        Auditoría transaccional, rentabilidad histórica, conciliación de caja e inventarios con filtros avanzados y exportación CSV.
+        Auditoría transaccional, rentabilidad histórica, conciliación de caja e inventarios con filtros avanzados y
+        exportación CSV.
       </p>
     </div>
 
@@ -51,10 +52,8 @@
   <div class="bg-white rounded-2xl border border-slate-200/80 p-2 shadow-sm">
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2" role="tablist">
       <button type="button" (click)="selectCategory('sales')" data-testid="tab-category-sales"
-        [class.bg-primary-600]="selectedCategory() === 'sales'"
-        [class.text-white]="selectedCategory() === 'sales'"
-        [class.border-primary-600]="selectedCategory() === 'sales'"
-        [class.shadow-sm]="selectedCategory() === 'sales'"
+        [class.bg-primary-600]="selectedCategory() === 'sales'" [class.text-white]="selectedCategory() === 'sales'"
+        [class.border-primary-600]="selectedCategory() === 'sales'" [class.shadow-sm]="selectedCategory() === 'sales'"
         [class.hover:bg-primary-700]="selectedCategory() === 'sales'"
         [class.hover:text-white]="selectedCategory() === 'sales'"
         [class.text-slate-600]="selectedCategory() !== 'sales'"
@@ -67,8 +66,7 @@
       </button>
 
       <button type="button" (click)="selectCategory('finance')" data-testid="tab-category-finance"
-        [class.bg-primary-600]="selectedCategory() === 'finance'"
-        [class.text-white]="selectedCategory() === 'finance'"
+        [class.bg-primary-600]="selectedCategory() === 'finance'" [class.text-white]="selectedCategory() === 'finance'"
         [class.border-primary-600]="selectedCategory() === 'finance'"
         [class.shadow-sm]="selectedCategory() === 'finance'"
         [class.hover:bg-primary-700]="selectedCategory() === 'finance'"
@@ -115,13 +113,10 @@
       </button>
 
       <button type="button" (click)="selectCategory('cash')" data-testid="tab-category-cash"
-        [class.bg-primary-600]="selectedCategory() === 'cash'"
-        [class.text-white]="selectedCategory() === 'cash'"
-        [class.border-primary-600]="selectedCategory() === 'cash'"
-        [class.shadow-sm]="selectedCategory() === 'cash'"
+        [class.bg-primary-600]="selectedCategory() === 'cash'" [class.text-white]="selectedCategory() === 'cash'"
+        [class.border-primary-600]="selectedCategory() === 'cash'" [class.shadow-sm]="selectedCategory() === 'cash'"
         [class.hover:bg-primary-700]="selectedCategory() === 'cash'"
-        [class.hover:text-white]="selectedCategory() === 'cash'"
-        [class.text-slate-600]="selectedCategory() !== 'cash'"
+        [class.hover:text-white]="selectedCategory() === 'cash'" [class.text-slate-600]="selectedCategory() !== 'cash'"
         [class.hover:bg-primary-50]="selectedCategory() !== 'cash'"
         [class.hover:text-primary-700]="selectedCategory() !== 'cash'"
         [class.hover:border-primary-300]="selectedCategory() !== 'cash'"
@@ -131,10 +126,8 @@
       </button>
 
       <button type="button" (click)="selectCategory('audit')" data-testid="tab-category-audit"
-        [class.bg-primary-600]="selectedCategory() === 'audit'"
-        [class.text-white]="selectedCategory() === 'audit'"
-        [class.border-primary-600]="selectedCategory() === 'audit'"
-        [class.shadow-sm]="selectedCategory() === 'audit'"
+        [class.bg-primary-600]="selectedCategory() === 'audit'" [class.text-white]="selectedCategory() === 'audit'"
+        [class.border-primary-600]="selectedCategory() === 'audit'" [class.shadow-sm]="selectedCategory() === 'audit'"
         [class.hover:bg-primary-700]="selectedCategory() === 'audit'"
         [class.hover:text-white]="selectedCategory() === 'audit'"
         [class.text-slate-600]="selectedCategory() !== 'audit'"
@@ -151,106 +144,97 @@
   <!-- SUBSECCIONES SEGÚN LA CATEGORÍA ACTIVA -->
   @if (selectedCategory() === 'sales') {
   <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
-    <button type="button" (click)="selectReport('sales')" data-testid="tab-sales"
-      [ngClass]="selectedReport() === 'sales'
+    <button type="button" (click)="selectReport('sales')" data-testid="tab-sales" [ngClass]="selectedReport() === 'sales'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">💳</span>
       <span>Historial y Facturación</span>
       @if (selectedReport() === 'sales') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
-    <button type="button" (click)="selectReport('sales-top')" data-testid="tab-sales-top"
-      [ngClass]="selectedReport() === 'sales-top'
+    <button type="button" (click)="selectReport('sales-top')" data-testid="tab-sales-top" [ngClass]="selectedReport() === 'sales-top'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">⭐</span>
       <span>Top Productos</span>
       @if (selectedReport() === 'sales-top') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
-    <button type="button" (click)="selectReport('sales-categories')" data-testid="tab-sales-categories"
-      [ngClass]="selectedReport() === 'sales-categories'
+    <button type="button" (click)="selectReport('sales-categories')" data-testid="tab-sales-categories" [ngClass]="selectedReport() === 'sales-categories'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">🏷️</span>
       <span>Por Categoría</span>
       @if (selectedReport() === 'sales-categories') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
-    <button type="button" (click)="selectReport('sales-hourly')" data-testid="tab-sales-hourly"
-      [ngClass]="selectedReport() === 'sales-hourly'
+    <button type="button" (click)="selectReport('sales-hourly')" data-testid="tab-sales-hourly" [ngClass]="selectedReport() === 'sales-hourly'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">⏰</span>
       <span>Horarios Pico</span>
       @if (selectedReport() === 'sales-hourly') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
-    <button type="button" (click)="selectReport('sales-employees')" data-testid="tab-sales-employees"
-      [ngClass]="selectedReport() === 'sales-employees'
+    <button type="button" (click)="selectReport('sales-employees')" data-testid="tab-sales-employees" [ngClass]="selectedReport() === 'sales-employees'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-3.5 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">👥</span>
       <span>Por Vendedor</span>
       @if (selectedReport() === 'sales-employees') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
   </div>
   } @else if (selectedCategory() === 'inventory') {
   <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
-    <button type="button" (click)="selectReport('inventory')" data-testid="tab-inventory"
-      [ngClass]="selectedReport() === 'inventory'
+    <button type="button" (click)="selectReport('inventory')" data-testid="tab-inventory" [ngClass]="selectedReport() === 'inventory'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">📋</span>
       <span>Kardex y Movimientos</span>
       @if (selectedReport() === 'inventory') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
-    <button type="button" (click)="selectReport('inventory-valuation')" data-testid="tab-inventory-valuation"
-      [ngClass]="selectedReport() === 'inventory-valuation'
+    <button type="button" (click)="selectReport('inventory-valuation')" data-testid="tab-inventory-valuation" [ngClass]="selectedReport() === 'inventory-valuation'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">💎</span>
       <span>Valoración de Inventario</span>
       @if (selectedReport() === 'inventory-valuation') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
-    <button type="button" (click)="selectReport('products')" data-testid="tab-products"
-      [ngClass]="selectedReport() === 'products'
+    <button type="button" (click)="selectReport('products')" data-testid="tab-products" [ngClass]="selectedReport() === 'products'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">📦</span>
       <span>Catálogo & Valuación</span>
       @if (selectedReport() === 'products') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
-    <button type="button" (click)="selectReport('low-stock')" data-testid="tab-low-stock"
-      [ngClass]="selectedReport() === 'low-stock'
+    <button type="button" (click)="selectReport('low-stock')" data-testid="tab-low-stock" [ngClass]="selectedReport() === 'low-stock'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
       class="px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
       <span class="text-base">⚠️</span>
       <span>Bajo Stock & Alertas</span>
       @if (selectedReport() === 'low-stock') {
-        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
   </div>
@@ -262,7 +246,8 @@
       <div>
         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
           <span>Filtros Temporales</span>
-          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span
+            class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
             Período Activo
           </span>
         </h3>
@@ -274,15 +259,11 @@
       <!-- Presets de fecha -->
       <div class="flex flex-wrap items-center gap-1.5">
         <button type="button" (click)="setDatePreset('today')" data-testid="preset-today"
-          [class.bg-primary-600]="activePreset() === 'today'"
-          [class.text-white]="activePreset() === 'today'"
-          [class.border-primary-600]="activePreset() === 'today'"
-          [class.shadow-sm]="activePreset() === 'today'"
+          [class.bg-primary-600]="activePreset() === 'today'" [class.text-white]="activePreset() === 'today'"
+          [class.border-primary-600]="activePreset() === 'today'" [class.shadow-sm]="activePreset() === 'today'"
           [class.hover:bg-primary-700]="activePreset() === 'today'"
-          [class.hover:text-white]="activePreset() === 'today'"
-          [class.bg-white]="activePreset() !== 'today'"
-          [class.text-slate-600]="activePreset() !== 'today'"
-          [class.border-slate-200]="activePreset() !== 'today'"
+          [class.hover:text-white]="activePreset() === 'today'" [class.bg-white]="activePreset() !== 'today'"
+          [class.text-slate-600]="activePreset() !== 'today'" [class.border-slate-200]="activePreset() !== 'today'"
           [class.hover:bg-primary-50]="activePreset() !== 'today'"
           [class.hover:text-primary-700]="activePreset() !== 'today'"
           [class.hover:border-primary-300]="activePreset() !== 'today'"
@@ -292,13 +273,10 @@
         </button>
 
         <button type="button" (click)="setDatePreset('yesterday')" data-testid="preset-yesterday"
-          [class.bg-primary-600]="activePreset() === 'yesterday'"
-          [class.text-white]="activePreset() === 'yesterday'"
-          [class.border-primary-600]="activePreset() === 'yesterday'"
-          [class.shadow-sm]="activePreset() === 'yesterday'"
+          [class.bg-primary-600]="activePreset() === 'yesterday'" [class.text-white]="activePreset() === 'yesterday'"
+          [class.border-primary-600]="activePreset() === 'yesterday'" [class.shadow-sm]="activePreset() === 'yesterday'"
           [class.hover:bg-primary-700]="activePreset() === 'yesterday'"
-          [class.hover:text-white]="activePreset() === 'yesterday'"
-          [class.bg-white]="activePreset() !== 'yesterday'"
+          [class.hover:text-white]="activePreset() === 'yesterday'" [class.bg-white]="activePreset() !== 'yesterday'"
           [class.text-slate-600]="activePreset() !== 'yesterday'"
           [class.border-slate-200]="activePreset() !== 'yesterday'"
           [class.hover:bg-primary-50]="activePreset() !== 'yesterday'"
@@ -310,13 +288,10 @@
         </button>
 
         <button type="button" (click)="setDatePreset('thisMonth')" data-testid="preset-this-month"
-          [class.bg-primary-600]="activePreset() === 'thisMonth'"
-          [class.text-white]="activePreset() === 'thisMonth'"
-          [class.border-primary-600]="activePreset() === 'thisMonth'"
-          [class.shadow-sm]="activePreset() === 'thisMonth'"
+          [class.bg-primary-600]="activePreset() === 'thisMonth'" [class.text-white]="activePreset() === 'thisMonth'"
+          [class.border-primary-600]="activePreset() === 'thisMonth'" [class.shadow-sm]="activePreset() === 'thisMonth'"
           [class.hover:bg-primary-700]="activePreset() === 'thisMonth'"
-          [class.hover:text-white]="activePreset() === 'thisMonth'"
-          [class.bg-white]="activePreset() !== 'thisMonth'"
+          [class.hover:text-white]="activePreset() === 'thisMonth'" [class.bg-white]="activePreset() !== 'thisMonth'"
           [class.text-slate-600]="activePreset() !== 'thisMonth'"
           [class.border-slate-200]="activePreset() !== 'thisMonth'"
           [class.hover:bg-primary-50]="activePreset() !== 'thisMonth'"
@@ -328,13 +303,10 @@
         </button>
 
         <button type="button" (click)="setDatePreset('lastMonth')" data-testid="preset-last-month"
-          [class.bg-primary-600]="activePreset() === 'lastMonth'"
-          [class.text-white]="activePreset() === 'lastMonth'"
-          [class.border-primary-600]="activePreset() === 'lastMonth'"
-          [class.shadow-sm]="activePreset() === 'lastMonth'"
+          [class.bg-primary-600]="activePreset() === 'lastMonth'" [class.text-white]="activePreset() === 'lastMonth'"
+          [class.border-primary-600]="activePreset() === 'lastMonth'" [class.shadow-sm]="activePreset() === 'lastMonth'"
           [class.hover:bg-primary-700]="activePreset() === 'lastMonth'"
-          [class.hover:text-white]="activePreset() === 'lastMonth'"
-          [class.bg-white]="activePreset() !== 'lastMonth'"
+          [class.hover:text-white]="activePreset() === 'lastMonth'" [class.bg-white]="activePreset() !== 'lastMonth'"
           [class.text-slate-600]="activePreset() !== 'lastMonth'"
           [class.border-slate-200]="activePreset() !== 'lastMonth'"
           [class.hover:bg-primary-50]="activePreset() !== 'lastMonth'"
@@ -346,15 +318,11 @@
         </button>
 
         <button type="button" (click)="setDatePreset('7days')" data-testid="preset-7days"
-          [class.bg-primary-600]="activePreset() === '7days'"
-          [class.text-white]="activePreset() === '7days'"
-          [class.border-primary-600]="activePreset() === '7days'"
-          [class.shadow-sm]="activePreset() === '7days'"
+          [class.bg-primary-600]="activePreset() === '7days'" [class.text-white]="activePreset() === '7days'"
+          [class.border-primary-600]="activePreset() === '7days'" [class.shadow-sm]="activePreset() === '7days'"
           [class.hover:bg-primary-700]="activePreset() === '7days'"
-          [class.hover:text-white]="activePreset() === '7days'"
-          [class.bg-white]="activePreset() !== '7days'"
-          [class.text-slate-600]="activePreset() !== '7days'"
-          [class.border-slate-200]="activePreset() !== '7days'"
+          [class.hover:text-white]="activePreset() === '7days'" [class.bg-white]="activePreset() !== '7days'"
+          [class.text-slate-600]="activePreset() !== '7days'" [class.border-slate-200]="activePreset() !== '7days'"
           [class.hover:bg-primary-50]="activePreset() !== '7days'"
           [class.hover:text-primary-700]="activePreset() !== '7days'"
           [class.hover:border-primary-300]="activePreset() !== '7days'"
@@ -364,15 +332,11 @@
         </button>
 
         <button type="button" (click)="setDatePreset('30days')" data-testid="preset-30days"
-          [class.bg-primary-600]="activePreset() === '30days'"
-          [class.text-white]="activePreset() === '30days'"
-          [class.border-primary-600]="activePreset() === '30days'"
-          [class.shadow-sm]="activePreset() === '30days'"
+          [class.bg-primary-600]="activePreset() === '30days'" [class.text-white]="activePreset() === '30days'"
+          [class.border-primary-600]="activePreset() === '30days'" [class.shadow-sm]="activePreset() === '30days'"
           [class.hover:bg-primary-700]="activePreset() === '30days'"
-          [class.hover:text-white]="activePreset() === '30days'"
-          [class.bg-white]="activePreset() !== '30days'"
-          [class.text-slate-600]="activePreset() !== '30days'"
-          [class.border-slate-200]="activePreset() !== '30days'"
+          [class.hover:text-white]="activePreset() === '30days'" [class.bg-white]="activePreset() !== '30days'"
+          [class.text-slate-600]="activePreset() !== '30days'" [class.border-slate-200]="activePreset() !== '30days'"
           [class.hover:bg-primary-50]="activePreset() !== '30days'"
           [class.hover:text-primary-700]="activePreset() !== '30days'"
           [class.hover:border-primary-300]="activePreset() !== '30days'"
@@ -382,19 +346,13 @@
         </button>
 
         <button type="button" (click)="setDatePreset('all')" data-testid="preset-all"
-          [class.bg-primary-600]="activePreset() === 'all'"
-          [class.text-white]="activePreset() === 'all'"
-          [class.border-primary-600]="activePreset() === 'all'"
-          [class.shadow-sm]="activePreset() === 'all'"
-          [class.hover:bg-primary-700]="activePreset() === 'all'"
-          [class.hover:text-white]="activePreset() === 'all'"
-          [class.bg-white]="activePreset() !== 'all'"
-          [class.text-slate-600]="activePreset() !== 'all'"
-          [class.border-slate-200]="activePreset() !== 'all'"
-          [class.hover:bg-primary-50]="activePreset() !== 'all'"
+          [class.bg-primary-600]="activePreset() === 'all'" [class.text-white]="activePreset() === 'all'"
+          [class.border-primary-600]="activePreset() === 'all'" [class.shadow-sm]="activePreset() === 'all'"
+          [class.hover:bg-primary-700]="activePreset() === 'all'" [class.hover:text-white]="activePreset() === 'all'"
+          [class.bg-white]="activePreset() !== 'all'" [class.text-slate-600]="activePreset() !== 'all'"
+          [class.border-slate-200]="activePreset() !== 'all'" [class.hover:bg-primary-50]="activePreset() !== 'all'"
           [class.hover:text-primary-700]="activePreset() !== 'all'"
-          [class.hover:border-primary-300]="activePreset() !== 'all'"
-          [class.hover:shadow-xs]="activePreset() !== 'all'"
+          [class.hover:border-primary-300]="activePreset() !== 'all'" [class.hover:shadow-xs]="activePreset() !== 'all'"
           class="px-3 py-1.5 rounded-lg border text-sm font-semibold cursor-pointer transition-all duration-200 active:scale-[0.98]">
           Todo el Histórico
         </button>
@@ -421,10 +379,10 @@
         <label class="block text-sm font-semibold text-slate-600 mb-1">Búsqueda rápida</label>
         <div class="relative">
           <input type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
-            data-testid="input-quick-search"
-            placeholder="Filtrar por SKU, nombre, comprobante..."
+            data-testid="input-quick-search" placeholder="Filtrar por SKU, nombre, comprobante..."
             class="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 hover:border-primary-300 transition-colors" />
-          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
@@ -441,440 +399,445 @@
     </div>
   </div>
 
-  <!-- TARJETAS ANALÍTICAS Y BLOQUE VISUAL ESPECIALIZADO -->
-  @if (selectedCategory() === 'sales') {
-    @let sa = salesAnalytics();
-    @let sm = salesMetrics();
-    @if (sa || sm) {
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-semibold text-slate-500">Total Facturado</span>
-          @if (sa) {
-            <span class="px-2 py-0.5 rounded-full text-xs font-black"
-              [ngClass]="sa.revenueGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.revenueGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
-              {{ sa.revenueGrowthPct > 0 ? '+' : '' }}{{ sa.revenueGrowthPct }}%
-            </span>
-          }
-        </div>
-        <div class="text-2xl sm:text-3xl font-black text-primary-600 mt-1" data-testid="metric-sales-total">
-          {{ (sa?.totalRevenue ?? sm?.totalSalesAmount ?? 0) | currencyFormat }}
-        </div>
-        <p class="text-xs text-slate-500 mt-1">
-          IVA (19%): {{ (sa?.tax ?? sm?.totalTax ?? 0) | currencyFormat }}
-          @if (sa) {
-            &bull; {{ sa.unitsSold }} unidades
-          }
-        </p>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-semibold text-slate-500">Transacciones Realizadas</span>
-          @if (sa) {
-            <span class="px-2 py-0.5 rounded-full text-xs font-black"
-              [ngClass]="sa.transactionsGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.transactionsGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
-              {{ sa.transactionsGrowthPct > 0 ? '+' : '' }}{{ sa.transactionsGrowthPct }}%
-            </span>
-          }
-        </div>
-        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-testid="metric-sales-count">
-          {{ sa?.transactionCount ?? sm?.totalTransactions ?? 0 }}
-        </div>
-        <p class="text-xs text-slate-500 mt-1">Comprobantes emitidos en el período</p>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-semibold text-slate-500">Ticket Promedio</span>
-          @if (sa) {
-            <span class="px-2 py-0.5 rounded-full text-xs font-black"
-              [ngClass]="sa.ticketGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.ticketGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
-              {{ sa.ticketGrowthPct > 0 ? '+' : '' }}{{ sa.ticketGrowthPct }}%
-            </span>
-          }
-        </div>
-        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-          {{ (sa?.averageTicket ?? sm?.averageTicket ?? 0) | currencyFormat }}
-        </div>
-        <p class="text-xs text-slate-500 mt-1">Gasto medio por cliente</p>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-        <span class="text-sm font-semibold text-slate-500">Volumen de Artículos</span>
-        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-          {{ (sa?.unitsSold ?? sm?.totalSalesAmount ?? 0) }} uds
-        </div>
-        <p class="text-xs text-slate-500 mt-1">
-          Impuestos (19%): {{ (sa?.tax ?? sm?.totalTax ?? 0) | currencyFormat }}
-        </p>
-      </div>
-    </div>
-
-    <!-- BANNER DE SUGERENCIA SI HOY TIENE 0 VENTAS -->
-    @if (activePreset() === 'today' && (!sa || sa.totalRevenue === 0)) {
-    <div class="bg-gradient-to-r from-amber-50 to-primary-50 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-      <div class="flex items-start sm:items-center gap-3">
-        <span class="text-xl">💡</span>
-        <div>
-          <h4 class="text-sm font-bold text-slate-800">El filtro actual "Hoy" no tiene ventas registradas en esta sede</h4>
-          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Explora las comparativas y gráficas seleccionando un período con movimientos:</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <button type="button" (click)="setDatePreset('thisMonth')"
-          class="px-3 py-1.5 rounded-xl bg-white border border-primary-300 text-primary-700 hover:bg-primary-50 text-sm font-bold transition-all shadow-xs cursor-pointer">
-          📅 Ver Mes Actual
-        </button>
-        <button type="button" (click)="setDatePreset('all')"
-          class="px-3 py-1.5 rounded-xl bg-primary-600 text-white hover:bg-primary-700 text-sm font-bold transition-all shadow-xs cursor-pointer">
-          📈 Ver Todo el Histórico
-        </button>
-      </div>
-    </div>
-    }
-
-    <!-- PANEL GRÁFICO & COMPARATIVAS EMPRESARIALES DE VENTAS -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-      <!-- 1. GRÁFICA DE TENDENCIA O COMPARATIVA DE PERÍODOS (8/12) -->
-      <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col gap-3">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-          <div>
-            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-              <span>{{ salesGraphMode() === 'trend' ? '📈 Evolución y Tendencias en el Tiempo' : '⚖️ Comparativa de Período vs Ciclo Anterior' }}</span>
-            </h3>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-              {{ salesGraphMode() === 'trend' ? 'Serie cronológica de facturación con indicación de subidas (verde), bajadas (rojo) y estabilidad (amarillo).' : 'Análisis comparativo de crecimiento relativo y absoluto vs el período anterior.' }}
-            </p>
-          </div>
-
-          <!-- Selector de Modo Gráfico -->
-          <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/80 w-fit shrink-0">
-            <button type="button" (click)="salesGraphMode.set('trend')" data-testid="btn-graph-mode-trend"
-              [ngClass]="salesGraphMode() === 'trend' ? 'bg-white text-primary-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-              class="px-3 py-1.5 text-sm rounded-lg transition-all cursor-pointer">
-              Tendencia
-            </button>
-            <button type="button" (click)="salesGraphMode.set('comparison')" data-testid="btn-graph-mode-comparison"
-              [ngClass]="salesGraphMode() === 'comparison' ? 'bg-white text-primary-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-              class="px-3 py-1.5 text-sm rounded-lg transition-all cursor-pointer">
-              Comparativa
-            </button>
-          </div>
-        </div>
-
-        <!-- MODO 1: GRÁFICA DE TENDENCIA SVG -->
-        @if (salesGraphMode() === 'trend') {
-          @let tc = trendChartData();
-          @if (tc.hasData) {
-          <div class="space-y-3">
-            <!-- Barra de Leyenda de Pendientes -->
-            <div class="flex items-center justify-between flex-wrap gap-2 text-xs pt-1">
-              <div class="flex items-center gap-3">
-                <span class="text-slate-500 font-semibold">Comportamiento:</span>
-                <span class="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> ↗ Subida ({{ tc.upCount }})
-                </span>
-                <span class="inline-flex items-center gap-1 font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
-                  <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> ↘ Bajada ({{ tc.downCount }})
-                </span>
-                @if (tc.flatCount > 0) {
-                <span class="inline-flex items-center gap-1 font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                  <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> → Estable ({{ tc.flatCount }})
-                </span>
-                }
-              </div>
-              <span class="text-slate-400 font-mono text-[11px]">Pasa el cursor sobre cualquier valor para ver la fecha</span>
-            </div>
-
-            <!-- Gráfica SVG Responsive -->
-            <div class="w-full overflow-hidden bg-slate-50/40 rounded-xl p-2 border border-slate-100">
-              <svg viewBox="0 0 680 220" class="w-full h-56 sm:h-64 overflow-visible">
-                <defs>
-                  <linearGradient id="salesTrendGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.18" />
-                    <stop offset="50%" stop-color="#3b82f6" stop-opacity="0.08" />
-                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0.01" />
-                  </linearGradient>
-                </defs>
-
-                <!-- Líneas de referencia horizontales -->
-                <line x1="45" y1="50" x2="635" y2="50" stroke="#e2e8f0" stroke-dasharray="3 3" />
-                <line x1="45" y1="112" x2="635" y2="112" stroke="#e2e8f0" stroke-dasharray="3 3" />
-                <line x1="45" y1="175" x2="635" y2="175" stroke="#cbd5e1" stroke-width="1.5" />
-
-                <!-- Área con gradiente suave -->
-                <path [attr.d]="tc.areaPath" fill="url(#salesTrendGrad)" />
-
-                <!-- Segmentos coloreados según pendiente: Verde (subida), Rojo (bajada), Amarillo (estable) -->
-                @for (seg of tc.segments; track $index) {
-                <line [attr.x1]="seg.x1" [attr.y1]="seg.y1" [attr.x2]="seg.x2" [attr.y2]="seg.y2"
-                  [attr.stroke]="seg.color" stroke-width="3.5" stroke-linecap="round" />
-                }
-
-                <!-- Puntos interactivos con SOLO EL VALOR y TARJETICA en HOVER -->
-                @for (pt of tc.points; track pt.label) {
-                <g class="group cursor-pointer">
-                  <!-- Zona de activación hover amplia -->
-                  <rect [attr.x]="pt.x - 22" [attr.y]="pt.y - 25" width="44" height="48"
-                    fill="transparent" class="cursor-pointer" />
-
-                  <!-- Línea guía vertical punteada hacia el eje X -->
-                  <line [attr.x1]="pt.x" [attr.y1]="pt.y" [attr.x2]="pt.x" y2="175"
-                    stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2 2"
-                    class="opacity-50 group-hover:opacity-100 group-hover:stroke-slate-400 transition-opacity" />
-
-                  <!-- Círculo del punto central -->
-                  <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="5" [attr.fill]="pt.pointColor"
-                    stroke="#ffffff" stroke-width="2.5" class="transition-all duration-200 group-hover:r-7 group-hover:drop-shadow-sm" />
-
-                  <!-- SOLO EL VALOR (sin recuadro) sobre el punto -->
-                  <text [attr.x]="pt.x" [attr.y]="pt.valueY" text-anchor="middle"
-                    class="text-[10px] font-mono font-bold select-none cursor-pointer group-hover:font-black transition-all"
-                    [attr.fill]="pt.pointColor">
-                    {{ pt.formattedAmount }}
-                  </text>
-
-                  <!-- TARJETICA FLOTANTE QUE APARECE AL PONER EL CURSOR SOBRE EL VALOR -->
-                  <g class="opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none drop-shadow-md z-30"
-                     [attr.transform]="'translate(' + pt.tooltipX + ',' + pt.tooltipY + ')'">
-                    <rect x="-50" y="-17" width="100" height="34" rx="7"
-                      fill="#0f172a" stroke="#334155" stroke-width="1" />
-                    
-                    @if (pt.tooltipIsAbove) {
-                      <polygon points="-5,17 5,17 0,22" fill="#0f172a" />
-                    } @else {
-                      <polygon points="-5,-17 5,-17 0,-22" fill="#0f172a" />
-                    }
-
-                    <!-- Fecha -->
-                    <text x="0" y="-3" text-anchor="middle"
-                      class="text-[9.5px] font-mono font-bold fill-amber-300 select-none">
-                      📅 {{ pt.label }}
-                    </text>
-
-                    <!-- Monto y transacciones -->
-                    <text x="0" y="9" text-anchor="middle"
-                      class="text-[8.5px] font-mono font-semibold fill-white select-none">
-                      {{ pt.amount | currencyFormat }} ({{ pt.count }} tx{{ pt.count !== 1 ? 's' : '' }})
-                    </text>
-                  </g>
-
-                  <!-- Etiqueta de fecha en el eje X inferior -->
-                  <text [attr.x]="pt.x" y="195" text-anchor="middle"
-                    class="text-[8.5px] font-mono font-medium fill-slate-400 select-none group-hover:fill-slate-800 group-hover:font-bold transition-colors">
-                    {{ pt.shortDate }}
-                  </text>
-                </g>
-                }
-              </svg>
-            </div>
-
-            <!-- Resumen de Tendencias -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-sm">
-              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-slate-500 block text-xs font-semibold">Día Récord</span>
-                <span class="font-bold text-slate-800 text-sm">{{ tc.peakDay?.label || 'N/A' }}</span>
-                <span class="text-primary-600 font-mono font-bold block text-xs">{{ tc.peakDay?.totalRevenue | currencyFormat }}</span>
-              </div>
-              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-slate-500 block text-xs font-semibold">Promedio Diario</span>
-                <span class="font-bold text-slate-800 text-sm">{{ tc.averageRevenue | currencyFormat }}</span>
-                <span class="text-slate-500 text-xs block">por día activo</span>
-              </div>
-              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-slate-500 block text-xs font-semibold">Total en Serie</span>
-                <span class="font-bold text-slate-900 text-sm">{{ tc.totalRevenue | currencyFormat }}</span>
-                <span class="text-slate-500 text-xs block">{{ tc.points.length }} fechas registradas</span>
-              </div>
-            </div>
-          </div>
-          } @else {
-            <div class="p-10 text-center space-y-2">
-              <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-lg">📉</div>
-              <p class="text-sm font-bold text-slate-700">Sin datos de tendencia para el período seleccionado</p>
-              <p class="text-xs text-slate-500">Prueba cambiando el preset a "Mes Actual" o "Todo el Histórico".</p>
-            </div>
-          }
-        }
-
-        <!-- MODO 2: COMPARATIVA DE PERÍODO ACTUAL VS ANTERIOR -->
-        @if (salesGraphMode() === 'comparison') {
-          @let comp = comparativeAnalysis();
-          @if (comp) {
-          <div class="pt-4 space-y-5">
-            <!-- Barra 1: Facturación Bruta -->
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between text-sm">
-                <span class="font-bold text-slate-700 flex items-center gap-1.5">
-                  <span>💰 Facturación Total</span>
-                </span>
-                <span class="px-2 py-0.5 rounded-full text-xs font-black"
-                  [ngClass]="comp.revDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
-                  {{ comp.revDiff >= 0 ? '+' : '' }}{{ comp.revDiff | currencyFormat }} ({{ comp.revPct >= 0 ? '+' : '' }}{{ comp.revPct }}%)
-                </span>
-              </div>
-              <div class="space-y-1">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
-                  <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
-                    <div class="bg-primary-600 h-full rounded-full transition-all duration-300" [style.width.%]="comp.curRevBarWidth"></div>
-                  </div>
-                  <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curRev | currencyFormat }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
-                  <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
-                    <div class="bg-slate-400 h-full rounded-full transition-all duration-300" [style.width.%]="comp.prevRevBarWidth"></div>
-                  </div>
-                  <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevRev | currencyFormat }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Barra 2: Transacciones Concretadas -->
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between text-sm">
-                <span class="font-bold text-slate-700 flex items-center gap-1.5">
-                  <span>🧾 Transacciones / Facturas</span>
-                </span>
-                <span class="px-2 py-0.5 rounded-full text-xs font-black"
-                  [ngClass]="comp.txDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
-                  {{ comp.txDiff >= 0 ? '+' : '' }}{{ comp.txDiff }} transacciones ({{ comp.txPct >= 0 ? '+' : '' }}{{ comp.txPct }}%)
-                </span>
-              </div>
-              <div class="space-y-1">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
-                  <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
-                    <div class="bg-primary-600 h-full rounded-full transition-all duration-300" [style.width.%]="comp.curTxBarWidth"></div>
-                  </div>
-                  <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curTx }} txs</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
-                  <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
-                    <div class="bg-slate-400 h-full rounded-full transition-all duration-300" [style.width.%]="comp.prevTxBarWidth"></div>
-                  </div>
-                  <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevTx }} txs</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Barra 3: Ticket Promedio -->
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between text-sm">
-                <span class="font-bold text-slate-700 flex items-center gap-1.5">
-                  <span>🎯 Ticket Promedio</span>
-                </span>
-                <span class="px-2 py-0.5 rounded-full text-xs font-black"
-                  [ngClass]="comp.ticketDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
-                  {{ comp.ticketDiff >= 0 ? '+' : '' }}{{ comp.ticketDiff | currencyFormat }} ({{ comp.ticketPct >= 0 ? '+' : '' }}{{ comp.ticketPct }}%)
-                </span>
-              </div>
-              <div class="space-y-1">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
-                  <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
-                    <div class="bg-primary-600 h-full rounded-full transition-all duration-300" [style.width.%]="comp.curTicketBarWidth"></div>
-                  </div>
-                  <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curTicket | currencyFormat }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
-                  <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
-                    <div class="bg-slate-400 h-full rounded-full transition-all duration-300" [style.width.%]="comp.prevTicketBarWidth"></div>
-                  </div>
-                  <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevTicket | currencyFormat }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          }
+  <!-- TARJETAS ANALÍTICAS Y BLOQUE VISUAL ESPECIALIZADO (SÓLO PARA HISTORIAL Y FACTURACIÓN) -->
+  @if (selectedReport() === 'sales') {
+  @let sa = salesAnalytics();
+  @let sm = salesMetrics();
+  @if (sa || sm) {
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-semibold text-slate-500">Total Facturado</span>
+        @if (sa) {
+        <span class="px-2 py-0.5 rounded-full text-xs font-black"
+          [ngClass]="sa.revenueGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.revenueGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
+          {{ sa.revenueGrowthPct > 0 ? '+' : '' }}{{ sa.revenueGrowthPct }}%
+        </span>
         }
       </div>
+      <div class="text-2xl sm:text-3xl font-black text-primary-600 mt-1" data-testid="metric-sales-total">
+        {{ (sa?.totalRevenue ?? sm?.totalSalesAmount ?? 0) | currencyFormat }}
+      </div>
+      <p class="text-xs text-slate-500 mt-1">
+        IVA (19%): {{ (sa?.tax ?? sm?.totalTax ?? 0) | currencyFormat }}
+        @if (sa) {
+        &bull; {{ sa.unitsSold }} unidades
+        }
+      </p>
+    </div>
 
-      <!-- 2. GRÁFICA DE DISTRIBUCIÓN DE MEDIOS DE PAGO & CATEGORÍAS (4/12) -->
-      <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between space-y-4">
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-semibold text-slate-500">Transacciones Realizadas</span>
+        @if (sa) {
+        <span class="px-2 py-0.5 rounded-full text-xs font-black"
+          [ngClass]="sa.transactionsGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.transactionsGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
+          {{ sa.transactionsGrowthPct > 0 ? '+' : '' }}{{ sa.transactionsGrowthPct }}%
+        </span>
+        }
+      </div>
+      <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-testid="metric-sales-count">
+        {{ sa?.transactionCount ?? sm?.totalTransactions ?? 0 }}
+      </div>
+      <p class="text-xs text-slate-500 mt-1">Comprobantes emitidos en el período</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-semibold text-slate-500">Ticket Promedio</span>
+        @if (sa) {
+        <span class="px-2 py-0.5 rounded-full text-xs font-black"
+          [ngClass]="sa.ticketGrowthPct > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : sa.ticketGrowthPct < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'">
+          {{ sa.ticketGrowthPct > 0 ? '+' : '' }}{{ sa.ticketGrowthPct }}%
+        </span>
+        }
+      </div>
+      <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
+        {{ (sa?.averageTicket ?? sm?.averageTicket ?? 0) | currencyFormat }}
+      </div>
+      <p class="text-xs text-slate-500 mt-1">Gasto medio por cliente</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+      <span class="text-sm font-semibold text-slate-500">Volumen de Artículos</span>
+      <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
+        {{ (sa?.unitsSold ?? sm?.totalSalesAmount ?? 0) }} uds
+      </div>
+      <p class="text-xs text-slate-500 mt-1">
+        Impuestos (19%): {{ (sa?.tax ?? sm?.totalTax ?? 0) | currencyFormat }}
+      </p>
+    </div>
+  </div>
+
+  <!-- BANNER DE SUGERENCIA SI HOY TIENE 0 VENTAS -->
+  @if (activePreset() === 'today' && (!sa || sa.totalRevenue === 0)) {
+  <div
+    class="bg-gradient-to-r from-amber-50 to-primary-50 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+    <div class="flex items-start sm:items-center gap-3">
+      <span class="text-xl">💡</span>
+      <div>
+        <h4 class="text-sm font-bold text-slate-800">El filtro actual "Hoy" no tiene ventas registradas en esta sede
+        </h4>
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Explora las comparativas y gráficas seleccionando un período
+          con movimientos:</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button type="button" (click)="setDatePreset('thisMonth')"
+        class="px-3 py-1.5 rounded-xl bg-white border border-primary-300 text-primary-700 hover:bg-primary-50 text-sm font-bold transition-all shadow-xs cursor-pointer">
+        📅 Ver Mes Actual
+      </button>
+      <button type="button" (click)="setDatePreset('all')"
+        class="px-3 py-1.5 rounded-xl bg-primary-600 text-white hover:bg-primary-700 text-sm font-bold transition-all shadow-xs cursor-pointer">
+        📈 Ver Todo el Histórico
+      </button>
+    </div>
+  </div>
+  }
+
+  <!-- PANEL GRÁFICO & COMPARATIVAS EMPRESARIALES DE VENTAS -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <!-- 1. GRÁFICA DE TENDENCIA O COMPARATIVA DE PERÍODOS (8/12) -->
+    <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div>
-          <h3 class="text-base font-bold text-slate-900 flex items-center justify-between">
-            <span>💳 Medios de Pago</span>
-            <span class="text-xs font-semibold text-slate-500">Distribución</span>
+          <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span>{{ salesGraphMode() === 'trend' ? '📈 Evolución y Tendencias en el Tiempo' : '⚖️ Comparativa de
+              Período vs Ciclo Anterior' }}</span>
           </h3>
-          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Participación de efectivo vs electrónico.</p>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            {{ salesGraphMode() === 'trend' ? '' : 'Análisis comparativo de crecimiento vs el
+            período anterior.' }}
+          </p>
         </div>
 
-        <!-- Donut SVG -->
-        @let donutSegments = paymentDonutSegments();
-        @if (donutSegments.length) {
-        <div class="flex flex-col items-center justify-center pt-2">
-          <div class="relative w-40 h-40">
-            <svg viewBox="0 0 42 42" class="w-full h-full -rotate-90">
-              <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="4.5" />
-              @for (seg of donutSegments; track seg.method) {
-                <circle cx="21" cy="21" r="15.9155" fill="none" [attr.stroke]="seg.color" stroke-width="4.8"
-                  [attr.stroke-dasharray]="seg.strokeDash" [attr.stroke-dashoffset]="seg.strokeOffset"
-                  stroke-linecap="round" class="transition-all duration-500" />
-              }
-            </svg>
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
-              <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Recaudación</span>
-              <span class="text-sm sm:text-base font-black text-slate-800 font-mono mt-0.5 truncate max-w-[105px]">
-                {{ (sa?.totalRevenue ?? sm?.totalSalesAmount ?? 0) | currencyFormat }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Leyenda de Métodos de Pago -->
-          <div class="w-full space-y-2 mt-4 text-sm">
-            @for (seg of donutSegments; track seg.method) {
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full" [style.backgroundColor]="seg.color"></span>
-                <span class="font-bold text-slate-800 text-sm">{{ seg.method }}</span>
-              </div>
-              <div class="text-right">
-                <span class="font-mono font-bold text-slate-900 block text-sm">{{ seg.amount | currencyFormat }}</span>
-                <span class="text-xs text-slate-500 font-mono">{{ seg.percentage }}% &bull; {{ seg.count }} txs</span>
-              </div>
-            </div>
-            }
-          </div>
+        <!-- Selector de Modo Gráfico -->
+        <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/80 w-fit shrink-0">
+          <button type="button" (click)="salesGraphMode.set('trend')" data-testid="btn-graph-mode-trend"
+            [ngClass]="salesGraphMode() === 'trend' ? 'bg-white text-primary-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+            class="px-3 py-1.5 text-sm rounded-lg transition-all cursor-pointer">
+            Tendencia
+          </button>
+          <button type="button" (click)="salesGraphMode.set('comparison')" data-testid="btn-graph-mode-comparison"
+            [ngClass]="salesGraphMode() === 'comparison' ? 'bg-white text-primary-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+            class="px-3 py-1.5 text-sm rounded-lg transition-all cursor-pointer">
+            Comparativa
+          </button>
         </div>
-        } @else {
-          <div class="p-8 text-center space-y-2">
-            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-lg">💳</div>
-            <p class="text-sm font-semibold text-slate-600">Sin pagos en el período</p>
-          </div>
-        }
-
-        <!-- Top Categorías Resumen -->
-        @if (salesCategories().length) {
-        <div class="pt-3 border-t border-slate-100 space-y-2">
-          <div class="flex items-center justify-between text-xs font-bold text-slate-700">
-            <span>🏷️ Top Categorías</span>
-            <button type="button" (click)="selectReport('sales-categories')" class="text-primary-600 hover:underline text-[11px] font-semibold cursor-pointer">
-              Ver todas ›
-            </button>
-          </div>
-          <div class="space-y-1.5">
-            @for (cat of salesCategories().slice(0, 2); track cat.categoryId) {
-            <div class="text-[11px] space-y-0.5">
-              <div class="flex items-center justify-between">
-                <span class="font-medium text-slate-600 truncate max-w-[120px]">{{ cat.categoryName }}</span>
-                <span class="font-mono font-bold text-slate-800">{{ cat.sharePercentage }}% ({{ cat.totalRevenue | currencyFormat }})</span>
-              </div>
-              <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                <div class="bg-primary-500 h-full rounded-full" [style.width.%]="cat.sharePercentage"></div>
-              </div>
-            </div>
-            }
-          </div>
-        </div>
-        }
       </div>
+
+      <!-- MODO 1: GRÁFICA DE TENDENCIA SVG -->
+      @if (salesGraphMode() === 'trend') {
+      @let tc = trendChartData();
+      @if (tc.hasData) {
+      <div class="space-y-3">
+
+        <!-- Gráfica SVG Responsive -->
+        <div class="w-full overflow-hidden bg-slate-50/40 rounded-xl p-2 border border-slate-100">
+          <svg viewBox="0 0 680 220" class="w-full h-56 sm:h-64 overflow-visible">
+            <defs>
+              <linearGradient id="salesTrendGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.18" />
+                <stop offset="50%" stop-color="#3b82f6" stop-opacity="0.08" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.01" />
+              </linearGradient>
+            </defs>
+
+            <!-- Líneas de referencia horizontales -->
+            <line x1="45" y1="50" x2="635" y2="50" stroke="#e2e8f0" stroke-dasharray="3 3" />
+            <line x1="45" y1="112" x2="635" y2="112" stroke="#e2e8f0" stroke-dasharray="3 3" />
+            <line x1="45" y1="175" x2="635" y2="175" stroke="#cbd5e1" stroke-width="1.5" />
+
+            <!-- Área con gradiente suave -->
+            <path [attr.d]="tc.areaPath" fill="url(#salesTrendGrad)" />
+
+            <!-- Segmentos coloreados según pendiente: Verde (subida), Rojo (bajada), Amarillo (estable) -->
+            @for (seg of tc.segments; track $index) {
+            <line [attr.x1]="seg.x1" [attr.y1]="seg.y1" [attr.x2]="seg.x2" [attr.y2]="seg.y2" [attr.stroke]="seg.color"
+              stroke-width="3.5" stroke-linecap="round" />
+            }
+
+            <!-- Puntos interactivos con SOLO EL VALOR y TARJETICA en HOVER -->
+            @for (pt of tc.points; track pt.label) {
+            <g class="group cursor-pointer">
+              <!-- Zona de activación hover amplia -->
+              <rect [attr.x]="pt.x - 22" [attr.y]="pt.y - 25" width="44" height="48" fill="transparent"
+                class="cursor-pointer" />
+
+              <!-- Línea guía vertical punteada hacia el eje X -->
+              <line [attr.x1]="pt.x" [attr.y1]="pt.y" [attr.x2]="pt.x" y2="175" stroke="#e2e8f0" stroke-width="1"
+                stroke-dasharray="2 2"
+                class="opacity-50 group-hover:opacity-100 group-hover:stroke-slate-400 transition-opacity" />
+
+              <!-- Círculo del punto central -->
+              <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="5" [attr.fill]="pt.pointColor" stroke="#ffffff"
+                stroke-width="2.5" class="transition-all duration-200 group-hover:r-7 group-hover:drop-shadow-sm" />
+
+              <!-- SOLO EL VALOR (sin recuadro) sobre el punto -->
+              <text [attr.x]="pt.x" [attr.y]="pt.valueY" text-anchor="middle"
+                class="text-[10px] font-mono font-bold select-none cursor-pointer group-hover:font-black transition-all"
+                [attr.fill]="pt.pointColor">
+                {{ pt.formattedAmount }}
+              </text>
+
+              <!-- TARJETICA FLOTANTE QUE APARECE AL PONER EL CURSOR SOBRE EL VALOR -->
+              <g class="opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none drop-shadow-md z-30"
+                [attr.transform]="'translate(' + pt.tooltipX + ',' + pt.tooltipY + ')'">
+                <rect x="-50" y="-17" width="100" height="34" rx="7" fill="#0f172a" stroke="#334155" stroke-width="1" />
+
+                @if (pt.tooltipIsAbove) {
+                <polygon points="-5,17 5,17 0,22" fill="#0f172a" />
+                } @else {
+                <polygon points="-5,-17 5,-17 0,-22" fill="#0f172a" />
+                }
+
+                <!-- Fecha -->
+                <text x="0" y="-3" text-anchor="middle"
+                  class="text-[9.5px] font-mono font-bold fill-amber-300 select-none">
+                  📅 {{ pt.label }}
+                </text>
+
+                <!-- Monto y transacciones -->
+                <text x="0" y="9" text-anchor="middle"
+                  class="text-[8.5px] font-mono font-semibold fill-white select-none">
+                  {{ pt.amount | currencyFormat }} ({{ pt.count }} tx{{ pt.count !== 1 ? 's' : '' }})
+                </text>
+              </g>
+
+              <!-- Etiqueta de fecha en el eje X inferior -->
+              <text [attr.x]="pt.x" y="195" text-anchor="middle"
+                class="text-[8.5px] font-mono font-medium fill-slate-400 select-none group-hover:fill-slate-800 group-hover:font-bold transition-colors">
+                {{ pt.shortDate }}
+              </text>
+            </g>
+            }
+          </svg>
+        </div>
+
+        <!-- Resumen de Tendencias -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 text-sm">
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-slate-500 block text-xs font-semibold">Día Récord</span>
+            <span class="font-bold text-slate-800 text-sm">{{ tc.peakDay?.label || 'N/A' }}</span>
+            <span class="text-primary-600 font-mono font-bold block text-xs">{{ tc.peakDay?.totalRevenue |
+              currencyFormat }}</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-slate-500 block text-xs font-semibold">Promedio Diario</span>
+            <span class="font-bold text-slate-800 text-sm">{{ tc.averageRevenue | currencyFormat }}</span>
+            <span class="text-slate-500 text-xs block">por día activo</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-slate-500 block text-xs font-semibold">Total en Serie</span>
+            <span class="font-bold text-slate-900 text-sm">{{ tc.totalRevenue | currencyFormat }}</span>
+            <span class="text-slate-500 text-xs block">{{ tc.points.length }} fechas registradas</span>
+          </div>
+        </div>
+      </div>
+      } @else {
+      <div class="p-10 text-center space-y-2">
+        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-lg">
+          📉</div>
+        <p class="text-sm font-bold text-slate-700">Sin datos de tendencia para el período seleccionado</p>
+        <p class="text-xs text-slate-500">Prueba cambiando el preset a "Mes Actual" o "Todo el Histórico".</p>
+      </div>
+      }
+      }
+
+      <!-- MODO 2: COMPARATIVA DE PERÍODO ACTUAL VS ANTERIOR -->
+      @if (salesGraphMode() === 'comparison') {
+      @let comp = comparativeAnalysis();
+      @if (comp) {
+      <div class="pt-4 space-y-5">
+        <!-- Barra 1: Facturación Bruta -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-bold text-slate-700 flex items-center gap-1.5">
+              <span>💰 Facturación Total</span>
+            </span>
+            <span class="px-2 py-0.5 rounded-full text-xs font-black"
+              [ngClass]="comp.revDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
+              {{ comp.revDiff >= 0 ? '+' : '' }}{{ comp.revDiff | currencyFormat }} ({{ comp.revPct >= 0 ? '+' : '' }}{{
+              comp.revPct }}%)
+            </span>
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
+              <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div class="bg-primary-600 h-full rounded-full transition-all duration-300"
+                  [style.width.%]="comp.curRevBarWidth"></div>
+              </div>
+              <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curRev | currencyFormat
+                }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
+              <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div class="bg-slate-400 h-full rounded-full transition-all duration-300"
+                  [style.width.%]="comp.prevRevBarWidth"></div>
+              </div>
+              <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevRev |
+                currencyFormat }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra 2: Transacciones Concretadas -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-bold text-slate-700 flex items-center gap-1.5">
+              <span>🧾 Transacciones / Facturas</span>
+            </span>
+            <span class="px-2 py-0.5 rounded-full text-xs font-black"
+              [ngClass]="comp.txDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
+              {{ comp.txDiff >= 0 ? '+' : '' }}{{ comp.txDiff }} transacciones ({{ comp.txPct >= 0 ? '+' : '' }}{{
+              comp.txPct }}%)
+            </span>
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
+              <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div class="bg-primary-600 h-full rounded-full transition-all duration-300"
+                  [style.width.%]="comp.curTxBarWidth"></div>
+              </div>
+              <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curTx }} txs</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
+              <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div class="bg-slate-400 h-full rounded-full transition-all duration-300"
+                  [style.width.%]="comp.prevTxBarWidth"></div>
+              </div>
+              <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevTx }} txs</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra 3: Ticket Promedio -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-bold text-slate-700 flex items-center gap-1.5">
+              <span>🎯 Ticket Promedio</span>
+            </span>
+            <span class="px-2 py-0.5 rounded-full text-xs font-black"
+              [ngClass]="comp.ticketDiff >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
+              {{ comp.ticketDiff >= 0 ? '+' : '' }}{{ comp.ticketDiff | currencyFormat }} ({{ comp.ticketPct >= 0 ? '+'
+              : '' }}{{ comp.ticketPct }}%)
+            </span>
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-500 w-16">Actual:</span>
+              <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div class="bg-primary-600 h-full rounded-full transition-all duration-300"
+                  [style.width.%]="comp.curTicketBarWidth"></div>
+              </div>
+              <span class="text-sm font-mono font-bold text-slate-900 w-32 text-right">{{ comp.curTicket |
+                currencyFormat }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-500 w-16">Anterior:</span>
+              <div class="flex-1 bg-slate-100 h-3 rounded-full overflow-hidden">
+                <div class="bg-slate-400 h-full rounded-full transition-all duration-300"
+                  [style.width.%]="comp.prevTicketBarWidth"></div>
+              </div>
+              <span class="text-sm font-mono font-medium text-slate-600 w-32 text-right">{{ comp.prevTicket |
+                currencyFormat }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+      }
     </div>
-    }
+
+    <!-- 2. GRÁFICA DE DISTRIBUCIÓN DE MEDIOS DE PAGO & CATEGORÍAS (4/12) -->
+    <div
+      class="lg:col-span-4 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col justify-between space-y-4">
+      <div>
+        <h3 class="text-base font-bold text-slate-900 flex items-center justify-between">
+          <span>💳 Medios de Pago</span>
+          <span class="text-xs font-semibold text-slate-500">Distribución</span>
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Participación de efectivo vs electrónico.</p>
+      </div>
+
+      <!-- Donut SVG -->
+      @let donutSegments = paymentDonutSegments();
+      @if (donutSegments.length) {
+      <div class="flex flex-col items-center justify-center pt-2">
+        <div class="relative w-40 h-40">
+          <svg viewBox="0 0 42 42" class="w-full h-full -rotate-90">
+            <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#f1f5f9" stroke-width="4.5" />
+            @for (seg of donutSegments; track seg.method) {
+            <circle cx="21" cy="21" r="15.9155" fill="none" [attr.stroke]="seg.color" stroke-width="4.8"
+              [attr.stroke-dasharray]="seg.strokeDash" [attr.stroke-dashoffset]="seg.strokeOffset"
+              stroke-linecap="round" class="transition-all duration-500" />
+            }
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
+            <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Recaudación</span>
+            <span class="text-sm sm:text-base font-black text-slate-800 font-mono mt-0.5 truncate max-w-[105px]">
+              {{ (sa?.totalRevenue ?? sm?.totalSalesAmount ?? 0) | currencyFormat }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Leyenda de Métodos de Pago -->
+        <div class="w-full space-y-2 mt-4 text-sm">
+          @for (seg of donutSegments; track seg.method) {
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" [style.backgroundColor]="seg.color"></span>
+              <span class="font-bold text-slate-800 text-sm">{{ seg.method }}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-mono font-bold text-slate-900 block text-sm">{{ seg.amount | currencyFormat }}</span>
+              <span class="text-xs text-slate-500 font-mono">{{ seg.percentage }}% &bull; {{ seg.count }} txs</span>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      } @else {
+      <div class="p-8 text-center space-y-2">
+        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-lg">
+          💳</div>
+        <p class="text-sm font-semibold text-slate-600">Sin pagos en el período</p>
+      </div>
+      }
+
+      <!-- Top Categorías Resumen -->
+      @if (salesCategories().length) {
+      <div class="pt-3 border-t border-slate-100 space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+          <span>🏷️ Top Categorías</span>
+          <button type="button" (click)="selectReport('sales-categories')"
+            class="text-primary-600 hover:underline text-[11px] font-semibold cursor-pointer">
+            Ver todas ›
+          </button>
+        </div>
+        <div class="space-y-1.5">
+          @for (cat of salesCategories().slice(0, 2); track cat.categoryId) {
+          <div class="text-[11px] space-y-0.5">
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-slate-600 truncate max-w-[120px]">{{ cat.categoryName }}</span>
+              <span class="font-mono font-bold text-slate-800">{{ cat.sharePercentage }}% ({{ cat.totalRevenue |
+                currencyFormat }})</span>
+            </div>
+            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-primary-500 h-full rounded-full" [style.width.%]="cat.sharePercentage"></div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
   }
 
   @if (selectedCategory() === 'finance' && profitabilityData(); as prof) {
@@ -940,7 +903,8 @@
         data-testid="metric-cash-difference">
         {{ cash.totalDifference | currencyFormat }}
       </div>
-      <p class="text-xs text-slate-500 mt-1">{{ cash.totalDifference === 0 ? 'Cajas Cuadradas' : (cash.totalDifference > 0 ? 'Sobrante' : 'Faltante') }}</p>
+      <p class="text-xs text-slate-500 mt-1">{{ cash.totalDifference === 0 ? 'Cajas Cuadradas' : (cash.totalDifference >
+        0 ? 'Sobrante' : 'Faltante') }}</p>
     </div>
 
     <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
@@ -958,10 +922,13 @@
   <div class="space-y-4">
     <!-- 4 Tarjetas KPI Financieros de Existencias -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
+      <div
+        class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold text-slate-500">Capital Total Inmovilizado</span>
-          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200">Costo Base</span>
+          <span
+            class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200">Costo
+            Base</span>
         </div>
         <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2 font-mono" data-testid="metric-valuation-cost">
           {{ val.totalCostValuation | currencyFormat }}
@@ -971,12 +938,16 @@
         </p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
+      <div
+        class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold text-slate-500">Valoración Comercial Total</span>
-          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Precio Venta</span>
+          <span
+            class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Precio
+            Venta</span>
         </div>
-        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2 font-mono" data-testid="metric-valuation-retail">
+        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2 font-mono"
+          data-testid="metric-valuation-retail">
           {{ val.totalRetailValuation | currencyFormat }}
         </div>
         <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
@@ -984,14 +955,18 @@
         </p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
+      <div
+        class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold text-slate-500">Utilidad Bruta Proyectada</span>
-          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-primary-50 text-primary-700 border border-primary-200" data-testid="metric-valuation-margin">
+          <span
+            class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-primary-50 text-primary-700 border border-primary-200"
+            data-testid="metric-valuation-margin">
             Margen: {{ val.profitMarginPercentage }}%
           </span>
         </div>
-        <div class="text-2xl sm:text-3xl font-black text-emerald-600 mt-2 font-mono" data-testid="metric-valuation-profit">
+        <div class="text-2xl sm:text-3xl font-black text-emerald-600 mt-2 font-mono"
+          data-testid="metric-valuation-profit">
           {{ val.potentialProfit | currencyFormat }}
         </div>
         <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
@@ -999,7 +974,8 @@
         </p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
+      <div
+        class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold text-slate-500">Unidades Físicas en Stock</span>
           <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">Inventario Total</span>
@@ -1015,7 +991,8 @@
 
     <!-- Banner de Alerta de Capital Estancado (Stock Muerto) -->
     @if (val.stagnantProductsCount > 0) {
-    <div class="p-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+    <div
+      class="p-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl shrink-0">
           ⚠️
@@ -1023,12 +1000,14 @@
         <div>
           <h4 class="text-sm font-bold text-amber-900 flex items-center gap-2">
             <span>Capital Estancado en Riesgo de Obsolescencia</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-amber-200/70 text-amber-800 font-extrabold font-mono" data-testid="metric-stagnant-cost">
+            <span class="text-xs px-2 py-0.5 rounded-full bg-amber-200/70 text-amber-800 font-extrabold font-mono"
+              data-testid="metric-stagnant-cost">
               {{ val.stagnantCapitalAmount | currencyFormat }}
             </span>
           </h4>
           <p class="text-xs text-amber-800/90 mt-0.5">
-            Se detectaron <strong>{{ val.stagnantProductsCount }} productos</strong> con existencias físicas sin ninguna venta registrada en los últimos 30 días.
+            Se detectaron <strong>{{ val.stagnantProductsCount }} productos</strong> con existencias físicas sin ninguna
+            venta registrada en los últimos 30 días.
           </p>
         </div>
       </div>
@@ -1049,17 +1028,18 @@
             <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
               <span>🏷️ Concentración Patrimonial por Categoría</span>
             </h4>
-            <p class="text-xs text-slate-500 mt-0.5">Distribución porcentual del capital inmovilizado al costo entre familias de producto</p>
+            <p class="text-xs text-slate-500 mt-0.5">Distribución porcentual del capital inmovilizado al costo entre
+              familias de producto</p>
           </div>
         </div>
 
         @if (inventoryValuationByCategory().length) {
         <div class="w-full h-3.5 rounded-full flex overflow-hidden bg-slate-100 gap-0.5 shadow-inner mt-2">
           @for (cat of inventoryValuationByCategory(); track cat.categoryId; let idx = $index) {
-            <div [style.width.%]="cat.capitalSharePercentage"
-              [ngClass]="idx % 5 === 0 ? 'bg-primary-500' : idx % 5 === 1 ? 'bg-indigo-500' : idx % 5 === 2 ? 'bg-amber-500' : idx % 5 === 3 ? 'bg-emerald-500' : 'bg-rose-500'"
-              [title]="cat.categoryName + ': ' + cat.capitalSharePercentage + '% (' + (cat.totalCostValuation | currencyFormat) + ')'"
-              class="h-full transition-all duration-300"></div>
+          <div [style.width.%]="cat.capitalSharePercentage"
+            [ngClass]="idx % 5 === 0 ? 'bg-primary-500' : idx % 5 === 1 ? 'bg-indigo-500' : idx % 5 === 2 ? 'bg-amber-500' : idx % 5 === 3 ? 'bg-emerald-500' : 'bg-rose-500'"
+            [title]="cat.categoryName + ': ' + cat.capitalSharePercentage + '% (' + (cat.totalCostValuation | currencyFormat) + ')'"
+            class="h-full transition-all duration-300"></div>
           }
         </div>
 
@@ -1072,7 +1052,8 @@
               <span class="font-bold text-slate-800 truncate">{{ cat.categoryName }}</span>
             </div>
             <div class="text-right shrink-0">
-              <span class="font-mono font-bold text-slate-900 block">{{ cat.totalCostValuation | currencyFormat }}</span>
+              <span class="font-mono font-bold text-slate-900 block">{{ cat.totalCostValuation | currencyFormat
+                }}</span>
               <span class="text-[11px] text-slate-500 font-mono">{{ cat.capitalSharePercentage }}% capital</span>
             </div>
           </div>
@@ -1082,7 +1063,8 @@
       </div>
 
       <!-- Resumen ABC Pareto 80/20 -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-3 flex flex-col justify-between">
+      <div
+        class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-3 flex flex-col justify-between">
         <div>
           <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
             <span>🎯 Clasificación ABC (Pareto 80/20)</span>
@@ -1095,14 +1077,16 @@
               [ngClass]="selectedAbcClass() === 'A' ? 'ring-2 ring-purple-500 bg-purple-50/70 border-purple-300' : 'bg-slate-50/80 border-slate-200/70 hover:bg-purple-50/40'"
               class="p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between group">
               <div class="flex items-center gap-2.5">
-                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-purple-600 text-white shadow-xs">CLASE A</span>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-purple-600 text-white shadow-xs">CLASE
+                  A</span>
                 <div>
                   <span class="text-xs font-bold text-slate-900 block">Alta Relevancia (80%)</span>
                   <span class="text-[11px] text-slate-500">{{ val.categoryACount }} productos</span>
                 </div>
               </div>
               <div class="text-right">
-                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryACostAmount | currencyFormat }}</span>
+                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryACostAmount |
+                  currencyFormat }}</span>
                 <span class="text-[10px] text-purple-700 font-bold font-mono">{{ val.categoryASharePct }}% valor</span>
               </div>
             </div>
@@ -1119,7 +1103,8 @@
                 </div>
               </div>
               <div class="text-right">
-                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryBCostAmount | currencyFormat }}</span>
+                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryBCostAmount |
+                  currencyFormat }}</span>
                 <span class="text-[10px] text-blue-700 font-bold font-mono">{{ val.categoryBSharePct }}% valor</span>
               </div>
             </div>
@@ -1136,7 +1121,8 @@
                 </div>
               </div>
               <div class="text-right">
-                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryCCostAmount | currencyFormat }}</span>
+                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryCCostAmount |
+                  currencyFormat }}</span>
                 <span class="text-[10px] text-slate-600 font-bold font-mono">{{ val.categoryCSharePct }}% valor</span>
               </div>
             </div>
@@ -1144,7 +1130,8 @@
         </div>
 
         @if (selectedAbcClass()) {
-        <button type="button" (click)="setAbcFilter(null)" class="text-xs text-primary-600 hover:text-primary-800 font-bold text-center w-full pt-1 cursor-pointer">
+        <button type="button" (click)="setAbcFilter(null)"
+          class="text-xs text-primary-600 hover:text-primary-800 font-bold text-center w-full pt-1 cursor-pointer">
           ✕ Quitar filtro ABC (Ver Todas)
         </button>
         }
@@ -1154,16 +1141,19 @@
   }
 
   <!-- TABLA INTERACTIVA DE REPORTES -->
-  <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden" data-testid="reports-table-container">
+  <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden"
+    data-testid="reports-table-container">
     <!-- ENCABEZADO DE TABLA CON TÍTULO Y CONTEXTO -->
-    <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div
+      class="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <div class="flex items-center gap-2.5">
           <h3 class="text-lg font-black text-slate-900 tracking-tight" data-testid="table-title">
             {{ tableTitle() }}
           </h3>
           @if (currentRecordsCount() > 0) {
-          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-50 text-primary-700 border border-primary-200 shadow-2xs">
+          <span
+            class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-50 text-primary-700 border border-primary-200 shadow-2xs">
             {{ currentRecordsCount() }} {{ currentRecordsCount() === 1 ? 'registro' : 'registros' }}
           </span>
           }
@@ -1171,7 +1161,7 @@
         <p class="text-sm text-slate-500 mt-0.5">
           {{ tableSubtitle() }}
           @if (searchTerm()) {
-            <span class="text-primary-600 font-semibold">&bull; Filtrando por: "{{ searchTerm() }}"</span>
+          <span class="text-primary-600 font-semibold">&bull; Filtrando por: "{{ searchTerm() }}"</span>
           }
         </p>
       </div>
@@ -1186,720 +1176,776 @@
 
     @if (tableLoading()) {
     <div class="p-12 text-center space-y-4">
-      <div class="inline-block w-8 h-8 border-3 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      <div class="inline-block w-8 h-8 border-3 border-primary-600 border-t-transparent rounded-full animate-spin">
+      </div>
       <p class="text-sm font-semibold text-slate-500">Cargando registros del reporte...</p>
     </div>
     } @else {
-      <!-- 1. VISTA DE VENTAS -->
-      @if (selectedReport() === 'sales') {
-        @if (salesData()?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-sales">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">Factura</th>
-                <th class="py-3.5 px-4">Fecha (UTC/Local)</th>
-                <th class="py-3.5 px-4">Cliente</th>
-                <th class="py-3.5 px-4">Método</th>
-                <th class="py-3.5 px-4">Estado</th>
-                <th class="py-3.5 px-4 text-right">Subtotal</th>
-                <th class="py-3.5 px-4 text-right">IVA (19%)</th>
-                <th class="py-3.5 px-4 text-right">Total</th>
-                <th class="py-3.5 px-4 text-center">Líneas</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of salesData()?.items; track row.id) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.saleNumber }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.customerName }}</td>
-                <td class="py-3.5 px-4 text-slate-600">
-                  <span class="px-2.5 py-1 rounded-md bg-slate-100 font-mono text-xs font-semibold">{{ formatPaymentMethod(row.paymentMethod) }}</span>
-                </td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="row.status === 'Completed' || row.status === 'Completada' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.status === 'Cancelled' || row.status === 'Anulada' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-700')">
-                    {{ formatSaleStatus(row.status) }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.subtotal | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.tax | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.total | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-center font-mono text-slate-500">{{ row.itemsCount }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
+    <!-- 1. VISTA DE VENTAS -->
+    @if (selectedReport() === 'sales') {
+    @if (salesData()?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-sales">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">Factura</th>
+            <th class="py-3.5 px-4">Fecha (UTC/Local)</th>
+            <th class="py-3.5 px-4">Cliente</th>
+            <th class="py-3.5 px-4">Método</th>
+            <th class="py-3.5 px-4">Estado</th>
+            <th class="py-3.5 px-4 text-right">Subtotal</th>
+            <th class="py-3.5 px-4 text-right">IVA (19%)</th>
+            <th class="py-3.5 px-4 text-right">Total</th>
+            <th class="py-3.5 px-4 text-center">Líneas</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of salesData()?.items; track row.id) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.saleNumber }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.customerName }}</td>
+            <td class="py-3.5 px-4 text-slate-600">
+              <span class="px-2.5 py-1 rounded-md bg-slate-100 font-mono text-xs font-semibold">{{
+                formatPaymentMethod(row.paymentMethod) }}</span>
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="row.status === 'Completed' || row.status === 'Completada' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.status === 'Cancelled' || row.status === 'Anulada' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-700')">
+                {{ formatSaleStatus(row.status) }}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.subtotal | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.tax | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.total | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-center font-mono text-slate-500">{{ row.itemsCount }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">💳
+      </div>
+      <h4 class="text-base font-bold text-slate-900">No se encontraron ventas para este período</h4>
+      <p class="text-sm text-slate-500 max-w-md mx-auto">
+        Prueba seleccionando <button (click)="setDatePreset('thisMonth')"
+          class="text-primary-600 font-bold hover:underline cursor-pointer">Mes Actual</button> o <button
+          (click)="setDatePreset('all')" class="text-primary-600 font-bold hover:underline cursor-pointer">Todo el
+          Histórico</button>.
+      </p>
+    </div>
+    }
+    }
+
+    <!-- 2. VISTA DE TOP PRODUCTOS -->
+    @else if (selectedReport() === 'sales-top') {
+    @if (topProductsData().length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-sales-top">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">Ranking</th>
+            <th class="py-3.5 px-4">SKU</th>
+            <th class="py-3.5 px-4">Producto</th>
+            <th class="py-3.5 px-4">Categoría</th>
+            <th class="py-3.5 px-4 text-right">Unidades Vendidas</th>
+            <th class="py-3.5 px-4 text-right">Precio Promedio</th>
+            <th class="py-3.5 px-4 text-right">Ingresos Totales</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of topProductsData(); track row.productId; let idx = $index) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+            <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-primary-600">{{ row.unitsSold }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.averageUnitPrice | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.totalRevenue | currencyFormat
+              }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">⭐
+      </div>
+      <h4 class="text-sm font-bold text-slate-900">No hay ventas registradas en el período para generar el ranking</h4>
+    </div>
+    }
+    }
+
+    <!-- 2.1 VISTA DE VENTAS POR CATEGORÍA -->
+    @else if (selectedReport() === 'sales-categories') {
+    @if (salesCategories().length) {
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
+      <span class="text-xs font-bold text-slate-700 block mb-2">Participación de Facturación por Categoría</span>
+      <div class="w-full h-3 rounded-full flex overflow-hidden bg-slate-200 gap-0.5 shadow-inner">
+        @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
+        <div [style.width.%]="cat.sharePercentage"
+          [ngClass]="idx % 4 === 0 ? 'bg-primary-500' : idx % 4 === 1 ? 'bg-indigo-500' : idx % 4 === 2 ? 'bg-amber-500' : 'bg-emerald-500'"
+          [title]="cat.categoryName + ': ' + cat.sharePercentage + '%'" class="h-full transition-all duration-300">
         </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">💳</div>
-            <h4 class="text-base font-bold text-slate-900">No se encontraron ventas para este período</h4>
-            <p class="text-sm text-slate-500 max-w-md mx-auto">
-              Prueba seleccionando <button (click)="setDatePreset('thisMonth')" class="text-primary-600 font-bold hover:underline cursor-pointer">Mes Actual</button> o <button (click)="setDatePreset('all')" class="text-primary-600 font-bold hover:underline cursor-pointer">Todo el Histórico</button>.
-            </p>
-          </div>
         }
-      }
-
-      <!-- 2. VISTA DE TOP PRODUCTOS -->
-      @else if (selectedReport() === 'sales-top') {
-        @if (topProductsData().length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-sales-top">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">Ranking</th>
-                <th class="py-3.5 px-4">SKU</th>
-                <th class="py-3.5 px-4">Producto</th>
-                <th class="py-3.5 px-4">Categoría</th>
-                <th class="py-3.5 px-4 text-right">Unidades Vendidas</th>
-                <th class="py-3.5 px-4 text-right">Precio Promedio</th>
-                <th class="py-3.5 px-4 text-right">Ingresos Totales</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of topProductsData(); track row.productId; let idx = $index) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-primary-600">{{ row.unitsSold }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.averageUnitPrice | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.totalRevenue | currencyFormat }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
+      </div>
+      <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-600">
+        @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full"
+            [ngClass]="idx % 4 === 0 ? 'bg-primary-500' : idx % 4 === 1 ? 'bg-indigo-500' : idx % 4 === 2 ? 'bg-amber-500' : 'bg-emerald-500'"></span>
+          <span class="font-medium text-slate-800">{{ cat.categoryName }}</span>
+          <span class="font-mono font-bold text-slate-500">({{ cat.sharePercentage }}%)</span>
         </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">⭐</div>
-            <h4 class="text-sm font-bold text-slate-900">No hay ventas registradas en el período para generar el ranking</h4>
-          </div>
         }
-      }
+      </div>
+    </div>
 
-      <!-- 2.1 VISTA DE VENTAS POR CATEGORÍA -->
-      @else if (selectedReport() === 'sales-categories') {
-        @if (salesCategories().length) {
-        <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
-          <span class="text-xs font-bold text-slate-700 block mb-2">Participación de Facturación por Categoría</span>
-          <div class="w-full h-3 rounded-full flex overflow-hidden bg-slate-200 gap-0.5 shadow-inner">
-            @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
-              <div [style.width.%]="cat.sharePercentage"
-                [ngClass]="idx % 4 === 0 ? 'bg-primary-500' : idx % 4 === 1 ? 'bg-indigo-500' : idx % 4 === 2 ? 'bg-amber-500' : 'bg-emerald-500'"
-                [title]="cat.categoryName + ': ' + cat.sharePercentage + '%'"
-                class="h-full transition-all duration-300"></div>
-            }
-          </div>
-          <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-600">
-            @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
-              <div class="flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full"
-                  [ngClass]="idx % 4 === 0 ? 'bg-primary-500' : idx % 4 === 1 ? 'bg-indigo-500' : idx % 4 === 2 ? 'bg-amber-500' : 'bg-emerald-500'"></span>
-                <span class="font-medium text-slate-800">{{ cat.categoryName }}</span>
-                <span class="font-mono font-bold text-slate-500">({{ cat.sharePercentage }}%)</span>
-              </div>
-            }
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-sales-categories">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">#</th>
-                <th class="py-3.5 px-4">Categoría</th>
-                <th class="py-3.5 px-4 text-right">Unidades Vendidas</th>
-                <th class="py-3.5 px-4 text-right">Facturación Total</th>
-                <th class="py-3.5 px-4 text-center">Participación (% Share)</th>
-                <th class="py-3.5 px-4 text-center">Transacciones</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
-                <td class="py-3.5 px-4 font-bold text-slate-900">{{ cat.categoryName }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-primary-600">{{ cat.unitsSold }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ cat.totalRevenue | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-center">
-                  <div class="inline-flex items-center gap-2">
-                    <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div class="bg-primary-500 h-full rounded-full" [style.width.%]="cat.sharePercentage"></div>
-                    </div>
-                    <span class="font-mono font-bold text-slate-700 text-xs">{{ cat.sharePercentage }}%</span>
-                  </div>
-                </td>
-                <td class="py-3.5 px-4 text-center font-mono text-slate-600">{{ cat.transactionCount }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">🏷️</div>
-            <h4 class="text-base font-bold text-slate-900">No se encontraron ventas por categoría en el período</h4>
-          </div>
-        }
-      }
-
-      <!-- 2.2 VISTA DE HORARIOS DE MAYOR ACTIVIDAD COMERCIAL (HEATMAP / HORAS PICO) -->
-      @else if (selectedReport() === 'sales-hourly') {
-        @let activeHours = hourlyActivity();
-        @if (activeHours.length) {
-        <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
-          <span class="text-sm font-bold text-slate-700 block mb-3">Distribución de Transacciones por Hora del Día (00:00 a 23:59)</span>
-          <div class="grid grid-cols-12 sm:grid-cols-24 gap-1 items-end h-24 pt-4 px-2">
-            @for (h of activeHours; track h.hour) {
-              <div class="flex flex-col items-center gap-1 h-full justify-end group relative cursor-pointer" [title]="h.hourLabel + ': ' + h.transactionCount + ' transacciones ($' + h.totalRevenue + ')'">
-                <div class="w-full rounded-t transition-all duration-200"
-                  [ngClass]="h.isPeakHour ? 'bg-amber-500 ring-2 ring-amber-300' : h.transactionCount > 0 ? 'bg-primary-500' : 'bg-slate-200'"
-                  [style.height.%]="h.transactionCount > 0 ? Math.max((h.transactionCount * 15), 20) : 8">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-sales-categories">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">#</th>
+            <th class="py-3.5 px-4">Categoría</th>
+            <th class="py-3.5 px-4 text-right">Unidades Vendidas</th>
+            <th class="py-3.5 px-4 text-right">Facturación Total</th>
+            <th class="py-3.5 px-4 text-center">Participación (% Share)</th>
+            <th class="py-3.5 px-4 text-center">Transacciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
+            <td class="py-3.5 px-4 font-bold text-slate-900">{{ cat.categoryName }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-primary-600">{{ cat.unitsSold }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ cat.totalRevenue | currencyFormat
+              }}</td>
+            <td class="py-3.5 px-4 text-center">
+              <div class="inline-flex items-center gap-2">
+                <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div class="bg-primary-500 h-full rounded-full" [style.width.%]="cat.sharePercentage"></div>
                 </div>
-                <span class="text-[10px] font-mono text-slate-500 group-hover:text-slate-900 font-semibold">{{ h.hour }}h</span>
+                <span class="font-mono font-bold text-slate-700 text-xs">{{ cat.sharePercentage }}%</span>
               </div>
-            }
-          </div>
-        </div>
+            </td>
+            <td class="py-3.5 px-4 text-center font-mono text-slate-600">{{ cat.transactionCount }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">
+        🏷️</div>
+      <h4 class="text-base font-bold text-slate-900">No se encontraron ventas por categoría en el período</h4>
+    </div>
+    }
+    }
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-sales-hourly">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">Franja Horaria</th>
-                <th class="py-3.5 px-4 text-center">Transacciones Realizadas</th>
-                <th class="py-3.5 px-4 text-right">Facturación en Franja</th>
-                <th class="py-3.5 px-4 text-center">Estado Operativo</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (h of filteredHourlyActivity(); track h.hour) {
-              <tr class="hover:bg-slate-50/60 transition-colors" [ngClass]="h.isPeakHour ? 'bg-amber-50/40' : ''">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-800 flex items-center gap-2">
-                  <span class="text-slate-400">⏰</span>
-                  <span>{{ h.hourLabel }}</span>
-                </td>
-                <td class="py-3.5 px-4 text-center font-mono font-bold"
-                  [ngClass]="h.isPeakHour ? 'text-amber-700' : 'text-slate-700'">
-                  {{ h.transactionCount }}
-                </td>
-                <td class="py-3.5 px-4 text-right font-mono font-black"
-                  [ngClass]="h.isPeakHour ? 'text-amber-800' : 'text-slate-900'">
-                  {{ h.totalRevenue | currencyFormat }}
-                </td>
-                <td class="py-3.5 px-4 text-center">
-                  @if (h.isPeakHour) {
-                    <span class="px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs inline-flex items-center gap-1">
-                      <span>⭐</span>
-                      <span>HORA PICO</span>
-                    </span>
-                  } @else if (h.transactionCount > 0) {
-                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      Activa
-                    </span>
-                  } @else {
-                    <span class="text-slate-400 font-mono text-xs">&mdash;</span>
-                  }
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">⏰</div>
-            <h4 class="text-base font-bold text-slate-900">No hay actividad transaccional registrada para este período</h4>
+    <!-- 2.2 VISTA DE HORARIOS DE MAYOR ACTIVIDAD COMERCIAL (HEATMAP / HORAS PICO) -->
+    @else if (selectedReport() === 'sales-hourly') {
+    @let activeHours = hourlyActivity();
+    @if (activeHours.length) {
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
+      <span class="text-sm font-bold text-slate-700 block mb-3">Distribución de Transacciones por Hora del Día (00:00 a
+        23:59)</span>
+      <div class="grid grid-cols-12 sm:grid-cols-24 gap-1 items-end h-24 pt-4 px-2">
+        @for (h of activeHours; track h.hour) {
+        <div class="flex flex-col items-center gap-1 h-full justify-end group relative cursor-pointer"
+          [title]="h.hourLabel + ': ' + h.transactionCount + ' transacciones ($' + h.totalRevenue + ')'">
+          <div class="w-full rounded-t transition-all duration-200"
+            [ngClass]="h.isPeakHour ? 'bg-amber-500 ring-2 ring-amber-300' : h.transactionCount > 0 ? 'bg-primary-500' : 'bg-slate-200'"
+            [style.height.%]="h.transactionCount > 0 ? Math.max((h.transactionCount * 15), 20) : 8">
           </div>
+          <span class="text-[10px] font-mono text-slate-500 group-hover:text-slate-900 font-semibold">{{ h.hour
+            }}h</span>
+        </div>
         }
-      }
+      </div>
+    </div>
 
-      <!-- 2.3 VISTA DE RENDIMIENTO POR EMPLEADO / VENDEDOR -->
-      @else if (selectedReport() === 'sales-employees') {
-        @if (salesEmployees().length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-sales-employees">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">Ranking</th>
-                <th class="py-3.5 px-4">Empleado / Vendedor</th>
-                <th class="py-3.5 px-4">Rol en Sistema</th>
-                <th class="py-3.5 px-4 text-center">Transacciones Emitidas</th>
-                <th class="py-3.5 px-4 text-right">Ticket Promedio</th>
-                <th class="py-3.5 px-4 text-right">Total Facturado</th>
-                <th class="py-3.5 px-4 text-center">Aporte a la Sede (%)</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (emp of salesEmployees(); track emp.userId; let idx = $index) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
-                <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-black">
-                    {{ emp.employeeName.charAt(0) }}
-                  </div>
-                  <span>{{ emp.employeeName }}</span>
-                </td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                    {{ formatUserRole(emp.role) }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-center font-mono font-bold text-slate-700">{{ emp.transactionCount }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ emp.averageTicket | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ emp.totalRevenue | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-center">
-                  <div class="inline-flex items-center gap-2">
-                    <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div class="bg-primary-500 h-full rounded-full" [style.width.%]="emp.sharePercentage"></div>
-                    </div>
-                    <span class="font-mono font-bold text-slate-700 text-xs">{{ emp.sharePercentage }}%</span>
-                  </div>
-                </td>
-              </tr>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-sales-hourly">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">Franja Horaria</th>
+            <th class="py-3.5 px-4 text-center">Transacciones Realizadas</th>
+            <th class="py-3.5 px-4 text-right">Facturación en Franja</th>
+            <th class="py-3.5 px-4 text-center">Estado Operativo</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (h of filteredHourlyActivity(); track h.hour) {
+          <tr class="hover:bg-slate-50/60 transition-colors" [ngClass]="h.isPeakHour ? 'bg-amber-50/40' : ''">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-800 flex items-center gap-2">
+              <span class="text-slate-400">⏰</span>
+              <span>{{ h.hourLabel }}</span>
+            </td>
+            <td class="py-3.5 px-4 text-center font-mono font-bold"
+              [ngClass]="h.isPeakHour ? 'text-amber-700' : 'text-slate-700'">
+              {{ h.transactionCount }}
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono font-black"
+              [ngClass]="h.isPeakHour ? 'text-amber-800' : 'text-slate-900'">
+              {{ h.totalRevenue | currencyFormat }}
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              @if (h.isPeakHour) {
+              <span
+                class="px-2.5 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 shadow-2xs inline-flex items-center gap-1">
+                <span>⭐</span>
+                <span>HORA PICO</span>
+              </span>
+              } @else if (h.transactionCount > 0) {
+              <span
+                class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Activa
+              </span>
+              } @else {
+              <span class="text-slate-400 font-mono text-xs">&mdash;</span>
               }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">👥</div>
-            <h4 class="text-base font-bold text-slate-900">No se encontraron ventas asociadas a empleados en este período</h4>
-          </div>
-        }
-      }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">⏰
+      </div>
+      <h4 class="text-base font-bold text-slate-900">No hay actividad transaccional registrada para este período</h4>
+    </div>
+    }
+    }
 
-      <!-- 3. VISTA DE FINANZAS & RENTABILIDAD CON COSTO HISTÓRICO (CMV) -->
-      @else if (selectedReport() === 'finance') {
-        @if (profitabilityData()?.productDetails?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-finance">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">SKU</th>
-                <th class="py-3.5 px-4">Producto</th>
-                <th class="py-3.5 px-4">Categoría</th>
-                <th class="py-3.5 px-4 text-right">Uds Vendidas</th>
-                <th class="py-3.5 px-4 text-right">Ingresos</th>
-                <th class="py-3.5 px-4 text-right">Costo Histórico (CMV)</th>
-                <th class="py-3.5 px-4 text-right">Utilidad Bruta</th>
-                <th class="py-3.5 px-4 text-right">Margen Bruto</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of profitabilityData()?.productDetails?.items; track row.productId) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-700">{{ row.unitsSold }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-700">{{ row.totalRevenue | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.costOfGoodsSold | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black"
-                  [ngClass]="row.grossProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                  {{ row.grossProfit | currencyFormat }}
-                </td>
-                <td class="py-3.5 px-4 text-right">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="row.grossMarginPercentage >= 30 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.grossMarginPercentage >= 15 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
-                    {{ row.grossMarginPercentage }}%
-                  </span>
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📈</div>
-            <h4 class="text-base font-bold text-slate-900">No hay datos de rentabilidad para este período</h4>
-          </div>
-        }
-      }
+    <!-- 2.3 VISTA DE RENDIMIENTO POR EMPLEADO / VENDEDOR -->
+    @else if (selectedReport() === 'sales-employees') {
+    @if (salesEmployees().length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-sales-employees">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">Ranking</th>
+            <th class="py-3.5 px-4">Empleado / Vendedor</th>
+            <th class="py-3.5 px-4">Rol en Sistema</th>
+            <th class="py-3.5 px-4 text-center">Transacciones Emitidas</th>
+            <th class="py-3.5 px-4 text-right">Ticket Promedio</th>
+            <th class="py-3.5 px-4 text-right">Total Facturado</th>
+            <th class="py-3.5 px-4 text-center">Aporte a la Sede (%)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (emp of salesEmployees(); track emp.userId; let idx = $index) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-400">#{{ idx + 1 }}</td>
+            <td class="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
+              <div
+                class="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-black">
+                {{ emp.employeeName.charAt(0) }}
+              </div>
+              <span>{{ emp.employeeName }}</span>
+            </td>
+            <td class="py-3.5 px-4">
+              <span
+                class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                {{ formatUserRole(emp.role) }}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center font-mono font-bold text-slate-700">{{ emp.transactionCount }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ emp.averageTicket | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ emp.totalRevenue | currencyFormat
+              }}</td>
+            <td class="py-3.5 px-4 text-center">
+              <div class="inline-flex items-center gap-2">
+                <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div class="bg-primary-500 h-full rounded-full" [style.width.%]="emp.sharePercentage"></div>
+                </div>
+                <span class="font-mono font-bold text-slate-700 text-xs">{{ emp.sharePercentage }}%</span>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">👥
+      </div>
+      <h4 class="text-base font-bold text-slate-900">No se encontraron ventas asociadas a empleados en este período</h4>
+    </div>
+    }
+    }
 
-      <!-- 4. VISTA DE CAJA POS & CONCILIACIÓN -->
-      @else if (selectedReport() === 'cash-reconciliation') {
-        @if (cashReconciliationData()?.sessions?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-cash-reconciliation">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">N° Sesión</th>
-                <th class="py-3.5 px-4">Cajero</th>
-                <th class="py-3.5 px-4">Apertura</th>
-                <th class="py-3.5 px-4">Estado</th>
-                <th class="py-3.5 px-4 text-right">Fondo Inicial</th>
-                <th class="py-3.5 px-4 text-right">Ventas Efectivo</th>
-                <th class="py-3.5 px-4 text-right">Efectivo Esperado</th>
-                <th class="py-3.5 px-4 text-right">Efectivo Real</th>
-                <th class="py-3.5 px-4 text-right">Diferencia</th>
-                <th class="py-3.5 px-4">Conciliación</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of cashReconciliationData()?.sessions?.items; track row.sessionId) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sessionNumber }}</td>
-                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.cashierName }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.openedAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="row.status === 'Closed' || row.status === 'Cerrada' ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
-                    {{ formatCashRegisterStatus(row.status) }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.initialCash | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.totalCashInflow | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.expectedCash | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.actualCash !== null && row.actualCash !== undefined ? (row.actualCash | currencyFormat) : '-' }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black"
-                  [ngClass]="row.difference === 0 ? 'text-emerald-600' : (row.difference && row.difference > 0 ? 'text-blue-600' : 'text-rose-600')">
-                  {{ row.difference !== null && row.difference !== undefined ? (row.difference | currencyFormat) : '0.00' }}
-                </td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="row.differenceStatus === 'Balanced' || row.differenceStatus === 'Cuadrada' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.differenceStatus === 'Surplus' || row.differenceStatus === 'Sobrante' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
-                    {{ formatDifferenceStatus(row.differenceStatus) }}
-                  </span>
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">💵</div>
-            <h4 class="text-sm font-bold text-slate-900">No hay sesiones de caja registradas para este período</h4>
-          </div>
-        }
-      }
+    <!-- 3. VISTA DE FINANZAS & RENTABILIDAD CON COSTO HISTÓRICO (CMV) -->
+    @else if (selectedReport() === 'finance') {
+    @if (profitabilityData()?.productDetails?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-finance">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">SKU</th>
+            <th class="py-3.5 px-4">Producto</th>
+            <th class="py-3.5 px-4">Categoría</th>
+            <th class="py-3.5 px-4 text-right">Uds Vendidas</th>
+            <th class="py-3.5 px-4 text-right">Ingresos</th>
+            <th class="py-3.5 px-4 text-right">Costo Histórico (CMV)</th>
+            <th class="py-3.5 px-4 text-right">Utilidad Bruta</th>
+            <th class="py-3.5 px-4 text-right">Margen Bruto</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of profitabilityData()?.productDetails?.items; track row.productId) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+            <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-700">{{ row.unitsSold }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-700">{{ row.totalRevenue | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.costOfGoodsSold | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black"
+              [ngClass]="row.grossProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+              {{ row.grossProfit | currencyFormat }}
+            </td>
+            <td class="py-3.5 px-4 text-right">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="row.grossMarginPercentage >= 30 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.grossMarginPercentage >= 15 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
+                {{ row.grossMarginPercentage }}%
+              </span>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📈
+      </div>
+      <h4 class="text-base font-bold text-slate-900">No hay datos de rentabilidad para este período</h4>
+    </div>
+    }
+    }
 
-      <!-- 5. VISTA DE KARDEX -->
-      @else if (selectedReport() === 'inventory') {
-        @if (inventoryData()?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-inventory">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">N° Movimiento</th>
-                <th class="py-3.5 px-4">Fecha</th>
-                <th class="py-3.5 px-4">Tipo</th>
-                <th class="py-3.5 px-4">SKU</th>
-                <th class="py-3.5 px-4">Producto</th>
-                <th class="py-3.5 px-4 text-right">Cambio (Delta)</th>
-                <th class="py-3.5 px-4 text-right">Stock Previo</th>
-                <th class="py-3.5 px-4 text-right">Stock Final</th>
-                <th class="py-3.5 px-4">Operador</th>
-                <th class="py-3.5 px-4">Referencia</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of inventoryData()?.items; track row.id) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.movementNumber }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="row.quantityDelta > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
-                    {{ formatMovementType(row.type) }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-700">{{ row.productSku }}</td>
-                <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.productName }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold"
-                  [ngClass]="row.quantityDelta > 0 ? 'text-emerald-600' : 'text-rose-600'">
-                  {{ row.quantityDelta > 0 ? '+' : '' }}{{ row.quantityDelta }}
-                </td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.previousStock }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.newStock }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.operatorName }}</td>
-                <td class="py-3.5 px-4 text-slate-500 font-mono text-xs">{{ row.reference || '-' }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📋</div>
-            <h4 class="text-base font-bold text-slate-900">No hay movimientos en el Kardex para este período</h4>
-          </div>
-        }
-      }
+    <!-- 4. VISTA DE CAJA POS & CONCILIACIÓN -->
+    @else if (selectedReport() === 'cash-reconciliation') {
+    @if (cashReconciliationData()?.sessions?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-cash-reconciliation">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">N° Sesión</th>
+            <th class="py-3.5 px-4">Cajero</th>
+            <th class="py-3.5 px-4">Apertura</th>
+            <th class="py-3.5 px-4">Estado</th>
+            <th class="py-3.5 px-4 text-right">Fondo Inicial</th>
+            <th class="py-3.5 px-4 text-right">Ventas Efectivo</th>
+            <th class="py-3.5 px-4 text-right">Efectivo Esperado</th>
+            <th class="py-3.5 px-4 text-right">Efectivo Real</th>
+            <th class="py-3.5 px-4 text-right">Diferencia</th>
+            <th class="py-3.5 px-4">Conciliación</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of cashReconciliationData()?.sessions?.items; track row.sessionId) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sessionNumber }}</td>
+            <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.cashierName }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.openedAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="row.status === 'Closed' || row.status === 'Cerrada' ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
+                {{ formatCashRegisterStatus(row.status) }}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.initialCash | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.totalCashInflow | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.expectedCash | currencyFormat
+              }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.actualCash !== null &&
+              row.actualCash !== undefined ? (row.actualCash | currencyFormat) : '-' }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black"
+              [ngClass]="row.difference === 0 ? 'text-emerald-600' : (row.difference && row.difference > 0 ? 'text-blue-600' : 'text-rose-600')">
+              {{ row.difference !== null && row.difference !== undefined ? (row.difference | currencyFormat) : '0.00' }}
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="row.differenceStatus === 'Balanced' || row.differenceStatus === 'Cuadrada' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (row.differenceStatus === 'Surplus' || row.differenceStatus === 'Sobrante' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
+                {{ formatDifferenceStatus(row.differenceStatus) }}
+              </span>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">💵
+      </div>
+      <h4 class="text-sm font-bold text-slate-900">No hay sesiones de caja registradas para este período</h4>
+    </div>
+    }
+    }
 
-      <!-- 5.1 VISTA DE VALORACIÓN FINANCIERA Y PATRIMONIAL DE INVENTARIO -->
-      @else if (selectedReport() === 'inventory-valuation') {
-        @if (inventoryValuationData()?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-inventory-valuation">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4 text-center">Clase ABC</th>
-                <th class="py-3.5 px-4">SKU</th>
-                <th class="py-3.5 px-4">Producto</th>
-                <th class="py-3.5 px-4">Categoría</th>
-                <th class="py-3.5 px-4 text-right">Stock</th>
-                <th class="py-3.5 px-4 text-right">Costo Unit.</th>
-                <th class="py-3.5 px-4 text-right">Precio Venta</th>
-                <th class="py-3.5 px-4 text-right">Val. al Costo</th>
-                <th class="py-3.5 px-4 text-right">Val. Comercial</th>
-                <th class="py-3.5 px-4 text-right">Utilidad Proy.</th>
-                <th class="py-3.5 px-4 text-center">Margen %</th>
-                <th class="py-3.5 px-4 text-center">Rotación</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of inventoryValuationData()?.items; track row.productId) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 text-center">
-                  <span class="px-2.5 py-1 rounded-lg text-xs font-black inline-block"
-                    [ngClass]="row.abcClassification === 'A'
+    <!-- 5. VISTA DE KARDEX -->
+    @else if (selectedReport() === 'inventory') {
+    @if (inventoryData()?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-inventory">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">N° Movimiento</th>
+            <th class="py-3.5 px-4">Fecha</th>
+            <th class="py-3.5 px-4">Tipo</th>
+            <th class="py-3.5 px-4">SKU</th>
+            <th class="py-3.5 px-4">Producto</th>
+            <th class="py-3.5 px-4 text-right">Cambio (Delta)</th>
+            <th class="py-3.5 px-4 text-right">Stock Previo</th>
+            <th class="py-3.5 px-4 text-right">Stock Final</th>
+            <th class="py-3.5 px-4">Operador</th>
+            <th class="py-3.5 px-4">Referencia</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of inventoryData()?.items; track row.id) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.movementNumber }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="row.quantityDelta > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
+                {{ formatMovementType(row.type) }}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-700">{{ row.productSku }}</td>
+            <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.productName }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold"
+              [ngClass]="row.quantityDelta > 0 ? 'text-emerald-600' : 'text-rose-600'">
+              {{ row.quantityDelta > 0 ? '+' : '' }}{{ row.quantityDelta }}
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.previousStock }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.newStock }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.operatorName }}</td>
+            <td class="py-3.5 px-4 text-slate-500 font-mono text-xs">{{ row.reference || '-' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📋
+      </div>
+      <h4 class="text-base font-bold text-slate-900">No hay movimientos en el Kardex para este período</h4>
+    </div>
+    }
+    }
+
+    <!-- 5.1 VISTA DE VALORACIÓN FINANCIERA Y PATRIMONIAL DE INVENTARIO -->
+    @else if (selectedReport() === 'inventory-valuation') {
+    @if (inventoryValuationData()?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-inventory-valuation">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4 text-center">Clase ABC</th>
+            <th class="py-3.5 px-4">SKU</th>
+            <th class="py-3.5 px-4">Producto</th>
+            <th class="py-3.5 px-4">Categoría</th>
+            <th class="py-3.5 px-4 text-right">Stock</th>
+            <th class="py-3.5 px-4 text-right">Costo Unit.</th>
+            <th class="py-3.5 px-4 text-right">Precio Venta</th>
+            <th class="py-3.5 px-4 text-right">Val. al Costo</th>
+            <th class="py-3.5 px-4 text-right">Val. Comercial</th>
+            <th class="py-3.5 px-4 text-right">Utilidad Proy.</th>
+            <th class="py-3.5 px-4 text-center">Margen %</th>
+            <th class="py-3.5 px-4 text-center">Rotación</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of inventoryValuationData()?.items; track row.productId) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 text-center">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-black inline-block"
+                [ngClass]="row.abcClassification === 'A'
                       ? 'bg-purple-100 text-purple-800 border border-purple-200 shadow-xs'
                       : (row.abcClassification === 'B' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200')">
-                    CLASE {{ row.abcClassification }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3.5 px-4">
-                  <div class="font-bold text-slate-900">{{ row.productName }}</div>
-                  <div class="text-xs text-slate-500">{{ row.supplierName }}</div>
-                </td>
-                <td class="py-3.5 px-4 text-slate-700 font-medium">{{ row.categoryName }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.currentStock }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.unitCost | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.unitPrice | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.totalCostValuation | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.totalRetailValuation | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-emerald-600">{{ row.potentialProfit | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-center font-mono font-bold">
-                  <span class="px-2 py-0.5 rounded text-xs"
-                    [ngClass]="row.profitMarginPercentage >= 30 ? 'bg-emerald-50 text-emerald-700' : (row.profitMarginPercentage >= 15 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700')">
-                    {{ row.profitMarginPercentage }}%
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-center">
-                  @if (row.isStagnant) {
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"
-                      [title]="'Última venta: ' + (row.lastSaleDate ? (row.lastSaleDate | date:'yyyy-MM-dd') : 'Sin ventas registradas')">
-                      <span>⚠️ {{ row.daysWithoutSales }}d sin venta</span>
-                    </span>
-                  } @else {
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span>✓ Activo ({{ row.daysWithoutSales }}d)</span>
-                    </span>
-                  }
-                </td>
-              </tr>
+                CLASE {{ row.abcClassification }}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900">{{ row.productName }}</div>
+              <div class="text-xs text-slate-500">{{ row.supplierName }}</div>
+            </td>
+            <td class="py-3.5 px-4 text-slate-700 font-medium">{{ row.categoryName }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.currentStock }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.unitCost | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.unitPrice | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.totalCostValuation |
+              currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.totalRetailValuation |
+              currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-emerald-600">{{ row.potentialProfit |
+              currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-center font-mono font-bold">
+              <span class="px-2 py-0.5 rounded text-xs"
+                [ngClass]="row.profitMarginPercentage >= 30 ? 'bg-emerald-50 text-emerald-700' : (row.profitMarginPercentage >= 15 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700')">
+                {{ row.profitMarginPercentage }}%
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              @if (row.isStagnant) {
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"
+                [title]="'Última venta: ' + (row.lastSaleDate ? (row.lastSaleDate | date:'yyyy-MM-dd') : 'Sin ventas registradas')">
+                <span>⚠️ {{ row.daysWithoutSales }}d sin venta</span>
+              </span>
+              } @else {
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span>✓ Activo ({{ row.daysWithoutSales }}d)</span>
+              </span>
               }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">💎</div>
-            <h4 class="text-base font-bold text-slate-900">No hay productos en inventario que coincidan con los criterios de búsqueda</h4>
-            <p class="text-sm text-slate-500 max-w-md mx-auto">Prueba limpiando los filtros de búsqueda rápida o clase ABC.</p>
-          </div>
-        }
-      }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">💎
+      </div>
+      <h4 class="text-base font-bold text-slate-900">No hay productos en inventario que coincidan con los criterios de
+        búsqueda</h4>
+      <p class="text-sm text-slate-500 max-w-md mx-auto">Prueba limpiando los filtros de búsqueda rápida o clase ABC.
+      </p>
+    </div>
+    }
+    }
 
-      <!-- 6. VISTA DE COMPRAS -->
-      @else if (selectedReport() === 'purchases') {
-        @if (purchasesData()?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-purchases">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">N° Orden Compra</th>
-                <th class="py-3.5 px-4">Fecha</th>
-                <th class="py-3.5 px-4">Proveedor</th>
-                <th class="py-3.5 px-4">Estado</th>
-                <th class="py-3.5 px-4 text-right">Subtotal</th>
-                <th class="py-3.5 px-4 text-right">IVA (19%)</th>
-                <th class="py-3.5 px-4 text-right">Total</th>
-                <th class="py-3.5 px-4 text-center">Items</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of purchasesData()?.items; track row.id) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.purchaseNumber }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.supplierName }}</td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                    {{ formatPurchaseStatus(row.status) }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.subtotal | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.tax | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.total | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-center font-mono text-slate-500">{{ row.itemsCount }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">🛍️</div>
-            <h4 class="text-base font-bold text-slate-900">No se encontraron compras para este período</h4>
-          </div>
-        }
-      }
+    <!-- 6. VISTA DE COMPRAS -->
+    @else if (selectedReport() === 'purchases') {
+    @if (purchasesData()?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-purchases">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">N° Orden Compra</th>
+            <th class="py-3.5 px-4">Fecha</th>
+            <th class="py-3.5 px-4">Proveedor</th>
+            <th class="py-3.5 px-4">Estado</th>
+            <th class="py-3.5 px-4 text-right">Subtotal</th>
+            <th class="py-3.5 px-4 text-right">IVA (19%)</th>
+            <th class="py-3.5 px-4 text-right">Total</th>
+            <th class="py-3.5 px-4 text-center">Items</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of purchasesData()?.items; track row.id) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.purchaseNumber }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.supplierName }}</td>
+            <td class="py-3.5 px-4">
+              <span
+                class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                {{ formatPurchaseStatus(row.status) }}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.subtotal | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.tax | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.total | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-center font-mono text-slate-500">{{ row.itemsCount }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">
+        🛍️</div>
+      <h4 class="text-base font-bold text-slate-900">No se encontraron compras para este período</h4>
+    </div>
+    }
+    }
 
-      <!-- 7. VISTA DE CATÁLOGO & VALUACIÓN -->
-      @else if (selectedReport() === 'products') {
-        @if (productsData()?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-products">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">SKU</th>
-                <th class="py-3.5 px-4">Producto</th>
-                <th class="py-3.5 px-4">Categoría</th>
-                <th class="py-3.5 px-4">Proveedor</th>
-                <th class="py-3.5 px-4 text-right">P. Compra</th>
-                <th class="py-3.5 px-4 text-right">P. Venta</th>
-                <th class="py-3.5 px-4 text-right">Stock</th>
-                <th class="py-3.5 px-4 text-right">Valuación</th>
-                <th class="py-3.5 px-4">Estado</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of productsData()?.items; track row.id) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.name }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.supplierName }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.purchasePrice | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.salePrice | currencyFormat }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.currentStock }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-primary-600">{{ row.valuation | currencyFormat }}</td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="row.currentStock === 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : (row.currentStock <= row.minimumStock ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200')">
-                    {{ row.status }}
-                  </span>
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📦</div>
-            <h4 class="text-base font-bold text-slate-900">No hay productos que coincidan con la búsqueda</h4>
-          </div>
-        }
-      }
+    <!-- 7. VISTA DE CATÁLOGO & VALUACIÓN -->
+    @else if (selectedReport() === 'products') {
+    @if (productsData()?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-products">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">SKU</th>
+            <th class="py-3.5 px-4">Producto</th>
+            <th class="py-3.5 px-4">Categoría</th>
+            <th class="py-3.5 px-4">Proveedor</th>
+            <th class="py-3.5 px-4 text-right">P. Compra</th>
+            <th class="py-3.5 px-4 text-right">P. Venta</th>
+            <th class="py-3.5 px-4 text-right">Stock</th>
+            <th class="py-3.5 px-4 text-right">Valuación</th>
+            <th class="py-3.5 px-4">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of productsData()?.items; track row.id) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+            <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.name }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.supplierName }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.purchasePrice | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.salePrice | currencyFormat }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.currentStock }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-primary-600">{{ row.valuation | currencyFormat
+              }}</td>
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="row.currentStock === 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : (row.currentStock <= row.minimumStock ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200')">
+                {{ row.status }}
+              </span>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📦
+      </div>
+      <h4 class="text-base font-bold text-slate-900">No hay productos que coincidan con la búsqueda</h4>
+    </div>
+    }
+    }
 
-      <!-- 8. VISTA DE BAJO STOCK -->
-      @else if (selectedReport() === 'low-stock') {
-        @if (lowStockData()?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-low-stock">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">SKU</th>
-                <th class="py-3.5 px-4">Producto</th>
-                <th class="py-3.5 px-4">Categoría</th>
-                <th class="py-3.5 px-4">Proveedor</th>
-                <th class="py-3.5 px-4 text-right">Stock Actual</th>
-                <th class="py-3.5 px-4 text-right">Stock Mínimo</th>
-                <th class="py-3.5 px-4 text-right">Déficit</th>
-                <th class="py-3.5 px-4 text-right">Costo Estimado Reposición</th>
-                <th class="py-3.5 px-4">Estado</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of lowStockData()?.items; track row.id) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
-                <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.name }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
-                <td class="py-3.5 px-4 text-slate-600">{{ row.supplierName }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black"
-                  [ngClass]="row.currentStock === 0 ? 'text-rose-600' : 'text-amber-600'">
-                  {{ row.currentStock }}
-                </td>
-                <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.minimumStock }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-rose-600">-{{ row.deficit }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.estimatedRestockCost | currencyFormat }}</td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
-                    [ngClass]="row.currentStock === 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'">
-                    {{ row.status }}
-                  </span>
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-xl">✅</div>
-            <h4 class="text-base font-bold text-slate-900">¡Inventario Saludable!</h4>
-            <p class="text-sm text-slate-500 max-w-md mx-auto">No hay productos con stock por debajo del límite mínimo configurado.</p>
-          </div>
-        }
-      }
+    <!-- 8. VISTA DE BAJO STOCK -->
+    @else if (selectedReport() === 'low-stock') {
+    @if (lowStockData()?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-low-stock">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">SKU</th>
+            <th class="py-3.5 px-4">Producto</th>
+            <th class="py-3.5 px-4">Categoría</th>
+            <th class="py-3.5 px-4">Proveedor</th>
+            <th class="py-3.5 px-4 text-right">Stock Actual</th>
+            <th class="py-3.5 px-4 text-right">Stock Mínimo</th>
+            <th class="py-3.5 px-4 text-right">Déficit</th>
+            <th class="py-3.5 px-4 text-right">Costo Estimado Reposición</th>
+            <th class="py-3.5 px-4">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of lowStockData()?.items; track row.id) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+            <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.name }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.categoryName }}</td>
+            <td class="py-3.5 px-4 text-slate-600">{{ row.supplierName }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black"
+              [ngClass]="row.currentStock === 0 ? 'text-rose-600' : 'text-amber-600'">
+              {{ row.currentStock }}
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-500">{{ row.minimumStock }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-bold text-rose-600">-{{ row.deficit }}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.estimatedRestockCost |
+              currencyFormat }}</td>
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="row.currentStock === 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'">
+                {{ row.status }}
+              </span>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div
+        class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-xl">✅
+      </div>
+      <h4 class="text-base font-bold text-slate-900">¡Inventario Saludable!</h4>
+      <p class="text-sm text-slate-500 max-w-md mx-auto">No hay productos con stock por debajo del límite mínimo
+        configurado.</p>
+    </div>
+    }
+    }
 
-      <!-- 9. VISTA DE AUDITORÍA -->
-      @else if (selectedReport() === 'audit') {
-        @if (auditData()?.items?.length) {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" data-testid="table-audit">
-            <thead>
-              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th class="py-3.5 px-4">Fecha y Hora</th>
-                <th class="py-3.5 px-4">Entidad</th>
-                <th class="py-3.5 px-4">Acción</th>
-                <th class="py-3.5 px-4">Detalle de Operación</th>
-                <th class="py-3.5 px-4">Usuario Responsable</th>
-                <th class="py-3.5 px-4">IP</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-sm font-medium">
-              @for (row of auditData()?.items; track row.id) {
-              <tr class="hover:bg-slate-50/60 transition-colors">
-                <td class="py-3.5 px-4 text-slate-600 font-mono">{{ row.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</td>
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.entityName }}</td>
-                <td class="py-3.5 px-4">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
-                    {{ row.action }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-slate-700">{{ row.details }}</td>
-                <td class="py-3.5 px-4 font-semibold text-slate-900">{{ row.userName }}</td>
-                <td class="py-3.5 px-4 font-mono text-slate-400 text-xs">{{ row.ipAddress || '-' }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        } @else {
-          <div class="p-12 text-center space-y-3" data-testid="empty-state">
-            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">🛡️</div>
-            <h4 class="text-base font-bold text-slate-900">No se encontraron eventos de auditoría para este período</h4>
-          </div>
-        }
-      }
+    <!-- 9. VISTA DE AUDITORÍA -->
+    @else if (selectedReport() === 'audit') {
+    @if (auditData()?.items?.length) {
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse" data-testid="table-audit">
+        <thead>
+          <tr
+            class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <th class="py-3.5 px-4">Fecha y Hora</th>
+            <th class="py-3.5 px-4">Entidad</th>
+            <th class="py-3.5 px-4">Acción</th>
+            <th class="py-3.5 px-4">Detalle de Operación</th>
+            <th class="py-3.5 px-4">Usuario Responsable</th>
+            <th class="py-3.5 px-4">IP</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          @for (row of auditData()?.items; track row.id) {
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-4 text-slate-600 font-mono">{{ row.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.entityName }}</td>
+            <td class="py-3.5 px-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
+                {{ row.action }}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-slate-700">{{ row.details }}</td>
+            <td class="py-3.5 px-4 font-semibold text-slate-900">{{ row.userName }}</td>
+            <td class="py-3.5 px-4 font-mono text-slate-400 text-xs">{{ row.ipAddress || '-' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="p-12 text-center space-y-3" data-testid="empty-state">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">
+        🛡️</div>
+      <h4 class="text-base font-bold text-slate-900">No se encontraron eventos de auditoría para este período</h4>
+    </div>
+    }
+    }
     }
 
     <!-- PAGINADOR Y TAMAÑO DE PÁGINA -->
     @if (currentPagination(); as pag) {
-    <div class="bg-slate-50/80 px-5 py-3.5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-600">
+    <div
+      class="bg-slate-50/80 px-5 py-3.5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-600">
       <div class="flex items-center gap-2">
         <span>Mostrar</span>
         <select [ngModel]="pageSize()" (ngModelChange)="setPageSize($any($event))"
@@ -1914,8 +1960,7 @@
       <div class="flex items-center gap-2">
         <span>Página {{ pag.pageNumber }} de {{ pag.totalPages > 0 ? pag.totalPages : 1 }}</span>
         <div class="flex items-center gap-1">
-          <button type="button" (click)="prevPage()" [disabled]="pag.pageNumber <= 1"
-            data-testid="btn-prev-page"
+          <button type="button" (click)="prevPage()" [disabled]="pag.pageNumber <= 1" data-testid="btn-prev-page"
             class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-bold transition-all text-sm">
             &larr; Anterior
           </button>
@@ -1934,12 +1979,14 @@
   <div class="pt-4 border-t border-slate-200">
     <div class="mb-4">
       <h2 class="text-lg font-bold text-slate-900">Catálogo de Exportación Directa</h2>
-      <p class="text-sm text-slate-500">Paquetes completos de datos estructurados CSV para análisis secundario en Excel / ERP.</p>
+      <p class="text-sm text-slate-500">Paquetes completos de datos estructurados CSV para análisis secundario en Excel
+        / ERP.</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       @for (rep of summary()?.reports; track rep.key) {
-      <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+      <div
+        class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
         <div>
           <div class="flex items-center justify-between mb-3">
             <span class="text-2xl">

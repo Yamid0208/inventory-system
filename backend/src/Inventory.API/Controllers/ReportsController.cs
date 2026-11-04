@@ -534,7 +534,7 @@ public class ReportsController : BaseApiController
     private int? ResolveTargetWarehouseId(int? queryWarehouseId)
     {
         var role = GetCurrentUserRole();
-        if (role == "SuperAdmin")
+        if (role == "SuperAdmin" || role == "Admin")
         {
             return queryWarehouseId;
         }

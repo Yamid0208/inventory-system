@@ -130,7 +130,8 @@ public class ReportExportService : IReportExportService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value ||
+                                    (s.WarehouseId == null && s.User != null && s.User.WarehouseId == warehouseId.Value));
         }
 
         if (startDate.HasValue)
@@ -422,7 +423,8 @@ public class ReportExportService : IReportExportService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value ||
+                                    (s.WarehouseId == null && s.User != null && s.User.WarehouseId == warehouseId.Value));
         }
 
         if (startDate.HasValue)
@@ -634,7 +636,8 @@ public class ReportExportService : IReportExportService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value ||
+                                    (s.WarehouseId == null && s.User != null && s.User.WarehouseId == warehouseId.Value));
         }
 
         if (startDate.HasValue)
@@ -932,7 +935,8 @@ public class ReportExportService : IReportExportService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value ||
+                                    (s.WarehouseId == null && s.User != null && s.User.WarehouseId == warehouseId.Value));
         }
 
         if (startDate.HasValue)
@@ -1359,7 +1363,8 @@ public class ReportExportService : IReportExportService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value ||
+                                    (s.WarehouseId == null && s.User != null && s.User.WarehouseId == warehouseId.Value));
         }
 
         if (startDate.HasValue)
@@ -1446,7 +1451,8 @@ public class ReportExportService : IReportExportService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value ||
+                                    (s.WarehouseId == null && s.User != null && s.User.WarehouseId == warehouseId.Value));
         }
 
         if (startDate.HasValue)
@@ -1543,7 +1549,8 @@ public class ReportExportService : IReportExportService
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == warehouseId.Value);
+            query = query.Where(s => s.WarehouseId == warehouseId.Value ||
+                                    (s.WarehouseId == null && s.User != null && s.User.WarehouseId == warehouseId.Value));
         }
 
         if (startDate.HasValue)
