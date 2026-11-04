@@ -161,7 +161,7 @@ public class PurchaseService : IPurchaseService
                         var previousStock = product.CurrentStock;
                         product.UpdateStock(itemReq.Quantity);
 
-                        var movementNumber = $"MOV-{DateTimeOffset.UtcNow:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
+                        var movementNumber = $"MOV-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
                         var movement = new InventoryMovement(
                             movementNumber,
                             product.Id,
@@ -225,7 +225,7 @@ public class PurchaseService : IPurchaseService
                     var previousStock = product.CurrentStock;
                     product.UpdateStock(item.Quantity);
 
-                    var movementNumber = $"MOV-{DateTimeOffset.UtcNow:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
+                    var movementNumber = $"MOV-{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
                     var movement = new InventoryMovement(
                         movementNumber,
                         product.Id,

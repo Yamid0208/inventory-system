@@ -130,6 +130,13 @@ public class Product : BaseEntity
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 
+    public void UpdateImageUrl(string? imageUrl)
+    {
+        ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim();
+        UpdatedAt = DateTimeOffset.UtcNow;
+        UpdateRowVersion();
+    }
+
     public void UpdateStock(int quantityDelta)
     {
         var newStock = CurrentStock + quantityDelta;

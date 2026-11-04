@@ -499,7 +499,7 @@
 
 <!-- MODALS -->
 @if (showOpenModal()) {
-<app-open-cash-modal [warehouses]="warehouses()" [loading]="modalLoading()" [errorMessage]="modalError()"
+<app-open-cash-modal [warehouses]="warehouses()" [defaultWarehouseId]="branchContextService.selectedWarehouseId() || (warehouses().length > 0 ? warehouses()[0].id : null)" [loading]="modalLoading()" [errorMessage]="modalError()"
   (submitOpen)="handleOpenCash($event)" (cancel)="showOpenModal.set(false)"></app-open-cash-modal>
 }
 

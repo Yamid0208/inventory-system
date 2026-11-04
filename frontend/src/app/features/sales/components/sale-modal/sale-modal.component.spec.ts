@@ -191,5 +191,95 @@ describe('SaleModalComponent (Customer Lookup & Registration Tests)', () => {
     expect(component.calculatedSubtotal()).toBe(95000 + 45000);
     expect(component.calculatedTotal()).toBeCloseTo((95000 + 45000) * 1.19, 2);
   });
+
+  it('calcula correctamente el total con descuento fijo ($) y base gravable neta', () => {
+    component.products = [
+      { id: 1, sku: 'PROD-001', name: 'Martillo', salePrice: 100000, currentStock: 10 } as any
+    ];
+    component.taxRatePercent.set(19);
+    component.taxRateDecimal.set(0.19);
+
+    component.onProductSelect(0, 1);
+    expect(component.calculatedSubtotal()).toBe(100000);
+
+    // Aplicar descuento fijo de $10.000
+    component.setDiscountType('fixed');
+    component.discountValue.set(10000);
+
+    expect(component.calculatedDiscount()).toBe(10000);
+    expect(component.taxableBase()).toBe(90000);
+    expect(component.calculatedTax()).toBe(90000 * 0.19); // 17100
+    expect(component.calculatedTotal()).toBe(90000 + 17100); // 107100
+    expect(component.isDiscountExceeded()).toBe(false);
+  });
+
+  it('calcula correctamente el total con descuento porcentual (%)', () => {
+    component.products = [
+      { id: 1, sku: 'PROD-001', name: 'Martillo', salePrice: 200000, currentStock: 10 } as any
+    ];
+    component.taxRatePercent.set(19);
+    component.taxRateDecimal.set(0.19);
+
+    component.onProductSelect(0, 1);
+    expect(component.calculatedSubtotal()).toBe(200000);
+
+    // Aplicar 15% de descuento
+    component.setQuickDiscount(15);
+    expect(component.discountType()).toBe('percent');
+    expect(component.discountValue()).toBe(15);
+
+    expect(component.calculatedDiscount()).toBe(30000);
+    expect(component.taxableBase()).toBe(170000);
+    expect(component.calculatedTax()).toBe(170000 * 0.19); // 32300
+    expect(component.calculatedTotal()).toBe(170000 + 32300); // 202300
+    expect(component.isDiscountExceeded()).toBe(false);
+  });
+
+  it('detecta si el descuento excede el subtotal o si es mayor a 100%', () => {
+    component.products = [
+      { id: 1, sku: 'PROD-001', name: 'Martillo', salePrice: 50000, currentStock: 10 } as any
+    ];
+    component.onProductSelect(0, 1);
+
+    // Descuento fijo mayor al subtotal
+    component.setDiscountType('fixed');
+    component.discountValue.set(60000);
+    expect(component.isDiscountExceeded()).toBe(true);
+
+    // Descuento porcentual mayor a 100%
+    component.setDiscountType('percent');
+    component.discountValue.set(105);
+    expect(component.isDiscountExceeded()).toBe(true);
+  });
+
+  it('emite el descuento en el payload de CreateSaleRequest en onSubmit', async () => {
+    component.products = [
+      { id: 1, sku: 'PROD-001', name: 'Martillo', salePrice: 100000, currentStock: 10 } as any
+    ];
+    component.taxRatePercent.set(19);
+    component.taxRateDecimal.set(0.19);
+
+    component.form.patchValue({
+      customerName: 'Cliente VIP',
+      customerTaxId: '12345678',
+      paymentMethod: 'Cash'
+    });
+    component.onProductSelect(0, 1);
+
+    component.setDiscountType('fixed');
+    component.discountValue.set(10000);
+
+    let emittedRequest: any = null;
+    component.save.subscribe((req) => {
+      emittedRequest = req;
+    });
+
+    await component.onSubmit();
+
+    expect(emittedRequest).toBeTruthy();
+    expect(emittedRequest.customerName).toBe('Cliente VIP');
+    expect(emittedRequest.discount).toBe(10000);
+    expect(emittedRequest.payments[0].amount).toBe(107100);
+  });
 });
 

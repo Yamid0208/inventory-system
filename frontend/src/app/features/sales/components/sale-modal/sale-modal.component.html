@@ -39,7 +39,7 @@
 
     <!-- Formulario -->
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-xs">
-      <!-- Sección de Datos del Cliente -->
+      <!-- 1. Sección de Datos del Cliente -->
       <div class="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <span class="font-bold text-slate-800 flex items-center gap-1.5">
@@ -144,7 +144,7 @@
         }
       </div>
 
-      <!-- Datos de Facturación y Sede -->
+      <!-- 2. Datos de Facturación y Sede -->
       <div class="grid grid-cols-1 sm:grid-cols-2" [class.md:grid-cols-3]="warehouses.length > 0" class="gap-4">
         @if (warehouses.length > 0) {
         <div>
@@ -174,7 +174,208 @@
         </div>
       </div>
 
-      <!-- Sección de Medios de Pago (Soporte para Pagos Divididos / Múltiples) -->
+      <!-- 3. PRODUCTOS A FACTURAR (Sección reubicada arriba) -->
+      <div class="space-y-3 pt-1">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800">Productos a Facturar</h3>
+            <p class="text-[11px] text-slate-400">Agrega los productos que componen la factura o comprobante de venta.</p>
+          </div>
+          <button type="button" (click)="addItem()"
+            class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>+ Agregar Producto</span>
+          </button>
+        </div>
+
+        <div formArrayName="items" class="space-y-2.5 max-h-72 sm:max-h-80 overflow-y-auto pr-1">
+          @for (item of itemsArray.controls; track item; let i = $index) {
+          <div [formGroupName]="i"
+            class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">
+            <!-- Selector de Producto -->
+            <div class="flex-1 w-full">
+              <app-autocomplete formControlName="productId" label="Producto / SKU" [options]="productOptions"
+                placeholder="Buscar producto por SKU o nombre..." (valueChange)="onProductSelect(i, $event)"></app-autocomplete>
+            </div>
+
+            <!-- Cantidad -->
+            <div class="w-full sm:w-28">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Cantidad</label>
+              <input type="text" inputmode="numeric" formControlName="quantity" appThousandsSeparator
+                [allowDecimals]="false" placeholder="1"
+                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-center focus:outline-none focus:border-primary-500"
+                [class.border-rose-500]="isLineStockExceeded(i)" />
+            </div>
+
+            <!-- Precio Unitario de Venta -->
+            <div class="w-full sm:w-32">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Precio Venta</label>
+              <input type="text" inputmode="decimal" formControlName="unitPrice" appThousandsSeparator
+                [allowDecimals]="true" placeholder="0" readonly tabindex="-1"
+                class="w-full px-2.5 py-1.5 bg-slate-100/80 border border-slate-200 rounded-lg text-xs text-slate-600 font-mono text-right focus:outline-none cursor-not-allowed select-none" />
+            </div>
+
+            <!-- Total Línea -->
+            <div class="w-full sm:w-28 text-right">
+              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Total</label>
+              <div class="py-1.5 font-mono font-bold text-slate-800">
+                {{ getLineTotal(i) | currencyFormat }}
+              </div>
+            </div>
+
+            <!-- Eliminar -->
+            <button type="button" (click)="removeItem(i)" [disabled]="itemsArray.length === 1"
+              class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+              title="Eliminar fila">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                </path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Advertencia RN-001 si excede stock -->
+          @if (isLineStockExceeded(i)) {
+          <div
+            class="px-3 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold text-[11px] flex items-center gap-1.5">
+            <span>⚠️</span>
+            <span>La cantidad supera las existencias físicas disponibles ({{ getSelectedProduct(i)?.currentStock }}
+              uds). La regla RN-001 prohíbe stock negativo.</span>
+          </div>
+          }
+          }
+        </div>
+      </div>
+
+      <!-- 4. DESCUENTO COMERCIAL (Nueva sección ergonómica) -->
+      <div class="p-3.5 bg-amber-50/40 rounded-2xl border border-amber-200/70 space-y-3">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div>
+            <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+                </path>
+              </svg>
+              Descuento Comercial de la Venta (Opcional)
+            </span>
+            <p class="text-[11px] text-slate-500">
+              Aplica un descuento comercial general en valor fijo ($) o en porcentaje (%).
+            </p>
+          </div>
+
+          <!-- Selector de Modo de Descuento ($ / %) -->
+          <div class="inline-flex p-0.5 bg-slate-200/80 rounded-lg shadow-inner">
+            <button type="button" (click)="setDiscountType('fixed')"
+              class="px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer"
+              [class]="discountType() === 'fixed' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'">
+              $ Monto Fijo
+            </button>
+            <button type="button" (click)="setDiscountType('percent')"
+              class="px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer"
+              [class]="discountType() === 'percent' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'">
+              % Porcentaje
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+          <!-- Input de Descuento -->
+          <div class="sm:col-span-6">
+            <label class="block text-[11px] font-semibold text-slate-700 mb-1">
+              {{ discountType() === 'fixed' ? 'Valor a Descontar ($)' : 'Porcentaje a Descontar (%)' }}
+            </label>
+            <div class="relative flex items-center">
+              <span class="absolute left-3 text-slate-400 font-mono font-bold text-xs select-none">
+                {{ discountType() === 'fixed' ? '$' : '%' }}
+              </span>
+              <input
+                type="number"
+                min="0"
+                [max]="discountType() === 'fixed' ? calculatedSubtotal() : 100"
+                [value]="discountValue() || ''"
+                (input)="onDiscountInput($event)"
+                [placeholder]="discountType() === 'fixed' ? '0' : '0 %'"
+                class="w-full pl-8 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 font-mono text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
+                [class.border-rose-400]="isDiscountExceeded()"
+              />
+              @if (discountValue() > 0) {
+              <button
+                type="button"
+                (click)="clearDiscount()"
+                class="absolute right-2 text-slate-400 hover:text-rose-600 p-1 text-xs font-bold transition-colors cursor-pointer"
+                title="Quitar descuento">
+                ✕
+              </button>
+              }
+            </div>
+          </div>
+
+          <!-- Accesos Rápidos de Descuento -->
+          <div class="sm:col-span-6 flex flex-wrap items-center gap-1.5 pt-1 sm:pt-4">
+            <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mr-1">Rápidos:</span>
+            <button type="button" (click)="setQuickDiscount(5)"
+              class="px-2 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 hover:bg-amber-50 hover:border-amber-300 text-slate-700 transition-colors cursor-pointer shadow-sm">
+              5%
+            </button>
+            <button type="button" (click)="setQuickDiscount(10)"
+              class="px-2 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 hover:bg-amber-50 hover:border-amber-300 text-slate-700 transition-colors cursor-pointer shadow-sm">
+              10%
+            </button>
+            <button type="button" (click)="setQuickDiscount(15)"
+              class="px-2 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 hover:bg-amber-50 hover:border-amber-300 text-slate-700 transition-colors cursor-pointer shadow-sm">
+              15%
+            </button>
+            <button type="button" (click)="setQuickDiscount(20)"
+              class="px-2 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 hover:bg-amber-50 hover:border-amber-300 text-slate-700 transition-colors cursor-pointer shadow-sm">
+              20%
+            </button>
+            @if (discountValue() > 0) {
+            <button type="button" (click)="clearDiscount()"
+              class="px-2 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-500 transition-colors cursor-pointer">
+              Limpiar
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- Feedback de Descuento Aplicado -->
+        @if (calculatedDiscount() > 0 && !isDiscountExceeded()) {
+        <div class="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-600 font-bold">🏷️</span>
+            <span>
+              Descuento aplicado: <strong>-{{ calculatedDiscount() | currencyFormat }}</strong>
+              @if (discountType() === 'fixed' && calculatedSubtotal() > 0) {
+              <span class="text-slate-500 font-normal">({{ ((calculatedDiscount() / calculatedSubtotal()) * 100) | number:'1.1-1' }}% del subtotal)</span>
+              }
+            </span>
+          </div>
+          <span class="text-slate-600 text-[11px]">
+            Base gravable resultante: <strong>{{ taxableBase() | currencyFormat }}</strong>
+          </span>
+        </div>
+        }
+
+        <!-- Error si descuento supera el subtotal o es inválido -->
+        @if (isDiscountExceeded()) {
+        <div class="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+          <span>⚠️</span>
+          <span>
+            @if (discountType() === 'percent') {
+            El porcentaje de descuento no puede ser superior al 100% ni menor a 0.
+            } @else {
+            El monto de descuento no puede superar el subtotal bruto ({{ calculatedSubtotal() | currencyFormat }}) ni ser negativo.
+            }
+          </span>
+        </div>
+        }
+      </div>
+
+      <!-- 5. SECCIÓN DE MEDIOS DE PAGO (Reubicada después de productos y descuento) -->
       <div class="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/80 space-y-3">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
@@ -315,92 +516,22 @@
         }
       </div>
 
-      <!-- Líneas de Detalle de Venta -->
-      <div class="space-y-3 pt-1">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="font-bold text-slate-800">Productos a Facturar</h3>
-            <p class="text-[11px] text-slate-400">Agrega los productos que componen la factura o comprobante de venta.</p>
-          </div>
-          <button type="button" (click)="addItem()"
-            class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            <span> Agregar Producto</span>
-          </button>
-        </div>
-
-        <div formArrayName="items" class="space-y-2.5 max-h-72 sm:max-h-80  pr-1">
-          @for (item of itemsArray.controls; track item; let i = $index) {
-          <div [formGroupName]="i"
-            class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-center gap-3">
-            <!-- Selector de Producto -->
-            <div class="flex-1 w-full">
-              <app-autocomplete formControlName="productId" label="Producto / SKU" [options]="productOptions"
-                placeholder="Buscar producto por SKU o nombre..." (valueChange)="onProductSelect(i, $event)"></app-autocomplete>
-            </div>
-
-            <!-- Cantidad -->
-            <div class="w-full sm:w-28">
-              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Cantidad</label>
-              <input type="text" inputmode="numeric" formControlName="quantity" appThousandsSeparator
-                [allowDecimals]="false" placeholder="1"
-                class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono text-center focus:outline-none focus:border-primary-500"
-                [class.border-rose-500]="isLineStockExceeded(i)" />
-            </div>
-
-            <!-- Precio Unitario de Venta -->
-            <div class="w-full sm:w-32">
-              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Precio Venta</label>
-              <input type="text" inputmode="decimal" formControlName="unitPrice" appThousandsSeparator
-                [allowDecimals]="true" placeholder="0" readonly tabindex="-1"
-                class="w-full px-2.5 py-1.5 bg-slate-100/80 border border-slate-200 rounded-lg text-xs text-slate-600 font-mono text-right focus:outline-none cursor-not-allowed select-none" />
-            </div>
-
-            <!-- Total Línea -->
-            <div class="w-full sm:w-28 text-right">
-              <label class="block text-[10px] text-slate-400 font-medium mb-0.5">Total</label>
-              <div class="py-1.5 font-mono font-bold text-slate-800">
-                {{ getLineTotal(i) | currencyFormat }}
-              </div>
-            </div>
-
-            <!-- Eliminar -->
-            <button type="button" (click)="removeItem(i)" [disabled]="itemsArray.length === 1"
-              class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
-              title="Eliminar fila">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                </path>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Advertencia RN-001 si excede stock -->
-          @if (isLineStockExceeded(i)) {
-          <div
-            class="px-3 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold text-[11px] flex items-center gap-1.5">
-            <span>⚠️</span>
-            <span>La cantidad supera las existencias físicas disponibles ({{ getSelectedProduct(i)?.currentStock }}
-              uds). La regla RN-001 prohíbe stock negativo.</span>
-          </div>
-          }
-          }
-        </div>
-      </div>
-
-      <!-- Resumen de Totales Financieros -->
+      <!-- 6. RESUMEN DE TOTALES FINANCIEROS -->
       <div class="p-4 bg-slate-900 text-white rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <span class="text-xs text-slate-400">
-          Descuento automático de stock en tiempo real e incorporación a Kardex.
+          Descuento comercial reflejado contablemente y ajuste de Kardex en tiempo real.
         </span>
         <div class="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-6 text-right font-mono text-xs w-full sm:w-auto">
           <div>
             <span class="block text-[10px] text-slate-400">Subtotal</span>
             <span>{{ calculatedSubtotal() | currencyFormat }}</span>
           </div>
+          @if (calculatedDiscount() > 0) {
+          <div>
+            <span class="block text-[10px] text-amber-400 font-semibold">Descuento</span>
+            <span class="text-amber-300 font-bold">-{{ calculatedDiscount() | currencyFormat }}</span>
+          </div>
+          }
           <div>
             <span class="block text-[10px] text-slate-400">IVA ({{ taxRatePercent() }}%)</span>
             <span>{{ calculatedTax() | currencyFormat }}</span>
@@ -412,14 +543,14 @@
         </div>
       </div>
 
-      <!-- Botones de Acción -->
+      <!-- 7. BOTONES DE ACCIÓN -->
       <div
         class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-3 border-t border-slate-100">
         <app-button variant="outline" size="sm" type="button" (clicked)="onCancel()">
           Cancelar
         </app-button>
         <app-button variant="primary" size="sm" type="submit"
-          [disabled]="form.invalid || itemsArray.length === 0 || anyStockExceeded() || !isPaymentBalanced() || isLoading() || isRegisteringCustomer()">
+          [disabled]="form.invalid || itemsArray.length === 0 || anyStockExceeded() || isDiscountExceeded() || !isPaymentBalanced() || isLoading() || isRegisteringCustomer()">
           {{ isLoading() ? 'Procesando Venta...' : 'Completar Venta y Descontar Stock' }}
         </app-button>
       </div>

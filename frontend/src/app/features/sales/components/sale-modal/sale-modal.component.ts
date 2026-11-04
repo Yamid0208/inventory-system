@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -28,7 +28,7 @@ import { SettingsService } from '../../../../core/services/settings.service';
   ],
   templateUrl: './sale-modal.component.html'
 })
-export class SaleModalComponent implements OnInit {
+export class SaleModalComponent implements OnInit, OnChanges {
   @Input() products: Product[] = [];
   @Input() warehouses: Warehouse[] = [];
   @Input() defaultWarehouseId: number | null = null;
@@ -49,6 +49,9 @@ export class SaleModalComponent implements OnInit {
 
   taxRatePercent = signal<number>(19);
   taxRateDecimal = signal<number>(0.19);
+
+  discountType = signal<'fixed' | 'percent'>('fixed');
+  discountValue = signal<number>(0);
 
   constructor(
     private fb: FormBuilder,
@@ -128,6 +131,17 @@ export class SaleModalComponent implements OnInit {
         this.paymentsArray.clear();
       }
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.form && (changes['defaultWarehouseId'] || changes['warehouses'])) {
+      const currentVal = this.form.get('warehouseId')?.value;
+      if (!currentVal && this.defaultWarehouseId) {
+        this.form.patchValue({ warehouseId: this.defaultWarehouseId });
+      } else if (!currentVal && this.warehouses.length > 0) {
+        this.form.patchValue({ warehouseId: this.warehouses[0].id });
+      }
+    }
   }
 
   isSplitPayment = signal<boolean>(false);
@@ -430,6 +444,29 @@ export class SaleModalComponent implements OnInit {
     return subtotal * (1 + this.taxRateDecimal());
   }
 
+  setDiscountType(type: 'fixed' | 'percent'): void {
+    this.discountType.set(type);
+    if (type === 'percent' && this.discountValue() > 100) {
+      this.discountValue.set(100);
+    }
+  }
+
+  setQuickDiscount(percent: number): void {
+    this.discountType.set('percent');
+    this.discountValue.set(percent);
+  }
+
+  clearDiscount(): void {
+    this.discountValue.set(0);
+  }
+
+  onDiscountInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const clean = input.value.replace(/[^0-9.]/g, '');
+    const num = parseFloat(clean);
+    this.discountValue.set(isNaN(num) || num < 0 ? 0 : num);
+  }
+
   calculatedSubtotal(): number {
     return this.itemsArray.controls.reduce((acc, curr) => {
       const raw = curr.getRawValue();
@@ -439,12 +476,36 @@ export class SaleModalComponent implements OnInit {
     }, 0);
   }
 
+  calculatedDiscount(): number {
+    const sub = this.calculatedSubtotal();
+    const val = Number(this.discountValue()) || 0;
+    if (val <= 0 || sub <= 0) return 0;
+    if (this.discountType() === 'percent') {
+      const clampedPercent = Math.min(100, Math.max(0, val));
+      return Math.round((sub * clampedPercent / 100) * 100) / 100;
+    }
+    return Math.min(sub, Math.max(0, val));
+  }
+
+  taxableBase(): number {
+    return Math.max(0, this.calculatedSubtotal() - this.calculatedDiscount());
+  }
+
   calculatedTax(): number {
-    return this.calculatedSubtotal() * this.taxRateDecimal();
+    return Math.round((this.taxableBase() * this.taxRateDecimal()) * 100) / 100;
   }
 
   calculatedTotal(): number {
-    return this.calculatedSubtotal() + this.calculatedTax();
+    return Math.round((this.taxableBase() + this.calculatedTax()) * 100) / 100;
+  }
+
+  isDiscountExceeded(): boolean {
+    const val = Number(this.discountValue()) || 0;
+    if (val < 0) return true;
+    if (this.discountType() === 'percent') {
+      return val > 100;
+    }
+    return val > this.calculatedSubtotal();
   }
 
   isLoading(): boolean {
@@ -456,7 +517,7 @@ export class SaleModalComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid || this.anyStockExceeded() || !this.isPaymentBalanced()) return;
+    if (this.form.invalid || this.anyStockExceeded() || this.isDiscountExceeded() || !this.isPaymentBalanced()) return;
 
     const rawVal = this.form.getRawValue();
     const name = rawVal.customerName.trim();
@@ -511,6 +572,7 @@ export class SaleModalComponent implements OnInit {
         unitPrice: Number(i.unitPrice),
         taxRate: this.taxRateDecimal()
       })),
+      discount: this.calculatedDiscount(),
       payments: finalPayments,
       warehouseId: rawVal.warehouseId ? Number(rawVal.warehouseId) : undefined
     };

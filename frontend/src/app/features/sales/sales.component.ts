@@ -206,24 +206,54 @@ export class SalesComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    if (!this.cashRegisterService.activeSession()) {
-      this.confirmationService.confirm({
-        title: 'Apertura de Caja Requerida',
-        message: 'Para registrar ventas en el POS, debes tener una sesión de caja abierta activa. ¿Deseas ir al módulo de caja para abrirla ahora?',
-        confirmText: 'Ir a Abrir Caja',
-        cancelText: 'Cancelar',
-        variant: 'warning'
-      }).then(confirmed => {
-        if (confirmed) {
-          this.router.navigate(['/cash-register']);
+    this.cashRegisterService.getCurrentSession().subscribe({
+      next: (session) => {
+        if (!session) {
+          this.promptOpenCashRegister();
+          return;
         }
-      });
-      return;
-    }
 
-    this.modalError.set(null);
-    this.loadProducts(); // Asegurar existencias más recientes
-    this.isCreateModalOpen.set(true);
+        this.modalError.set(null);
+        this.loadProducts(); // Asegurar existencias más recientes
+        this.isCreateModalOpen.set(true);
+      },
+      error: () => {
+        this.promptOpenCashRegister();
+      }
+    });
+  }
+
+  private promptOpenCashRegister(): void {
+    this.confirmationService.confirm({
+      title: 'Apertura de Caja Requerida',
+      message: 'Para registrar ventas en el POS, debes tener una sesión de caja abierta activa. ¿Deseas ir al módulo de caja para abrirla ahora?',
+      confirmText: 'Ir a Abrir Caja',
+      cancelText: 'Cancelar',
+      variant: 'warning'
+    }).then(confirmed => {
+      if (confirmed) {
+        this.router.navigate(['/cash-register']);
+      }
+    });
+  }
+
+  closeCreateModal(): void {
+    this.isCreateModalOpen.set(false);
+    if (this.route.snapshot.queryParams['new']) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { new: null, t: null },
+        queryParamsHandling: 'merge'
+      });
+    }
+  }
+
+  getActiveWarehouseId(): number | null {
+    const branchId = this.branchContextService.selectedWarehouseId();
+    if (branchId && branchId > 0) return branchId;
+    const userWhId = this.authService.currentUser()?.warehouseId;
+    if (userWhId && userWhId > 0) return userWhId;
+    return this.warehouses().length > 0 ? this.warehouses()[0].id : null;
   }
 
   onCreateSale(request: CreateSaleRequest): void {
@@ -233,7 +263,7 @@ export class SalesComponent implements OnInit {
     this.saleService.createSale(request).subscribe({
       next: (createdSale) => {
         this.modalLoading.set(false);
-        this.isCreateModalOpen.set(false);
+        this.closeCreateModal();
         this.loadProducts();
         this.loadSales();
         this.alertService?.checkUnreadStatus();

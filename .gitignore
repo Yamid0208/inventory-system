@@ -39,6 +39,8 @@ test-results/
 # Docker & Uploads
 uploads/*
 !uploads/.gitkeep
+backend/src/Inventory.API/uploads/*
+!backend/src/Inventory.API/uploads/.gitkeep
 sqlserver_data/
 
 # Environment & Secret files

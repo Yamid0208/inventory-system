@@ -84,6 +84,10 @@ export class ProductService {
     return this.http.post<{ imageUrl: string }>(`${this.apiUrl}/${id}/image`, formData);
   }
 
+  deleteImage(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/image`);
+  }
+
   downloadImportTemplate(): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/import/template`, { responseType: 'blob' });
   }

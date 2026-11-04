@@ -131,6 +131,12 @@
               <span>Subtotal:</span>
               <span class="font-mono font-medium text-slate-900">{{ sale.subtotal | currencyFormat }}</span>
             </div>
+            @if (sale.discount && sale.discount > 0) {
+            <div class="flex justify-between text-xs text-amber-700 font-semibold">
+              <span>Descuento:</span>
+              <span class="font-mono">-{{ sale.discount | currencyFormat }}</span>
+            </div>
+            }
             <div class="flex justify-between text-xs text-slate-600 pb-2 border-b border-slate-200">
               <span>IVA discriminado:</span>
               <span class="font-mono font-medium text-slate-900">{{ sale.tax | currencyFormat }}</span>

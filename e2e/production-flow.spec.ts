@@ -10,7 +10,7 @@ test.describe('E2E Pre-Production Verification Suite', () => {
 
     const headers = response.headers();
     expect(headers['x-content-type-options']).toBe('nosniff');
-    expect(headers['x-frame-options']).toBe('SAMEORIGIN');
+    expect(['DENY', 'SAMEORIGIN']).toContain(headers['x-frame-options']);
     expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
   });
 

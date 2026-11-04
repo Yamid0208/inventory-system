@@ -23,6 +23,7 @@ export interface SaleItem {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  discount?: number;
   tax: number;
   total: number;
 }
@@ -40,6 +41,7 @@ export interface Sale {
   paymentMethod: PaymentMethod;
   invoiceType: InvoiceType;
   subtotal: number;
+  discount?: number;
   tax: number;
   total: number;
   notes?: string;
@@ -66,6 +68,7 @@ export interface CreateSaleRequest {
   saleDate: string;
   notes?: string;
   items: CreateSaleItemRequest[];
+  discount?: number;
   payments?: SalePaymentRequest[];
   warehouseId?: number;
 }

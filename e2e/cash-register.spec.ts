@@ -78,14 +78,25 @@ test.describe('E2E POS Cash Register Module Suite', () => {
     await expect(openBtn).toBeVisible({ timeout: 5000 });
     await openBtn.click();
 
-    // Modal de apertura visible
+    // Modal de apertura visible y verificación de obligatoriedad de Sede/Almacén
     await expect(page.getByText('Apertura de Caja')).toBeVisible({ timeout: 5000 });
+    const warehouseSelect = page.locator('#warehouseId');
+    await expect(warehouseSelect).toBeVisible();
+    await expect(page.locator('label:has-text("Sede / Almacén *")')).toBeVisible();
+
     const initialCashInput = page.locator('#initialCash');
     await initialCashInput.fill('150000');
     const notesInput = page.locator('#notes');
     await notesInput.fill('Apertura de turno automatizada Playwright E2E');
 
+    // Si no tiene sede seleccionada, seleccionar la primera sede válida
+    const currentWh = await warehouseSelect.inputValue();
+    if (!currentWh || currentWh === 'null') {
+      await warehouseSelect.selectOption({ index: 1 });
+    }
+
     const confirmOpenBtn = page.locator('button:has-text("Confirmar y Abrir Caja")');
+    await expect(confirmOpenBtn).toBeEnabled();
     await confirmOpenBtn.click();
 
     // Verificar que la caja pasó a estado ABIERTA
@@ -222,6 +233,13 @@ test.describe('E2E POS Cash Register Module Suite', () => {
     if (await openCardPrompt.isVisible()) {
       await page.locator('button:has-text("Realizar Apertura de Caja")').click();
       await page.locator('#initialCash').fill('200000');
+      const whSelect = page.locator('#warehouseId');
+      if (await whSelect.isVisible()) {
+        const val = await whSelect.inputValue();
+        if (!val || val === 'null') {
+          await whSelect.selectOption({ index: 1 });
+        }
+      }
       await page.locator('button:has-text("Confirmar y Abrir Caja")').click();
       await expect(activeHeader).toBeVisible({ timeout: 8000 });
     }

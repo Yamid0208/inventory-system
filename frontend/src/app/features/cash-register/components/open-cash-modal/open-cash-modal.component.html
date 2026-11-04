@@ -56,24 +56,27 @@
         }
       </div>
 
-      <!-- Warehouse Selection (Optional if multiple) -->
-      @if (warehouses && warehouses.length > 0) {
-        <div>
-          <label for="warehouseId" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-            Sede / Almacén
-          </label>
-          <select
-            id="warehouseId"
-            formControlName="warehouseId"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-          >
-            <option [ngValue]="null">Seleccionar sede (opcional)...</option>
-            @for (wh of warehouses; track wh.id) {
-              <option [ngValue]="wh.id">{{ wh.name }} ({{ wh.code }})</option>
-            }
-          </select>
-        </div>
-      }
+      <!-- Warehouse Selection (Obligatorio) -->
+      <div>
+        <label for="warehouseId" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+          Sede / Almacén <span class="text-rose-500">*</span>
+        </label>
+        <select
+          id="warehouseId"
+          formControlName="warehouseId"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+          [class.border-rose-500]="form.get('warehouseId')?.invalid && form.get('warehouseId')?.touched"
+        >
+          <option [ngValue]="null" disabled>Seleccionar sede / almacén obligatoria...</option>
+          @for (wh of warehouses; track wh.id) {
+            <option [ngValue]="wh.id">{{ wh.name }} ({{ wh.code }})</option>
+          }
+        </select>
+        <p class="text-[11px] text-slate-500 mt-1">La caja operará y registrará transacciones vinculadas a esta sede física.</p>
+        @if (form.get('warehouseId')?.invalid && form.get('warehouseId')?.touched) {
+          <p class="text-xs text-rose-500 mt-1">Debe seleccionar una sede o almacén obligatoriamente para abrir la caja.</p>
+        }
+      </div>
 
       <!-- Observations Notes -->
       <div>

@@ -328,19 +328,23 @@ public class ProductService : IProductService
         }
 
         // Actualizar URL de la entidad
-        product.Update(
-            name: product.Name,
-            categoryId: product.CategoryId,
-            supplierId: product.SupplierId,
-            purchasePrice: product.PurchasePrice,
-            salePrice: product.SalePrice,
-            minimumStock: product.MinimumStock,
-            description: product.Description,
-            imageUrl: savedRelativePath
-        );
+        product.UpdateImageUrl(savedRelativePath);
 
         await _context.SaveChangesAsync(cancellationToken);
         return savedRelativePath;
+    }
+
+    public async Task DeleteProductImageAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var product = await _context.Products.FindAsync(new object[] { id }, cancellationToken)
+            ?? throw new NotFoundException($"Producto con ID {id} no encontrado.");
+
+        if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+        {
+            await _fileStorageService.DeleteFileAsync(product.ImageUrl, cancellationToken);
+            product.UpdateImageUrl(null);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 
     private static ProductDto MapToDto(Product product)

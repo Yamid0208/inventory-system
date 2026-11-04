@@ -13,7 +13,7 @@ import { ThousandsSeparatorDirective } from '../../../../shared/directives/thous
   templateUrl: './open-cash-modal.component.html'
 })
 export class OpenCashModalComponent implements OnInit {
-  private fb = inject(FormBuilder);
+  constructor(private fb: FormBuilder) {}
 
   @Input() loading = false;
   @Input() errorMessage: string | null = null;
@@ -26,9 +26,10 @@ export class OpenCashModalComponent implements OnInit {
   form!: FormGroup;
 
   ngOnInit(): void {
+    const initialWhId = this.defaultWarehouseId || (this.warehouses.length > 0 ? this.warehouses[0].id : null);
     this.form = this.fb.group({
       initialCash: [0, [Validators.required, Validators.min(0)]],
-      warehouseId: [this.defaultWarehouseId],
+      warehouseId: [initialWhId, [Validators.required, Validators.min(1)]],
       notes: ['']
     });
   }
@@ -40,9 +41,16 @@ export class OpenCashModalComponent implements OnInit {
     }
 
     const val = this.form.value;
+    const whId = Number(val.warehouseId);
+    if (!whId || whId <= 0) {
+      this.form.get('warehouseId')?.setErrors({ required: true });
+      this.form.markAllAsTouched();
+      return;
+    }
+
     this.submitOpen.emit({
       initialCash: Number(val.initialCash) || 0,
-      warehouseId: val.warehouseId ? Number(val.warehouseId) : undefined,
+      warehouseId: whId,
       notes: val.notes?.trim() || undefined
     });
   }

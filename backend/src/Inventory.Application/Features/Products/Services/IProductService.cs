@@ -13,4 +13,5 @@ public interface IProductService
     Task<ProductDto> ToggleStatusAsync(int id, bool isActive, CancellationToken cancellationToken = default);
     Task DeleteProductAsync(int id, CancellationToken cancellationToken = default);
     Task<string> UploadProductImageAsync(int id, Stream imageStream, string fileName, string contentType, CancellationToken cancellationToken = default);
+    Task DeleteProductImageAsync(int id, CancellationToken cancellationToken = default);
 }

@@ -83,8 +83,8 @@ export interface CashRegisterDashboard {
 
 export interface OpenCashRegisterRequest {
   initialCash: number;
+  warehouseId: number;
   notes?: string;
-  warehouseId?: number;
 }
 
 export interface CreateCashMovementRequest {
