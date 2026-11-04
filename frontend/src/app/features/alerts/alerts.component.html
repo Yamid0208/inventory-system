@@ -103,8 +103,18 @@
     </div>
   </div>
 
-  <!-- FILTROS Y BÚSQUEDA -->
-  <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <!-- Barra Superior Estándar con Búsqueda Omni-Campo y Exportar CSV -->
+  <app-table-toolbar
+    searchPlaceholder="Buscar en alertas por SKU, producto, categoría, proveedor..."
+    [searchValue]="tableState.searchQuery()"
+    [totalCount]="tableState.totalCount()"
+    [filteredCount]="tableState.filteredCount()"
+    [isFiltered]="tableState.isFiltered()"
+    [showExportCsv]="true"
+    [exportDisabled]="tableState.processedItems().length === 0"
+    (searchChange)="tableState.setSearch($event)"
+    (exportCsv)="exportAlertsCsv()"
+  >
     <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
       <button
         type="button"
@@ -112,7 +122,7 @@
         class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
         [class]="severityFilter() === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
       >
-        Todas las Alertas ({{ (summary()?.totalAlerts || 0) }})
+        Todas ({{ (summary()?.totalAlerts || 0) }})
       </button>
       <button
         type="button"
@@ -120,7 +130,7 @@
         class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
         [class]="severityFilter() === 'critical' ? 'bg-rose-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
       >
-        Solo Agotados ({{ (summary()?.criticalCount || 0) }})
+        Agotados ({{ (summary()?.criticalCount || 0) }})
       </button>
       <button
         type="button"
@@ -131,21 +141,7 @@
         Bajo Stock ({{ (summary()?.warningCount || 0) }})
       </button>
     </div>
-
-    <div class="relative w-full md:w-72">
-      <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-      </span>
-      <input
-        type="text"
-        placeholder="Buscar por SKU, nombre o proveedor..."
-        (input)="onSearch($event)"
-        class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 transition-all"
-      />
-    </div>
-  </div>
+  </app-table-toolbar>
 
   <!-- TABLA DE ALERTAS -->
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -154,7 +150,7 @@
         <div class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
         <p class="text-xs text-slate-400">Escaneando niveles de existencias...</p>
       </div>
-    } @else if (alerts().length === 0) {
+    } @else if (tableState.processedItems().length === 0) {
       <div class="py-16 text-center space-y-2">
         <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,15 +167,23 @@
         <table class="w-full text-left text-xs border-collapse">
           <thead>
             <tr class="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              <th class="py-3.5 pl-6">Producto y Referencia</th>
-              <th class="py-3.5 px-4">Proveedor Registrado</th>
-              <th class="py-3.5 px-4 text-center">Nivel de Stock</th>
-              <th class="py-3.5 px-4 text-right">Inversión Estimada</th>
+              <th class="py-3.5 pl-6">
+                <app-sortable-header key="name" label="Producto y Referencia" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4">
+                <app-sortable-header key="supplierName" label="Proveedor Registrado" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4 text-center">
+                <app-sortable-header key="currentStock" label="Nivel de Stock" align="center" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4 text-right">
+                <app-sortable-header key="estimatedTotalCost" label="Inversión Estimada" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
               <th class="py-3.5 pr-6 text-right">Acción</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            @for (a of alerts(); track a.productId) {
+            @for (a of tableState.processedItems(); track a.productId) {
               <tr class="hover:bg-slate-50/70 transition-colors">
                 <!-- Producto -->
                 <td class="py-3.5 pl-6">

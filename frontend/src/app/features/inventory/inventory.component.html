@@ -53,70 +53,64 @@
     </div>
   </div>
 
-  <!-- Barra de Filtros: Rango de Fechas & Tipo de Movimiento (Stitch Style) -->
-  <div
-    class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
-    <!-- Píldoras de Período -->
-    <div class="flex items-center gap-1.5 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0">
-      <button type="button" (click)="setDateRange('today')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === 'today'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        Hoy
-      </button>
+  <!-- Barra Superior Estándar con Búsqueda Omni-Campo y Exportar CSV -->
+  <app-table-toolbar
+    searchPlaceholder="Buscar en Kardex..."
+    [searchValue]="tableState.searchQuery()"
+    [totalCount]="tableState.totalCount()"
+    [filteredCount]="tableState.filteredCount()"
+    [isFiltered]="tableState.isFiltered()"
+    [showExportCsv]="true"
+    [exportDisabled]="tableState.processedItems().length === 0"
+    (searchChange)="tableState.setSearch($event)"
+    (exportCsv)="exportKardexCsv()"
+  >
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Píldoras de Período -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
+        <button type="button" (click)="setDateRange('today')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === 'today'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          Hoy
+        </button>
 
-      <button type="button" (click)="setDateRange('7d')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '7d'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        7 Días
-      </button>
+        <button type="button" (click)="setDateRange('7d')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '7d'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          7 Días
+        </button>
 
-      <button type="button" (click)="setDateRange('1m')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1m'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        1 Mes
-      </button>
+        <button type="button" (click)="setDateRange('1m')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1m'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          1 Mes
+        </button>
 
-      <button type="button" (click)="setDateRange('1y')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1y'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        1 Año
-      </button>
+        <button type="button" (click)="setDateRange('1y')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap" [class]="dateRange() === '1y'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          1 Año
+        </button>
 
-      <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
-
-      <button type="button" (click)="setDateRange('custom')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
-        [class]="dateRange() === 'custom'
-          ? 'bg-primary-600 text-white shadow-sm'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        <span>Personalizado</span>
-      </button>
-    </div>
-
-    <!-- Buscador & Dropdown Tipo de Movimiento -->
-    <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-      <!-- Search Input -->
-      <div class="relative w-full sm:w-64">
-        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button type="button" (click)="setDateRange('custom')"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
+          [class]="dateRange() === 'custom'
+            ? 'bg-primary-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
-        </div>
-        <input type="text" [value]="searchQuery()" (input)="onSearch($event)" placeholder="Buscar en Kardex..."
-          class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all" />
+          <span>Personalizado</span>
+        </button>
       </div>
 
       <!-- Type Select Dropdown -->
-      <div class="w-full sm:w-52">
+      <div class="w-48">
         <app-autocomplete
           [value]="selectedType()"
           (valueChange)="onTypeSelected($event)"
@@ -125,7 +119,7 @@
         ></app-autocomplete>
       </div>
     </div>
-  </div>
+  </app-table-toolbar>
 
   <!-- Loading State con Esqueleto Visual -->
   @if (loading()) {
@@ -135,7 +129,7 @@
   <!-- Data Table Card -->
   @if (!loading()) {
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-    @if (movements().length === 0) {
+    @if (tableState.processedItems().length === 0) {
     <div class="p-16 text-center">
       <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,16 +153,28 @@
         <thead>
           <tr
             class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-            <th class="py-3.5 pl-6 pr-4">ID Movimiento</th>
-            <th class="py-3.5 px-4">Fecha y Hora</th>
-            <th class="py-3.5 px-4">SKU / Producto</th>
-            <th class="py-3.5 px-4">Tipo</th>
-            <th class="py-3.5 px-4 text-right">Variación Stock</th>
-            <th class="py-3.5 pr-6 pl-4">Responsable</th>
+            <th class="py-3.5 pl-6 pr-4">
+              <app-sortable-header key="movementNumber" label="ID Movimiento" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="createdAt" label="Fecha y Hora" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="productName" label="SKU / Producto" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="movementType" label="Tipo" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="quantityDelta" label="Variación Stock" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 pr-6 pl-4">
+              <app-sortable-header key="userName" label="Responsable" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-xs">
-          @for (m of movements(); track m.id) {
+          @for (m of tableState.processedItems(); track m.id) {
           <tr class="hover:bg-slate-50/80 transition-colors group">
             <!-- Movement ID (Purple Mono Link) -->
             <td class="py-4 pl-6 pr-4 whitespace-nowrap">

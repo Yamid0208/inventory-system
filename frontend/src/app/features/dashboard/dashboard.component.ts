@@ -63,6 +63,11 @@ export class DashboardComponent implements OnInit {
 
     this.dashboardService.getSummary(wid).subscribe({
       next: (data) => {
+        if (data) {
+          data.criticalProducts = data.criticalProducts || [];
+          data.recentMovements = data.recentMovements || [];
+          data.categories = data.categories || [];
+        }
         this.summary.set(data);
         this.refreshKey.update((k) => k + 1);
         this.loading.set(false);

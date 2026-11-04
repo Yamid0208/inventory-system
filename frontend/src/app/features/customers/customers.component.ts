@@ -5,21 +5,55 @@ import { ConfirmationService } from '../../core/services/confirmation.service';
 import { Customer, CustomerSummary, CustomerFilterParams } from '../../core/models/customer.model';
 import { CustomerModalComponent } from './customer-modal.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, CustomerModalComponent, AppPaginationComponent],
+  imports: [
+    CommonModule,
+    CustomerModalComponent,
+    AppPaginationComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent
+  ],
   templateUrl: './customers.component.html'
 })
 export class CustomersComponent implements OnInit {
   private customerService = inject(CustomerService);
   private confirmationService = inject(ConfirmationService);
+  private csvExportService = inject(CsvExportService);
 
   customers = signal<Customer[]>([]);
   summary = signal<CustomerSummary | null>(null);
   loading = signal<boolean>(false);
+
+  // Gestor reactivo para ordenamiento y búsqueda omni-campo en clientes
+  readonly tableState = new TableStateManager<Customer>({
+    data: () => this.customers()
+  });
+
+  exportCustomersCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `clientes_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'name', header: 'Cliente / Razón Social' },
+        { key: 'taxId', header: 'NIT / Cédula' },
+        { key: 'email', header: 'Correo Electrónico' },
+        { key: 'phone', header: 'Teléfono' },
+        { key: 'city', header: 'Ciudad' },
+        { key: 'address', header: 'Dirección' },
+        { key: 'isActive', header: 'Estado' }
+      ],
+      data
+    });
+  }
 
   totalCount = signal<number>(0);
   pageNumber = signal<number>(1);

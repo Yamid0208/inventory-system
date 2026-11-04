@@ -7,11 +7,20 @@ import { AuthService } from '../../core/auth/services/auth.service';
 import { Warehouse, CreateClientAdminRequest, CreateWarehouseRequest } from '../../core/models/warehouse.model';
 import { BranchContextService } from '../../core/services/branch-context.service';
 import { appEmailValidator } from '../../shared/validators';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 
 @Component({
   selector: 'app-warehouses',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent
+  ],
   templateUrl: './warehouses.component.html'
 })
 export class WarehousesComponent implements OnInit {
@@ -20,12 +29,38 @@ export class WarehousesComponent implements OnInit {
   private authService = inject(AuthService);
   branchContextService = inject(BranchContextService);
   private fb = inject(FormBuilder);
+  private csvExportService = inject(CsvExportService);
 
   warehouses = signal<Warehouse[]>([]);
   isLoading = signal<boolean>(false);
   searchTerm = signal<string>('');
   isModalOpen = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
+
+  // Gestor reactivo para ordenamiento y búsqueda omni-campo en almacenes
+  readonly tableState = new TableStateManager<Warehouse>({
+    data: () => this.warehouses()
+  });
+
+  exportWarehousesCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `almacenes_sedes_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'code', header: 'Código' },
+        { key: 'name', header: 'Sede / Almacén' },
+        { key: 'city', header: 'Ciudad' },
+        { key: 'address', header: 'Dirección' },
+        { key: 'phone', header: 'Teléfono' },
+        { key: 'adminUserName', header: 'Administrador' },
+        { key: 'employeeCount', header: 'N° Empleados' },
+        { key: 'isActive', header: 'Estado' },
+        { key: 'createdAt', header: 'Fecha Alta' }
+      ],
+      data
+    });
+  }
 
   userRole = computed(() => this.authService.currentUser()?.role || 'Seller');
   isSuperAdmin = computed(() => this.userRole() === 'SuperAdmin');

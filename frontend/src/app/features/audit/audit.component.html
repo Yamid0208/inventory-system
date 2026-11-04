@@ -59,8 +59,18 @@
     </div>
   </div>
 
-  <!-- FILTROS Y BÚSQUEDA -->
-  <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <!-- Barra Superior Estándar con Búsqueda Omni-Campo y Exportar CSV -->
+  <app-table-toolbar
+    searchPlaceholder="Buscar en auditoría por operador, entidad, detalles, IP..."
+    [searchValue]="tableState.searchQuery()"
+    [totalCount]="tableState.totalCount()"
+    [filteredCount]="tableState.filteredCount()"
+    [isFiltered]="tableState.isFiltered()"
+    [showExportCsv]="true"
+    [exportDisabled]="tableState.processedItems().length === 0"
+    (searchChange)="tableState.setSearch($event)"
+    (exportCsv)="exportAuditCsv()"
+  >
     <div class="flex items-center gap-3 overflow-x-auto">
       <!-- Selector Entidad -->
       <div class="w-48">
@@ -82,22 +92,7 @@
         ></app-autocomplete>
       </div>
     </div>
-
-    <!-- Búsqueda -->
-    <div class="relative w-full md:w-72">
-      <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-      </span>
-      <input
-        type="text"
-        placeholder="Buscar por detalle, usuario o ID..."
-        (input)="onSearch($event)"
-        class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 transition-all"
-      />
-    </div>
-  </div>
+  </app-table-toolbar>
 
   <!-- TABLA DE AUDITORÍA -->
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -106,7 +101,7 @@
         <div class="w-8 h-8 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
         <p class="text-xs text-slate-400">Cargando pistas de auditoría...</p>
       </div>
-    } @else if (logs().length === 0) {
+    } @else if (tableState.processedItems().length === 0) {
       <div class="py-16 text-center space-y-2">
         <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,16 +118,28 @@
         <table class="w-full text-left text-xs border-collapse">
           <thead>
             <tr class="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              <th class="py-3.5 pl-6">Fecha / Hora</th>
-              <th class="py-3.5 px-4">Operador</th>
-              <th class="py-3.5 px-4">Entidad Afectada</th>
-              <th class="py-3.5 px-4">Acción</th>
-              <th class="py-3.5 px-4">Detalles de la Operación</th>
-              <th class="py-3.5 pr-6 text-right">Dirección IP</th>
+              <th class="py-3.5 pl-6">
+                <app-sortable-header key="createdAt" label="Fecha / Hora" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4">
+                <app-sortable-header key="userName" label="Operador" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4">
+                <app-sortable-header key="entityName" label="Entidad Afectada" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4">
+                <app-sortable-header key="action" label="Acción" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 px-4">
+                <app-sortable-header key="details" label="Detalles de la Operación" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
+              <th class="py-3.5 pr-6 text-right">
+                <app-sortable-header key="ipAddress" label="Dirección IP" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            @for (log of logs(); track log.id) {
+            @for (log of tableState.processedItems(); track log.id) {
               <tr class="hover:bg-slate-50/70 transition-colors">
                 <!-- Fecha -->
                 <td class="py-3.5 pl-6 whitespace-nowrap">

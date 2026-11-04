@@ -1097,4 +1097,62 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
     await expect(chartAudit).toBeVisible({ timeout: 5000 });
     await expect(chartAudit.locator('text=Distribución de Eventos por Módulo / Entidad')).toBeVisible();
   });
+
+  test('TC-REP-10: Estándar Universal - Flechas a la derecha, Ordenamiento (asc/desc/reset), Búsqueda Omni-Campo y CSV', async ({ page }) => {
+    await page.goto('/reports');
+    await page.waitForURL('**/reports', { timeout: 10000 });
+
+    // Seleccionar "Mes Actual" para tener múltiples filas
+    const btnThisMonth = page.locator('button:has-text("Mes Actual")').first();
+    await btnThisMonth.click();
+
+    const tableSales = page.locator('[data-testid="table-sales"]');
+    await expect(tableSales).toBeVisible({ timeout: 5000 });
+    await expect(tableSales.locator('tbody tr')).toHaveCount(2);
+
+    // 1. Verificación de la barra superior estándar
+    const searchInput = page.locator('[data-testid="reports-table-container"] input[placeholder="Buscar en cualquier campo de la tabla..."]');
+    await expect(searchInput).toBeVisible();
+
+    const btnExport = page.locator('[data-testid="reports-table-container"] button:has-text("Exportar CSV")');
+    await expect(btnExport).toBeVisible();
+
+    // 2. Búsqueda omni-campo: filtrar por cliente "Andina"
+    await searchInput.fill('Andina');
+    await page.waitForTimeout(400); // debounce
+    await expect(tableSales.locator('tbody tr')).toHaveCount(1);
+    await expect(tableSales.locator('text=Comercializadora Andina')).toBeVisible();
+
+    // Búsqueda por otro campo, ej. "Efectivo" (método de pago de la otra venta)
+    await searchInput.fill('Efectivo');
+    await page.waitForTimeout(400);
+    await expect(tableSales.locator('tbody tr')).toHaveCount(1);
+    await expect(tableSales.locator('text=Ferretería El Progreso')).toBeVisible();
+
+    // Limpiar búsqueda
+    const clearBtn = page.locator('button[aria-label="Limpiar búsqueda"]');
+    await clearBtn.click();
+    await page.waitForTimeout(400);
+    await expect(tableSales.locator('tbody tr')).toHaveCount(2);
+
+    // 3. Ordenamiento interactivo por columna con flecha a la derecha: Columna "Factura"
+    const facturaHeaderBtn = tableSales.locator('th app-sortable-header button').filter({ hasText: 'Factura' });
+    await expect(facturaHeaderBtn).toBeVisible();
+    await expect(facturaHeaderBtn).toHaveAttribute('aria-sort', 'none');
+
+    // Clic 1: Ascendente (flecha hacia arriba, aria-sort=ascending)
+    await facturaHeaderBtn.click();
+    await expect(facturaHeaderBtn).toHaveAttribute('aria-sort', 'ascending');
+    const firstCellAsc = await tableSales.locator('tbody tr:first-child td:first-child').innerText();
+
+    // Clic 2: Descendente (flecha hacia abajo, aria-sort=descending)
+    await facturaHeaderBtn.click();
+    await expect(facturaHeaderBtn).toHaveAttribute('aria-sort', 'descending');
+    const firstCellDesc = await tableSales.locator('tbody tr:first-child td:first-child').innerText();
+    expect(firstCellAsc).not.toBe(firstCellDesc);
+
+    // Clic 3: Sin ordenamiento (neutra, aria-sort=none)
+    await facturaHeaderBtn.click();
+    await expect(facturaHeaderBtn).toHaveAttribute('aria-sort', 'none');
+  });
 });

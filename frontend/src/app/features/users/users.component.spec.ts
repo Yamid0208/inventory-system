@@ -8,6 +8,7 @@ import { WarehouseService } from '../../core/services/warehouse.service';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { BranchContextService } from '../../core/services/branch-context.service';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { of } from 'rxjs';
 
 describe('UsersComponent (Unit Tests)', () => {
@@ -74,6 +75,7 @@ describe('UsersComponent (Unit Tests)', () => {
 
     const injector = createEnvironmentInjector([
       UsersComponent,
+      CsvExportService,
       { provide: UserAdminService, useValue: userAdminServiceMock },
       { provide: RoleService, useValue: roleServiceMock },
       { provide: WarehouseService, useValue: warehouseServiceMock },
@@ -83,6 +85,45 @@ describe('UsersComponent (Unit Tests)', () => {
     ], null as any);
 
     component = injector.get(UsersComponent);
+  });
+
+  it('debe ordenar usuarios, buscar en todos los campos y exportar a CSV', () => {
+    const multiUsers = [
+      { id: 1, fullName: 'Carlos Bodeguero', email: 'carlos@empresa.com', role: 'Warehouse', isActive: true, createdAt: '2026-09-01', warehouseName: 'Sede Norte' },
+      { id: 2, fullName: 'Ana Administradora', email: 'ana@empresa.com', role: 'Admin', isActive: true, createdAt: '2026-08-01', warehouseName: 'Sede Principal' },
+      { id: 3, fullName: 'Beatriz Ventas', email: 'beatriz@empresa.com', role: 'Seller', isActive: false, createdAt: '2026-09-15', warehouseName: 'Sede Norte' }
+    ] as any;
+    component.users.set(multiUsers);
+
+    // 1. Sort by fullName ASC
+    component.tableState.toggleSort('fullName');
+    let items = component.tableState.processedItems();
+    expect(items[0].fullName).toBe('Ana Administradora');
+    expect(items[1].fullName).toBe('Beatriz Ventas');
+    expect(items[2].fullName).toBe('Carlos Bodeguero');
+
+    // 2. Sort by fullName DESC
+    component.tableState.toggleSort('fullName');
+    items = component.tableState.processedItems();
+    expect(items[0].fullName).toBe('Carlos Bodeguero');
+    expect(items[2].fullName).toBe('Ana Administradora');
+
+    // 3. Reset sort
+    component.tableState.toggleSort('fullName');
+    items = component.tableState.processedItems();
+    expect(items[0].fullName).toBe('Carlos Bodeguero');
+
+    // 4. Omni-search by email
+    component.tableState.setSearch('beatriz');
+    expect(component.tableState.processedItems().length).toBe(1);
+    expect(component.tableState.processedItems()[0].fullName).toBe('Beatriz Ventas');
+
+    // 5. CSV export
+    const csvService = (component as any).csvExportService;
+    const spy = vi.spyOn(csvService, 'exportToCsv');
+    component.exportUsersCsv();
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0].filename).toContain('usuarios_');
   });
 
   it('debe instanciarse y cargar los usuarios', () => {

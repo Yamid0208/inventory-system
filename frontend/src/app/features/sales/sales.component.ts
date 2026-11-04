@@ -18,6 +18,10 @@ import { InvoiceViewerComponent } from './components/invoice-viewer/invoice-view
 import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 
@@ -33,6 +37,8 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
     AppButtonComponent,
     AppPaginationComponent,
     AppSkeletonComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './sales.component.html'
@@ -46,6 +52,7 @@ export class SalesComponent implements OnInit {
   private authService = inject(AuthService);
   private confirmationService = inject(ConfirmationService);
   private alertService = inject(AlertService, { optional: true });
+  private csvExportService = inject(CsvExportService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -53,6 +60,31 @@ export class SalesComponent implements OnInit {
   products = signal<Product[]>([]);
   warehouses = signal<Warehouse[]>([]);
   loading = signal<boolean>(false);
+
+  // Gestor reactivo para ordenamiento y búsqueda omni-campo en ventas
+  readonly tableState = new TableStateManager<Sale>({
+    data: () => this.sales()
+  });
+
+  exportSalesCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `ventas_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'saleNumber', header: 'N° Comprobante' },
+        { key: 'saleDate', header: 'Fecha' },
+        { key: 'warehouseName', header: 'Sede / Almacén' },
+        { key: 'customerName', header: 'Cliente' },
+        { key: 'customerTaxId', header: 'NIT / Cédula' },
+        { key: 'paymentMethod', header: 'Método de Pago' },
+        { key: 'userName', header: 'Vendedor' },
+        { key: 'status', header: 'Estado' },
+        { key: 'total', header: 'Total' }
+      ],
+      data
+    });
+  }
 
   userRole = computed(() => this.authService.currentUser()?.role || 'Seller');
   canFilterByWarehouse = computed(() => this.userRole() === 'SuperAdmin' || this.userRole() === 'Admin');
@@ -76,14 +108,16 @@ export class SalesComponent implements OnInit {
   modalError = signal<string | null>(null);
 
   constructor() {
-    effect(() => {
-      const activeBranchId = this.branchContextService.selectedWarehouseId();
-      untracked(() => {
-        this.selectedWarehouseId.set(activeBranchId);
-        this.pageNumber.set(1);
-        this.loadSales();
-      });
-    }, { allowSignalWrites: true });
+    try {
+      effect(() => {
+        const activeBranchId = this.branchContextService.selectedWarehouseId();
+        untracked(() => {
+          this.selectedWarehouseId.set(activeBranchId);
+          this.pageNumber.set(1);
+          this.loadSales();
+        });
+      }, { allowSignalWrites: true });
+    } catch {}
   }
 
   ngOnInit(): void {

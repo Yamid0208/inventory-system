@@ -20,6 +20,10 @@ import { AppButtonComponent } from '../../shared/components/app-button/app-butto
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent, AutocompleteOption } from '../../shared/components/app-autocomplete/app-autocomplete.component';
 import { AppSkeletonComponent } from '../../shared/components/app-skeleton/app-skeleton.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { BulkImportResult } from '../../core/models/product.model';
@@ -38,6 +42,8 @@ import { BulkImportResult } from '../../core/models/product.model';
     AppPaginationComponent,
     AppAutocompleteComponent,
     AppSkeletonComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent,
     CurrencyFormatPipe
   ],
   templateUrl: './products.component.html'
@@ -46,6 +52,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private supplierService = inject(SupplierService);
+  private csvExportService = inject(CsvExportService);
   branchContextService = inject(BranchContextService);
   authService = inject(AuthService);
   private alertService = inject(AlertService, { optional: true });
@@ -54,6 +61,30 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   private searchSubject = new Subject<string>();
   private searchSub?: Subscription;
+
+  // Gestor reactivo para ordenamiento en todas las columnas y búsqueda omni-campo
+  readonly tableState = new TableStateManager<Product>({
+    data: () => this.products()
+  });
+
+  exportProductsCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `productos_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'sku', header: 'SKU' },
+        { key: 'name', header: 'Producto' },
+        { key: 'categoryName', header: 'Categoría' },
+        { key: 'purchasePrice', header: 'Precio Compra' },
+        { key: 'salePrice', header: 'Precio Venta' },
+        { key: 'currentStock', header: 'Stock Actual' },
+        { key: 'minimumStock', header: 'Stock Mínimo' },
+        { key: 'stockStatus', header: 'Estado' }
+      ],
+      data
+    });
+  }
 
   constructor() {
     effect(() => {

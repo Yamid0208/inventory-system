@@ -71,37 +71,46 @@
 
   <!-- PESTAÑA 1: DIRECTORIO DE USUARIOS -->
   @if (activeTab() === 'users') {
-  <!-- FILTROS Y BÚSQUEDA -->
-  <div
-    class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <!-- Pills de Rol -->
-    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-      <button type="button" (click)="setRoleFilter('all')"
-        class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
-        [class]="roleFilter() === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-        Todos los Roles
-      </button>
-      <button type="button" (click)="setRoleFilter('Admin')"
-        class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
-        [class]="roleFilter() === 'Admin' ? 'bg-purple-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-        Administradores
-      </button>
-      <button type="button" (click)="setRoleFilter('Warehouse')"
-        class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
-        [class]="roleFilter() === 'Warehouse' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-        Bodega
-      </button>
-      <button type="button" (click)="setRoleFilter('Seller')"
-        class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
-        [class]="roleFilter() === 'Seller' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-        Ventas
-      </button>
-    </div>
+  <!-- Barra Superior Estándar con Búsqueda Omni-Campo y Exportar CSV -->
+  <app-table-toolbar
+    searchPlaceholder="Buscar en usuarios por nombre, email, rol, sede..."
+    [searchValue]="tableState.searchQuery()"
+    [totalCount]="tableState.totalCount()"
+    [filteredCount]="tableState.filteredCount()"
+    [isFiltered]="tableState.isFiltered()"
+    [showExportCsv]="true"
+    [exportDisabled]="tableState.processedItems().length === 0"
+    (searchChange)="tableState.setSearch($event)"
+    (exportCsv)="exportUsersCsv()"
+  >
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Pills de Rol -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+        <button type="button" (click)="setRoleFilter('all')"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          [class]="roleFilter() === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+          Todos
+        </button>
+        <button type="button" (click)="setRoleFilter('Admin')"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          [class]="roleFilter() === 'Admin' ? 'bg-purple-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+          Admin
+        </button>
+        <button type="button" (click)="setRoleFilter('Warehouse')"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          [class]="roleFilter() === 'Warehouse' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+          Bodega
+        </button>
+        <button type="button" (click)="setRoleFilter('Seller')"
+          class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          [class]="roleFilter() === 'Seller' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+          Ventas
+        </button>
+      </div>
 
-    <div class="flex items-center gap-3">
       <!-- Selector de Sede/Almacén (SuperAdmin o Admin) -->
       @if (authService.currentUser()?.role === 'SuperAdmin' || authService.currentUser()?.role === 'Admin') {
-      <div class="w-48">
+      <div class="w-44">
         <app-autocomplete
           [value]="warehouseFilter()"
           (valueChange)="setWarehouseFilter($any($event))"
@@ -112,7 +121,7 @@
       }
 
       <!-- Selector de Estado -->
-      <div class="w-44">
+      <div class="w-40">
         <app-autocomplete
           [value]="statusFilter()"
           (valueChange)="setStatusFilter($any($event))"
@@ -120,27 +129,15 @@
           placeholder="Todos los Estados"
         ></app-autocomplete>
       </div>
-
-      <!-- Input de Búsqueda -->
-      <div class="relative w-full md:w-64">
-        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-        </span>
-        <input type="text" placeholder="Buscar por nombre o email..." (input)="onSearch($event)"
-          class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-primary-500 transition-all" />
-      </div>
     </div>
-  </div>
+  </app-table-toolbar>
 
   <!-- TABLA DE USUARIOS -->
   @if (loading()) {
     <app-skeleton type="table" [rows]="6" [columns]="5"></app-skeleton>
   } @else {
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-    @if (users().length === 0) {
+    @if (tableState.processedItems().length === 0) {
     <div class="py-16 text-center space-y-2">
       <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,16 +157,26 @@
         <thead>
           <tr
             class="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <th class="py-3.5 pl-6">Usuario</th>
-            <th class="py-3.5 px-4">Correo Electrónico</th>
-            <th class="py-3.5 px-4">Rol Operativo</th>
-            <th class="py-3.5 px-4">Estado</th>
-            <th class="py-3.5 px-4">Fecha Creación</th>
+            <th class="py-3.5 pl-6">
+              <app-sortable-header key="fullName" label="Usuario" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="email" label="Correo Electrónico" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="role" label="Rol Operativo" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="isActive" label="Estado" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="createdAt" label="Fecha Creación" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
             <th class="py-3.5 pr-6 text-right">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          @for (u of users(); track u.id) {
+          @for (u of tableState.processedItems(); track u.id) {
           <tr class="hover:bg-slate-50/70 transition-colors">
             <!-- Nombre y Avatar -->
             <td class="py-3.5 pl-6">

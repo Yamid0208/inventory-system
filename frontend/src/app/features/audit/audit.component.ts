@@ -4,20 +4,54 @@ import { AuditService } from '../../core/services/audit.service';
 import { AuditLog, AuditSummary, AuditLogFilterParams } from '../../core/models/audit.model';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
 import { AppAutocompleteComponent } from '../../shared/components/app-autocomplete/app-autocomplete.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 
 @Component({
   selector: 'app-audit',
   standalone: true,
-  imports: [CommonModule, AppPaginationComponent, AppAutocompleteComponent],
+  imports: [
+    CommonModule,
+    AppPaginationComponent,
+    AppAutocompleteComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent
+  ],
   templateUrl: './audit.component.html'
 })
 export class AuditComponent implements OnInit {
   private auditService = inject(AuditService);
+  private csvExportService = inject(CsvExportService);
 
   logs = signal<AuditLog[]>([]);
   summary = signal<AuditSummary | null>(null);
   loading = signal<boolean>(false);
+
+  // Gestor reactivo para ordenamiento y búsqueda omni-campo en auditoría
+  readonly tableState = new TableStateManager<AuditLog>({
+    data: () => this.logs()
+  });
+
+  exportAuditCsv(): void {
+    const data = this.tableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `auditoria_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'createdAt', header: 'Fecha y Hora' },
+        { key: 'userName', header: 'Usuario' },
+        { key: 'action', header: 'Acción' },
+        { key: 'entityName', header: 'Entidad' },
+        { key: 'entityId', header: 'ID Entidad' },
+        { key: 'details', header: 'Detalles' },
+        { key: 'ipAddress', header: 'IP' }
+      ],
+      data
+    });
+  }
 
   totalCount = signal<number>(0);
   pageNumber = signal<number>(1);

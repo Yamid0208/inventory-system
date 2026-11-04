@@ -122,7 +122,7 @@
         [class.hover:border-primary-300]="selectedCategory() !== 'cash'"
         class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-sm font-bold transition-all duration-200 cursor-pointer active:scale-[0.98]">
         <span class="text-base">💵</span>
-        <span>Caja POS</span>
+        <span>Caja </span>
       </button>
 
       <button type="button" (click)="selectCategory('audit')" data-testid="tab-category-audit"
@@ -1939,18 +1939,34 @@
         <thead>
           <tr
             class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <th class="py-3.5 px-4">SKU</th>
-            <th class="py-3.5 px-4">Producto</th>
-            <th class="py-3.5 px-4">Categoría</th>
-            <th class="py-3.5 px-4 text-right">Uds Vendidas</th>
-            <th class="py-3.5 px-4 text-right">Ingresos</th>
-            <th class="py-3.5 px-4 text-right">Costo Histórico (CMV)</th>
-            <th class="py-3.5 px-4 text-right">Utilidad Bruta</th>
-            <th class="py-3.5 px-4 text-right">Margen Bruto</th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="sku" label="SKU" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="productName" label="Producto" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="categoryName" label="Categoría" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="unitsSold" label="Uds Vendidas" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="totalRevenue" label="Ingresos" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="costOfGoodsSold" label="Costo Histórico (CMV)" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="grossProfit" label="Utilidad Bruta" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="grossMarginPercentage" label="Margen Bruto" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm font-medium">
-          @for (row of profitabilityData()?.productDetails?.items; track row.productId) {
+          @for (row of tableState.processedItems(); track row.productId) {
           <tr class="hover:bg-slate-50/60 transition-colors">
             <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
             <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.productName }}</td>
@@ -2101,20 +2117,40 @@
         <thead>
           <tr
             class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <th class="py-3.5 px-4">N° Sesión</th>
-            <th class="py-3.5 px-4">Cajero</th>
-            <th class="py-3.5 px-4">Apertura</th>
-            <th class="py-3.5 px-4">Estado</th>
-            <th class="py-3.5 px-4 text-right">Fondo Inicial</th>
-            <th class="py-3.5 px-4 text-right">Ventas Efectivo</th>
-            <th class="py-3.5 px-4 text-right">Efectivo Esperado</th>
-            <th class="py-3.5 px-4 text-right">Efectivo Real</th>
-            <th class="py-3.5 px-4 text-right">Diferencia</th>
-            <th class="py-3.5 px-4">Conciliación</th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="sessionNumber" label="N° Sesión" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="cashierName" label="Cajero" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="openedAt" label="Apertura" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="status" label="Estado" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="initialCash" label="Fondo Inicial" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="totalCashInflow" label="Ventas Efectivo" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="expectedCash" label="Efectivo Esperado" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="actualCash" label="Efectivo Real" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="difference" label="Diferencia" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="reconciliationStatus" label="Conciliación" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm font-medium">
-          @for (row of cashReconciliationData()?.sessions?.items; track row.sessionId) {
+          @for (row of tableState.processedItems(); track row.sessionId) {
           <tr class="hover:bg-slate-50/60 transition-colors">
             <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sessionNumber }}</td>
             <td class="py-3.5 px-4 font-semibold text-slate-800">{{ row.cashierName }}</td>
@@ -2239,20 +2275,40 @@
         <thead>
           <tr
             class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <th class="py-3.5 px-4">N° Movimiento</th>
-            <th class="py-3.5 px-4">Fecha</th>
-            <th class="py-3.5 px-4">Tipo</th>
-            <th class="py-3.5 px-4">SKU</th>
-            <th class="py-3.5 px-4">Producto</th>
-            <th class="py-3.5 px-4 text-right">Cambio (Delta)</th>
-            <th class="py-3.5 px-4 text-right">Stock Previo</th>
-            <th class="py-3.5 px-4 text-right">Stock Final</th>
-            <th class="py-3.5 px-4">Operador</th>
-            <th class="py-3.5 px-4">Referencia</th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="movementNumber" label="N° Movimiento" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="createdAt" label="Fecha" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="type" label="Tipo" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="productSku" label="SKU" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="productName" label="Producto" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="quantityDelta" label="Cambio (Delta)" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="previousStock" label="Stock Previo" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="newStock" label="Stock Final" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="operatorName" label="Operador" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="reference" label="Referencia" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm font-medium">
-          @for (row of inventoryData()?.items; track row.id) {
+          @for (row of tableState.processedItems(); track row.id) {
           <tr class="hover:bg-slate-50/60 transition-colors">
             <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.movementNumber }}</td>
             <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
@@ -2294,22 +2350,46 @@
         <thead>
           <tr
             class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <th class="py-3.5 px-4 text-center">Clase ABC</th>
-            <th class="py-3.5 px-4">SKU</th>
-            <th class="py-3.5 px-4">Producto</th>
-            <th class="py-3.5 px-4">Categoría</th>
-            <th class="py-3.5 px-4 text-right">Stock</th>
-            <th class="py-3.5 px-4 text-right">Costo Unit.</th>
-            <th class="py-3.5 px-4 text-right">Precio Venta</th>
-            <th class="py-3.5 px-4 text-right">Val. al Costo</th>
-            <th class="py-3.5 px-4 text-right">Val. Comercial</th>
-            <th class="py-3.5 px-4 text-right">Utilidad Proy.</th>
-            <th class="py-3.5 px-4 text-center">Margen %</th>
-            <th class="py-3.5 px-4 text-center">Rotación</th>
+            <th class="py-3.5 px-4 text-center">
+              <app-sortable-header key="abcClassification" label="Clase ABC" align="center" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="sku" label="SKU" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="productName" label="Producto" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="categoryName" label="Categoría" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="currentStock" label="Stock" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="unitCost" label="Costo Unit." align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="unitPrice" label="Precio Venta" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="totalCostValuation" label="Val. al Costo" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="totalRetailValuation" label="Val. Comercial" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="potentialProfit" label="Utilidad Proy." align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-center">
+              <app-sortable-header key="profitMarginPercentage" label="Margen %" align="center" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-center">
+              <app-sortable-header key="daysWithoutSales" label="Rotación" align="center" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm font-medium">
-          @for (row of inventoryValuationData()?.items; track row.productId) {
+          @for (row of tableState.processedItems(); track row.productId) {
           <tr class="hover:bg-slate-50/60 transition-colors">
             <td class="py-3.5 px-4 text-center">
               <span class="px-2.5 py-1 rounded-lg text-xs font-black inline-block"
@@ -2476,18 +2556,34 @@
         <thead>
           <tr
             class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <th class="py-3.5 px-4">N° Orden Compra</th>
-            <th class="py-3.5 px-4">Fecha</th>
-            <th class="py-3.5 px-4">Proveedor</th>
-            <th class="py-3.5 px-4">Estado</th>
-            <th class="py-3.5 px-4 text-right">Subtotal</th>
-            <th class="py-3.5 px-4 text-right">IVA (19%)</th>
-            <th class="py-3.5 px-4 text-right">Total</th>
-            <th class="py-3.5 px-4 text-center">Items</th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="purchaseNumber" label="N° Orden Compra" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="createdAt" label="Fecha" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="supplierName" label="Proveedor" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="status" label="Estado" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="subtotal" label="Subtotal" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="tax" label="IVA (19%)" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="total" label="Total" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-center">
+              <app-sortable-header key="itemsCount" label="Items" align="center" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm font-medium">
-          @for (row of purchasesData()?.items; track row.id) {
+          @for (row of tableState.processedItems(); track row.id) {
           <tr class="hover:bg-slate-50/60 transition-colors">
             <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.purchaseNumber }}</td>
             <td class="py-3.5 px-4 text-slate-600">{{ row.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
@@ -2592,19 +2688,37 @@
         <thead>
           <tr
             class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <th class="py-3.5 px-4">SKU</th>
-            <th class="py-3.5 px-4">Producto</th>
-            <th class="py-3.5 px-4">Categoría</th>
-            <th class="py-3.5 px-4">Proveedor</th>
-            <th class="py-3.5 px-4 text-right">P. Compra</th>
-            <th class="py-3.5 px-4 text-right">P. Venta</th>
-            <th class="py-3.5 px-4 text-right">Stock</th>
-            <th class="py-3.5 px-4 text-right">Valuación</th>
-            <th class="py-3.5 px-4">Estado</th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="sku" label="SKU" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="name" label="Producto" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="categoryName" label="Categoría" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="supplierName" label="Proveedor" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="purchasePrice" label="P. Compra" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="salePrice" label="P. Venta" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="currentStock" label="Stock" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="valuation" label="Valuación" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="status" label="Estado" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm font-medium">
-          @for (row of productsData()?.items; track row.id) {
+          @for (row of tableState.processedItems(); track row.id) {
           <tr class="hover:bg-slate-50/60 transition-colors">
             <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
             <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.name }}</td>
@@ -2714,19 +2828,37 @@
         <thead>
           <tr
             class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <th class="py-3.5 px-4">SKU</th>
-            <th class="py-3.5 px-4">Producto</th>
-            <th class="py-3.5 px-4">Categoría</th>
-            <th class="py-3.5 px-4">Proveedor</th>
-            <th class="py-3.5 px-4 text-right">Stock Actual</th>
-            <th class="py-3.5 px-4 text-right">Stock Mínimo</th>
-            <th class="py-3.5 px-4 text-right">Déficit</th>
-            <th class="py-3.5 px-4 text-right">Costo Estimado Reposición</th>
-            <th class="py-3.5 px-4">Estado</th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="sku" label="SKU" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="name" label="Producto" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="categoryName" label="Categoría" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="supplierName" label="Proveedor" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="currentStock" label="Stock Actual" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="minimumStock" label="Stock Mínimo" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="deficit" label="Déficit" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4 text-right">
+              <app-sortable-header key="estimatedRestockCost" label="Costo Estimado Reposición" align="right" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="status" label="Estado" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm font-medium">
-          @for (row of lowStockData()?.items; track row.id) {
+          @for (row of tableState.processedItems(); track row.id) {
           <tr class="hover:bg-slate-50/60 transition-colors">
             <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
             <td class="py-3.5 px-4 font-medium text-slate-900">{{ row.name }}</td>
@@ -2845,16 +2977,28 @@
         <thead>
           <tr
             class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <th class="py-3.5 px-4">Fecha y Hora</th>
-            <th class="py-3.5 px-4">Entidad</th>
-            <th class="py-3.5 px-4">Acción</th>
-            <th class="py-3.5 px-4">Detalle de Operación</th>
-            <th class="py-3.5 px-4">Usuario Responsable</th>
-            <th class="py-3.5 px-4">IP</th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="createdAt" label="Fecha y Hora" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="entityName" label="Entidad" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="action" label="Acción" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="details" label="Detalle de Operación" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="userName" label="Usuario Responsable" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
+            <th class="py-3.5 px-4">
+              <app-sortable-header key="ipAddress" label="IP" [sortKey]="tableState.sortKey()" [sortDirection]="tableState.sortDirection()" (sortChange)="tableState.toggleSort($event)"></app-sortable-header>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 text-sm font-medium">
-          @for (row of auditData()?.items; track row.id) {
+          @for (row of tableState.processedItems(); track row.id) {
           <tr class="hover:bg-slate-50/60 transition-colors">
             <td class="py-3.5 px-4 text-slate-600 font-mono">{{ row.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</td>
             <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.entityName }}</td>

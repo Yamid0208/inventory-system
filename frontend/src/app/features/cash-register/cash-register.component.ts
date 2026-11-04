@@ -20,6 +20,10 @@ import { AppButtonComponent } from '../../shared/components/app-button/app-butto
 import { AppCardComponent } from '../../shared/components/app-card/app-card.component';
 import { AppBadgeComponent } from '../../shared/components/app-badge/app-badge.component';
 import { AppPaginationComponent } from '../../shared/components/app-pagination/app-pagination.component';
+import { AppTableToolbarComponent } from '../../shared/components/app-table-toolbar/app-table-toolbar.component';
+import { AppSortableHeaderComponent } from '../../shared/components/app-sortable-header/app-sortable-header.component';
+import { TableStateManager } from '../../shared/utils/table-state-manager';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { PageChangeEvent } from '../../shared/models/pagination.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
 import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
@@ -39,6 +43,8 @@ import { CashSessionDetailModalComponent } from './components/cash-session-detai
     AppCardComponent,
     AppBadgeComponent,
     AppPaginationComponent,
+    AppTableToolbarComponent,
+    AppSortableHeaderComponent,
     CurrencyFormatPipe,
     DateFormatPipe,
     OpenCashModalComponent,
@@ -54,8 +60,60 @@ export class CashRegisterComponent implements OnInit {
   private warehouseService = inject(WarehouseService);
   public authService = inject(AuthService);
   public branchContextService = inject(BranchContextService);
+  private csvExportService = inject(CsvExportService);
 
   activeTab = signal<'operation' | 'history'>('operation');
+
+  // Estados de la sesión actual
+  activeSession = signal<CashRegisterSession | null>(null);
+  liveMovements = signal<CashRegisterMovement[]>([]);
+  loading = signal<boolean>(true);
+
+  // Gestores reactivos de ordenamiento y búsqueda para ambas tablas
+  readonly liveMovementsTableState = new TableStateManager<CashRegisterMovement>({
+    data: () => this.liveMovements()
+  });
+
+  readonly historyTableState = new TableStateManager<CashRegisterSession>({
+    data: () => this.historySessions()
+  });
+
+  exportLiveMovementsCsv(): void {
+    const data = this.liveMovementsTableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `movimientos_caja_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'movementDate', header: 'Fecha y Hora' },
+        { key: 'movementType', header: 'Tipo' },
+        { key: 'concept', header: 'Concepto' },
+        { key: 'paymentMethod', header: 'Medio de Pago' },
+        { key: 'saleNumber', header: 'Comprobante POS' },
+        { key: 'amount', header: 'Valor' }
+      ],
+      data
+    });
+  }
+
+  exportHistoryCsv(): void {
+    const data = this.historyTableState.processedItems();
+    if (!data.length) return;
+    this.csvExportService.exportToCsv({
+      filename: `historial_cajas_${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { key: 'sessionNumber', header: 'Sesión' },
+        { key: 'userName', header: 'Empleado' },
+        { key: 'openedAt', header: 'Apertura' },
+        { key: 'closedAt', header: 'Cierre' },
+        { key: 'initialCash', header: 'Saldo Inicial' },
+        { key: 'expectedCash', header: 'Esperado' },
+        { key: 'actualCash', header: 'Contado' },
+        { key: 'cashDifference', header: 'Diferencia' },
+        { key: 'status', header: 'Estado' }
+      ],
+      data
+    });
+  }
 
   constructor() {
     try {
@@ -71,11 +129,6 @@ export class CashRegisterComponent implements OnInit {
       }, { allowSignalWrites: true });
     } catch {}
   }
-
-  // Estados de la sesión actual
-  activeSession = signal<CashRegisterSession | null>(null);
-  liveMovements = signal<CashRegisterMovement[]>([]);
-  loading = signal<boolean>(true);
 
   // Estados del historial
   historySessions = signal<CashRegisterSession[]>([]);

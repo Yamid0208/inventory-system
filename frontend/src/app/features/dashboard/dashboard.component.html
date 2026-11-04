@@ -291,7 +291,7 @@
           </span>
         </div>
 
-        @if (summary()!.criticalProducts.length === 0) {
+        @if (!summary()!.criticalProducts || summary()!.criticalProducts.length === 0) {
         <div class="py-8 text-center text-xs text-slate-400 font-medium">
           ✓ Todo el inventario se encuentra en niveles saludables de existencia.
         </div>

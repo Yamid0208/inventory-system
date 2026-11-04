@@ -5,6 +5,7 @@ import { ReportsComponent } from './reports.component';
 import { ReportService } from '../../core/services/report.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { BranchContextService } from '../../core/services/branch-context.service';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { of } from 'rxjs';
 
 describe('ReportsComponent (Unit Tests)', () => {
@@ -102,6 +103,7 @@ describe('ReportsComponent (Unit Tests)', () => {
 
   const injector = createEnvironmentInjector([
     ReportsComponent,
+    CsvExportService,
     { provide: ReportService, useValue: reportServiceMock },
     { provide: DashboardService, useValue: dashboardServiceMock },
     { provide: BranchContextService, useValue: branchContextServiceMock }
@@ -223,5 +225,61 @@ describe('ReportsComponent (Unit Tests)', () => {
     expect(reportServiceMock.getSalesByEmployee).toHaveBeenCalled();
     expect(component.salesEmployees().length).toBe(1);
     expect(component.tableTitle()).toContain('Empleado');
+  });
+
+  it('debe permitir ordenamiento interactivo por columna y búsqueda omni-campo en tableState', () => {
+    component.selectedReport.set('sales');
+    component.salesData.set({
+      items: [
+        { id: 1, saleNumber: 'V-002', createdAt: '2026-03-01', customerName: 'Carlos Gómez', total: 15000 } as any,
+        { id: 2, saleNumber: 'V-001', createdAt: '2026-01-15', customerName: 'Ana María', total: 35000 } as any
+      ],
+      totalCount: 2,
+      pageNumber: 1,
+      pageSize: 10,
+      totalPages: 1,
+      totalAmount: 50000,
+      totalQuantity: 2
+    });
+
+    // 1. Búsqueda omni-campo
+    component.tableState.setSearch('carlos');
+    expect(component.tableState.processedItems().length).toBe(1);
+    expect(component.tableState.processedItems()[0].saleNumber).toBe('V-002');
+
+    component.tableState.setSearch('');
+    expect(component.tableState.processedItems().length).toBe(2);
+
+    // 2. Ordenamiento: asc -> desc -> reset
+    component.tableState.toggleSort('saleNumber');
+    expect(component.tableState.sortDirection()).toBe('asc');
+    expect(component.tableState.processedItems()[0].saleNumber).toBe('V-001');
+
+    component.tableState.toggleSort('saleNumber');
+    expect(component.tableState.sortDirection()).toBe('desc');
+    expect(component.tableState.processedItems()[0].saleNumber).toBe('V-002');
+
+    component.tableState.toggleSort('saleNumber');
+    expect(component.tableState.sortDirection()).toBeNull();
+    expect(component.tableState.processedItems()[0].saleNumber).toBe('V-002'); // orden original
+  });
+
+  it('debe exportar la tabla activa a CSV mediante CsvExportService', () => {
+    component.selectedReport.set('sales');
+    const csvService = injector.get(CsvExportService);
+    const exportSpy = vi.spyOn(csvService, 'exportToCsv').mockReturnValue(true);
+
+    component.salesData.set({
+      items: [{ id: 1, saleNumber: 'V-100', customerName: 'Test Cliente', total: 1000 } as any],
+      totalCount: 1,
+      pageNumber: 1,
+      pageSize: 10,
+      totalPages: 1,
+      totalAmount: 1000,
+      totalQuantity: 1
+    });
+
+    component.exportActiveTableCsv();
+    expect(exportSpy).toHaveBeenCalled();
   });
 });

@@ -1688,11 +1688,11 @@ public class ReportExportService : IReportExportService
     {
         var query = _context.Products
             .AsNoTracking()
-            .Where(p => !p.IsDeleted);
+            .Where(p => p.IsActive && !p.IsDeleted);
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(p => p.WarehouseId == warehouseId.Value || p.WarehouseId == null);
+            query = query.Where(p => p.WarehouseId == warehouseId.Value);
         }
 
         var products = await query
@@ -1832,11 +1832,11 @@ public class ReportExportService : IReportExportService
         var query = _context.Products
             .AsNoTracking()
             .Include(p => p.Category)
-            .Where(p => !p.IsDeleted);
+            .Where(p => p.IsActive && !p.IsDeleted);
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(p => p.WarehouseId == warehouseId.Value || p.WarehouseId == null);
+            query = query.Where(p => p.WarehouseId == warehouseId.Value);
         }
 
         var products = await query
@@ -1898,11 +1898,11 @@ public class ReportExportService : IReportExportService
             .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Supplier)
-            .Where(p => !p.IsDeleted);
+            .Where(p => p.IsActive && !p.IsDeleted);
 
         if (warehouseId.HasValue && warehouseId.Value > 0)
         {
-            query = query.Where(p => p.WarehouseId == warehouseId.Value || p.WarehouseId == null);
+            query = query.Where(p => p.WarehouseId == warehouseId.Value);
         }
 
         if (categoryId.HasValue && categoryId.Value > 0)
