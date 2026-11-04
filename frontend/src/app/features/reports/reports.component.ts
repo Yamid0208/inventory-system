@@ -102,9 +102,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
           formattedAmount: string;
           count: number;
           pointColor: string;
-          badgeX: number;
-          badgeY: number;
-          isAbove: boolean;
+          valueY: number;
+          tooltipX: number;
+          tooltipY: number;
+          tooltipIsAbove: boolean;
         }[],
         maxRevenue: 0,
         totalRevenue: 0,
@@ -168,9 +169,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
         formattedAmount: formatCompact(item.totalRevenue),
         count: item.transactionCount,
         pointColor: '#6366F1',
-        badgeX: 0,
-        badgeY: 0,
-        isAbove: true
+        valueY: 0,
+        tooltipX: 0,
+        tooltipY: 0,
+        tooltipIsAbove: true
       };
     });
 
@@ -211,7 +213,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Asignar color a cada punto según el segmento que llega a él y calcular posición de badge
+    // Asignar color a cada punto según la pendiente y calcular posición del valor y del tooltip
     points.forEach((pt, idx) => {
       if (idx === 0) {
         pt.pointColor = segments.length > 0 ? segments[0].color : '#6366F1';
@@ -219,28 +221,15 @@ export class ReportsComponent implements OnInit, OnDestroy {
         pt.pointColor = segments[idx - 1].color;
       }
 
-      const isNearTop = pt.y < 55;
-      const isNearBottom = pt.y > 170;
-      let isAbove = true;
-      let badgeY: number;
+      // Posición del texto del valor (limpio, sin recuadro) sobre el punto
+      const isTopClipped = pt.y < 35;
+      pt.valueY = isTopClipped ? pt.y + 15 : pt.y - 10;
 
-      if (isNearTop) {
-        isAbove = false;
-        badgeY = pt.y + 12;
-      } else if (isNearBottom) {
-        isAbove = true;
-        badgeY = pt.y - 34;
-      } else if (raw.length > 7 && idx % 2 === 0) {
-        isAbove = false;
-        badgeY = pt.y + 12;
-      } else {
-        isAbove = true;
-        badgeY = pt.y - 34;
-      }
-
-      pt.badgeX = Math.round((pt.x - 28) * 10) / 10;
-      pt.badgeY = Math.round(badgeY * 10) / 10;
-      pt.isAbove = isAbove;
+      // Posición de la tarjetica flotante en hover
+      const isNearTop = pt.y < 65;
+      pt.tooltipY = isNearTop ? pt.y + 24 : pt.y - 44;
+      pt.tooltipIsAbove = !isNearTop;
+      pt.tooltipX = Math.max(56, Math.min(width - 56, pt.x));
     });
 
     let linePath = '';
