@@ -1,10 +1,11 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CashRegisterService } from '../../core/services/cash-register.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { WarehouseService } from '../../core/services/warehouse.service';
 import { AuthService } from '../../core/auth/services/auth.service';
+import { BranchContextService } from '../../core/services/branch-context.service';
 import {
   CashRegisterSession,
   CashRegisterMovement,
@@ -52,8 +53,24 @@ export class CashRegisterComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private warehouseService = inject(WarehouseService);
   public authService = inject(AuthService);
+  public branchContextService = inject(BranchContextService);
 
   activeTab = signal<'operation' | 'history'>('operation');
+
+  constructor() {
+    try {
+      effect(() => {
+        const wid = this.branchContextService.selectedWarehouseId();
+        untracked(() => {
+          if (this.activeTab() === 'history') {
+            this.loadHistory();
+          } else {
+            this.loadCurrentSession();
+          }
+        });
+      }, { allowSignalWrites: true });
+    } catch {}
+  }
 
   // Estados de la sesión actual
   activeSession = signal<CashRegisterSession | null>(null);
@@ -131,12 +148,14 @@ export class CashRegisterComponent implements OnInit {
 
   loadHistory(): void {
     this.historyLoading.set(true);
+    const wid = this.branchContextService.selectedWarehouseId();
     this.cashService.getSessions({
       pageNumber: this.currentPage(),
       pageSize: this.pageSize(),
       status: this.filterStatus(),
       startDate: this.filterStartDate() || undefined,
-      endDate: this.filterEndDate() || undefined
+      endDate: this.filterEndDate() || undefined,
+      warehouseId: wid !== null && wid !== undefined && wid > 0 ? wid : undefined
     }).subscribe({
       next: (result) => {
         this.historySessions.set(result.items);

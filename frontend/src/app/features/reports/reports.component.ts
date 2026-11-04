@@ -376,6 +376,472 @@ export class ReportsComponent implements OnInit, OnDestroy {
   lowStockData = signal<PagedReportResult<LowStockReportItem> | null>(null);
   auditData = signal<PagedReportResult<AuditActivityReportItem> | null>(null);
 
+  // Selector de métrica en Top Productos (Facturación vs Unidades)
+  topProductsMode = signal<'revenue' | 'volume'>('revenue');
+
+  // Selector de métrica en Actividad Horaria (Transacciones vs Facturación)
+  hourlyHistogramMode = signal<'transactions' | 'revenue'>('transactions');
+
+  // 1. Gráfica y Podio de Top Productos
+  topProductsChart = computed(() => {
+    const items = this.topProductsData();
+    if (!items || items.length === 0) return null;
+    const maxRevenue = Math.max(...items.map(i => i.totalRevenue), 1);
+    const maxUnits = Math.max(...items.map(i => i.unitsSold), 1);
+    const totalTopRevenue = items.reduce((acc, i) => acc + i.totalRevenue, 0);
+    const totalTopUnits = items.reduce((acc, i) => acc + i.unitsSold, 0);
+    const starProduct = items[0];
+
+    const enriched = items.map((item, idx) => ({
+      ...item,
+      rank: idx + 1,
+      revenueBarPct: Math.max(Math.round((item.totalRevenue / maxRevenue) * 100), 4),
+      unitsBarPct: Math.max(Math.round((item.unitsSold / maxUnits) * 100), 4),
+      revenueSharePct: totalTopRevenue > 0 ? Math.round((item.totalRevenue / totalTopRevenue) * 1000) / 10 : 0,
+      unitsSharePct: totalTopUnits > 0 ? Math.round((item.unitsSold / totalTopUnits) * 1000) / 10 : 0
+    }));
+
+    return {
+      items: enriched,
+      starProduct,
+      totalTopRevenue,
+      totalTopUnits,
+      averageUnitPrice: totalTopUnits > 0 ? Math.round(totalTopRevenue / totalTopUnits) : 0
+    };
+  });
+
+  // 2. Gráfica Donut & Barras de Contribución por Categoría
+  categoriesChartData = computed(() => {
+    const cats = this.salesCategories();
+    if (!cats || cats.length === 0) return null;
+    const totalRevenue = cats.reduce((acc, c) => acc + c.totalRevenue, 0);
+    const totalUnits = cats.reduce((acc, c) => acc + c.unitsSold, 0);
+    const maxRevenue = Math.max(...cats.map(c => c.totalRevenue), 1);
+
+    const palette = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#8b5cf6', '#06b6d4', '#14b8a6'];
+    let accumulatedPct = 0;
+
+    const segments = cats.map((cat, idx) => {
+      const pct = totalRevenue > 0 ? (cat.totalRevenue / totalRevenue) * 100 : 0;
+      const roundedPct = Math.round(pct * 10) / 10;
+      const strokeDash = `${roundedPct} ${Math.max(100 - roundedPct, 0)}`;
+      const strokeOffset = 100 - accumulatedPct + 25;
+      accumulatedPct += roundedPct;
+      const color = palette[idx % palette.length];
+      const avgTicket = cat.transactionCount > 0 ? Math.round(cat.totalRevenue / cat.transactionCount) : 0;
+
+      return {
+        ...cat,
+        color,
+        sharePct: roundedPct,
+        strokeDash,
+        strokeOffset,
+        avgTicket,
+        barWidth: Math.max(Math.round((cat.totalRevenue / maxRevenue) * 100), 4)
+      };
+    });
+
+    const starCategory = [...cats].sort((a, b) => b.totalRevenue - a.totalRevenue)[0];
+    const highVolumeCategory = [...cats].sort((a, b) => b.unitsSold - a.unitsSold)[0];
+
+    return {
+      totalRevenue,
+      totalUnits,
+      segments,
+      starCategory,
+      highVolumeCategory
+    };
+  });
+
+  // 3. Histograma SVG y Diagrama de Jornadas en Actividad Horaria
+  hourlyHistogramData = computed(() => {
+    const hours = this.hourlyActivity();
+    if (!hours || hours.length === 0) return null;
+    const maxTx = Math.max(...hours.map(h => h.transactionCount), 1);
+    const maxRev = Math.max(...hours.map(h => h.totalRevenue), 1);
+    const totalTx = hours.reduce((acc, h) => acc + h.transactionCount, 0);
+    const totalRev = hours.reduce((acc, h) => acc + h.totalRevenue, 0);
+    const peakHour = hours.find(h => h.isPeakHour) || [...hours].sort((a, b) => b.transactionCount - a.transactionCount)[0];
+
+    // Agrupación por franjas de la jornada comercial
+    const morning = hours.filter(h => h.hour >= 6 && h.hour < 12);
+    const afternoon = hours.filter(h => h.hour >= 12 && h.hour < 18);
+    const evening = hours.filter(h => h.hour >= 18 && h.hour <= 23);
+    const night = hours.filter(h => h.hour >= 0 && h.hour < 6);
+
+    const calcSlot = (slot: HourlyActivityItem[]) => {
+      const tx = slot.reduce((acc, h) => acc + h.transactionCount, 0);
+      const rev = slot.reduce((acc, h) => acc + h.totalRevenue, 0);
+      return {
+        tx,
+        rev,
+        pct: totalTx > 0 ? Math.round((tx / totalTx) * 100) : 0
+      };
+    };
+
+    const enrichedHours = hours.map(h => ({
+      ...h,
+      heightPct: Math.max(Math.round((h.transactionCount / maxTx) * 100), h.transactionCount > 0 ? 8 : 2),
+      revenueHeightPct: Math.max(Math.round((h.totalRevenue / maxRev) * 100), h.totalRevenue > 0 ? 8 : 2)
+    }));
+
+    return {
+      hours: enrichedHours,
+      maxTx,
+      maxRev,
+      totalTx,
+      totalRev,
+      peakHour,
+      slots: {
+        morning: calcSlot(morning),
+        afternoon: calcSlot(afternoon),
+        evening: calcSlot(evening),
+        night: calcSlot(night)
+      }
+    };
+  });
+
+  // 4. Leaderboard & Rendimiento por Empleado
+  employeesChartData = computed(() => {
+    const emps = this.salesEmployees();
+    if (!emps || emps.length === 0) return null;
+    const maxRev = Math.max(...emps.map(e => e.totalRevenue), 1);
+    const totalRev = emps.reduce((acc, e) => acc + e.totalRevenue, 0);
+    const totalTx = emps.reduce((acc, e) => acc + e.transactionCount, 0);
+    const teamAverageTicket = totalTx > 0 ? Math.round(totalRev / totalTx) : 0;
+    const averageSalesPerEmployee = Math.round(totalRev / emps.length);
+
+    const enriched = emps.map((emp, idx) => ({
+      ...emp,
+      rank: idx + 1,
+      barWidth: Math.max(Math.round((emp.totalRevenue / maxRev) * 100), 4),
+      sharePct: totalRev > 0 ? Math.round((emp.totalRevenue / totalRev) * 1000) / 10 : 0
+    }));
+
+    return {
+      employees: enriched,
+      topPerformer: enriched[0],
+      totalRev,
+      totalTx,
+      teamAverageTicket,
+      averageSalesPerEmployee
+    };
+  });
+
+  // 5. Cascada Financiera y Medidor de Margen (Finance)
+  financeWaterfallData = computed(() => {
+    const data = this.profitabilityData();
+    if (!data) return null;
+    const rev = data.totalRevenue;
+    const cogs = data.totalCostOfGoodsSold;
+    const grossProfit = data.grossProfit;
+    const marginPct = data.grossMarginPercentage;
+
+    const cogsSharePct = rev > 0 ? Math.round((cogs / rev) * 1000) / 10 : 0;
+    const profitSharePct = rev > 0 ? Math.round((grossProfit / rev) * 1000) / 10 : 0;
+
+    let healthStatus: 'healthy' | 'moderate' | 'critical' = 'healthy';
+    let healthLabel = 'Margen Saludable';
+    let healthColor = '#10b981';
+
+    if (marginPct < 15) {
+      healthStatus = 'critical';
+      healthLabel = 'Margen Crítico (< 15%)';
+      healthColor = '#ef4444';
+    } else if (marginPct < 30) {
+      healthStatus = 'moderate';
+      healthLabel = 'Margen Moderado (15-30%)';
+      healthColor = '#f59e0b';
+    }
+
+    const items = data.productDetails?.items || [];
+    const topProfitItem = items.length > 0 ? [...items].sort((a, b) => b.grossProfit - a.grossProfit)[0] : null;
+    const topMarginItem = items.length > 0 ? [...items].sort((a, b) => b.grossMarginPercentage - a.grossMarginPercentage)[0] : null;
+
+    return {
+      revenue: rev,
+      cogs,
+      grossProfit,
+      marginPct,
+      cogsSharePct,
+      profitSharePct,
+      healthStatus,
+      healthLabel,
+      healthColor,
+      topProfitItem,
+      topMarginItem
+    };
+  });
+
+  // 6. Arqueos de Caja POS & Diagrama de Descuadres
+  cashReconciliationChartData = computed(() => {
+    const data = this.cashReconciliationData();
+    if (!data) return null;
+    const sessions = data.sessions?.items || [];
+    const totalSessions = data.totalSessionsCount || sessions.length;
+
+    const balanced = sessions.filter(s => s.differenceStatus === 'Balanced' || Math.abs(s.difference ?? 0) < 0.01).length;
+    const surplus = sessions.filter(s => s.differenceStatus === 'Surplus' || (s.difference ?? 0) > 0.01).length;
+    const shortage = sessions.filter(s => s.differenceStatus === 'Shortage' || (s.difference ?? 0) < -0.01).length;
+
+    const balancedPct = totalSessions > 0 ? Math.round((balanced / totalSessions) * 100) : 100;
+    const surplusPct = totalSessions > 0 ? Math.round((surplus / totalSessions) * 100) : 0;
+    const shortagePct = totalSessions > 0 ? Math.round((shortage / totalSessions) * 100) : 0;
+
+    const totalExpected = data.totalExpectedCash;
+    const totalActual = data.totalActualCash;
+    const maxCash = Math.max(totalExpected, totalActual, 1);
+    const expectedBarPct = Math.max(Math.round((totalExpected / maxCash) * 100), 4);
+    const actualBarPct = Math.max(Math.round((totalActual / maxCash) * 100), 4);
+
+    const electronic = data.totalElectronicInflow;
+    const totalInflow = totalExpected + electronic;
+    const cashShare = totalInflow > 0 ? Math.round((totalExpected / totalInflow) * 100) : 50;
+    const electronicShare = 100 - cashShare;
+
+    return {
+      totalSessions,
+      balanced,
+      surplus,
+      shortage,
+      balancedPct,
+      surplusPct,
+      shortagePct,
+      totalExpected,
+      totalActual,
+      totalDifference: data.totalDifference,
+      expectedBarPct,
+      actualBarPct,
+      cashShare,
+      electronicShare,
+      electronic
+    };
+  });
+
+  // 7. Balance Transaccional de Kardex (Entradas vs Salidas)
+  kardexChartData = computed(() => {
+    const data = this.inventoryData();
+    if (!data || !data.items || data.items.length === 0) return null;
+    const items = data.items;
+
+    let totalInflowUnits = 0;
+    let totalOutflowUnits = 0;
+    let inflowCount = 0;
+    let outflowCount = 0;
+
+    const typeCounts: Record<string, { count: number; units: number }> = {};
+
+    items.forEach(m => {
+      const delta = m.quantityDelta;
+      const type = m.type;
+      if (!typeCounts[type]) {
+        typeCounts[type] = { count: 0, units: 0 };
+      }
+      typeCounts[type].count++;
+      typeCounts[type].units += Math.abs(delta);
+
+      if (delta > 0) {
+        totalInflowUnits += delta;
+        inflowCount++;
+      } else {
+        totalOutflowUnits += Math.abs(delta);
+        outflowCount++;
+      }
+    });
+
+    const totalUnitsMoved = totalInflowUnits + totalOutflowUnits;
+    const inflowPct = totalUnitsMoved > 0 ? Math.round((totalInflowUnits / totalUnitsMoved) * 100) : 50;
+    const outflowPct = 100 - inflowPct;
+    const netDelta = totalInflowUnits - totalOutflowUnits;
+
+    const maxTypeUnits = Math.max(...Object.values(typeCounts).map(v => v.units), 1);
+    const typesList = Object.keys(typeCounts).map(type => ({
+      type,
+      label: this.formatMovementType(type),
+      count: typeCounts[type].count,
+      units: typeCounts[type].units,
+      barPct: Math.max(Math.round((typeCounts[type].units / maxTypeUnits) * 100), 4)
+    })).sort((a, b) => b.units - a.units);
+
+    return {
+      totalInflowUnits,
+      totalOutflowUnits,
+      inflowCount,
+      outflowCount,
+      totalUnitsMoved,
+      inflowPct,
+      outflowPct,
+      netDelta,
+      typesList
+    };
+  });
+
+  // 8. Salud del Catálogo de Productos y Valuación
+  productsCatalogChartData = computed(() => {
+    const data = this.productsData();
+    if (!data || !data.items || data.items.length === 0) return null;
+    const items = data.items;
+
+    const normalStock = items.filter(p => p.currentStock > p.minimumStock).length;
+    const lowStock = items.filter(p => p.currentStock <= p.minimumStock && p.currentStock > 0).length;
+    const outOfStock = items.filter(p => p.currentStock <= 0).length;
+    const total = items.length;
+
+    const normalPct = total > 0 ? Math.round((normalStock / total) * 100) : 0;
+    const lowPct = total > 0 ? Math.round((lowStock / total) * 100) : 0;
+    const outPct = total > 0 ? 100 - normalPct - lowPct : 0;
+
+    const totalCost = items.reduce((acc, p) => acc + (p.purchasePrice * Math.max(p.currentStock, 0)), 0);
+    const totalRetail = items.reduce((acc, p) => acc + (p.salePrice * Math.max(p.currentStock, 0)), 0);
+    const potentialProfit = totalRetail - totalCost;
+    const averageMargin = totalRetail > 0 ? Math.round((potentialProfit / totalRetail) * 1000) / 10 : 0;
+
+    return {
+      total,
+      normalStock,
+      lowStock,
+      outOfStock,
+      normalPct,
+      lowPct,
+      outPct,
+      totalCost,
+      totalRetail,
+      potentialProfit,
+      averageMargin
+    };
+  });
+
+  // 9. Matriz de Severidad y Reposición de Bajo Stock
+  lowStockChartData = computed(() => {
+    const data = this.lowStockData();
+    if (!data || !data.items || data.items.length === 0) return null;
+    const items = data.items;
+
+    const critical = items.filter(p => p.currentStock <= 0).length;
+    const highRisk = items.filter(p => p.currentStock > 0 && p.currentStock <= p.minimumStock * 0.25).length;
+    const moderate = items.filter(p => p.currentStock > p.minimumStock * 0.25).length;
+    const total = items.length;
+
+    const totalDeficit = items.reduce((acc, p) => acc + p.deficit, 0);
+    const totalRestockCost = items.reduce((acc, p) => acc + p.estimatedRestockCost, 0);
+
+    const maxDeficit = Math.max(...items.map(p => p.deficit), 1);
+    const topCritical = [...items]
+      .sort((a, b) => b.deficit - a.deficit)
+      .slice(0, 5)
+      .map(p => ({
+        ...p,
+        deficitBarPct: Math.max(Math.round((p.deficit / maxDeficit) * 100), 5)
+      }));
+
+    return {
+      total,
+      critical,
+      highRisk,
+      moderate,
+      criticalPct: total > 0 ? Math.round((critical / total) * 100) : 0,
+      highRiskPct: total > 0 ? Math.round((highRisk / total) * 100) : 0,
+      moderatePct: total > 0 ? Math.round((moderate / total) * 100) : 0,
+      totalDeficit,
+      totalRestockCost,
+      topCritical
+    };
+  });
+
+  // 10. Diagrama de Estado de Compras y Gasto por Proveedor
+  purchasesChartData = computed(() => {
+    const data = this.purchasesData();
+    if (!data || !data.items || data.items.length === 0) return null;
+    const items = data.items;
+
+    const received = items.filter(p => p.status === 'Received' || p.status === 'Recibida');
+    const pending = items.filter(p => p.status === 'Pending' || p.status === 'Pendiente');
+    const cancelled = items.filter(p => p.status === 'Cancelled' || p.status === 'Anulada');
+
+    const receivedAmount = received.reduce((acc, p) => acc + p.total, 0);
+    const pendingAmount = pending.reduce((acc, p) => acc + p.total, 0);
+    const cancelledAmount = cancelled.reduce((acc, p) => acc + p.total, 0);
+    const totalInvoiced = items.reduce((acc, p) => acc + p.total, 0);
+    const totalTax = items.reduce((acc, p) => acc + p.tax, 0);
+
+    const supplierMap: Record<string, { count: number; total: number }> = {};
+    items.forEach(p => {
+      const sName = p.supplierName || 'Sin Proveedor';
+      if (!supplierMap[sName]) supplierMap[sName] = { count: 0, total: 0 };
+      supplierMap[sName].count++;
+      supplierMap[sName].total += p.total;
+    });
+
+    const maxSupplierTotal = Math.max(...Object.values(supplierMap).map(s => s.total), 1);
+    const topSuppliers = Object.keys(supplierMap).map(name => ({
+      name,
+      count: supplierMap[name].count,
+      total: supplierMap[name].total,
+      barPct: Math.max(Math.round((supplierMap[name].total / maxSupplierTotal) * 100), 5),
+      sharePct: totalInvoiced > 0 ? Math.round((supplierMap[name].total / totalInvoiced) * 100) : 0
+    })).sort((a, b) => b.total - a.total).slice(0, 5);
+
+    return {
+      totalOrders: items.length,
+      totalInvoiced,
+      totalTax,
+      receivedCount: received.length,
+      receivedAmount,
+      pendingCount: pending.length,
+      pendingAmount,
+      cancelledCount: cancelled.length,
+      cancelledAmount,
+      topSuppliers,
+      topSupplier: topSuppliers.length > 0 ? topSuppliers[0] : null
+    };
+  });
+
+  // 11. Trazabilidad de Auditoría por Acción y Entidad
+  auditChartData = computed(() => {
+    const data = this.auditData();
+    if (!data || !data.items || data.items.length === 0) return null;
+    const items = data.items;
+
+    const entityMap: Record<string, number> = {};
+    const actionMap: Record<string, number> = {};
+    const userMap: Record<string, number> = {};
+
+    items.forEach(ev => {
+      entityMap[ev.entityName] = (entityMap[ev.entityName] || 0) + 1;
+      actionMap[ev.action] = (actionMap[ev.action] || 0) + 1;
+      userMap[ev.userName] = (userMap[ev.userName] || 0) + 1;
+    });
+
+    const total = items.length;
+    const maxEntity = Math.max(...Object.values(entityMap), 1);
+    const entities = Object.keys(entityMap).map(e => ({
+      name: e,
+      count: entityMap[e],
+      barPct: Math.max(Math.round((entityMap[e] / maxEntity) * 100), 5),
+      sharePct: Math.round((entityMap[e] / total) * 100)
+    })).sort((a, b) => b.count - a.count);
+
+    const actions = Object.keys(actionMap).map(a => ({
+      action: a,
+      count: actionMap[a],
+      sharePct: Math.round((actionMap[a] / total) * 100)
+    })).sort((a, b) => b.count - a.count);
+
+    const users = Object.keys(userMap).map(u => ({
+      name: u,
+      count: userMap[u]
+    })).sort((a, b) => b.count - a.count).slice(0, 5);
+
+    return {
+      total,
+      entities,
+      actions,
+      users,
+      topEntity: entities.length > 0 ? entities[0] : null,
+      topUser: users.length > 0 ? users[0] : null
+    };
+  });
+
   tableTitle = computed(() => {
     switch (this.selectedReport()) {
       case 'sales': return '💳 Historial y Facturación de Ventas';

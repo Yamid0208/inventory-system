@@ -230,7 +230,8 @@ public class CashRegisterService : ICashRegisterService
 
         if (request.WarehouseId.HasValue && request.WarehouseId.Value > 0)
         {
-            query = query.Where(s => s.WarehouseId == request.WarehouseId.Value);
+            query = query.Where(s => s.WarehouseId == request.WarehouseId.Value ||
+                                    (s.WarehouseId == null && s.User != null && s.User.WarehouseId == request.WarehouseId.Value));
         }
 
         if (request.StartDate.HasValue)

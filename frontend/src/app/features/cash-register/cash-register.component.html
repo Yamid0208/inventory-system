@@ -319,6 +319,14 @@
       class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
       <div class="flex flex-wrap items-center gap-3">
         <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Sede Activa</label>
+          <div class="px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1.5">
+            <span>🏢</span>
+            <span>{{ branchContextService.assignedWarehouseName() }}</span>
+          </div>
+        </div>
+
+        <div>
           <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Estado</label>
           <select [(ngModel)]="filterStatus" (change)="loadHistory()"
             class="px-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">

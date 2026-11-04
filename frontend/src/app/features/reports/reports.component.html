@@ -1242,7 +1242,104 @@
 
     <!-- 2. VISTA DE TOP PRODUCTOS -->
     @else if (selectedReport() === 'sales-top') {
-    @if (topProductsData().length) {
+    @let tc = topProductsChart();
+    @if (tc && tc.items.length) {
+    <!-- GRÁFICA & DIAGRAMA DE RENDIMIENTO TOP PRODUCTOS -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-sales-top">
+      <!-- Tarjetas de Resumen Top -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">🌟 Producto Más Vendido (#1)</span>
+            <span class="text-sm font-black text-slate-900 truncate max-w-[200px] block mt-0.5">{{ tc.starProduct.productName }}</span>
+            <span class="text-[11px] text-slate-400 font-mono">{{ tc.starProduct.sku }} &bull; {{ tc.starProduct.categoryName }}</span>
+          </div>
+          <div class="text-right">
+            <span class="text-sm font-black text-primary-600 font-mono block">{{ tc.starProduct.totalRevenue | currencyFormat }}</span>
+            <span class="text-xs font-bold text-slate-500">{{ tc.starProduct.unitsSold }} uds</span>
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">📦 Volumen Total Líderes</span>
+            <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ tc.totalTopUnits }} uds</span>
+            <span class="text-[11px] text-slate-400">En los {{ tc.items.length }} productos top</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-lg">
+            🏆
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">💰 Facturación Acumulada Top</span>
+            <span class="text-xl font-black text-emerald-600 font-mono mt-0.5 block">{{ tc.totalTopRevenue | currencyFormat }}</span>
+            <span class="text-[11px] text-slate-400">Precio promedio: {{ tc.averageUnitPrice | currencyFormat }}/ud</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+            💎
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra comparativa interactiva con selector de métrica -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <span>📊 Comparativa Visual de Rendimiento</span>
+              <span class="text-xs text-slate-400 font-normal">({{ topProductsMode() === 'revenue' ? 'Por Facturación Generada' : 'Por Volumen de Unidades' }})</span>
+            </h4>
+          </div>
+          <div class="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg border border-slate-200/70 text-xs w-fit">
+            <button type="button" (click)="topProductsMode.set('revenue')" data-testid="btn-top-mode-revenue"
+              [ngClass]="topProductsMode() === 'revenue' ? 'bg-white text-primary-700 font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
+              class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+              💰 Facturación ($)
+            </button>
+            <button type="button" (click)="topProductsMode.set('volume')" data-testid="btn-top-mode-volume"
+              [ngClass]="topProductsMode() === 'volume' ? 'bg-white text-primary-700 font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900'"
+              class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+              📦 Unidades (uds)
+            </button>
+          </div>
+        </div>
+
+        <!-- Barras de ranking top 5 con medallas -->
+        <div class="space-y-2.5 pt-1">
+          @for (item of tc.items.slice(0, 5); track item.productId) {
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-1.5 truncate max-w-[280px] sm:max-w-md">
+                <span class="font-bold text-sm">
+                  {{ item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : '#' + item.rank }}
+                </span>
+                <span class="font-bold text-slate-800 truncate">{{ item.productName }}</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 font-mono">{{ item.sku }}</span>
+              </div>
+              <div class="text-right shrink-0 font-mono font-bold text-slate-900">
+                @if (topProductsMode() === 'revenue') {
+                  <span>{{ item.totalRevenue | currencyFormat }}</span>
+                  <span class="text-[11px] text-slate-400 font-normal ml-1">({{ item.revenueSharePct }}%)</span>
+                } @else {
+                  <span>{{ item.unitsSold }} uds</span>
+                  <span class="text-[11px] text-slate-400 font-normal ml-1">({{ item.unitsSharePct }}%)</span>
+                }
+              </div>
+            </div>
+            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden flex">
+              <div class="h-full rounded-full transition-all duration-500"
+                [ngClass]="item.rank === 1 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : item.rank === 2 ? 'bg-gradient-to-r from-slate-300 to-slate-400' : item.rank === 3 ? 'bg-gradient-to-r from-amber-600 to-amber-700' : 'bg-gradient-to-r from-primary-500 to-indigo-500'"
+                [style.width.%]="topProductsMode() === 'revenue' ? item.revenueBarPct : item.unitsBarPct">
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-sales-top">
         <thead>
@@ -1284,26 +1381,62 @@
 
     <!-- 2.1 VISTA DE VENTAS POR CATEGORÍA -->
     @else if (selectedReport() === 'sales-categories') {
-    @if (salesCategories().length) {
-    <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
-      <span class="text-xs font-bold text-slate-700 block mb-2">Participación de Facturación por Categoría</span>
-      <div class="w-full h-3 rounded-full flex overflow-hidden bg-slate-200 gap-0.5 shadow-inner">
-        @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
-        <div [style.width.%]="cat.sharePercentage"
-          [ngClass]="idx % 4 === 0 ? 'bg-primary-500' : idx % 4 === 1 ? 'bg-indigo-500' : idx % 4 === 2 ? 'bg-amber-500' : 'bg-emerald-500'"
-          [title]="cat.categoryName + ': ' + cat.sharePercentage + '%'" class="h-full transition-all duration-300">
+    @let cd = categoriesChartData();
+    @if (cd && cd.segments.length) {
+    <!-- GRÁFICA & DIAGRAMA DE VENTAS POR CATEGORÍA -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-sales-categories">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+        <!-- Donut SVG de Participación por Categoría -->
+        <div class="lg:col-span-4 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs flex flex-col items-center">
+          <span class="text-xs font-bold text-slate-700 block mb-2">Concentración de Ventas</span>
+          <div class="relative w-36 h-36 flex items-center justify-center">
+            <svg viewBox="0 0 42 42" class="w-full h-full transform -rotate-90">
+              <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#f1f5f9" stroke-width="4.5" />
+              @for (seg of cd.segments; track seg.categoryId) {
+              <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" [attr.stroke]="seg.color"
+                stroke-width="4.5" [attr.stroke-dasharray]="seg.strokeDash" [attr.stroke-dashoffset]="seg.strokeOffset"
+                class="transition-all duration-500 hover:opacity-80" />
+              }
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+              <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total</span>
+              <span class="text-xs font-black text-slate-900 font-mono">{{ cd.totalRevenue | currencyFormat }}</span>
+            </div>
+          </div>
+          <span class="text-[11px] text-slate-500 mt-2">{{ cd.segments.length }} familias con ventas</span>
         </div>
-        }
-      </div>
-      <div class="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-600">
-        @for (cat of salesCategories(); track cat.categoryId; let idx = $index) {
-        <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full"
-            [ngClass]="idx % 4 === 0 ? 'bg-primary-500' : idx % 4 === 1 ? 'bg-indigo-500' : idx % 4 === 2 ? 'bg-amber-500' : 'bg-emerald-500'"></span>
-          <span class="font-medium text-slate-800">{{ cat.categoryName }}</span>
-          <span class="font-mono font-bold text-slate-500">({{ cat.sharePercentage }}%)</span>
+
+        <!-- Barras de Aporte y Desglose por Familia -->
+        <div class="lg:col-span-8 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <h4 class="text-sm font-bold text-slate-900">Aporte y Métricas por Familia de Producto</h4>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-500">Volumen Total: <strong>{{ cd.totalUnits }} uds</strong></span>
+            </div>
+          </div>
+
+          <div class="space-y-2.5">
+            @for (seg of cd.segments; track seg.categoryId) {
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.background-color]="seg.color"></span>
+                  <span class="font-bold text-slate-800">{{ seg.categoryName }}</span>
+                  <span class="text-slate-400 font-mono">({{ seg.unitsSold }} uds &bull; {{ seg.transactionCount }} tx)</span>
+                </div>
+                <div class="text-right shrink-0 font-mono font-bold text-slate-900">
+                  <span>{{ seg.totalRevenue | currencyFormat }}</span>
+                  <span class="text-[11px] text-slate-500 ml-1.5">({{ seg.sharePct }}%)</span>
+                </div>
+              </div>
+              <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-300" [style.width.%]="seg.barWidth"
+                  [style.background-color]="seg.color"></div>
+              </div>
+            </div>
+            }
+          </div>
         </div>
-        }
       </div>
     </div>
 
@@ -1353,23 +1486,88 @@
 
     <!-- 2.2 VISTA DE HORARIOS DE MAYOR ACTIVIDAD COMERCIAL (HEATMAP / HORAS PICO) -->
     @else if (selectedReport() === 'sales-hourly') {
-    @let activeHours = hourlyActivity();
-    @if (activeHours.length) {
-    <div class="p-5 border-b border-slate-200/80 bg-slate-50/50">
-      <span class="text-sm font-bold text-slate-700 block mb-3">Distribución de Transacciones por Hora del Día (00:00 a
-        23:59)</span>
-      <div class="grid grid-cols-12 sm:grid-cols-24 gap-1 items-end h-24 pt-4 px-2">
-        @for (h of activeHours; track h.hour) {
-        <div class="flex flex-col items-center gap-1 h-full justify-end group relative cursor-pointer"
-          [title]="h.hourLabel + ': ' + h.transactionCount + ' transacciones ($' + h.totalRevenue + ')'">
-          <div class="w-full rounded-t transition-all duration-200"
-            [ngClass]="h.isPeakHour ? 'bg-amber-500 ring-2 ring-amber-300' : h.transactionCount > 0 ? 'bg-primary-500' : 'bg-slate-200'"
-            [style.height.%]="h.transactionCount > 0 ? Math.max((h.transactionCount * 15), 20) : 8">
+    @let hh = hourlyHistogramData();
+    @if (hh && hh.totalTx > 0) {
+    <!-- GRÁFICA & DIAGRAMA DE ACTIVIDAD HORARIA Y FRANJAS -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-sales-hourly">
+      <!-- Diagrama de Franjas Comerciales -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-white p-3 rounded-xl border border-slate-200/70 shadow-2xs">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-600">🌅 Mañana (06h - 12h)</span>
+            <span class="font-bold text-primary-600 font-mono">{{ hh.slots.morning.pct }}%</span>
           </div>
-          <span class="text-[10px] font-mono text-slate-500 group-hover:text-slate-900 font-semibold">{{ h.hour
-            }}h</span>
+          <div class="text-lg font-black text-slate-900 font-mono mt-1">{{ hh.slots.morning.tx }} tx</div>
+          <span class="text-[11px] text-slate-400 font-mono">{{ hh.slots.morning.rev | currencyFormat }}</span>
         </div>
-        }
+
+        <div class="bg-white p-3 rounded-xl border border-slate-200/70 shadow-2xs">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-600">☀️ Tarde (12h - 18h)</span>
+            <span class="font-bold text-emerald-600 font-mono">{{ hh.slots.afternoon.pct }}%</span>
+          </div>
+          <div class="text-lg font-black text-slate-900 font-mono mt-1">{{ hh.slots.afternoon.tx }} tx</div>
+          <span class="text-[11px] text-slate-400 font-mono">{{ hh.slots.afternoon.rev | currencyFormat }}</span>
+        </div>
+
+        <div class="bg-white p-3 rounded-xl border border-slate-200/70 shadow-2xs">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-600">🌙 Noche (18h - 24h)</span>
+            <span class="font-bold text-indigo-600 font-mono">{{ hh.slots.evening.pct }}%</span>
+          </div>
+          <div class="text-lg font-black text-slate-900 font-mono mt-1">{{ hh.slots.evening.tx }} tx</div>
+          <span class="text-[11px] text-slate-400 font-mono">{{ hh.slots.evening.rev | currencyFormat }}</span>
+        </div>
+
+        <div class="bg-white p-3 rounded-xl border border-slate-200/70 shadow-2xs">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-600">🌌 Madrugada (00h - 06h)</span>
+            <span class="font-bold text-slate-500 font-mono">{{ hh.slots.night.pct }}%</span>
+          </div>
+          <div class="text-lg font-black text-slate-900 font-mono mt-1">{{ hh.slots.night.tx }} tx</div>
+          <span class="text-[11px] text-slate-400 font-mono">{{ hh.slots.night.rev | currencyFormat }}</span>
+        </div>
+      </div>
+
+      <!-- Histograma SVG / Barras de 24 horas -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <span>⏰ Histograma de Intensidad Transaccional (24 Horas)</span>
+              @if (hh.peakHour) {
+              <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                Pico: {{ hh.peakHour.hourLabel }} ({{ hh.peakHour.transactionCount }} tx)
+              </span>
+              }
+            </h4>
+          </div>
+          <div class="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg border border-slate-200/70 text-xs">
+            <button type="button" (click)="hourlyHistogramMode.set('transactions')"
+              [ngClass]="hourlyHistogramMode() === 'transactions' ? 'bg-white text-primary-700 font-bold shadow-2xs' : 'text-slate-600'"
+              class="px-2 py-0.5 rounded cursor-pointer">
+              Transacciones
+            </button>
+            <button type="button" (click)="hourlyHistogramMode.set('revenue')"
+              [ngClass]="hourlyHistogramMode() === 'revenue' ? 'bg-white text-primary-700 font-bold shadow-2xs' : 'text-slate-600'"
+              class="px-2 py-0.5 rounded cursor-pointer">
+              Facturación
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 sm:grid-cols-24 gap-1 items-end h-28 pt-4 px-2 bg-slate-50/50 rounded-xl border border-slate-100">
+          @for (h of hh.hours; track h.hour) {
+          <div class="flex flex-col items-center gap-1 h-full justify-end group relative cursor-pointer"
+            [title]="h.hourLabel + ': ' + h.transactionCount + ' tx ($' + (h.totalRevenue | currencyFormat) + ')'">
+            <div class="w-full rounded-t transition-all duration-200"
+              [ngClass]="h.isPeakHour ? 'bg-amber-500 ring-2 ring-amber-300' : h.transactionCount > 0 ? 'bg-primary-500 hover:bg-primary-600' : 'bg-slate-200/80'"
+              [style.height.%]="hourlyHistogramMode() === 'transactions' ? h.heightPct : h.revenueHeightPct">
+            </div>
+            <span class="text-[9px] font-mono text-slate-500 group-hover:text-slate-900 font-semibold">{{ h.hour }}h</span>
+          </div>
+          }
+        </div>
       </div>
     </div>
 
@@ -1431,7 +1629,62 @@
 
     <!-- 2.3 VISTA DE RENDIMIENTO POR EMPLEADO / VENDEDOR -->
     @else if (selectedReport() === 'sales-employees') {
-    @if (salesEmployees().length) {
+    @let ec = employeesChartData();
+    @if (ec && ec.employees.length) {
+    <!-- GRÁFICA & LEADERBOARD DE PRODUCTIVIDAD COMERCIAL -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-sales-employees">
+      <!-- Tarjetas de Podio Top Asesores -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        @for (top of ec.employees.slice(0, 3); track top.userId) {
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-black"
+              [ngClass]="top.rank === 1 ? 'bg-amber-100 text-amber-800 ring-2 ring-amber-300' : top.rank === 2 ? 'bg-slate-200 text-slate-800' : 'bg-amber-50 text-amber-700'">
+              {{ top.rank === 1 ? '🥇' : top.rank === 2 ? '🥈' : '🥉' }}
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-900 block truncate max-w-[130px]">{{ top.employeeName }}</span>
+              <span class="text-[11px] text-slate-400">{{ formatUserRole(top.role) }}</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-black text-slate-900 font-mono block">{{ top.totalRevenue | currencyFormat }}</span>
+            <span class="text-[10px] text-slate-500 font-mono">{{ top.transactionCount }} tx &bull; {{ top.sharePct }}%</span>
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Barras Comparativas de Productividad -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+          <h4 class="text-sm font-bold text-slate-900">Leaderboard de Facturación y Ticket Promedio</h4>
+          <span class="text-xs text-slate-500">Benchmark promedio equipo: <strong>{{ ec.teamAverageTicket | currencyFormat }}</strong></span>
+        </div>
+
+        <div class="space-y-2.5">
+          @for (emp of ec.employees; track emp.userId) {
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-slate-500 font-mono">#{{ emp.rank }}</span>
+                <span class="font-bold text-slate-800">{{ emp.employeeName }}</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-semibold">{{ formatUserRole(emp.role) }}</span>
+              </div>
+              <div class="text-right font-mono font-bold text-slate-900">
+                <span>{{ emp.totalRevenue | currencyFormat }}</span>
+                <span class="text-slate-400 font-normal ml-1">({{ emp.sharePct }}% sede &bull; {{ emp.transactionCount }} tx)</span>
+              </div>
+            </div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="bg-primary-500 h-full rounded-full transition-all duration-300" [style.width.%]="emp.barWidth"></div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-sales-employees">
         <thead>
@@ -1491,6 +1744,116 @@
 
     <!-- 3. VISTA DE FINANZAS & RENTABILIDAD CON COSTO HISTÓRICO (CMV) -->
     @else if (selectedReport() === 'finance') {
+    @let fw = financeWaterfallData();
+    @if (fw && fw.revenue > 0) {
+    <!-- GRÁFICA & DIAGRAMA DE CASCADA DE RENTABILIDAD & MARGEN BRUTO -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-finance">
+      <!-- Tarjetas de Métricas Financieras -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-slate-500 font-semibold block">Facturación Bruta (Ingresos)</span>
+          <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ fw.revenue | currencyFormat }}</span>
+          <span class="text-[11px] text-slate-400">100% de la venta realizada</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-amber-700 font-semibold block">Costo de Mercancía (CMV)</span>
+          <span class="text-xl font-black text-amber-600 font-mono mt-0.5 block">{{ fw.cogs | currencyFormat }}</span>
+          <span class="text-[11px] text-amber-700/80 font-mono font-bold">{{ fw.cogsSharePct }}% absorción de costo</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-emerald-700 font-semibold block">Utilidad Bruta Operativa</span>
+          <span class="text-xl font-black text-emerald-600 font-mono mt-0.5 block">{{ fw.grossProfit | currencyFormat }}</span>
+          <span class="text-[11px] text-emerald-700/80 font-mono font-bold">{{ fw.profitSharePct }}% masa de ganancia</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-500 font-semibold">Margen Bruto</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold"
+              [ngClass]="fw.healthStatus === 'healthy' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (fw.healthStatus === 'moderate' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
+              {{ fw.healthLabel }}
+            </span>
+          </div>
+          <span class="text-2xl font-black font-mono mt-0.5 block"
+            [ngClass]="fw.healthStatus === 'healthy' ? 'text-emerald-600' : (fw.healthStatus === 'moderate' ? 'text-amber-600' : 'text-rose-600')">
+            {{ fw.marginPct }}%
+          </span>
+          <span class="text-[11px] text-slate-400">Rentabilidad media ponderada</span>
+        </div>
+      </div>
+
+      <!-- Diagrama de Cascada Financiera (Waterfall) -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+          <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <span>⚖️ Cascada de Distribución Financiera de Ingresos</span>
+          </h4>
+          <span class="text-xs text-slate-500">Ingresos Totales = CMV + Utilidad Bruta</span>
+        </div>
+
+        <!-- Barra apilada proporcional de flujo -->
+        <div class="space-y-1.5">
+          <div class="w-full h-7 rounded-xl flex overflow-hidden shadow-inner bg-slate-100 border border-slate-200/60 p-0.5 gap-0.5">
+            <div class="h-full rounded-l-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white font-mono text-xs font-bold flex items-center justify-center transition-all duration-500 truncate px-2"
+              [style.width.%]="fw.cogsSharePct" [title]="'Costo CMV: ' + (fw.cogs | currencyFormat) + ' (' + fw.cogsSharePct + '%)'">
+              @if (fw.cogsSharePct >= 15) {
+                <span>CMV: {{ fw.cogsSharePct }}%</span>
+              }
+            </div>
+            <div class="h-full rounded-r-lg bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-mono text-xs font-bold flex items-center justify-center transition-all duration-500 truncate px-2"
+              [style.width.%]="fw.profitSharePct" [title]="'Utilidad Bruta: ' + (fw.grossProfit | currencyFormat) + ' (' + fw.profitSharePct + '%)'">
+              @if (fw.profitSharePct >= 15) {
+                <span>Utilidad: {{ fw.profitSharePct }}%</span>
+              }
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span>Costo Adquisición Stock (CMV): <strong>{{ fw.cogs | currencyFormat }}</strong></span>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span>Ganancia Operativa (Margen): <strong>{{ fw.grossProfit | currencyFormat }}</strong></span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Destacados de Rentabilidad por Producto -->
+        @if (fw.topProfitItem || fw.topMarginItem) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100 text-xs">
+          @if (fw.topProfitItem) {
+          <div class="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-200/70 flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-emerald-800 block">💰 Mayor Aporte de Utilidad Neta</span>
+              <span class="font-bold text-slate-900 truncate max-w-[180px] block">{{ fw.topProfitItem.productName }}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-mono font-black text-emerald-700 block">{{ fw.topProfitItem.grossProfit | currencyFormat }}</span>
+              <span class="text-[10px] text-emerald-600 font-mono">{{ fw.topProfitItem.grossMarginPercentage }}% margen</span>
+            </div>
+          </div>
+          }
+          @if (fw.topMarginItem) {
+          <div class="p-2.5 rounded-lg bg-primary-50/60 border border-primary-200/70 flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-primary-800 block">📈 Mayor Margen Porcentual</span>
+              <span class="font-bold text-slate-900 truncate max-w-[180px] block">{{ fw.topMarginItem.productName }}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-mono font-black text-primary-700 block">{{ fw.topMarginItem.grossMarginPercentage }}%</span>
+              <span class="text-[10px] text-primary-600 font-mono">{{ fw.topMarginItem.grossProfit | currencyFormat }} util.</span>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+    }
+
     @if (profitabilityData()?.productDetails?.items?.length) {
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-finance">
@@ -1542,6 +1905,117 @@
 
     <!-- 4. VISTA DE CAJA POS & CONCILIACIÓN -->
     @else if (selectedReport() === 'cash-reconciliation') {
+    @let crc = cashReconciliationChartData();
+    @if (crc && crc.totalSessions > 0) {
+    <!-- GRÁFICA & DIAGRAMA DE CONCILIACIÓN DE CAJA -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-cash-reconciliation">
+      <!-- Tarjetas de Arqueo -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-slate-500 font-semibold block">Sesiones Auditadas</span>
+          <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ crc.totalSessions }} turnos</span>
+          <span class="text-[11px] text-emerald-600 font-bold font-mono">{{ crc.balancedPct }}% cuadradas</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-slate-500 font-semibold block">Efectivo Físico Arqueado</span>
+          <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ crc.totalActual | currencyFormat }}</span>
+          <span class="text-[11px] text-slate-400 font-mono">Esperado: {{ crc.totalExpected | currencyFormat }}</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-slate-500 font-semibold block">Diferencia Neta Acumulada</span>
+          <span class="text-xl font-black font-mono mt-0.5 block"
+            [ngClass]="crc.totalDifference === 0 ? 'text-emerald-600' : (crc.totalDifference > 0 ? 'text-blue-600' : 'text-rose-600')">
+            {{ crc.totalDifference | currencyFormat }}
+          </span>
+          <span class="text-[11px] font-bold"
+            [ngClass]="crc.totalDifference === 0 ? 'text-emerald-600' : (crc.totalDifference > 0 ? 'text-blue-600' : 'text-rose-600')">
+            {{ crc.totalDifference === 0 ? '✓ Balance Exacto' : (crc.totalDifference > 0 ? 'Sobrante Acumulado' : '⚠️ Faltante en Cajas') }}
+          </span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-slate-500 font-semibold block">Canales Digitales (POS)</span>
+          <span class="text-xl font-black text-indigo-600 font-mono mt-0.5 block">{{ crc.electronic | currencyFormat }}</span>
+          <span class="text-[11px] text-slate-400 font-mono">{{ crc.electronicShare }}% del flujo total</span>
+        </div>
+      </div>
+
+      <!-- Diagrama de Estado de Arqueos & Comparativa Sistema vs Real -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Proporción de Estados de Arqueo -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+          <h4 class="text-sm font-bold text-slate-900 flex items-center justify-between">
+            <span>🛡️ Estado de Conformidad de Arqueos</span>
+            <span class="text-xs text-slate-500 font-normal">{{ crc.totalSessions }} arqueos</span>
+          </h4>
+
+          <div class="w-full h-3 rounded-full flex overflow-hidden bg-slate-100 gap-0.5 shadow-inner">
+            <div [style.width.%]="crc.balancedPct" class="bg-emerald-500 h-full transition-all duration-300"
+              [title]="'Cuadradas: ' + crc.balanced + ' (' + crc.balancedPct + '%)'"></div>
+            <div [style.width.%]="crc.surplusPct" class="bg-blue-500 h-full transition-all duration-300"
+              [title]="'Sobrantes: ' + crc.surplus + ' (' + crc.surplusPct + '%)'"></div>
+            <div [style.width.%]="crc.shortagePct" class="bg-rose-500 h-full transition-all duration-300"
+              [title]="'Faltantes: ' + crc.shortage + ' (' + crc.shortagePct + '%)'"></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
+            <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200/60">
+              <span class="text-emerald-700 font-bold block">✅ Cuadradas</span>
+              <span class="font-mono font-black text-slate-900 text-sm mt-0.5 block">{{ crc.balanced }}</span>
+              <span class="text-[10px] text-emerald-600 font-mono">{{ crc.balancedPct }}%</span>
+            </div>
+            <div class="p-2 rounded-lg bg-blue-50 border border-blue-200/60">
+              <span class="text-blue-700 font-bold block">➕ Sobrantes</span>
+              <span class="font-mono font-black text-slate-900 text-sm mt-0.5 block">{{ crc.surplus }}</span>
+              <span class="text-[10px] text-blue-600 font-mono">{{ crc.surplusPct }}%</span>
+            </div>
+            <div class="p-2 rounded-lg bg-rose-50 border border-rose-200/60">
+              <span class="text-rose-700 font-bold block">⚠️ Faltantes</span>
+              <span class="font-mono font-black text-slate-900 text-sm mt-0.5 block">{{ crc.shortage }}</span>
+              <span class="text-[10px] text-rose-600 font-mono">{{ crc.shortagePct }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparativa Efectivo Sistema vs Recuento Físico -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+          <h4 class="text-sm font-bold text-slate-900 flex items-center justify-between">
+            <span>💵 Efectivo Esperado en Sistema vs Físico Recontado</span>
+          </h4>
+
+          <div class="space-y-2 pt-1">
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-700">Sistema (Esperado en Caja):</span>
+                <span class="font-mono font-black text-slate-900">{{ crc.totalExpected | currencyFormat }}</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div class="bg-primary-500 h-full rounded-full transition-all duration-300" [style.width.%]="crc.expectedBarPct"></div>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-700">Arqueo (Recuento Real):</span>
+                <span class="font-mono font-black text-slate-900">{{ crc.totalActual | currencyFormat }}</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" [style.width.%]="crc.actualBarPct"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Físico vs Digital:</span>
+            <span class="font-mono"><strong>{{ crc.cashShare }}%</strong> Efectivo &bull; <strong>{{ crc.electronicShare }}%</strong> Digital</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
     @if (cashReconciliationData()?.sessions?.items?.length) {
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-cash-reconciliation">
@@ -1604,6 +2078,82 @@
 
     <!-- 5. VISTA DE KARDEX -->
     @else if (selectedReport() === 'inventory') {
+    @let kd = kardexChartData();
+    @if (kd && kd.totalUnitsMoved > 0) {
+    <!-- GRÁFICA & DIAGRAMA DE FLUJO TRANSACCIONAL DE KARDEX -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-inventory-kardex">
+      <!-- Tarjetas de Balance de Flujo -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-emerald-700 font-semibold block">📥 Entradas de Inventario</span>
+            <span class="text-xl font-black text-emerald-600 font-mono mt-0.5 block">+{{ kd.totalInflowUnits }} uds</span>
+            <span class="text-[11px] text-slate-400 font-mono">{{ kd.inflowCount }} transacciones</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+            ⬆️
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-rose-700 font-semibold block">📤 Salidas de Inventario</span>
+            <span class="text-xl font-black text-rose-600 font-mono mt-0.5 block">-{{ kd.totalOutflowUnits }} uds</span>
+            <span class="text-[11px] text-slate-400 font-mono">{{ kd.outflowCount }} transacciones</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+            ⬇️
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">⚖️ Variación Neta (Delta)</span>
+            <span class="text-xl font-black font-mono mt-0.5 block"
+              [ngClass]="kd.netDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+              {{ kd.netDelta >= 0 ? '+' : '' }}{{ kd.netDelta }} uds
+            </span>
+            <span class="text-[11px] text-slate-400">Total movilizado: {{ kd.totalUnitsMoved }} uds</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-lg">
+            🔄
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagrama de Proporción Entradas vs Salidas y Desglose por Tipo -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+          <h4 class="text-sm font-bold text-slate-900">Distribución de Movimientos por Naturaleza</h4>
+          <span class="text-xs font-mono text-slate-500">Ratio In/Out: <strong>{{ kd.inflowPct }}% / {{ kd.outflowPct }}%</strong></span>
+        </div>
+
+        <!-- Barra apilada Entradas vs Salidas -->
+        <div class="w-full h-3 rounded-full flex overflow-hidden bg-slate-100 gap-0.5 shadow-inner">
+          <div class="bg-emerald-500 h-full transition-all duration-300" [style.width.%]="kd.inflowPct"
+            [title]="'Entradas: ' + kd.totalInflowUnits + ' uds (' + kd.inflowPct + '%)'"></div>
+          <div class="bg-rose-500 h-full transition-all duration-300" [style.width.%]="kd.outflowPct"
+            [title]="'Salidas: ' + kd.totalOutflowUnits + ' uds (' + kd.outflowPct + '%)'"></div>
+        </div>
+
+        <!-- Barras por tipo de operación -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-2">
+          @for (item of kd.typesList; track item.type) {
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+            <div>
+              <span class="font-bold text-slate-800 block">{{ item.label }}</span>
+              <span class="text-[10px] text-slate-400 font-mono">{{ item.count }} operaciones</span>
+            </div>
+            <div class="text-right">
+              <span class="font-mono font-bold text-slate-900 block">{{ item.units }} uds</span>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    }
+
     @if (inventoryData()?.items?.length) {
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-inventory">
@@ -1744,6 +2294,103 @@
 
     <!-- 6. VISTA DE COMPRAS -->
     @else if (selectedReport() === 'purchases') {
+    @let pc = purchasesChartData();
+    @if (pc && pc.totalOrders > 0) {
+    <!-- GRÁFICA & DIAGRAMA DE COMPRAS Y ABASTECIMIENTO -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-purchases">
+      <!-- Tarjetas de Abastecimiento -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">Inversión Bruta en Compras</span>
+            <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ pc.totalInvoiced | currencyFormat }}</span>
+            <span class="text-[11px] text-slate-400 font-mono">IVA (19%): {{ pc.totalTax | currencyFormat }}</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-lg">
+            🛍️
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">Órdenes Realizadas</span>
+            <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ pc.totalOrders }} órdenes</span>
+            <span class="text-[11px] text-emerald-600 font-bold font-mono">{{ pc.receivedCount }} recibidas / {{ pc.pendingCount }} pendientes</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+            📦
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">Proveedor Principal</span>
+            <span class="text-sm font-black text-slate-900 truncate max-w-[180px] block mt-0.5">{{ pc.topSupplier?.name || 'N/A' }}</span>
+            <span class="text-[11px] text-slate-500 font-mono">{{ (pc.topSupplier?.total || 0) | currencyFormat }} ({{ pc.topSupplier?.sharePct || 0 }}%)</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+            🏭
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagrama de Concentración de Gasto por Proveedor y Estado de Órdenes -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+        <!-- Barras de Gasto por Proveedor -->
+        <div class="lg:col-span-8 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+          <h4 class="text-sm font-bold text-slate-900 flex items-center justify-between">
+            <span>🏭 Concentración de Inversión por Proveedor</span>
+            <span class="text-xs text-slate-500 font-normal">Top 5 proveedores</span>
+          </h4>
+
+          <div class="space-y-2 pt-1">
+            @for (sup of pc.topSuppliers; track sup.name) {
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-800 truncate">{{ sup.name }} ({{ sup.count }} órdenes)</span>
+                <span class="font-mono font-bold text-slate-900">{{ sup.total | currencyFormat }} <span class="text-[11px] text-slate-400 font-normal">({{ sup.sharePct }}%)</span></span>
+              </div>
+              <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="bg-blue-600 h-full rounded-full transition-all duration-300" [style.width.%]="sup.barPct"></div>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Proporción por Estado de Órdenes -->
+        <div class="lg:col-span-4 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+          <h4 class="text-sm font-bold text-slate-900">Estado de Suministro</h4>
+          <div class="space-y-2 pt-1">
+            <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200/60 flex items-center justify-between text-xs">
+              <span class="font-bold text-emerald-800">✅ Recibidas</span>
+              <div class="text-right">
+                <span class="font-mono font-black text-slate-900 block">{{ pc.receivedAmount | currencyFormat }}</span>
+                <span class="text-[10px] text-emerald-600 font-mono">{{ pc.receivedCount }} órdenes</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200/60 flex items-center justify-between text-xs">
+              <span class="font-bold text-amber-800">⏳ En Tránsito / Pendientes</span>
+              <div class="text-right">
+                <span class="font-mono font-black text-slate-900 block">{{ pc.pendingAmount | currencyFormat }}</span>
+                <span class="text-[10px] text-amber-600 font-mono">{{ pc.pendingCount }} órdenes</span>
+              </div>
+            </div>
+            @if (pc.cancelledCount > 0) {
+            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200/60 flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-600">❌ Canceladas</span>
+              <div class="text-right">
+                <span class="font-mono font-black text-slate-700 block">{{ pc.cancelledAmount | currencyFormat }}</span>
+                <span class="text-[10px] text-slate-500 font-mono">{{ pc.cancelledCount }} órdenes</span>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
     @if (purchasesData()?.items?.length) {
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-purchases">
@@ -1792,6 +2439,74 @@
 
     <!-- 7. VISTA DE CATÁLOGO & VALUACIÓN -->
     @else if (selectedReport() === 'products') {
+    @let pcd = productsCatalogChartData();
+    @if (pcd && pcd.total > 0) {
+    <!-- GRÁFICA & DIAGRAMA DE SALUD Y VALUACIÓN DE CATÁLOGO -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-products">
+      <!-- Tarjetas de Valuación de Catálogo -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-slate-500 font-semibold block">Productos Listados</span>
+          <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ pcd.total }} referencias</span>
+          <span class="text-[11px] text-emerald-600 font-bold font-mono">{{ pcd.normalPct }}% con stock óptimo</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-slate-500 font-semibold block">Inversión al Costo</span>
+          <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ pcd.totalCost | currencyFormat }}</span>
+          <span class="text-[11px] text-slate-400">Capital en existencias actuales</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-slate-500 font-semibold block">Valoración Comercial</span>
+          <span class="text-xl font-black text-primary-600 font-mono mt-0.5 block">{{ pcd.totalRetail | currencyFormat }}</span>
+          <span class="text-[11px] text-slate-400 font-mono">Margen proy.: {{ pcd.averageMargin }}%</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs">
+          <span class="text-xs text-emerald-700 font-semibold block">Utilidad Potencial</span>
+          <span class="text-xl font-black text-emerald-600 font-mono mt-0.5 block">{{ pcd.potentialProfit | currencyFormat }}</span>
+          <span class="text-[11px] text-slate-400">Spread comercial neto</span>
+        </div>
+      </div>
+
+      <!-- Diagrama de Salud de Existencias (Stock Health Breakdown) -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+          <h4 class="text-sm font-bold text-slate-900">Distribución de Salud Operativa de Stock</h4>
+          <span class="text-xs text-slate-500">Métricas de existencias físicas</span>
+        </div>
+
+        <div class="w-full h-3 rounded-full flex overflow-hidden bg-slate-100 gap-0.5 shadow-inner">
+          <div class="bg-emerald-500 h-full transition-all duration-300" [style.width.%]="pcd.normalPct"
+            [title]="'Normal: ' + pcd.normalStock + ' (' + pcd.normalPct + '%)'"></div>
+          <div class="bg-amber-500 h-full transition-all duration-300" [style.width.%]="pcd.lowPct"
+            [title]="'Bajo: ' + pcd.lowStock + ' (' + pcd.lowPct + '%)'"></div>
+          <div class="bg-rose-500 h-full transition-all duration-300" [style.width.%]="pcd.outPct"
+            [title]="'Agotado: ' + pcd.outOfStock + ' (' + pcd.outPct + '%)'"></div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
+          <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200/60">
+            <span class="text-emerald-700 font-bold block">✓ Stock Óptimo</span>
+            <span class="font-mono font-black text-slate-900 text-sm mt-0.5 block">{{ pcd.normalStock }} productos</span>
+            <span class="text-[10px] text-emerald-600 font-mono">{{ pcd.normalPct }}% del catálogo</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200/60">
+            <span class="text-amber-700 font-bold block">⚠️ Stock Bajo</span>
+            <span class="font-mono font-black text-slate-900 text-sm mt-0.5 block">{{ pcd.lowStock }} productos</span>
+            <span class="text-[10px] text-amber-600 font-mono">{{ pcd.lowPct }}% del catálogo</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-rose-50 border border-rose-200/60">
+            <span class="text-rose-700 font-bold block">🚨 Agotados (Quiebre)</span>
+            <span class="font-mono font-black text-slate-900 text-sm mt-0.5 block">{{ pcd.outOfStock }} productos</span>
+            <span class="text-[10px] text-rose-600 font-mono">{{ pcd.outPct }}% del catálogo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
     @if (productsData()?.items?.length) {
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-products">
@@ -1843,6 +2558,77 @@
 
     <!-- 8. VISTA DE BAJO STOCK -->
     @else if (selectedReport() === 'low-stock') {
+    @let lsd = lowStockChartData();
+    @if (lsd && lsd.total > 0) {
+    <!-- GRÁFICA & DIAGRAMA DE MATRIZ DE RIESGO DE BAJO STOCK -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-low-stock">
+      <!-- Tarjetas de Severidad -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-rose-200/80 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-rose-700 font-semibold block">🚨 Quiebres Inmediatos (Stock 0)</span>
+            <span class="text-xl font-black text-rose-600 font-mono mt-0.5 block">{{ lsd.critical }} productos</span>
+            <span class="text-[11px] text-slate-400 font-mono">{{ lsd.criticalPct }}% de los afectados</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg">
+            ⛔
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-amber-200/80 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-amber-700 font-semibold block">⚠️ Déficit Total Acumulado</span>
+            <span class="text-xl font-black text-amber-600 font-mono mt-0.5 block">-{{ lsd.totalDeficit }} uds</span>
+            <span class="text-[11px] text-slate-400">Unidades para alcanzar stock mínimo</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
+            📉
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">💰 Inversión de Reposición</span>
+            <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ lsd.totalRestockCost | currencyFormat }}</span>
+            <span class="text-[11px] text-emerald-600 font-bold">Presupuesto requerido</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-lg">
+            💳
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagrama de Productos con Mayor Déficit Crítico -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+        <h4 class="text-sm font-bold text-slate-900 flex items-center justify-between">
+          <span>🚨 Top Productos con Mayor Déficit de Reposición</span>
+          <span class="text-xs text-slate-500 font-normal">Prioridad de compra sugerida</span>
+        </h4>
+
+        <div class="space-y-2 pt-1">
+          @for (item of lsd.topCritical; track item.id) {
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="font-bold text-slate-800 truncate">{{ item.name }}</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 font-mono">{{ item.sku }}</span>
+              </div>
+              <div class="text-right shrink-0 font-mono font-bold text-rose-600">
+                <span>Déficit: -{{ item.deficit }} uds</span>
+                <span class="text-slate-400 font-normal ml-1">({{ item.estimatedRestockCost | currencyFormat }})</span>
+              </div>
+            </div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-rose-500 to-amber-500 h-full rounded-full transition-all duration-300"
+                [style.width.%]="item.deficitBarPct"></div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    }
+
     @if (lowStockData()?.items?.length) {
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-low-stock">
@@ -1900,6 +2686,80 @@
 
     <!-- 9. VISTA DE AUDITORÍA -->
     @else if (selectedReport() === 'audit') {
+    @let ad = auditChartData();
+    @if (ad && ad.total > 0) {
+    <!-- GRÁFICA & DIAGRAMA DE ACTIVIDAD DE AUDITORÍA -->
+    <div class="p-5 border-b border-slate-200/80 bg-slate-50/40 space-y-4" data-testid="chart-audit">
+      <!-- Tarjetas de Actividad de Auditoría -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">Total Eventos Registrados</span>
+            <span class="text-xl font-black text-slate-900 font-mono mt-0.5 block">{{ ad.total }} eventos</span>
+            <span class="text-[11px] text-slate-400">Trazabilidad inmutable 100%</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-lg">
+            🛡️
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">Entidad Más Auditada</span>
+            <span class="text-base font-black text-slate-900 font-mono mt-0.5 block">{{ ad.topEntity?.name || 'N/A' }}</span>
+            <span class="text-[11px] text-slate-400 font-mono">{{ ad.topEntity?.count || 0 }} registros ({{ ad.topEntity?.sharePct || 0 }}%)</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+            📋
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs flex items-center justify-between">
+          <div>
+            <span class="text-xs text-slate-500 font-semibold block">Operador Más Activo</span>
+            <span class="text-base font-black text-slate-900 truncate max-w-[150px] block mt-0.5">{{ ad.topUser?.name || 'N/A' }}</span>
+            <span class="text-[11px] text-slate-400 font-mono">{{ ad.topUser?.count || 0 }} acciones registradas</span>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+            👤
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagrama de Barras por Entidad y Chips de Acciones -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+          <h4 class="text-sm font-bold text-slate-900">Distribución de Eventos por Módulo / Entidad</h4>
+          <div class="space-y-2 pt-1">
+            @for (ent of ad.entities; track ent.name) {
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-800 font-mono">{{ ent.name }}</span>
+                <span class="font-mono text-slate-600 font-bold">{{ ent.count }} <span class="text-slate-400 font-normal">({{ ent.sharePct }}%)</span></span>
+              </div>
+              <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="bg-indigo-600 h-full rounded-full transition-all duration-300" [style.width.%]="ent.barPct"></div>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs space-y-3">
+          <h4 class="text-sm font-bold text-slate-900">Frecuencia por Tipo de Acción</h4>
+          <div class="space-y-2 pt-1">
+            @for (act of ad.actions; track act.action) {
+            <div class="p-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+              <span class="px-2 py-0.5 rounded font-mono font-bold bg-slate-200/80 text-slate-700 text-[11px]">{{ act.action }}</span>
+              <span class="font-mono font-black text-slate-900">{{ act.count }} <span class="text-[10px] text-slate-400 font-normal font-mono">({{ act.sharePct }}%)</span></span>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
     @if (auditData()?.items?.length) {
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse" data-testid="table-audit">
