@@ -229,6 +229,8 @@ using (var scope = app.Services.CreateScope())
                 if (db.Database.IsNpgsql())
                 {
                     await db.Database.ExecuteSqlRawAsync(@"
+                        ALTER TABLE ""Sales"" ADD COLUMN IF NOT EXISTS ""Discount"" NUMERIC(18,2) NOT NULL DEFAULT 0;
+
                         CREATE TABLE IF NOT EXISTS ""SalePayments"" (
                             ""Id"" SERIAL PRIMARY KEY,
                             ""SaleId"" INTEGER NOT NULL,
