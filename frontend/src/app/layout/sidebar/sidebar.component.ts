@@ -95,4 +95,14 @@ export class SidebarComponent {
   onNavClick(): void {
     this.sidebarService.close();
   }
+
+  onNewSaleClick(event: Event): void {
+    event.preventDefault();
+    this.sidebarService.close();
+    if (this.router.url.startsWith('/sales')) {
+      this.router.navigate(['/sales'], { queryParams: { new: 'true', t: Date.now() } });
+    } else {
+      this.router.navigate(['/sales'], { queryParams: { new: 'true' } });
+    }
+  }
 }

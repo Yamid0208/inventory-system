@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -28,7 +28,7 @@ import { SettingsService } from '../../../../core/services/settings.service';
   ],
   templateUrl: './sale-modal.component.html'
 })
-export class SaleModalComponent implements OnInit {
+export class SaleModalComponent implements OnInit, OnChanges {
   @Input() products: Product[] = [];
   @Input() warehouses: Warehouse[] = [];
   @Input() defaultWarehouseId: number | null = null;
@@ -131,6 +131,17 @@ export class SaleModalComponent implements OnInit {
         this.paymentsArray.clear();
       }
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.form && (changes['defaultWarehouseId'] || changes['warehouses'])) {
+      const currentVal = this.form.get('warehouseId')?.value;
+      if (!currentVal && this.defaultWarehouseId) {
+        this.form.patchValue({ warehouseId: this.defaultWarehouseId });
+      } else if (!currentVal && this.warehouses.length > 0) {
+        this.form.patchValue({ warehouseId: this.warehouses[0].id });
+      }
+    }
   }
 
   isSplitPayment = signal<boolean>(false);

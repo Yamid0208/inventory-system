@@ -226,6 +226,25 @@ export class SalesComponent implements OnInit {
     this.isCreateModalOpen.set(true);
   }
 
+  closeCreateModal(): void {
+    this.isCreateModalOpen.set(false);
+    if (this.route.snapshot.queryParams['new']) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { new: null, t: null },
+        queryParamsHandling: 'merge'
+      });
+    }
+  }
+
+  getActiveWarehouseId(): number | null {
+    const branchId = this.branchContextService.selectedWarehouseId();
+    if (branchId && branchId > 0) return branchId;
+    const userWhId = this.authService.currentUser()?.warehouseId;
+    if (userWhId && userWhId > 0) return userWhId;
+    return this.warehouses().length > 0 ? this.warehouses()[0].id : null;
+  }
+
   onCreateSale(request: CreateSaleRequest): void {
     this.modalLoading.set(true);
     this.modalError.set(null);
@@ -233,7 +252,7 @@ export class SalesComponent implements OnInit {
     this.saleService.createSale(request).subscribe({
       next: (createdSale) => {
         this.modalLoading.set(false);
-        this.isCreateModalOpen.set(false);
+        this.closeCreateModal();
         this.loadProducts();
         this.loadSales();
         this.alertService?.checkUnreadStatus();

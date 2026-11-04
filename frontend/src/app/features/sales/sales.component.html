@@ -263,9 +263,9 @@
 
 <!-- Modales -->
 @if (isCreateModalOpen()) {
-<app-sale-modal [products]="products()" [warehouses]="warehouses()" [defaultWarehouseId]="selectedWarehouseId()"
+<app-sale-modal [products]="products()" [warehouses]="warehouses()" [defaultWarehouseId]="getActiveWarehouseId()"
   [loading]="modalLoading()" [errorMessage]="modalError()" (save)="onCreateSale($event)"
-  (cancel)="isCreateModalOpen.set(false)"></app-sale-modal>
+  (cancel)="closeCreateModal()"></app-sale-modal>
 }
 
 @if (selectedSaleForDetail()) {

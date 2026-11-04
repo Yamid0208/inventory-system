@@ -191,4 +191,43 @@ test.describe('E2E POS Sales Modal - Layout Ergonómico y Sistema de Descuentos'
     await expect(page.locator('text=Cliente Descuento E2E Playwright').first()).toBeVisible({ timeout: 10000 });
   });
 
+  test('Sidebar "+ Nueva Venta" abre el modal incluso estando en /sales?new=true y precarga la sede activa del navbar', async ({ page }) => {
+    // 1. Navegar a /sales
+    await page.goto('/sales');
+    await page.waitForLoadState('networkidle');
+
+    // 2. Hacer click en el botón "+ Nueva Venta" del Sidebar
+    const sidebarNewSaleBtn = page.locator('aside button:has-text("Nueva Venta")').first();
+    await expect(sidebarNewSaleBtn).toBeVisible({ timeout: 5000 });
+    await sidebarNewSaleBtn.click();
+
+    // 3. Validar que el modal de ventas se abra
+    const modal = page.locator('div.fixed.inset-0').filter({ hasText: 'Registrar Venta' }).first();
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // 4. Validar que la sede esté precargada en el campo "Sede / Almacén"
+    // El input de autocomplete para Sede / Almacén debe tener valor seleccionado no vacío
+    const warehouseInput = modal.locator('label:has-text("Sede / Almacén")').locator('..').locator('input').first();
+    await expect(warehouseInput).toBeVisible();
+    const warehouseVal = await warehouseInput.inputValue();
+    expect(warehouseVal.trim().length).toBeGreaterThan(0);
+
+    // 5. Cerrar el modal mediante el botón cancelar
+    const cancelBtn = modal.locator('button:has-text("Cancelar")').first();
+    await cancelBtn.click();
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+
+    // 6. Hacer clic de nuevo en "+ Nueva Venta" del Sidebar estando ya en /sales
+    await sidebarNewSaleBtn.click();
+
+    // 7. Debe reabrirse el modal correctamente
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    const warehouseValAgain = await warehouseInput.inputValue();
+    expect(warehouseValAgain.trim().length).toBeGreaterThan(0);
+
+    // Cerrar modal
+    await cancelBtn.click();
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+  });
+
 });
