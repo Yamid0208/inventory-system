@@ -52,16 +52,25 @@ test.describe('E2E POS Cash Register Module Suite', () => {
     await page.goto('/cash-register');
     await page.waitForURL('**/cash-register', { timeout: 10000 });
 
+    // Esperar a que termine de cargar el estado inicial de caja
+    const stateLocator = page.locator('button:has-text("Realizar Apertura de Caja"), button:has-text("Arqueo y Cerrar Caja")').first();
+    await stateLocator.waitFor({ state: 'visible', timeout: 10000 });
+
     // Si ya existe una caja abierta de una prueba previa, realizar su cierre para partir de estado limpio
     const closeExistingBtn = page.locator('button:has-text("Arqueo y Cerrar Caja")');
-    if (await closeExistingBtn.isVisible({ timeout: 2000 })) {
+    if (await closeExistingBtn.isVisible()) {
       await closeExistingBtn.click();
       await page.waitForSelector('text=Confirmar Cierre Definitivo', { timeout: 5000 });
+      const notesInput = page.locator('#closeNotes');
+      if (await notesInput.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await notesInput.fill('Cierre de caja previo para limpieza de pruebas E2E');
+      }
       const submitClose = page.locator('button:has-text("Confirmar Cierre Definitivo")');
       await submitClose.click();
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
       // Volver a la pestaña de Operación en Vivo
       await page.getByRole('button', { name: /Operación en Vivo/i }).click();
+      await page.locator('button:has-text("Realizar Apertura de Caja")').first().waitFor({ state: 'visible', timeout: 10000 });
     }
 
     // 1. Apertura de Caja
@@ -224,11 +233,26 @@ test.describe('E2E POS Cash Register Module Suite', () => {
     const warehouses = await whRes.json();
     const warehouseId = Array.isArray(warehouses) && warehouses.length > 0 ? warehouses[0].id : null;
 
-    const productsRes = await request.get('http://localhost:5001/api/v1/products?pageNumber=1&pageSize=10', {
+    const productsRes = await request.get('http://localhost:5001/api/v1/products?pageNumber=1&pageSize=50', {
       headers: authHeaders
     });
     const productsData = await productsRes.json();
-    const product = productsData.items.find((p: any) => p.currentStock > 0) || productsData.items[0];
+    let product = productsData.items.find((p: any) => p.currentStock > 0);
+    if (!product && productsData.items.length > 0) {
+      product = productsData.items[0];
+      // Si el stock está en 0, realizar un ajuste positivo para que la prueba sea autónoma
+      await request.post('http://localhost:5001/api/v1/inventory/adjustments', {
+        headers: authHeaders,
+        data: {
+          productId: product.id,
+          warehouseId: warehouseId ?? product.warehouseId,
+          adjustmentType: 'AdjustmentIn',
+          quantity: 20,
+          reason: 'Ajuste para prueba automatizada E2E de Caja POS'
+        }
+      });
+      product.currentStock = 20;
+    }
 
     // 4. Crear una venta con medios de pago múltiples (Efectivo + Transferencia)
     const quantity = 1;

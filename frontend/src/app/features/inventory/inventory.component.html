@@ -267,7 +267,7 @@
 
 <!-- Modal de Ajuste Manual -->
 @if (isAdjustmentModalOpen()) {
-<app-stock-adjustment-modal [products]="products()" [loading]="modalLoading" [errorMessage]="modalError"
+<app-stock-adjustment-modal [products]="products()" [loading]="modalLoading()" [errorMessage]="modalError()"
   (save)="onSaveAdjustment($event)" (cancel)="isAdjustmentModalOpen.set(false)"></app-stock-adjustment-modal>
 }
 

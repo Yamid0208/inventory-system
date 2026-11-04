@@ -71,36 +71,17 @@
     (exportCsv)="exportCustomersCsv()"
   >
     <div class="flex items-center gap-2 overflow-x-auto">
-      <button
-        type="button"
-        (click)="setStatusFilter('all')"
-        [class.bg-primary-50]="statusFilter() === 'all'"
-        [class.text-primary-700]="statusFilter() === 'all'"
-        [class.border-primary-300]="statusFilter() === 'all'"
-        class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-all"
-      >
-        Todos
-      </button>
-      <button
-        type="button"
-        (click)="setStatusFilter('active')"
-        [class.bg-primary-50]="statusFilter() === 'active'"
-        [class.text-primary-700]="statusFilter() === 'active'"
-        [class.border-primary-300]="statusFilter() === 'active'"
-        class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-all"
-      >
-        Activos
-      </button>
-      <button
-        type="button"
-        (click)="setStatusFilter('inactive')"
-        [class.bg-primary-50]="statusFilter() === 'inactive'"
-        [class.text-primary-700]="statusFilter() === 'inactive'"
-        [class.border-primary-300]="statusFilter() === 'inactive'"
-        class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-all"
-      >
-        Inactivos
-      </button>
+      @for (opt of statusOptions; track opt.id) {
+        <button
+          type="button"
+          (click)="setStatusFilter(opt.id)"
+          [class]="statusFilter() === opt.id
+            ? 'px-3.5 py-1.5 rounded-xl border border-primary-300 bg-primary-50 text-xs font-semibold text-primary-700 shadow-xs cursor-pointer transition-all'
+            : 'px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-all'"
+        >
+          {{ opt.label }}
+        </button>
+      }
     </div>
   </app-table-toolbar>
 

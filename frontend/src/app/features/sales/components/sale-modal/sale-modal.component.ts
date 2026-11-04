@@ -32,8 +32,8 @@ export class SaleModalComponent implements OnInit {
   @Input() products: Product[] = [];
   @Input() warehouses: Warehouse[] = [];
   @Input() defaultWarehouseId: number | null = null;
-  @Input() loading: any = false;
-  @Input() errorMessage: any = null;
+  @Input() loading: boolean = false;
+  @Input() errorMessage: string | null = null;
 
   @Output() save = new EventEmitter<CreateSaleRequest>();
   @Output() cancel = new EventEmitter<void>();
@@ -180,7 +180,7 @@ export class SaleModalComponent implements OnInit {
     this.onCustomerSelected(customerId);
   }
 
-  onCustomerSelected(customerId: any): void {
+  onCustomerSelected(customerId: string | number | null): void {
     if (!customerId) return;
 
     const customer = this.registeredCustomers().find(c => c.id === Number(customerId));
@@ -379,7 +379,7 @@ export class SaleModalComponent implements OnInit {
     return Math.abs(this.calculatedTotal() - this.totalPaid()) < 0.05 && this.paymentsArray.length > 0;
   }
 
-  onProductSelect(index: number, selectedProductId?: any): void {
+  onProductSelect(index: number, selectedProductId?: string | number | null): void {
     const group = this.itemsArray.at(index);
     if (!group) return;
 
@@ -448,11 +448,11 @@ export class SaleModalComponent implements OnInit {
   }
 
   isLoading(): boolean {
-    return typeof this.loading === 'function' ? this.loading() : !!this.loading;
+    return !!this.loading;
   }
 
   getErrorMessage(): string | null {
-    return typeof this.errorMessage === 'function' ? this.errorMessage() : this.errorMessage;
+    return this.errorMessage;
   }
 
   async onSubmit(): Promise<void> {
@@ -505,7 +505,7 @@ export class SaleModalComponent implements OnInit {
       invoiceType: rawVal.invoiceType as InvoiceType,
       saleDate: new Date().toISOString(),
       notes: rawVal.notes?.trim() || undefined,
-      items: rawVal.items.map((i: any) => ({
+      items: rawVal.items.map((i: { productId: number | string; quantity: number | string; unitPrice: number | string }) => ({
         productId: Number(i.productId),
         quantity: Number(i.quantity),
         unitPrice: Number(i.unitPrice),

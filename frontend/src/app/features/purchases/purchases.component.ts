@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, untracked, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PurchaseService } from '../../core/services/purchase.service';
@@ -50,6 +51,7 @@ export class PurchasesComponent implements OnInit {
   private csvExportService = inject(CsvExportService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   purchases = signal<Purchase[]>([]);
   suppliers = signal<Supplier[]>([]);
@@ -113,7 +115,9 @@ export class PurchasesComponent implements OnInit {
     this.loadProducts();
     this.loadPurchases();
 
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
       if (params['new'] === 'true') {
         const productId = params['productId'] ? Number(params['productId']) : undefined;
         const quantity = params['quantity'] ? Number(params['quantity']) : undefined;

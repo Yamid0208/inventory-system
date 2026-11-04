@@ -21,8 +21,8 @@ import { ThousandsSeparatorDirective } from '../../../../shared/directives/thous
 })
 export class StockAdjustmentModalComponent implements OnInit {
   @Input() products: Product[] = [];
-  @Input() loading: any = false;
-  @Input() errorMessage: any = null;
+  @Input() loading: boolean = false;
+  @Input() errorMessage: string | null = null;
 
   @Output() save = new EventEmitter<CreateStockAdjustmentRequest>();
   @Output() cancel = new EventEmitter<void>();
@@ -117,11 +117,11 @@ export class StockAdjustmentModalComponent implements OnInit {
   }
 
   isLoading(): boolean {
-    return typeof this.loading === 'function' ? this.loading() : !!this.loading;
+    return !!this.loading;
   }
 
   getErrorMessage(): string | null {
-    return typeof this.errorMessage === 'function' ? this.errorMessage() : this.errorMessage;
+    return this.errorMessage;
   }
 
   onSubmit(): void {

@@ -81,6 +81,33 @@ export class ReportsComponent implements OnInit, OnDestroy {
   endDate = signal<string>('');
   activePreset = signal<DatePreset>('today');
 
+  // Configuración declarativa de categorías de reportes
+  readonly reportCategories = [
+    { id: 'sales' as ReportCategoryKey, label: 'Ventas', icon: '💳', testId: 'tab-category-sales' },
+    { id: 'finance' as ReportCategoryKey, label: 'Finanzas & CMV', icon: '📈', testId: 'tab-category-finance' },
+    { id: 'inventory' as ReportCategoryKey, label: 'Inventario', icon: '📋', testId: 'tab-category-inventory' },
+    { id: 'purchases' as ReportCategoryKey, label: 'Compras', icon: '🛍️', testId: 'tab-category-purchases' },
+    { id: 'cash' as ReportCategoryKey, label: 'Caja', icon: '💵', testId: 'tab-category-cash' },
+    { id: 'audit' as ReportCategoryKey, label: 'Auditoría', icon: '🛡️', testId: 'tab-category-audit' }
+  ] as const;
+
+  // Configuración declarativa de presets temporales
+  readonly datePresets = [
+    { id: 'today' as DatePreset, label: 'Hoy', testId: 'preset-today' },
+    { id: 'yesterday' as DatePreset, label: 'Ayer', testId: 'preset-yesterday' },
+    { id: 'thisMonth' as DatePreset, label: 'Mes Actual', testId: 'preset-this-month' },
+    { id: 'lastMonth' as DatePreset, label: 'Mes Anterior', testId: 'preset-last-month' },
+    { id: '7days' as DatePreset, label: 'Últimos 7 días', testId: 'preset-7days' },
+    { id: '30days' as DatePreset, label: 'Últimos 30 días', testId: 'preset-30days' },
+    { id: 'all' as DatePreset, label: 'Todo el Histórico', testId: 'preset-all' }
+  ] as const;
+
+  readonly presetActiveClasses = 'bg-primary-600 text-white border-primary-600 shadow-sm hover:bg-primary-700 hover:text-white';
+  readonly presetInactiveClasses = 'bg-white text-slate-600 border-slate-200 hover:bg-primary-50 hover:text-primary-700 hover:border-primary-300 hover:shadow-xs';
+
+  readonly categoryActiveClasses = 'bg-primary-600 text-white border-primary-600 shadow-sm hover:bg-primary-700 hover:text-white';
+  readonly categoryInactiveClasses = 'text-slate-600 hover:bg-primary-50 hover:text-primary-700 hover:border-primary-300';
+
   // Paginación y búsqueda
   pageNumber = signal<number>(1);
   pageSize = signal<number>(10);

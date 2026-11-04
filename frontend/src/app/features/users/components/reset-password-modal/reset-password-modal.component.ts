@@ -12,7 +12,7 @@ import { AppButtonComponent } from '../../../../shared/components/app-button/app
 })
 export class ResetPasswordModalComponent {
   @Input({ required: true }) user!: UserDetail;
-  @Input() loading: any = false;
+  @Input() loading: boolean = false;
 
   @Output() save = new EventEmitter<{ id: number; request: ResetUserPasswordRequest }>();
   @Output() cancel = new EventEmitter<void>();
@@ -26,7 +26,7 @@ export class ResetPasswordModalComponent {
   }
 
   isLoading(): boolean {
-    return typeof this.loading === 'function' ? this.loading() : !!this.loading;
+    return !!this.loading;
   }
 
   onSubmit(): void {

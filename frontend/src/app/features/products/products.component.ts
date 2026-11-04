@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed, effect, untracked } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, untracked, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductService } from '../../core/services/product.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -48,7 +49,7 @@ import { BulkImportResult } from '../../core/models/product.model';
   ],
   templateUrl: './products.component.html'
 })
-export class ProductsComponent implements OnInit, OnDestroy {
+export class ProductsComponent implements OnInit {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private supplierService = inject(SupplierService);
@@ -58,9 +59,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private alertService = inject(AlertService, { optional: true });
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
 
   private searchSubject = new Subject<string>();
-  private searchSub?: Subscription;
 
   // Gestor reactivo para ordenamiento en todas las columnas y búsqueda omni-campo
   readonly tableState = new TableStateManager<Product>({
@@ -159,8 +160,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.searchSub = this.searchSubject
+    this.searchSubject
       .pipe(
+        takeUntilDestroyed(this.destroyRef),
         debounceTime(350),
         distinctUntilChanged()
       )
@@ -173,17 +175,15 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.loadFilterLookups();
     this.loadProducts();
 
-    this.route.queryParams.subscribe(params => {
-      if (params['search'] !== undefined) {
-        this.searchQuery.set(params['search']);
-        this.pageNumber.set(1);
-        this.loadProducts();
-      }
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.searchSub?.unsubscribe();
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        if (params['search'] !== undefined) {
+          this.searchQuery.set(params['search']);
+          this.pageNumber.set(1);
+          this.loadProducts();
+        }
+      });
   }
 
   loadFilterLookups(): void {
@@ -234,7 +234,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
-  onCategorySelect(categoryId: any): void {
+  onCategorySelect(categoryId: string | number | null): void {
     const val = categoryId ? Number(categoryId) : null;
     this.selectedCategoryId.set(val);
     this.pageNumber.set(1);

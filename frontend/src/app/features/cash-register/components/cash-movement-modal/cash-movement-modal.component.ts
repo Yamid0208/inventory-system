@@ -23,6 +23,31 @@ export class CashMovementModalComponent implements OnInit {
 
   form!: FormGroup;
 
+  readonly movementTypes = [
+    {
+      id: 'ManualInflow' as const,
+      label: '+ Ingreso',
+      subtitle: 'Inyección caja',
+      activeClass: 'bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+    },
+    {
+      id: 'ManualOutflow' as const,
+      label: '- Egreso / Gasto',
+      subtitle: 'Compra menor',
+      activeClass: 'bg-rose-50 border-rose-500 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+    },
+    {
+      id: 'CashWithdrawal' as const,
+      label: '↓ Retiro',
+      subtitle: 'A caja fuerte',
+      activeClass: 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+    }
+  ] as const;
+
+  get currentMovementType(): 'ManualInflow' | 'ManualOutflow' | 'CashWithdrawal' {
+    return this.form?.get('movementType')?.value || this.initialMovementType;
+  }
+
   ngOnInit(): void {
     this.form = this.fb.group({
       movementType: [this.initialMovementType, [Validators.required]],

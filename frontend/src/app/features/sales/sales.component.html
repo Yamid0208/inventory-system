@@ -264,7 +264,7 @@
 <!-- Modales -->
 @if (isCreateModalOpen()) {
 <app-sale-modal [products]="products()" [warehouses]="warehouses()" [defaultWarehouseId]="selectedWarehouseId()"
-  [loading]="modalLoading" [errorMessage]="modalError" (save)="onCreateSale($event)"
+  [loading]="modalLoading()" [errorMessage]="modalError()" (save)="onCreateSale($event)"
   (cancel)="isCreateModalOpen.set(false)"></app-sale-modal>
 }
 

@@ -32,20 +32,18 @@
     <!-- Navigation Tabs -->
     <div
       class="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
-      <button type="button" (click)="switchTab('operation')" [class.bg-white]="activeTab() === 'operation'"
-        [class.text-slate-900]="activeTab() === 'operation'" [class.shadow-sm]="activeTab() === 'operation'"
-        [class.dark:bg-slate-700]="activeTab() === 'operation'" [class.dark:text-white]="activeTab() === 'operation'"
-        class="px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2">
+      <button type="button" (click)="switchTab('operation')"
+        [class]="activeTab() === 'operation' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+        class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
         Operación en Vivo
       </button>
 
-      <button type="button" (click)="switchTab('history')" [class.bg-white]="activeTab() === 'history'"
-        [class.text-slate-900]="activeTab() === 'history'" [class.shadow-sm]="activeTab() === 'history'"
-        [class.dark:bg-slate-700]="activeTab() === 'history'" [class.dark:text-white]="activeTab() === 'history'"
-        class="px-4 py-2 text-xs font-bold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2">
+      <button type="button" (click)="switchTab('history')"
+        [class]="activeTab() === 'history' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+        class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>

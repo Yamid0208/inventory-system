@@ -237,8 +237,8 @@
 
   <!-- Modales -->
   @if (isCreateModalOpen()) {
-  <app-purchase-modal [suppliers]="suppliers()" [products]="products()" [preloadedItem]="initialPreloadedItem()" [loading]="modalLoading"
-    [errorMessage]="modalError" (save)="onCreatePurchase($event)"
+  <app-purchase-modal [suppliers]="suppliers()" [products]="products()" [preloadedItem]="initialPreloadedItem()" [loading]="modalLoading()"
+    [errorMessage]="modalError()" (save)="onCreatePurchase($event)"
     (cancel)="closeCreateModal()"></app-purchase-modal>
   }
 

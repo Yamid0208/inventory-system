@@ -23,8 +23,8 @@ export class UserModalComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   @Input() user: UserDetail | null = null;
-  @Input() loading: any = false;
-  @Input() errorMessage: any = null;
+  @Input() loading: boolean = false;
+  @Input() errorMessage: string | null = null;
 
   @Output() save = new EventEmitter<any>();
   @Output() cancel = new EventEmitter<void>();
@@ -89,11 +89,11 @@ export class UserModalComponent implements OnInit {
   }
 
   isLoading(): boolean {
-    return typeof this.loading === 'function' ? this.loading() : !!this.loading;
+    return !!this.loading;
   }
 
   getErrorMessage(): string | null {
-    return typeof this.errorMessage === 'function' ? this.errorMessage() : (this.errorMessage || null);
+    return this.errorMessage || null;
   }
 
   onSubmit(): void {

@@ -62,6 +62,12 @@ export class CustomersComponent implements OnInit {
   searchQuery = signal<string>('');
   statusFilter = signal<string>('all');
 
+  readonly statusOptions = [
+    { id: 'all', label: 'Todos' },
+    { id: 'active', label: 'Activos' },
+    { id: 'inactive', label: 'Inactivos' }
+  ] as const;
+
   isModalOpen = signal<boolean>(false);
   selectedCustomer = signal<Customer | null>(null);
 
