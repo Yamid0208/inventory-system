@@ -18,7 +18,10 @@ import {
   SalesByCategoryItem,
   HourlyActivityItem,
   SalesByEmployeeItem,
-  SalesTrendItem
+  SalesTrendItem,
+  InventoryValuationSummary,
+  InventoryValuationByCategory,
+  InventoryValuationItem
 } from '../models/report.model';
 
 @Injectable({
@@ -305,6 +308,88 @@ export class ReportService {
     return this.http.get<PagedReportResult<AuditActivityReportItem>>(`${this.baseUrl}/audit/activity`, { params });
   }
 
+  // =========================================================================
+  // 6. SUITE DE VALORACIÓN FINANCIERA Y PATRIMONIAL DE INVENTARIO
+  // =========================================================================
+
+  getInventoryValuationSummary(warehouseId?: number | null): Observable<InventoryValuationSummary> {
+    let params = new HttpParams();
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<InventoryValuationSummary>(`${this.baseUrl}/inventory/valuation-summary`, { params });
+  }
+
+  getInventoryValuationByCategory(warehouseId?: number | null): Observable<InventoryValuationByCategory[]> {
+    let params = new HttpParams();
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    return this.http.get<InventoryValuationByCategory[]>(`${this.baseUrl}/inventory/valuation-by-category`, { params });
+  }
+
+  getInventoryValuationDetails(
+    warehouseId?: number | null,
+    categoryId?: number | null,
+    abcClass?: string | null,
+    stagnantOnly?: boolean,
+    searchTerm?: string,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedReportResult<InventoryValuationItem>> {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    if (categoryId !== undefined && categoryId !== null && categoryId > 0) {
+      params = params.set('categoryId', categoryId.toString());
+    }
+    if (abcClass) {
+      params = params.set('abcClass', abcClass);
+    }
+    if (stagnantOnly) {
+      params = params.set('stagnantOnly', 'true');
+    }
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+
+    return this.http.get<PagedReportResult<InventoryValuationItem>>(`${this.baseUrl}/inventory/valuation-details`, { params });
+  }
+
+  exportInventoryValuationCsv(
+    warehouseId?: number | null,
+    categoryId?: number | null,
+    abcClass?: string | null,
+    stagnantOnly?: boolean,
+    searchTerm?: string
+  ): Observable<Blob> {
+    let params = new HttpParams();
+    if (warehouseId !== undefined && warehouseId !== null && warehouseId > 0) {
+      params = params.set('warehouseId', warehouseId.toString());
+    }
+    if (categoryId !== undefined && categoryId !== null && categoryId > 0) {
+      params = params.set('categoryId', categoryId.toString());
+    }
+    if (abcClass) {
+      params = params.set('abcClass', abcClass);
+    }
+    if (stagnantOnly) {
+      params = params.set('stagnantOnly', 'true');
+    }
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+
+    return this.http.get(`${this.baseUrl}/inventory/valuation/csv`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
   downloadReport(reportKey: string, startDate?: string, endDate?: string, warehouseId?: number | null): Observable<Blob> {
     let params = new HttpParams();
     if (startDate) params = params.set('startDate', startDate);
@@ -324,6 +409,8 @@ export class ReportService {
       url = `${this.baseUrl}/sales/hourly-activity/csv`;
     } else if (reportKey === 'sales-employees') {
       url = `${this.baseUrl}/sales/by-employee/csv`;
+    } else if (reportKey === 'inventory-valuation') {
+      url = `${this.baseUrl}/inventory/valuation/csv`;
     }
 
     return this.http.get(url, {

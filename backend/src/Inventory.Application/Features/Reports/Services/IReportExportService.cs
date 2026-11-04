@@ -162,4 +162,33 @@ public interface IReportExportService
         DateTimeOffset? endDate,
         int? warehouseId = null,
         CancellationToken cancellationToken = default);
+
+    // =========================================================================
+    // 6. SUITE DE VALORACIÓN FINANCIERA Y PATRIMONIAL DE INVENTARIO
+    // =========================================================================
+    Task<InventoryValuationSummaryDto> GetInventoryValuationSummaryAsync(
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<InventoryValuationByCategoryDto>> GetInventoryValuationByCategoryAsync(
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<PagedReportResultDto<InventoryValuationItemDto>> GetInventoryValuationDetailsAsync(
+        int? warehouseId = null,
+        int? categoryId = null,
+        string? abcClass = null,
+        bool? stagnantOnly = null,
+        string? searchTerm = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default);
+
+    Task<byte[]> ExportInventoryValuationCsvAsync(
+        int? warehouseId = null,
+        int? categoryId = null,
+        string? abcClass = null,
+        bool? stagnantOnly = null,
+        string? searchTerm = null,
+        CancellationToken cancellationToken = default);
 }

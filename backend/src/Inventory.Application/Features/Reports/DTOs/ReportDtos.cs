@@ -239,3 +239,61 @@ public record SalesTrendDto(
     decimal TotalRevenue
 );
 
+// =========================================================================
+// DTOs para INSINCRO: Suite de Valoración Financiera y Patrimonial de Inventario
+// =========================================================================
+
+public record InventoryValuationSummaryDto(
+    decimal TotalCostValuation,
+    decimal TotalRetailValuation,
+    decimal PotentialProfit,
+    decimal ProfitMarginPercentage,
+    int TotalStockUnits,
+    int TotalProductsCount,
+    decimal StagnantCapitalAmount,
+    int StagnantProductsCount,
+    int CategoryACount,
+    decimal CategoryACostAmount,
+    decimal CategoryASharePct,
+    int CategoryBCount,
+    decimal CategoryBCostAmount,
+    decimal CategoryBSharePct,
+    int CategoryCCount,
+    decimal CategoryCCostAmount,
+    decimal CategoryCSharePct
+);
+
+public record InventoryValuationByCategoryDto(
+    int CategoryId,
+    string CategoryName,
+    int TotalUnits,
+    decimal TotalCostValuation,
+    decimal TotalRetailValuation,
+    decimal PotentialProfit,
+    decimal ProfitMarginPercentage,
+    decimal CapitalSharePercentage,
+    int ProductCount
+);
+
+public record InventoryValuationItemDto(
+    int ProductId,
+    string Sku,
+    string ProductName,
+    int CategoryId,
+    string CategoryName,
+    string SupplierName,
+    int CurrentStock,
+    int MinimumStock,
+    decimal UnitCost,
+    decimal UnitPrice,
+    decimal TotalCostValuation,
+    decimal TotalRetailValuation,
+    decimal PotentialProfit,
+    decimal ProfitMarginPercentage,
+    string AbcClassification,
+    int DaysWithoutSales,
+    bool IsStagnant,
+    DateTimeOffset? LastSaleDate
+);
+
+

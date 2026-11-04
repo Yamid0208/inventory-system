@@ -208,7 +208,7 @@
     </button>
   </div>
   } @else if (selectedCategory() === 'inventory') {
-  <div class="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
+  <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 w-fit">
     <button type="button" (click)="selectReport('inventory')" data-testid="tab-inventory"
       [ngClass]="selectedReport() === 'inventory'
         ? 'bg-primary-600 text-white shadow-sm font-bold'
@@ -217,6 +217,17 @@
       <span class="text-base">📋</span>
       <span>Kardex y Movimientos</span>
       @if (selectedReport() === 'inventory') {
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+      }
+    </button>
+    <button type="button" (click)="selectReport('inventory-valuation')" data-testid="tab-inventory-valuation"
+      [ngClass]="selectedReport() === 'inventory-valuation'
+        ? 'bg-primary-600 text-white shadow-sm font-bold'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'"
+      class="px-4 py-2 text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer">
+      <span class="text-base">💎</span>
+      <span>Valoración de Inventario</span>
+      @if (selectedReport() === 'inventory-valuation') {
         <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
       }
     </button>
@@ -942,6 +953,206 @@
   </div>
   }
 
+  <!-- KPI CARDS Y RESUMEN PATRIMONIAL DE VALORACIÓN DE INVENTARIO -->
+  @if (selectedReport() === 'inventory-valuation' && inventoryValuationSummary(); as val) {
+  <div class="space-y-4">
+    <!-- 4 Tarjetas KPI Financieros de Existencias -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-semibold text-slate-500">Capital Total Inmovilizado</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200">Costo Base</span>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2 font-mono" data-testid="metric-valuation-cost">
+          {{ val.totalCostValuation | currencyFormat }}
+        </div>
+        <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+          <span>Inversión patrimonial en adquisición de stock</span>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-semibold text-slate-500">Valoración Comercial Total</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Precio Venta</span>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2 font-mono" data-testid="metric-valuation-retail">
+          {{ val.totalRetailValuation | currencyFormat }}
+        </div>
+        <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+          <span>Facturación bruta proyectada al liquidar stock</span>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-semibold text-slate-500">Utilidad Bruta Proyectada</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-primary-50 text-primary-700 border border-primary-200" data-testid="metric-valuation-margin">
+            Margen: {{ val.profitMarginPercentage }}%
+          </span>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-emerald-600 mt-2 font-mono" data-testid="metric-valuation-profit">
+          {{ val.potentialProfit | currencyFormat }}
+        </div>
+        <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+          <span>Ganancia potencial neta sobre el costo</span>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-primary-300 transition-all">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-semibold text-slate-500">Unidades Físicas en Stock</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700">Inventario Total</span>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2 font-mono" data-testid="metric-valuation-units">
+          {{ val.totalStockUnits }}
+        </div>
+        <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+          <span>{{ val.totalProductsCount }} productos catalogados</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Banner de Alerta de Capital Estancado (Stock Muerto) -->
+    @if (val.stagnantProductsCount > 0) {
+    <div class="p-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl shrink-0">
+          ⚠️
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-amber-900 flex items-center gap-2">
+            <span>Capital Estancado en Riesgo de Obsolescencia</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-amber-200/70 text-amber-800 font-extrabold font-mono" data-testid="metric-stagnant-cost">
+              {{ val.stagnantCapitalAmount | currencyFormat }}
+            </span>
+          </h4>
+          <p class="text-xs text-amber-800/90 mt-0.5">
+            Se detectaron <strong>{{ val.stagnantProductsCount }} productos</strong> con existencias físicas sin ninguna venta registrada en los últimos 30 días.
+          </p>
+        </div>
+      </div>
+      <button type="button" (click)="toggleStagnantFilter()" data-testid="btn-toggle-stagnant"
+        [ngClass]="stagnantOnlyFilter() ? 'bg-amber-600 text-white shadow-xs' : 'bg-white text-amber-800 border border-amber-300 hover:bg-amber-100/70'"
+        class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5">
+        <span>{{ stagnantOnlyFilter() ? '✓ Viendo Sólo Estancados' : 'Filtrar Sólo Estancados' }}</span>
+      </button>
+    </div>
+    }
+
+    <!-- Concentración Patrimonial y Clasificación ABC (Pareto 80/20) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Desglose y Barra de Distribución por Categoría -->
+      <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <span>🏷️ Concentración Patrimonial por Categoría</span>
+            </h4>
+            <p class="text-xs text-slate-500 mt-0.5">Distribución porcentual del capital inmovilizado al costo entre familias de producto</p>
+          </div>
+        </div>
+
+        @if (inventoryValuationByCategory().length) {
+        <div class="w-full h-3.5 rounded-full flex overflow-hidden bg-slate-100 gap-0.5 shadow-inner mt-2">
+          @for (cat of inventoryValuationByCategory(); track cat.categoryId; let idx = $index) {
+            <div [style.width.%]="cat.capitalSharePercentage"
+              [ngClass]="idx % 5 === 0 ? 'bg-primary-500' : idx % 5 === 1 ? 'bg-indigo-500' : idx % 5 === 2 ? 'bg-amber-500' : idx % 5 === 3 ? 'bg-emerald-500' : 'bg-rose-500'"
+              [title]="cat.categoryName + ': ' + cat.capitalSharePercentage + '% (' + (cat.totalCostValuation | currencyFormat) + ')'"
+              class="h-full transition-all duration-300"></div>
+          }
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mt-3 pt-3 border-t border-slate-100 text-xs">
+          @for (cat of inventoryValuationByCategory(); track cat.categoryId; let idx = $index) {
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2 truncate">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0"
+                [ngClass]="idx % 5 === 0 ? 'bg-primary-500' : idx % 5 === 1 ? 'bg-indigo-500' : idx % 5 === 2 ? 'bg-amber-500' : idx % 5 === 3 ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+              <span class="font-bold text-slate-800 truncate">{{ cat.categoryName }}</span>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="font-mono font-bold text-slate-900 block">{{ cat.totalCostValuation | currencyFormat }}</span>
+              <span class="text-[11px] text-slate-500 font-mono">{{ cat.capitalSharePercentage }}% capital</span>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Resumen ABC Pareto 80/20 -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-3 flex flex-col justify-between">
+        <div>
+          <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <span>🎯 Clasificación ABC (Pareto 80/20)</span>
+          </h4>
+          <p class="text-xs text-slate-500 mt-0.5">Jerarquía financiera según inversión de capital</p>
+
+          <div class="space-y-2.5 mt-3">
+            <!-- Clase A -->
+            <div (click)="setAbcFilter(selectedAbcClass() === 'A' ? null : 'A')" data-testid="btn-filter-abc-a"
+              [ngClass]="selectedAbcClass() === 'A' ? 'ring-2 ring-purple-500 bg-purple-50/70 border-purple-300' : 'bg-slate-50/80 border-slate-200/70 hover:bg-purple-50/40'"
+              class="p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between group">
+              <div class="flex items-center gap-2.5">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-purple-600 text-white shadow-xs">CLASE A</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-900 block">Alta Relevancia (80%)</span>
+                  <span class="text-[11px] text-slate-500">{{ val.categoryACount }} productos</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryACostAmount | currencyFormat }}</span>
+                <span class="text-[10px] text-purple-700 font-bold font-mono">{{ val.categoryASharePct }}% valor</span>
+              </div>
+            </div>
+
+            <!-- Clase B -->
+            <div (click)="setAbcFilter(selectedAbcClass() === 'B' ? null : 'B')" data-testid="btn-filter-abc-b"
+              [ngClass]="selectedAbcClass() === 'B' ? 'ring-2 ring-blue-500 bg-blue-50/70 border-blue-300' : 'bg-slate-50/80 border-slate-200/70 hover:bg-blue-50/40'"
+              class="p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between group">
+              <div class="flex items-center gap-2.5">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-blue-600 text-white shadow-xs">CLASE B</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-900 block">Media Relevancia (15%)</span>
+                  <span class="text-[11px] text-slate-500">{{ val.categoryBCount }} productos</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryBCostAmount | currencyFormat }}</span>
+                <span class="text-[10px] text-blue-700 font-bold font-mono">{{ val.categoryBSharePct }}% valor</span>
+              </div>
+            </div>
+
+            <!-- Clase C -->
+            <div (click)="setAbcFilter(selectedAbcClass() === 'C' ? null : 'C')" data-testid="btn-filter-abc-c"
+              [ngClass]="selectedAbcClass() === 'C' ? 'ring-2 ring-slate-500 bg-slate-100 border-slate-300' : 'bg-slate-50/80 border-slate-200/70 hover:bg-slate-100/50'"
+              class="p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between group">
+              <div class="flex items-center gap-2.5">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-slate-600 text-white shadow-xs">CLASE C</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-900 block">Baja Relevancia (5%)</span>
+                  <span class="text-[11px] text-slate-500">{{ val.categoryCCount }} productos</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-mono font-black text-slate-900 block text-xs">{{ val.categoryCCostAmount | currencyFormat }}</span>
+                <span class="text-[10px] text-slate-600 font-bold font-mono">{{ val.categoryCSharePct }}% valor</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        @if (selectedAbcClass()) {
+        <button type="button" (click)="setAbcFilter(null)" class="text-xs text-primary-600 hover:text-primary-800 font-bold text-center w-full pt-1 cursor-pointer">
+          ✕ Quitar filtro ABC (Ver Todas)
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+  }
+
   <!-- TABLA INTERACTIVA DE REPORTES -->
   <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden" data-testid="reports-table-container">
     <!-- ENCABEZADO DE TABLA CON TÍTULO Y CONTEXTO -->
@@ -1419,6 +1630,82 @@
           <div class="p-12 text-center space-y-3" data-testid="empty-state">
             <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">📋</div>
             <h4 class="text-base font-bold text-slate-900">No hay movimientos en el Kardex para este período</h4>
+          </div>
+        }
+      }
+
+      <!-- 5.1 VISTA DE VALORACIÓN FINANCIERA Y PATRIMONIAL DE INVENTARIO -->
+      @else if (selectedReport() === 'inventory-valuation') {
+        @if (inventoryValuationData()?.items?.length) {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse" data-testid="table-inventory-valuation">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4 text-center">Clase ABC</th>
+                <th class="py-3.5 px-4">SKU</th>
+                <th class="py-3.5 px-4">Producto</th>
+                <th class="py-3.5 px-4">Categoría</th>
+                <th class="py-3.5 px-4 text-right">Stock</th>
+                <th class="py-3.5 px-4 text-right">Costo Unit.</th>
+                <th class="py-3.5 px-4 text-right">Precio Venta</th>
+                <th class="py-3.5 px-4 text-right">Val. al Costo</th>
+                <th class="py-3.5 px-4 text-right">Val. Comercial</th>
+                <th class="py-3.5 px-4 text-right">Utilidad Proy.</th>
+                <th class="py-3.5 px-4 text-center">Margen %</th>
+                <th class="py-3.5 px-4 text-center">Rotación</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-sm font-medium">
+              @for (row of inventoryValuationData()?.items; track row.productId) {
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-3.5 px-4 text-center">
+                  <span class="px-2.5 py-1 rounded-lg text-xs font-black inline-block"
+                    [ngClass]="row.abcClassification === 'A'
+                      ? 'bg-purple-100 text-purple-800 border border-purple-200 shadow-xs'
+                      : (row.abcClassification === 'B' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200')">
+                    CLASE {{ row.abcClassification }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ row.sku }}</td>
+                <td class="py-3.5 px-4">
+                  <div class="font-bold text-slate-900">{{ row.productName }}</div>
+                  <div class="text-xs text-slate-500">{{ row.supplierName }}</div>
+                </td>
+                <td class="py-3.5 px-4 text-slate-700 font-medium">{{ row.categoryName }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.currentStock }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.unitCost | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-600">{{ row.unitPrice | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">{{ row.totalCostValuation | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-slate-900">{{ row.totalRetailValuation | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-black text-emerald-600">{{ row.potentialProfit | currencyFormat }}</td>
+                <td class="py-3.5 px-4 text-center font-mono font-bold">
+                  <span class="px-2 py-0.5 rounded text-xs"
+                    [ngClass]="row.profitMarginPercentage >= 30 ? 'bg-emerald-50 text-emerald-700' : (row.profitMarginPercentage >= 15 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700')">
+                    {{ row.profitMarginPercentage }}%
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  @if (row.isStagnant) {
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"
+                      [title]="'Última venta: ' + (row.lastSaleDate ? (row.lastSaleDate | date:'yyyy-MM-dd') : 'Sin ventas registradas')">
+                      <span>⚠️ {{ row.daysWithoutSales }}d sin venta</span>
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span>✓ Activo ({{ row.daysWithoutSales }}d)</span>
+                    </span>
+                  }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        } @else {
+          <div class="p-12 text-center space-y-3" data-testid="empty-state">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl">💎</div>
+            <h4 class="text-base font-bold text-slate-900">No hay productos en inventario que coincidan con los criterios de búsqueda</h4>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">Prueba limpiando los filtros de búsqueda rápida o clase ABC.</p>
           </div>
         }
       }

@@ -523,6 +523,193 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
       });
     });
 
+    // Mock de Valoración de Inventario - KPIs y Resumen
+    await page.route('**/api/v1/reports/inventory/valuation-summary*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          totalCostValuation: 85000000,
+          totalRetailValuation: 125000000,
+          potentialProfit: 40000000,
+          profitMarginPercentage: 32.0,
+          totalStockUnits: 250,
+          totalProductsCount: 20,
+          stagnantCapitalAmount: 15000000,
+          stagnantProductsCount: 3,
+          categoryACount: 4,
+          categoryACostAmount: 68000000,
+          categoryASharePct: 80.0,
+          categoryBCount: 6,
+          categoryBCostAmount: 12750000,
+          categoryBSharePct: 15.0,
+          categoryCCount: 10,
+          categoryCCostAmount: 4250000,
+          categoryCSharePct: 5.0
+        })
+      });
+    });
+
+    // Mock de Valoración de Inventario - Por Categoría
+    await page.route('**/api/v1/reports/inventory/valuation-by-category*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            categoryId: 1,
+            categoryName: 'Electrónica y Audio',
+            totalUnits: 50,
+            totalCostValuation: 60000000,
+            totalRetailValuation: 90000000,
+            potentialProfit: 30000000,
+            profitMarginPercentage: 33.3,
+            capitalSharePercentage: 70.6,
+            productCount: 2
+          },
+          {
+            categoryId: 2,
+            categoryName: 'Herramientas',
+            totalUnits: 200,
+            totalCostValuation: 25000000,
+            totalRetailValuation: 35000000,
+            potentialProfit: 10000000,
+            profitMarginPercentage: 28.6,
+            capitalSharePercentage: 29.4,
+            productCount: 1
+          }
+        ])
+      });
+    });
+
+    // Mock de Valoración de Inventario - Detalle Tabular con Filtros
+    await page.route('**/api/v1/reports/inventory/valuation-details*', async (route) => {
+      const url = new URL(route.request().url());
+      const abc = url.searchParams.get('abcClass');
+      const stagnantOnly = url.searchParams.get('stagnantOnly') === 'true';
+      const search = (url.searchParams.get('searchTerm') || '').toLowerCase();
+
+      const allItems = [
+        {
+          productId: 1,
+          sku: 'SKU-JBL-PARTY',
+          productName: 'Parlante JBL PartyBox 310',
+          categoryId: 1,
+          categoryName: 'Electrónica y Audio',
+          supplierName: 'Harman Kardon Colombia',
+          currentStock: 10,
+          minimumStock: 2,
+          unitCost: 3000000,
+          unitPrice: 4500000,
+          totalCostValuation: 30000000,
+          totalRetailValuation: 45000000,
+          potentialProfit: 15000000,
+          profitMarginPercentage: 33.3,
+          abcClassification: 'A',
+          daysWithoutSales: 5,
+          isStagnant: false,
+          lastSaleDate: new Date().toISOString()
+        },
+        {
+          productId: 2,
+          sku: 'SKU-BOSE-S1',
+          productName: 'Sistema Bose S1 Pro+',
+          categoryId: 1,
+          categoryName: 'Electrónica y Audio',
+          supplierName: 'Bose Distribución',
+          currentStock: 10,
+          minimumStock: 2,
+          unitCost: 3000000,
+          unitPrice: 4200000,
+          totalCostValuation: 30000000,
+          totalRetailValuation: 42000000,
+          potentialProfit: 12000000,
+          profitMarginPercentage: 28.6,
+          abcClassification: 'A',
+          daysWithoutSales: 45,
+          isStagnant: true,
+          lastSaleDate: null
+        },
+        {
+          productId: 3,
+          sku: 'SKU-TALADRO-BOSCH',
+          productName: 'Taladro Percutor Bosch 1/2',
+          categoryId: 2,
+          categoryName: 'Herramientas',
+          supplierName: 'Bosch Colombia',
+          currentStock: 20,
+          minimumStock: 5,
+          unitCost: 600000,
+          unitPrice: 900000,
+          totalCostValuation: 12000000,
+          totalRetailValuation: 18000000,
+          potentialProfit: 6000000,
+          profitMarginPercentage: 33.3,
+          abcClassification: 'B',
+          daysWithoutSales: 12,
+          isStagnant: false,
+          lastSaleDate: new Date().toISOString()
+        },
+        {
+          productId: 4,
+          sku: 'SKU-CABLE-HDMI',
+          productName: 'Cable HDMI 4K Alta Velocidad',
+          categoryId: 1,
+          categoryName: 'Electrónica y Audio',
+          supplierName: 'Genéricos S.A.',
+          currentStock: 50,
+          minimumStock: 10,
+          unitCost: 85000,
+          unitPrice: 140000,
+          totalCostValuation: 4250000,
+          totalRetailValuation: 7000000,
+          potentialProfit: 2750000,
+          profitMarginPercentage: 39.3,
+          abcClassification: 'C',
+          daysWithoutSales: 8,
+          isStagnant: false,
+          lastSaleDate: new Date().toISOString()
+        }
+      ];
+
+      let filtered = allItems;
+      if (abc) {
+        filtered = filtered.filter(i => i.abcClassification.toUpperCase() === abc.toUpperCase());
+      }
+      if (stagnantOnly) {
+        filtered = filtered.filter(i => i.isStagnant);
+      }
+      if (search) {
+        filtered = filtered.filter(i => i.productName.toLowerCase().includes(search) || i.sku.toLowerCase().includes(search));
+      }
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: filtered,
+          totalCount: filtered.length,
+          pageNumber: 1,
+          pageSize: 10,
+          totalPages: 1,
+          totalCostAmount: filtered.reduce((acc, i) => acc + i.totalCostValuation, 0),
+          totalQuantity: filtered.reduce((acc, i) => acc + i.currentStock, 0)
+        })
+      });
+    });
+
+    // Mock de descarga CSV Valoración
+    await page.route('**/api/v1/reports/inventory/valuation/csv*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/csv',
+        headers: {
+          'Content-Disposition': 'attachment; filename="reporte_inventory-valuation_export.csv"'
+        },
+        body: '\uFEFFClasificación ABC,SKU,Producto,Categoría,Stock Actual,Costo Unitario,Precio Venta,Valoración al Costo,Valoración Comercial,Utilidad Proyectada,Margen Comercial (%),Días sin Ventas,Estado Rotación\nCLASE A,SKU-JBL-PARTY,Parlante JBL,Electrónica,10,$3.000.000,$4.500.000,$30.000.000,$45.000.000,$15.000.000,33.3%,5,Activo'
+      });
+    });
+
     // Mock de descarga CSV
     await page.route('**/api/v1/reports/*/csv*', async (route) => {
       await route.fulfill({
@@ -739,5 +926,99 @@ test.describe('E2E Reports Module - INSINCRO POS Operational, Financial & Audit 
     await expect(tableEmployees).toBeVisible({ timeout: 5000 });
     await expect(tableEmployees.locator('text=Administrador del Sistema')).toBeVisible();
     await expect(tableEmployees.locator('text=/Admin|Administrador/').first()).toBeVisible();
+  });
+
+  test('TC-REP-07: Suite de Valoración de Inventario - KPIs de Existencias, Concentración por Categoría y Clasificación ABC Pareto', async ({ page }) => {
+    await page.goto('/reports');
+    await page.waitForURL('**/reports', { timeout: 10000 });
+
+    // 1. Navegar a categoría Inventario
+    const tabCategoryInventory = page.locator('[data-testid="tab-category-inventory"]');
+    await expect(tabCategoryInventory).toBeVisible({ timeout: 5000 });
+    await tabCategoryInventory.click();
+
+    // 2. Hacer click en la sub-pestaña "Valoración de Inventario"
+    const tabValuation = page.locator('[data-testid="tab-inventory-valuation"]');
+    await expect(tabValuation).toBeVisible({ timeout: 5000 });
+    await tabValuation.click();
+
+    // 3. Validar los 4 KPIs Financieros de Existencias
+    const metricCost = page.locator('[data-testid="metric-valuation-cost"]');
+    await expect(metricCost).toBeVisible({ timeout: 5000 });
+    await expect(metricCost).toHaveText(/\$85\.000\.000/);
+
+    const metricRetail = page.locator('[data-testid="metric-valuation-retail"]');
+    await expect(metricRetail).toBeVisible();
+    await expect(metricRetail).toHaveText(/\$125\.000\.000/);
+
+    const metricProfit = page.locator('[data-testid="metric-valuation-profit"]');
+    await expect(metricProfit).toBeVisible();
+    await expect(metricProfit).toHaveText(/\$40\.000\.000/);
+
+    const metricUnits = page.locator('[data-testid="metric-valuation-units"]');
+    await expect(metricUnits).toBeVisible();
+    await expect(metricUnits).toHaveText(/250/);
+
+    // 4. Validar Concentración Patrimonial y Clasificación ABC
+    await expect(page.locator('text=Concentración Patrimonial por Categoría')).toBeVisible();
+    await expect(page.locator('text=Clasificación ABC (Pareto 80/20)')).toBeVisible();
+
+    // 5. Validar Tabla de Valoración Detallada
+    const tableValuation = page.locator('[data-testid="table-inventory-valuation"]');
+    await expect(tableValuation).toBeVisible({ timeout: 5000 });
+
+    // Verificar filas de productos con sus badges ABC
+    await expect(tableValuation.locator('text=SKU-JBL-PARTY')).toBeVisible();
+    await expect(tableValuation.locator('text=Parlante JBL PartyBox 310')).toBeVisible();
+    await expect(tableValuation.locator('text=CLASE A').first()).toBeVisible();
+    await expect(tableValuation.locator('text=CLASE B').first()).toBeVisible();
+    await expect(tableValuation.locator('text=CLASE C').first()).toBeVisible();
+
+    // 6. Probar Exportación CSV de Valoración
+    const exportBtn = page.locator('[data-testid="btn-export-csv"]');
+    await expect(exportBtn).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await exportBtn.click();
+    const download = await downloadPromise;
+
+    const filename = download.suggestedFilename();
+    expect(filename).toMatch(/reporte_inventory-valuation_.*\.csv/);
+  });
+
+  test('TC-REP-08: Suite de Valoración de Inventario - Filtros de Clase ABC, Alerta de Capital Estancado y Búsqueda', async ({ page }) => {
+    await page.goto('/reports');
+    await page.waitForURL('**/reports', { timeout: 10000 });
+
+    // 1. Navegar a categoría Inventario y sub-pestaña Valoración
+    await page.locator('[data-testid="tab-category-inventory"]').click();
+    await page.locator('[data-testid="tab-inventory-valuation"]').click();
+
+    // 2. Verificar banner de alerta de Capital Estancado
+    const stagnantCost = page.locator('[data-testid="metric-stagnant-cost"]');
+    await expect(stagnantCost).toBeVisible({ timeout: 5000 });
+    await expect(stagnantCost).toHaveText(/\$15\.000\.000/);
+
+    // 3. Filtrar por Clase A haciendo click en la tarjeta de Clase A
+    const filterClassA = page.locator('[data-testid="btn-filter-abc-a"]');
+    await expect(filterClassA).toBeVisible();
+    await filterClassA.click();
+
+    // Verificar que la tabla se actualice y sólo muestre ítems de Clase A
+    const tableValuation = page.locator('[data-testid="table-inventory-valuation"]');
+    await expect(tableValuation.locator('text=SKU-JBL-PARTY')).toBeVisible();
+    await expect(tableValuation.locator('text=SKU-BOSE-S1')).toBeVisible();
+    await expect(tableValuation.locator('text=SKU-TALADRO-BOSCH')).not.toBeVisible();
+    await expect(tableValuation.locator('text=SKU-CABLE-HDMI')).not.toBeVisible();
+
+    // 4. Filtrar por Solo Capital Estancado
+    const toggleStagnant = page.locator('[data-testid="btn-toggle-stagnant"]');
+    await expect(toggleStagnant).toBeVisible();
+    await toggleStagnant.click();
+
+    // Ahora sólo debe mostrar el producto estancado (Bose S1)
+    await expect(tableValuation.locator('text=SKU-BOSE-S1')).toBeVisible();
+    await expect(tableValuation.locator('text=45d sin venta')).toBeVisible();
+    await expect(tableValuation.locator('text=SKU-JBL-PARTY')).not.toBeVisible();
   });
 });

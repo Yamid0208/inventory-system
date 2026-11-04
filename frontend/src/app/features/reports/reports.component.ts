@@ -27,7 +27,10 @@ import {
   SalesByCategoryItem,
   HourlyActivityItem,
   SalesByEmployeeItem,
-  SalesTrendItem
+  SalesTrendItem,
+  InventoryValuationSummary,
+  InventoryValuationByCategory,
+  InventoryValuationItem
 } from '../../core/models/report.model';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format.pipe';
@@ -80,6 +83,14 @@ export class ReportsComponent implements OnInit, OnDestroy {
   salesEmployees = signal<SalesByEmployeeItem[]>([]);
   salesTrends = signal<SalesTrendItem[]>([]);
   topProductsData = signal<TopProductReportItem[]>([]);
+
+  // Datos de Valoración Financiera y Patrimonial de Inventario
+  inventoryValuationSummary = signal<InventoryValuationSummary | null>(null);
+  inventoryValuationByCategory = signal<InventoryValuationByCategory[]>([]);
+  inventoryValuationData = signal<PagedReportResult<InventoryValuationItem> | null>(null);
+  selectedAbcClass = signal<string | null>(null);
+  stagnantOnlyFilter = signal<boolean>(false);
+  selectedValuationCategoryId = signal<number | null>(null);
 
   // Modo de visualización gráfica en ventas: 'trend' (Tendencia cronológica) o 'comparison' (Comparativa períodos)
   salesGraphMode = signal<'trend' | 'comparison'>('trend');
@@ -375,6 +386,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
       case 'finance': return '📈 Rentabilidad y Utilidad Bruta (CMV Histórico)';
       case 'cash-reconciliation': return '💵 Arqueos y Conciliación de Cajas POS';
       case 'inventory': return '📋 Kardex Transaccional de Inventario';
+      case 'inventory-valuation': return '💎 Valoración Financiera y Patrimonial de Inventario';
       case 'products': return '📦 Catálogo de Productos y Valuación';
       case 'low-stock': return '⚠️ Alertas Críticas de Bajo Stock';
       case 'purchases': return '🛍️ Historial de Compras y Abastecimiento';
@@ -408,6 +420,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
       case 'finance': return this.profitabilityData()?.productDetails?.totalCount || 0;
       case 'cash-reconciliation': return this.cashReconciliationData()?.sessions?.totalCount || 0;
       case 'inventory': return this.inventoryData()?.totalCount || 0;
+      case 'inventory-valuation': return this.inventoryValuationData()?.totalCount || 0;
       case 'products': return this.productsData()?.totalCount || 0;
       case 'low-stock': return this.lowStockData()?.totalCount || 0;
       case 'purchases': return this.purchasesData()?.totalCount || 0;
@@ -432,6 +445,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
         return this.salesData();
       case 'inventory':
         return this.inventoryData();
+      case 'inventory-valuation':
+        return this.inventoryValuationData();
       case 'purchases':
         return this.purchasesData();
       case 'products':
@@ -551,7 +566,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
       this.selectedCategory.set('sales');
     } else if (type === 'finance') {
       this.selectedCategory.set('finance');
-    } else if (type === 'inventory' || type === 'low-stock') {
+    } else if (type === 'inventory' || type === 'inventory-valuation' || type === 'low-stock') {
       this.selectedCategory.set('inventory');
     } else if (type === 'products') {
       this.selectedCategory.set('inventory');
@@ -725,6 +740,32 @@ export class ReportsComponent implements OnInit, OnDestroy {
         });
         break;
 
+      case 'inventory-valuation':
+        this.reportService.getInventoryValuationSummary(wid).subscribe({
+          next: (summary) => this.inventoryValuationSummary.set(summary),
+          error: () => {}
+        });
+        this.reportService.getInventoryValuationByCategory(wid).subscribe({
+          next: (cats) => this.inventoryValuationByCategory.set(cats),
+          error: () => {}
+        });
+        this.reportService.getInventoryValuationDetails(
+          wid,
+          this.selectedValuationCategoryId(),
+          this.selectedAbcClass(),
+          this.stagnantOnlyFilter(),
+          term,
+          page,
+          size
+        ).subscribe({
+          next: (res) => {
+            this.inventoryValuationData.set(res);
+            this.tableLoading.set(false);
+          },
+          error: () => this.tableLoading.set(false)
+        });
+        break;
+
       case 'purchases':
         this.reportService.getPurchasesData(start, end, wid, term, page, size).subscribe({
           next: (res) => {
@@ -765,6 +806,24 @@ export class ReportsComponent implements OnInit, OnDestroy {
         });
         break;
     }
+  }
+
+  setAbcFilter(abc: string | null): void {
+    this.selectedAbcClass.set(abc);
+    this.pageNumber.set(1);
+    this.loadTableData();
+  }
+
+  toggleStagnantFilter(): void {
+    this.stagnantOnlyFilter.update(v => !v);
+    this.pageNumber.set(1);
+    this.loadTableData();
+  }
+
+  setValuationCategoryFilter(catId: number | null): void {
+    this.selectedValuationCategoryId.set(catId);
+    this.pageNumber.set(1);
+    this.loadTableData();
   }
 
   onSearchChange(term: string): void {

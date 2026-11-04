@@ -239,6 +239,59 @@ export interface SalesTrendItem {
   totalRevenue: number;
 }
 
+export interface InventoryValuationSummary {
+  totalCostValuation: number;
+  totalRetailValuation: number;
+  potentialProfit: number;
+  profitMarginPercentage: number;
+  totalStockUnits: number;
+  totalProductsCount: number;
+  stagnantCapitalAmount: number;
+  stagnantProductsCount: number;
+  categoryACount: number;
+  categoryACostAmount: number;
+  categoryASharePct: number;
+  categoryBCount: number;
+  categoryBCostAmount: number;
+  categoryBSharePct: number;
+  categoryCCount: number;
+  categoryCCostAmount: number;
+  categoryCSharePct: number;
+}
+
+export interface InventoryValuationByCategory {
+  categoryId: number;
+  categoryName: string;
+  totalUnits: number;
+  totalCostValuation: number;
+  totalRetailValuation: number;
+  potentialProfit: number;
+  profitMarginPercentage: number;
+  capitalSharePercentage: number;
+  productCount: number;
+}
+
+export interface InventoryValuationItem {
+  productId: number;
+  sku: string;
+  productName: string;
+  categoryId: number;
+  categoryName: string;
+  supplierName: string;
+  currentStock: number;
+  minimumStock: number;
+  unitCost: number;
+  unitPrice: number;
+  totalCostValuation: number;
+  totalRetailValuation: number;
+  potentialProfit: number;
+  profitMarginPercentage: number;
+  abcClassification: string;
+  daysWithoutSales: number;
+  isStagnant: boolean;
+  lastSaleDate?: string | null;
+}
+
 export type ReportCategoryKey = 'sales' | 'finance' | 'inventory' | 'purchases' | 'cash' | 'audit';
 
 export type ReportTypeKey =
@@ -248,6 +301,7 @@ export type ReportTypeKey =
   | 'sales-hourly'
   | 'sales-employees'
   | 'inventory'
+  | 'inventory-valuation'
   | 'low-stock'
   | 'purchases'
   | 'products'

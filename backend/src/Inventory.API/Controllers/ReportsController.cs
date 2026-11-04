@@ -446,6 +446,91 @@ public class ReportsController : BaseApiController
         return Ok(result);
     }
 
+    // =========================================================================
+    // 6. SUITE DE VALORACIÓN FINANCIERA Y PATRIMONIAL DE INVENTARIO
+    // =========================================================================
+
+    /// <summary>
+    /// KPIs consolidados de valoración de inventario (costo, valor comercial, margen y stock estancado).
+    /// </summary>
+    [HttpGet("inventory/valuation-summary")]
+    [ProducesResponseType(typeof(InventoryValuationSummaryDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<InventoryValuationSummaryDto>> GetInventoryValuationSummary(
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var summary = await _reportService.GetInventoryValuationSummaryAsync(targetWarehouseId, cancellationToken);
+        return Ok(summary);
+    }
+
+    /// <summary>
+    /// Desglose de capital inmovilizado y potencial comercial agrupado por categoría.
+    /// </summary>
+    [HttpGet("inventory/valuation-by-category")]
+    [ProducesResponseType(typeof(IReadOnlyList<InventoryValuationByCategoryDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<InventoryValuationByCategoryDto>>> GetInventoryValuationByCategory(
+        [FromQuery] int? warehouseId,
+        CancellationToken cancellationToken)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var list = await _reportService.GetInventoryValuationByCategoryAsync(targetWarehouseId, cancellationToken);
+        return Ok(list);
+    }
+
+    /// <summary>
+    /// Detalle paginado de productos con valoración financiera y clasificación ABC Pareto.
+    /// </summary>
+    [HttpGet("inventory/valuation-details")]
+    [ProducesResponseType(typeof(PagedReportResultDto<InventoryValuationItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedReportResultDto<InventoryValuationItemDto>>> GetInventoryValuationDetails(
+        [FromQuery] int? warehouseId,
+        [FromQuery] int? categoryId,
+        [FromQuery] string? abcClass,
+        [FromQuery] bool? stagnantOnly,
+        [FromQuery] string? searchTerm,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var result = await _reportService.GetInventoryValuationDetailsAsync(
+            targetWarehouseId,
+            categoryId,
+            abcClass,
+            stagnantOnly,
+            searchTerm,
+            pageNumber,
+            pageSize,
+            cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Exportación del reporte de valoración de inventario a CSV estructurado (RFC 4180 con UTF-8 BOM).
+    /// </summary>
+    [HttpGet("inventory/valuation/csv")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportInventoryValuationCsv(
+        [FromQuery] int? warehouseId,
+        [FromQuery] int? categoryId,
+        [FromQuery] string? abcClass,
+        [FromQuery] bool? stagnantOnly,
+        [FromQuery] string? searchTerm,
+        CancellationToken cancellationToken = default)
+    {
+        var targetWarehouseId = ResolveTargetWarehouseId(warehouseId);
+        var fileBytes = await _reportService.ExportInventoryValuationCsvAsync(
+            targetWarehouseId,
+            categoryId,
+            abcClass,
+            stagnantOnly,
+            searchTerm,
+            cancellationToken);
+        var filename = $"valoracion_inventario_{DateTime.UtcNow:yyyyMMdd_HHmm}.csv";
+        return File(fileBytes, "text/csv; charset=utf-8", filename);
+    }
+
     private int? ResolveTargetWarehouseId(int? queryWarehouseId)
     {
         var role = GetCurrentUserRole();

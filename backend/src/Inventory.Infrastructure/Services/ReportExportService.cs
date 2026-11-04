@@ -1670,4 +1670,424 @@ public class ReportExportService : IReportExportService
         MovementType.Return => "Devolución",
         _ => type.ToString()
     };
+
+    // =========================================================================
+    // 6. SUITE DE VALORACIÓN FINANCIERA Y PATRIMONIAL DE INVENTARIO
+    // =========================================================================
+
+    public async Task<InventoryValuationSummaryDto> GetInventoryValuationSummaryAsync(
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Products
+            .AsNoTracking()
+            .Where(p => !p.IsDeleted);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(p => p.WarehouseId == warehouseId.Value || p.WarehouseId == null);
+        }
+
+        var products = await query
+            .Select(p => new
+            {
+                p.Id,
+                p.CurrentStock,
+                p.PurchasePrice,
+                p.SalePrice,
+                p.CreatedAt
+            })
+            .ToListAsync(cancellationToken);
+
+        if (products.Count == 0)
+        {
+            return new InventoryValuationSummaryDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+
+        // Consultar fechas de última venta por producto para cálculo de capital estancado
+        var lastSales = await _context.SaleItems
+            .AsNoTracking()
+            .Where(si => !si.IsDeleted && si.Sale.Status != SaleStatus.Cancelled)
+            .GroupBy(si => si.ProductId)
+            .Select(g => new
+            {
+                ProductId = g.Key,
+                LastSaleDate = g.Max(si => si.Sale.SaleDate)
+            })
+            .ToDictionaryAsync(x => x.ProductId, x => x.LastSaleDate, cancellationToken);
+
+        decimal totalCost = 0;
+        decimal totalRetail = 0;
+        int totalUnits = 0;
+        int productsWithStock = 0;
+        decimal stagnantCapital = 0;
+        int stagnantCount = 0;
+
+        var now = DateTimeOffset.UtcNow;
+        var evaluatedProducts = new List<(int Id, decimal CostVal, decimal RetailVal, bool IsStagnant)>();
+
+        foreach (var p in products)
+        {
+            var costVal = p.CurrentStock * p.PurchasePrice;
+            var retailVal = p.CurrentStock * p.SalePrice;
+            totalCost += costVal;
+            totalRetail += retailVal;
+            totalUnits += p.CurrentStock;
+
+            if (p.CurrentStock > 0)
+            {
+                productsWithStock++;
+            }
+
+            var lastSaleDate = lastSales.TryGetValue(p.Id, out var dt) ? (DateTimeOffset?)dt : null;
+            var daysWithoutSales = lastSaleDate.HasValue
+                ? (int)(now - lastSaleDate.Value).TotalDays
+                : (int)(now - p.CreatedAt).TotalDays;
+
+            var isStagnant = p.CurrentStock > 0 && daysWithoutSales >= 30;
+            if (isStagnant)
+            {
+                stagnantCapital += costVal;
+                stagnantCount++;
+            }
+
+            evaluatedProducts.Add((p.Id, costVal, retailVal, isStagnant));
+        }
+
+        var potentialProfit = Math.Max(0, totalRetail - totalCost);
+        var marginPct = totalRetail > 0
+            ? Math.Round((potentialProfit / totalRetail) * 100m, 1)
+            : 0m;
+
+        // Clasificación ABC acumulada (80% A, 15% B, 5% C)
+        int countA = 0, countB = 0, countC = 0;
+        decimal costA = 0, costB = 0, costC = 0;
+        var orderedByVal = evaluatedProducts
+            .Where(x => x.CostVal > 0)
+            .OrderByDescending(x => x.CostVal)
+            .ToList();
+
+        decimal cumulativeCost = 0;
+        foreach (var item in orderedByVal)
+        {
+            cumulativeCost += item.CostVal;
+            var share = totalCost > 0 ? (cumulativeCost / totalCost) : 1m;
+
+            if (share <= 0.80m)
+            {
+                countA++;
+                costA += item.CostVal;
+            }
+            else if (share <= 0.95m)
+            {
+                countB++;
+                costB += item.CostVal;
+            }
+            else
+            {
+                countC++;
+                costC += item.CostVal;
+            }
+        }
+
+        // Productos con stock cero quedan en clasificación C
+        countC += evaluatedProducts.Count(x => x.CostVal <= 0);
+
+        var shareA = totalCost > 0 ? Math.Round((costA / totalCost) * 100m, 1) : 0m;
+        var shareB = totalCost > 0 ? Math.Round((costB / totalCost) * 100m, 1) : 0m;
+        var shareC = totalCost > 0 ? Math.Round((costC / totalCost) * 100m, 1) : 0m;
+
+        return new InventoryValuationSummaryDto(
+            totalCost,
+            totalRetail,
+            potentialProfit,
+            marginPct,
+            totalUnits,
+            productsWithStock,
+            stagnantCapital,
+            stagnantCount,
+            countA,
+            costA,
+            shareA,
+            countB,
+            costB,
+            shareB,
+            countC,
+            costC,
+            shareC
+        );
+    }
+
+    public async Task<IReadOnlyList<InventoryValuationByCategoryDto>> GetInventoryValuationByCategoryAsync(
+        int? warehouseId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Products
+            .AsNoTracking()
+            .Include(p => p.Category)
+            .Where(p => !p.IsDeleted);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(p => p.WarehouseId == warehouseId.Value || p.WarehouseId == null);
+        }
+
+        var products = await query
+            .Select(p => new
+            {
+                p.Id,
+                CategoryId = p.CategoryId,
+                CategoryName = p.Category != null ? p.Category.Name : "Sin Categoría",
+                p.CurrentStock,
+                p.PurchasePrice,
+                p.SalePrice
+            })
+            .ToListAsync(cancellationToken);
+
+        var totalGlobalCost = products.Sum(p => p.CurrentStock * p.PurchasePrice);
+
+        var groups = products
+            .GroupBy(p => new { p.CategoryId, p.CategoryName })
+            .Select(g =>
+            {
+                var costVal = g.Sum(x => x.CurrentStock * x.PurchasePrice);
+                var retailVal = g.Sum(x => x.CurrentStock * x.SalePrice);
+                var profit = Math.Max(0, retailVal - costVal);
+                var margin = retailVal > 0 ? Math.Round((profit / retailVal) * 100m, 1) : 0m;
+                var share = totalGlobalCost > 0 ? Math.Round((costVal / totalGlobalCost) * 100m, 1) : 0m;
+
+                return new InventoryValuationByCategoryDto(
+                    g.Key.CategoryId,
+                    g.Key.CategoryName,
+                    g.Sum(x => x.CurrentStock),
+                    costVal,
+                    retailVal,
+                    profit,
+                    margin,
+                    share,
+                    g.Count()
+                );
+            })
+            .OrderByDescending(x => x.TotalCostValuation)
+            .ToList();
+
+        return groups;
+    }
+
+    public async Task<PagedReportResultDto<InventoryValuationItemDto>> GetInventoryValuationDetailsAsync(
+        int? warehouseId = null,
+        int? categoryId = null,
+        string? abcClass = null,
+        bool? stagnantOnly = null,
+        string? searchTerm = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.Products
+            .AsNoTracking()
+            .Include(p => p.Category)
+            .Include(p => p.Supplier)
+            .Where(p => !p.IsDeleted);
+
+        if (warehouseId.HasValue && warehouseId.Value > 0)
+        {
+            query = query.Where(p => p.WarehouseId == warehouseId.Value || p.WarehouseId == null);
+        }
+
+        if (categoryId.HasValue && categoryId.Value > 0)
+        {
+            query = query.Where(p => p.CategoryId == categoryId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(p => p.Sku.ToLower().Contains(term) ||
+                                     p.Name.ToLower().Contains(term) ||
+                                     (p.Category != null && p.Category.Name.ToLower().Contains(term)));
+        }
+
+        var allProducts = await query
+            .Select(p => new
+            {
+                p.Id,
+                p.Sku,
+                p.Name,
+                CategoryId = p.CategoryId,
+                CategoryName = p.Category != null ? p.Category.Name : "Sin Categoría",
+                SupplierName = p.Supplier != null ? p.Supplier.Name : "Sin Proveedor",
+                p.CurrentStock,
+                p.MinimumStock,
+                p.PurchasePrice,
+                p.SalePrice,
+                p.CreatedAt
+            })
+            .ToListAsync(cancellationToken);
+
+        // Consultar fechas de última venta por producto
+        var lastSales = await _context.SaleItems
+            .AsNoTracking()
+            .Where(si => !si.IsDeleted && si.Sale.Status != SaleStatus.Cancelled)
+            .GroupBy(si => si.ProductId)
+            .Select(g => new
+            {
+                ProductId = g.Key,
+                LastSaleDate = g.Max(si => si.Sale.SaleDate)
+            })
+            .ToDictionaryAsync(x => x.ProductId, x => x.LastSaleDate, cancellationToken);
+
+        var totalGlobalCost = allProducts.Sum(p => p.CurrentStock * p.PurchasePrice);
+        var now = DateTimeOffset.UtcNow;
+
+        // Calcular valoración y Pareto ABC
+        var sortedByCost = allProducts
+            .OrderByDescending(p => p.CurrentStock * p.PurchasePrice)
+            .ToList();
+
+        decimal cumulativeCost = 0;
+        var evaluatedItems = new List<InventoryValuationItemDto>();
+
+        foreach (var p in sortedByCost)
+        {
+            var costVal = p.CurrentStock * p.PurchasePrice;
+            var retailVal = p.CurrentStock * p.SalePrice;
+            var profit = Math.Max(0, retailVal - costVal);
+            var margin = retailVal > 0 ? Math.Round((profit / retailVal) * 100m, 1) : 0m;
+
+            cumulativeCost += costVal;
+            var share = totalGlobalCost > 0 ? (cumulativeCost / totalGlobalCost) : 1m;
+
+            string abc;
+            if (p.CurrentStock <= 0)
+            {
+                abc = "C";
+            }
+            else if (share <= 0.80m)
+            {
+                abc = "A";
+            }
+            else if (share <= 0.95m)
+            {
+                abc = "B";
+            }
+            else
+            {
+                abc = "C";
+            }
+
+            var lastSaleDate = lastSales.TryGetValue(p.Id, out var dt) ? (DateTimeOffset?)dt : null;
+            var daysWithoutSales = lastSaleDate.HasValue
+                ? (int)(now - lastSaleDate.Value).TotalDays
+                : (int)(now - p.CreatedAt).TotalDays;
+
+            var isStagnant = p.CurrentStock > 0 && daysWithoutSales >= 30;
+
+            evaluatedItems.Add(new InventoryValuationItemDto(
+                p.Id,
+                p.Sku,
+                p.Name,
+                p.CategoryId,
+                p.CategoryName,
+                p.SupplierName,
+                p.CurrentStock,
+                p.MinimumStock,
+                p.PurchasePrice,
+                p.SalePrice,
+                costVal,
+                retailVal,
+                profit,
+                margin,
+                abc,
+                daysWithoutSales,
+                isStagnant,
+                lastSaleDate
+            ));
+        }
+
+        // Filtros post-evaluación ABC y Estancamiento
+        var filtered = evaluatedItems.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(abcClass))
+        {
+            var targetAbc = abcClass.Trim().ToUpper();
+            filtered = filtered.Where(x => x.AbcClassification == targetAbc);
+        }
+
+        if (stagnantOnly.HasValue && stagnantOnly.Value)
+        {
+            filtered = filtered.Where(x => x.IsStagnant);
+        }
+
+        var totalCount = filtered.Count();
+        var totalCostAmount = filtered.Sum(x => x.TotalCostValuation);
+        var totalQuantity = filtered.Sum(x => x.CurrentStock);
+
+        var pagedItems = filtered
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedReportResultDto<InventoryValuationItemDto>(
+            pagedItems,
+            totalCount,
+            pageNumber,
+            pageSize,
+            totalPages,
+            totalCostAmount,
+            totalQuantity
+        );
+    }
+
+    public async Task<byte[]> ExportInventoryValuationCsvAsync(
+        int? warehouseId = null,
+        int? categoryId = null,
+        string? abcClass = null,
+        bool? stagnantOnly = null,
+        string? searchTerm = null,
+        CancellationToken cancellationToken = default)
+    {
+        var paged = await GetInventoryValuationDetailsAsync(
+            warehouseId,
+            categoryId,
+            abcClass,
+            stagnantOnly,
+            searchTerm,
+            pageNumber: 1,
+            pageSize: 10000,
+            cancellationToken);
+
+        var sb = new StringBuilder();
+        sb.AppendLine("SKU,Producto,Categoría,Proveedor,Stock Actual,Costo Unitario,Precio Venta,Valoración al Costo,Valoración Comercial,Utilidad Proyectada,Margen %,Clasificación ABC,Días sin Venta,Estado Rotación");
+
+        foreach (var item in paged.Items)
+        {
+            var rotacion = item.IsStagnant ? "Capital Estancado" : (item.CurrentStock <= 0 ? "Agotado" : "Activo");
+            sb.AppendLine(string.Format(
+                CultureInfo.InvariantCulture,
+                "\"{0}\",\"{1}\",\"{2}\",\"{3}\",{4},{5:F2},{6:F2},{7:F2},{8:F2},{9:F2},{10:F1},\"{11}\",{12},\"{13}\"",
+                item.Sku.Replace("\"", "\"\""),
+                item.ProductName.Replace("\"", "\"\""),
+                item.CategoryName.Replace("\"", "\"\""),
+                item.SupplierName.Replace("\"", "\"\""),
+                item.CurrentStock,
+                item.UnitCost,
+                item.UnitPrice,
+                item.TotalCostValuation,
+                item.TotalRetailValuation,
+                item.PotentialProfit,
+                item.ProfitMarginPercentage,
+                item.AbcClassification,
+                item.DaysWithoutSales,
+                rotacion
+            ));
+        }
+
+        return ToUtf8BomBytes(sb.ToString());
+    }
 }
